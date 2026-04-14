@@ -1,0 +1,356 @@
+{
+  "sheets": [
+    {
+      "id": "striver-sde-sheet",
+      "title": "Striver SDE Sheet",
+      "description": "Top interview coding questions curated by Striver.",
+      "followers": 4154,
+      "questions": 191,
+      "category": "complete-dsa",
+      "sections": [
+        {
+          "title": "Arrays",
+          "completed": 0,
+          "total": 36,
+          "topics": [
+            {
+              "title": "Basics",
+              "completed": 0,
+              "total": 4,
+              "subtopics": [
+                {
+                  "title": "Set Matrix Zero",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/a-boolean-matrix-question/",
+                    "leetcode": "https://leetcode.com/problems/set-matrix-zeroes/",
+                    "youtube": "https://www.youtube.com/watch?v=M65xBewcqcI"
+                  }
+                },
+                {
+                  "title": "Pascal’s Triangle",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/pascal-triangle/",
+                    "leetcode": "https://leetcode.com/problems/pascals-triangle/",
+                    "youtube": "https://www.youtube.com/watch?v=RjvH7xIXP8I"
+                  }
+                },
+                {
+                  "title": "Next Permutation",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/next-permutation/",
+                    "leetcode": "https://leetcode.com/problems/next-permutation/",
+                    "youtube": "https://www.youtube.com/watch?v=LuLCLgMElus"
+                  }
+                },
+                {
+                  "title": "Stock Buy and Sell",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/stock-buy-sell/",
+                    "leetcode": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+                    "youtube": "https://www.youtube.com/watch?v=34WE6kwq49U"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Sorting and Searching",
+              "completed": 0,
+              "total": 3,
+              "subtopics": [
+                {
+                  "title": "Merge Intervals",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/merging-intervals/",
+                    "leetcode": "https://leetcode.com/problems/merge-intervals/",
+                    "youtube": "https://www.youtube.com/watch?v=2JzRBPFYbKE"
+                  }
+                },
+                {
+                  "title": "Merge Sorted Arrays",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/merge-two-sorted-arrays/",
+                    "leetcode": "https://leetcode.com/problems/merge-sorted-array/",
+                    "youtube": "https://www.youtube.com/watch?v=C4oBXLr3zos"
+                  }
+                },
+                {
+                  "title": "Search in Rotated Sorted Array",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/search-an-element-in-a-sorted-and-pivoted-array/",
+                    "leetcode": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
+                    "youtube": "https://www.youtube.com/watch?v=U8XENwh8Oy8"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+         {
+          "title": "String",
+          "completed": 0,
+          "total": 5,
+          "topics": [
+            {
+              "title": "String Problems",
+              "completed": 0,
+              "total": 5,
+              "subtopics": [
+                {
+                  "title": "Reverse Words in a String",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/reverse-words-in-a-given-string/",
+                    "leetcode": "https://leetcode.com/problems/reverse-words-in-a-string/",
+                    "youtube": "https://www.youtube.com/watch?v=lR1YzQckMWk"
+                  }
+                },
+                {
+                  "title": "Valid Anagram",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/check-whether-two-strings-are-anagram-of-each-other/",
+                    "leetcode": "https://leetcode.com/problems/valid-anagram/",
+                    "youtube": "https://www.youtube.com/watch?v=9UtInBqnCgA"
+                  }
+                },
+                {
+                  "title": "Longest Palindromic Substring",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/longest-palindromic-substring-set-1/",
+                    "leetcode": "https://leetcode.com/problems/longest-palindromic-substring/",
+                    "youtube": "https://www.youtube.com/watch?v=XYQecbcd6_c"
+                  }
+                },
+                {
+                  "title": "Group Anagrams",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/group-anagrams-given-list/",
+                    "leetcode": "https://leetcode.com/problems/group-anagrams/",
+                    "youtube": "https://www.youtube.com/watch?v=vzdNOK2oB2E"
+                  }
+                },
+                {
+                  "title": "Zigzag Conversion",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/zigzag-or-diagonal-traversal-of-matrix/",
+                    "leetcode": "https://leetcode.com/problems/zigzag-conversion/",
+                    "youtube": "https://www.youtube.com/watch?v=5_GdZVQkeoE"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Linked List",
+          "completed": 0,
+          "total": 15,
+          "topics": [
+            {
+              "title": "Basics",
+              "completed": 0,
+              "total": 4,
+              "subtopics": [
+                {
+                  "title": "Reverse a Linked List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/reverse-a-linked-list/",
+                    "leetcode": "https://leetcode.com/problems/reverse-linked-list/",
+                    "youtube": "https://www.youtube.com/watch?v=O0By4Zq0OFc"
+                  }
+                },
+                {
+                  "title": "Detect Loop in Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/detect-loop-in-a-linked-list/",
+                    "leetcode": "https://leetcode.com/problems/linked-list-cycle/",
+                    "youtube": "https://www.youtube.com/watch?v=9xw8i3wzJ78"
+                  }
+                },
+                {
+                  "title": "Find Intersection of Two LL",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/",
+                    "leetcode": "https://leetcode.com/problems/intersection-of-two-linked-lists/",
+                    "youtube": "https://www.youtube.com/watch?v=0DYoPz2T4Wo"
+                  }
+                },
+                {
+                  "title": "Add Two Numbers",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/add-two-numbers-represented-by-linked-lists/",
+                    "leetcode": "https://leetcode.com/problems/add-two-numbers/",
+                    "youtube": "https://www.youtube.com/watch?v=LBVsXSMOIk4"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Stack & Queue",
+          "completed": 0,
+          "total": 10,
+          "topics": [
+            {
+              "title": "Stack Problems",
+              "completed": 0,
+              "total": 5,
+              "subtopics": [
+                {
+                  "title": "Next Greater Element",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/next-greater-element/",
+                    "leetcode": "https://leetcode.com/problems/next-greater-element-i/",
+                    "youtube": "https://www.youtube.com/watch?v=Du881K7Jtk8"
+                  }
+                },
+                {
+                  "title": "Largest Rectangle in Histogram",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/largest-rectangle-under-histogram/",
+                    "leetcode": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+                    "youtube": "https://www.youtube.com/watch?v=zx5Sw9130L0"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Binary Trees",
+          "completed": 0,
+          "total": 15,
+          "topics": [
+            {
+              "title": "Traversals",
+              "completed": 0,
+              "total": 4,
+              "subtopics": [
+                {
+                  "title": "Inorder Traversal",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/inorder-tree-traversal/",
+                    "leetcode": "https://leetcode.com/problems/binary-tree-inorder-traversal/",
+                    "youtube": "https://www.youtube.com/watch?v=lxTGsVXjwvM"
+                  }
+                },
+                {
+                  "title": "Postorder Traversal",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/postorder-tree-traversal/",
+                    "leetcode": "https://leetcode.com/problems/binary-tree-postorder-traversal/",
+                    "youtube": "https://www.youtube.com/watch?v=2YBhNLodD8Q"
+                  }
+                },
+                {
+                  "title": "Preorder Traversal",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/preorder-tree-traversal/",
+                    "leetcode": "https://leetcode.com/problems/binary-tree-preorder-traversal/",
+                    "youtube": "https://www.youtube.com/watch?v=RlUu72JrOCQ"
+                  }
+                },
+                {
+                  "title": "Level Order Traversal",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/level-order-tree-traversal/",
+                    "leetcode": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+                    "youtube": "https://www.youtube.com/watch?v=EoAsWbO7sqg"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Dynamic Programming",
+          "completed": 0,
+          "total": 20,
+          "topics": [
+            {
+              "title": "Basics",
+              "completed": 0,
+              "total": 3,
+              "subtopics": [
+                {
+                  "title": "0/1 Knapsack",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/0-1-knapsack-problem-dp-10/",
+                    "leetcode": "https://leetcode.com/problems/ones-and-zeroes/",
+                    "youtube": "https://www.youtube.com/watch?v=GqOmJHQZivw"
+                  }
+                },
+                {
+                  "title": "Subset Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/subset-sum-problem-dp-25/",
+                    "leetcode": "https://leetcode.com/problems/partition-equal-subset-sum/",
+                    "youtube": "https://www.youtube.com/watch?v=fWX9xDmIzRI"
+                  }
+                },
+                {
+                  "title": "Longest Common Subsequence",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/longest-common-subsequence-dp-4/",
+                    "leetcode": "https://leetcode.com/problems/longest-common-subsequence/",
+                    "youtube": "https://www.youtube.com/watch?v=NPZn9jBrX8U"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    
+  ]
+}

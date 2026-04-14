@@ -1,0 +1,174 @@
+{
+    "sheets":[
+        {
+    "id": "arrays-practice",
+    "title": "Arrays Practice",
+    "description": "Master all essential array problems from basics to advanced for coding interviews.",
+    "followers": 3821,
+    "questions": 15,
+    "category": "popular",
+    "sections": [
+        {
+            "title": "Arrays Practice",
+            "topics": [
+                {
+                    "title": "Array Basics & Operations",
+                    "subtopics": [
+                        {
+                            "title": "Find Largest and Smallest Element in Array",
+                            "difficulty": "easy",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/maximum-and-minimum-in-an-array/",
+                                "leetcode": "",
+                                "youtube": "https://www.youtube.com/watch?v=37E9ckMDdTk"
+                            }
+                        },
+                        {
+                            "title": "Reverse an Array",
+                            "difficulty": "easy",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/write-a-program-to-reverse-an-array-or-string/",
+                                "leetcode": "",
+                                "youtube": "https://www.youtube.com/watch?v=8hly31xKli0"
+                            }
+                        },
+                        {
+                            "title": "Move Zeroes to End",
+                            "difficulty": "easy",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/move-zeroes-end-array/",
+                                "leetcode": "https://leetcode.com/problems/move-zeroes/",
+                                "youtube": "https://www.youtube.com/watch?v=aayNRwUN3Do"
+                            }
+                        },
+                        {
+                            "title": "Rotate Array by K Positions",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/array-rotation/",
+                                "leetcode": "https://leetcode.com/problems/rotate-array/",
+                                "youtube": "https://www.youtube.com/watch?v=BHr381Guz3Y"
+                            }
+                        },
+                        {
+                            "title": "Kadane’s Algorithm (Maximum Subarray Sum)",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/largest-sum-contiguous-subarray/",
+                                "leetcode": "https://leetcode.com/problems/maximum-subarray/",
+                                "youtube": "https://www.youtube.com/watch?v=VMtyGnNcdPw"
+                            }
+                        },
+                        {
+                            "title": "Sort 0s, 1s, and 2s (Dutch National Flag Problem)",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/sort-an-array-of-0s-1s-and-2s/",
+                                "leetcode": "https://leetcode.com/problems/sort-colors/",
+                                "youtube": "https://www.youtube.com/watch?v=oaVa-9wmpns"
+                            }
+                        },
+                        {
+                            "title": "Find the Missing Number in an Array",
+                            "difficulty": "easy",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/find-the-missing-number/",
+                                "leetcode": "https://leetcode.com/problems/missing-number/",
+                                "youtube": "https://www.youtube.com/watch?v=WnPLSRLSANE"
+                            }
+                        },
+                        {
+                            "title": "Merge Two Sorted Arrays Without Extra Space",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/merge-two-sorted-arrays-without-using-extra-space/",
+                                "leetcode": "",
+                                "youtube": "https://www.youtube.com/watch?v=n7uwj04E0I4"
+                            }
+                        },
+                        {
+                            "title": "Find the Duplicate Number",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/find-duplicates-in-on-time-and-constant-extra-space/",
+                                "leetcode": "https://leetcode.com/problems/find-the-duplicate-number/",
+                                "youtube": "https://www.youtube.com/watch?v=32Ll35mhWg0"
+                            }
+                        },
+                        {
+                            "title": "Merge Intervals",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/merging-intervals/",
+                                "leetcode": "https://leetcode.com/problems/merge-intervals/",
+                                "youtube": "https://www.youtube.com/watch?v=44H3cEC2fFM"
+                            }
+                        },
+                        {
+                            "title": "Next Permutation",
+                            "difficulty": "hard",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/next-permutation/",
+                                "leetcode": "https://leetcode.com/problems/next-permutation/",
+                                "youtube": "https://www.youtube.com/watch?v=LuLCLgMElus"
+                            }
+                        },
+                        {
+                            "title": "Set Matrix Zeroes",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/a-boolean-matrix-question/",
+                                "leetcode": "https://leetcode.com/problems/set-matrix-zeroes/",
+                                "youtube": "https://www.youtube.com/watch?v=ZmnqCZp9bBs"
+                            }
+                        },
+                        {
+                            "title": "Spiral Matrix Traversal",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/print-a-given-matrix-in-spiral-form/",
+                                "leetcode": "https://leetcode.com/problems/spiral-matrix/",
+                                "youtube": "https://www.youtube.com/watch?v=1ZGJzvkcLsA"
+                            }
+                        },
+                        {
+                            "title": "Pascal’s Triangle",
+                            "difficulty": "easy",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/pascal-triangle/",
+                                "leetcode": "https://leetcode.com/problems/pascals-triangle/",
+                                "youtube": "https://www.youtube.com/watch?v=bR7mQgwQ_o8"
+                            }
+                        },
+                        {
+                            "title": "Majority Element (> n/2 times)",
+                            "difficulty": "medium",
+                            "status": "not-started",
+                            "links": {
+                                "gfg": "https://www.geeksforgeeks.org/majority-element/",
+                                "leetcode": "https://leetcode.com/problems/majority-element/",
+                                "youtube": "https://www.youtube.com/watch?v=nP_ns3uSh80"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+]
+}
