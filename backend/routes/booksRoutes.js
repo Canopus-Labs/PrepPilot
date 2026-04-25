@@ -55,7 +55,9 @@ router.get("/", async (_req, res) => {
     const rootUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents?ref=${BRANCH}`;
     const rootEntries = await fetchJson(rootUrl);
 
-    const categoryDirs = rootEntries.filter((e) => e.type === "dir");
+    const categoryDirs = rootEntries.filter(
+      (e) => e.type === "dir" && e.name !== "src" && e.name !== "public",
+    );
     const warnings = [];
 
     const categories = await Promise.all(
