@@ -19,6 +19,7 @@ const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 // Remove ES Module import for cors. Use CommonJS require below.
 const app = express();
 
+app.set('trust proxy', 1);
 // CORS settings: derive from env
 // FRONTEND_ORIGIN=primary production frontend
 // EXTRA_ORIGINS=comma separated additional origins (staging, preview, etc.)
