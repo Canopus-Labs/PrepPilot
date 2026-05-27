@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
+import Button from "../../components/Button/Button";
 import { validateEmail } from "../../utils/helper";
 import { API_PATHS } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
@@ -103,23 +104,15 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
         )}
 
         {/* Login Button */}
-        <button
+        <Button
           type="submit"
-          disabled={loading}
-          className="w-full mt-6 flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 group"
+          loading={loading}
+          loadingText="Signing in..."
+          icon={<LuArrowRight className="group-hover:translate-x-1 transition-transform" />}
+          className="mt-6"
         >
-          {loading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Signing in...
-            </>
-          ) : (
-            <>
-              Sign In
-              <LuArrowRight className="text-base group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        </button>
+          Sign In
+        </Button>
 
         {/* Signup Link */}
         <div className="mt-6 pt-4 border-t border-white/10">
