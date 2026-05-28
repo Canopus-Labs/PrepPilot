@@ -1,0 +1,69 @@
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/InterviewPrepAI/.env
+
+# ========================
+# Dependencies
+# ========================
+node_modules/
+frontend/InterviewPrepAI/node_modules/
+backend/node_modules/
+
+# ========================
+# Build Outputs
+# ========================
+dist/
+build/
+frontend/InterviewPrepAI/dist/
+frontend/InterviewPrepAI/build/
+
+# ========================
+# Logs
+# ========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+
+# ========================
+# Cache & Temp Files
+# ========================
+.cache/
+.vite/
+.eslintcache
+*.tsbuildinfo
+tmp/
+temp/
+
+# ========================
+# Editor & OS Files
+# ========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Testing
+# ========================
+coverage/
+*.lcov
+.nyc_output/
+
+# ========================
+# Misc
+# ========================
+*.local

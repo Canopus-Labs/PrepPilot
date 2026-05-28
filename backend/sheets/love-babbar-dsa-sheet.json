@@ -1,0 +1,417 @@
+{
+  "sheets": [
+    {
+      "id": "love-babbar-dsa-sheet",
+      "title": "Love Babbar DSA Sheet",
+      "description": "450 DSA questions curated by Love Babbar to crack interviews.",
+      "followers": 3921,
+      "questions": 450,
+      "category": "complete-dsa",
+      "sections": [
+        {
+          "title": "Arrays",
+          "completed": 0,
+          "total": 5,
+          "topics": [
+            {
+              "title": "Basic Arrays",
+              "completed": 0,
+              "total": 5,
+              "subtopics": [
+                {
+                  "title": "Find the maximum and minimum element in an array",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/maximum-and-minimum-in-an-array/",
+                    "leetcode": "https://leetcode.com/problems/minimum-maximum-in-array/?favorite=2ckts_31",
+                    "youtube": "https://www.youtube.com/watch?v=6lAFOFQ_NNs"
+                  }
+                },
+                {
+                  "title": "Reverse the array",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/write-a-program-to-reverse-an-array-or-string/",
+                    "leetcode": "https://leetcode.com/problems/reverse-string/",
+                    "youtube": "https://www.youtube.com/watch?v=WEmuz4x7yMI"
+                  }
+                },
+                {
+                  "title": "Kth smallest element",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/kth-smallestlargest-element-unsorted-array/",
+                    "leetcode": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+                    "youtube": "https://www.youtube.com/watch?v=9s6ZcFZ_3ys"
+                  }
+                },
+                {
+                  "title": "Sort 0s, 1s and 2s",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/sort-an-array-of-0s-1s-and-2s/",
+                    "leetcode": "https://leetcode.com/problems/sort-colors/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Move all negative numbers to beginning and positive to end",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/move-negative-numbers-beginning-positive-end-constant-extra-space/",
+                    "leetcode": "https://leetcode.com/problems/move-zeroes/",
+                    "youtube": ""
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Strings",
+          "completed": 0,
+          "total": 3,
+          "topics": [
+            {
+              "title": "String Problems",
+              "completed": 0,
+              "total": 3,
+              "subtopics": [
+                {
+                  "title": "Check for Anagram",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/check-whether-two-strings-are-anagram-of-each-other/",
+                    "leetcode": "https://leetcode.com/problems/valid-anagram/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Permutations of a string",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/write-a-c-program-to-print-all-permutations-of-a-given-string/",
+                    "leetcode": "https://leetcode.com/problems/permutations/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Longest Palindromic Substring",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/longest-palindromic-substring-set-1/",
+                    "leetcode": "https://leetcode.com/problems/longest-palindromic-substring/",
+                    "youtube": ""
+                  }
+                }
+              ]
+            }
+          ]
+        },
+         {
+          "title": "Linked List",
+          "topics": [
+            {
+              "title": "Advanced Linked List",
+              "subtopics": [
+                {
+                  "title": "Remove Nth Node From End of List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/remove-nth-node-end-linked-list/",
+                    "leetcode": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+                    "youtube": "https://www.youtube.com/watch?v=XNdsvBFhn5U"
+                  }
+                },
+                {
+                  "title": "Merge k Sorted Lists",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/merge-k-sorted-linked-lists/",
+                    "leetcode": "https://leetcode.com/problems/merge-k-sorted-lists/",
+                    "youtube": "https://www.youtube.com/watch?v=Nbbf8JONKtw"
+                  }
+                },
+                {
+                  "title": "Rotate Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/rotate-a-linked-list/",
+                    "leetcode": "https://leetcode.com/problems/rotate-list/",
+                    "youtube": "https://www.youtube.com/watch?v=yJkFBJ2G2oM"
+                  }
+                },
+                {
+                  "title": "Add Two Numbers (as Linked List)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/sum-two-numbers-represented-linked-lists/",
+                    "leetcode": "https://leetcode.com/problems/add-two-numbers/",
+                    "youtube": "https://www.youtube.com/watch?v=wgkTbS5Y6i0"
+                  }
+                },
+                {
+                  "title": "Flatten a Multilevel Doubly Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                    "links": {
+                    "gfg": "https://www.geeksforgeeks.org/flattening-a-linked-list/",
+                    "leetcode": "https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/",
+                    "youtube": "https://www.youtube.com/watch?v=qKvRQXKEX4A"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Stack",
+          "topics": [
+            {
+              "title": "Fundamental Stacks",
+              "subtopics": [
+                {
+                  "title": "Implement Min Stack",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/design-and-implement-special-stack-data-structure/",
+                    "leetcode": "https://leetcode.com/problems/min-stack/",
+                    "youtube": "https://www.youtube.com/watch?v=jJ8IqTucker"
+                  }
+                },
+                {
+                  "title": "Next Greater Element",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/next-greater-element/",
+                    "leetcode": "https://leetcode.com/problems/next-greater-element-i/",
+                    "youtube": "https://www.youtube.com/watch?v=mq2VznZKLfk"
+                  }
+                },
+                {
+                  "title": "Largest Rectangle in Histogram",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/largest-rectangle-under-histogram/",
+                    "leetcode": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+                    "youtube": "https://www.youtube.com/watch?v=ZmnqCZp9bBs"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Queue",
+          "topics": [
+            {
+              "title": "Queue Queues",
+              "subtopics": [
+                {
+                  "title": "Implement Circular Queue",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/circular-queue-set-1-introduction-array-implementation/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/watch?v=wf-BqAjZb8M"
+                  }
+                },
+                {
+                  "title": "Generate Binary Numbers from 1 to n",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/generate-binary-numbers-from-1-to-n-using-a-queue/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/watch?v=qMS4xxL-UWw"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+          {
+          "title": "Trees",
+          "topics": [
+            {
+              "title": "Binary Tree Basics",
+              "subtopics": [
+                {
+                  "title": "Preorder, Inorder, Postorder Traversal",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/",
+                    "leetcode": "https://leetcode.com/problems/binary-tree-inorder-traversal/",
+                    "youtube": "https://www.youtube.com/watch?v=RFyI78Yg5SE"
+                  }
+                },
+                {
+                  "title": "Maximum Depth of Binary Tree",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/find-maximum-depth-or-height-of-a-tree/",
+                    "leetcode": "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+                    "youtube": "https://www.youtube.com/watch?v=BNYDmF3ID1o"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Binary Tree Challenges",
+              "subtopics": [
+                {
+                  "title": "Validate Binary Search Tree",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/a-program-to-check-if-a-binary-tree-is-bst-or-not/",
+                    "leetcode": "https://leetcode.com/problems/validate-binary-search-tree/",
+                    "youtube": "https://www.youtube.com/watch?v=-TGCL97wxkA"
+                  }
+                },
+                {
+                  "title": "Lowest Common Ancestor of BST",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/lowest-common-ancestor-in-a-binary-search-tree/",
+                    "leetcode": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+                    "youtube": "https://www.youtube.com/watch?v=gsujpva2AQQ"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Graphs",
+          "topics": [
+            {
+              "title": "Graph Traversals",
+              "subtopics": [
+                {
+                  "title": "Breadth-First Search (BFS)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/watch?v=6UpRdWFkpdE"
+                  }
+                },
+                {
+                  "title": "Depth-First Search (DFS)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/watch?v=a5Z2Tho5Pkg"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Graph Algorithms",
+              "subtopics": [
+                {
+                  "title": "Number of Provinces (Connected Components)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/find-number-of-islands/",
+                    "leetcode": "https://leetcode.com/problems/number-of-provinces/",
+                    "youtube": "https://www.youtube.com/watch?v=7wxON1HXJ6k"
+                  }
+                },
+                {
+                  "title": "Clone Graph",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/clone-graph-using-dfs-and-bfs/",
+                    "leetcode": "https://leetcode.com/problems/clone-graph/",
+                    "youtube": "https://www.youtube.com/watch?v=4uG1NMKNWCU"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Dynamic Programming",
+          "topics": [
+            {
+              "title": "Basic DP",
+              "subtopics": [
+                {
+                  "title": "Climbing Stairs",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/count-ways-reach-nth-stair/",
+                    "leetcode": "https://leetcode.com/problems/climbing-stairs/",
+                    "youtube": "https://www.youtube.com/watch?v=Y0lT9Fck7qI"
+                  }
+                },
+                {
+                  "title": "House Robber",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/maximum-sum-such-that-no-two-elements-are-adjacent/",
+                    "leetcode": "https://leetcode.com/problems/house-robber/",
+                    "youtube": "https://www.youtube.com/watch?v=vRbbcKXCxWc"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "DP Practice",
+              "subtopics": [
+                {
+                  "title": "Longest Increasing Subsequence",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/longest-increasing-subsequence-dp-3/",
+                    "leetcode": "https://leetcode.com/problems/longest-increasing-subsequence/",
+                    "youtube": "https://www.youtube.com/watch?v=CE2b_-XfVDk"
+                  }
+                },
+                {
+                  "title": "0/1 Knapsack Problem",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/0-1-knapsack-problem-dp-10/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/watch?v=8LusJS5-AGo"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

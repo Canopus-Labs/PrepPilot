@@ -1,0 +1,342 @@
+{
+    "sheets": [
+        {
+            "id": "neetcode-150",
+            "title": "NeetCode 150 DSA Sheet",
+            "description": "150 DSA problems from NeetCode for FAANG & big tech interview prep.",
+            "followers": 6250,
+            "questions": 150,
+            "category": "popular",
+            "sections": [
+                {
+                    "title": "Array & Hashing",
+                    "topics": [
+                        {
+                            "title": "Two Sum Patterns",
+                            "subtopics": [
+                                {
+                                    "title": "Two Sum",
+                                    "difficulty": "easy",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/two-sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=KLlXCFG5TnA"
+                                    }
+                                },
+                                {
+                                    "title": "3Sum",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/3sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=jzZsG8n2R9A"
+                                    }
+                                },
+                                {
+                                    "title": "4Sum",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/4sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=hSYwDXvF5Rc"
+                                    }
+                                },
+                                {
+                                    "title": "Two Sum II - Input Array Is Sorted",
+                                    "difficulty": "easy",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+                                        "youtube": "https://www.youtube.com/watch?v=wjYnzkAhcNk"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Group Anagrams",
+                            "subtopics": [
+                                {
+                                    "title": "Group Anagrams",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/group-anagrams/",
+                                        "youtube": "https://www.youtube.com/watch?v=HhNIjx22aHg"
+                                    }
+                                },
+                                {
+                                    "title": "Top K Frequent Elements",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/top-k-frequent-elements/",
+                                        "youtube": "https://www.youtube.com/watch?v=YPTqKIgVk-k"
+                                    }
+                                },
+                                {
+                                    "title": "Valid Anagram",
+                                    "difficulty": "easy",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/valid-anagram/",
+                                        "youtube": "https://www.youtube.com/watch?v=s5BpHgyO7tQ"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Two Pointers & Sliding Window",
+                    "topics": [
+                        {
+                            "title": "Two Pointers Core",
+                            "subtopics": [
+                                {
+                                    "title": "3Sum Closest",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/3sum-closest/",
+                                        "youtube": "https://www.youtube.com/watch?v=eu_mQy8TNK0"
+                                    }
+                                },
+                                {
+                                    "title": "Container With Most Water",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/container-with-most-water/",
+                                        "youtube": "https://www.youtube.com/watch?v=UuiTKBwPgAo"
+                                    }
+                                },
+                                {
+                                    "title": "Sort Colors",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/sort-colors/",
+                                        "youtube": "https://www.youtube.com/watch?v=oaXcJ2Eb2Ds"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Sliding Window Techniques",
+                            "subtopics": [
+                                {
+                                    "title": "Minimum Window Substring",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/minimum-window-substring/",
+                                        "youtube": "https://www.youtube.com/watch?v=WgFnflK8K1Q"
+                                    }
+                                },
+                                {
+                                    "title": "Longest Substring Without Repeating Characters",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+                                        "youtube": "https://www.youtube.com/watch?v=wiGpQwVHdE0"
+                                    }
+                                },
+                                {
+                                    "title": "Sliding Window Maximum",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/sliding-window-maximum/",
+                                        "youtube": "https://www.youtube.com/watch?v=5VY2Z3WLXYM"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Recursion & Backtracking",
+                    "topics": [
+                        {
+                            "title": "Essential Recursion",
+                            "subtopics": [
+                                {
+                                    "title": "Generate Parentheses",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/generate-parentheses/",
+                                        "youtube": "https://www.youtube.com/watch?v=0jNmHPfAfsA"
+                                    }
+                                },
+                                {
+                                    "title": "Word Search",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/word-search/",
+                                        "youtube": "https://www.youtube.com/watch?v=FTJCy5_jA4k"
+                                    }
+                                },
+                                {
+                                    "title": "Subsets",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/subsets/",
+                                        "youtube": "https://www.youtube.com/watch?v=RVA-Lq1Hwc8"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Trees",
+                    "topics": [
+                        {
+                            "title": "Binary Tree Traversal & Path",
+                            "subtopics": [
+                                {
+                                    "title": "Binary Tree Inorder Traversal",
+                                    "difficulty": "easy",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/binary-tree-inorder-traversal/",
+                                        "youtube": "https://www.youtube.com/watch?v=1Dk5oW7yJ2g"
+                                    }
+                                },
+                                {
+                                    "title": "Lowest Common Ancestor of BST",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+                                        "youtube": "https://www.youtube.com/watch?v=CSs4ZqpSCzI"
+                                    }
+                                },
+                                {
+                                    "title": "Path Sum",
+                                    "difficulty": "easy",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/path-sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=qJ3FB3REp8Q"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Tree Level & Diameter",
+                            "subtopics": [
+                                {
+                                    "title": "Binary Tree Level Order Traversal",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+                                        "youtube": "https://www.youtube.com/watch?v=WtVnFNSmzuw"
+                                    }
+                                },
+                                {
+                                    "title": "Diameter of Binary Tree",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/diameter-of-binary-tree/",
+                                        "youtube": "https://www.youtube.com/watch?v=F6oy1RbDdjg"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Heaps",
+                    "topics": [
+                        {
+                            "title": "Heap Pattern",
+                            "subtopics": [
+                                {
+                                    "title": "Merge k Sorted Lists",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/merge-k-sorted-lists/",
+                                        "youtube": "https://www.youtube.com/watch?v=8VfdJ9YeET0"
+                                    }
+                                },
+                                {
+                                    "title": "Find Median from Data Stream",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/find-median-from-data-stream/",
+                                        "youtube": "https://www.youtube.com/watch?v=1eWizYus7Ls"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "DSU",
+                    "topics": [
+                        {
+                            "title": "Union-Findcore",
+                            "subtopics": [
+                                {
+                                    "title": "Number of Islands",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/number-of-islands/",
+                                        "youtube": "https://www.youtube.com/watch?v=pVfj6mxhdMw"
+                                    }
+                                },
+                                {
+                                    "title": "Redundant Connection",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/redundant-connection/",
+                                        "youtube": "https://www.youtube.com/watch?v=zgGWIaaz4Pc"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Segment Tree",
+                    "topics": [
+                        {
+                            "title": "Range Query & Updates",
+                            "subtopics": [
+                                {
+                                    "title": "Range Sum Query - Mutable",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "https://leetcode.com/problems/range-sum-query-mutable/",
+                                        "youtube": "https://www.youtube.com/watch?v=ZB7BZMhfPgk"
+                                    }
+                                },
+                                {
+                                    "title": "Range Minimum Query",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "leetcode": "",
+                                        "youtube": "https://www.youtube.com/watch?v=ELPdqWan0EU"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

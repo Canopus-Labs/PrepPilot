@@ -1,0 +1,264 @@
+{
+    "sheets": [
+        {
+            "id": "gfg-must-know-dsa",
+            "title": "GFG Must‑Know DSA Sheet",
+            "description": "Top questions from GeeksforGeeks to ace coding interviews.",
+            "followers": 4587,
+            "questions": 250,
+            "category": "popular",
+            "sections": [
+                {
+                    "title": "Two Pointers",
+                    "topics": [
+                        {
+                            "title": "Pointer Pairing Problems",
+                            "subtopics": [
+                                {
+                                    "title": "3Sum",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/find-triplets-array-whose-sum-equal-zero/",
+                                        "leetcode": "https://leetcode.com/problems/3sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=jzZsG8n2R9A"
+                                    }
+                                },
+                                {
+                                    "title": "Container With Most Water",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/container-with-most-water/",
+                                        "leetcode": "https://leetcode.com/problems/container-with-most-water/",
+                                        "youtube": "https://www.youtube.com/watch?v=UuiTKBwPgAo"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Sliding Window",
+                    "topics": [
+                        {
+                            "title": "Fixed & Variable Size Window",
+                            "subtopics": [
+                                {
+                                    "title": "Maximum Sum Subarray of Size K",
+                                    "difficulty": "easy",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/find-maximum-average-subarray-of-k-length/",
+                                        "leetcode": "https://leetcode.com/problems/maximum-average-subarray-i/",
+                                        "youtube": "https://www.youtube.com/watch?v=sl_tG6mltgo"
+                                    }
+                                },
+                                {
+                                    "title": "Longest Substring Without Repeating Characters",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/length-of-the-longest-substring-without-repeating-characters/",
+                                        "leetcode": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+                                        "youtube": "https://www.youtube.com/watch?v=wiGpQwVHdE0"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Binary Search",
+                    "topics": [
+                        {
+                            "title": "Binary Search Tricks",
+                            "subtopics": [
+                                {
+                                    "title": "Search in Rotated Sorted Array",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/search-an-element-in-a-sorted-and-pivoted-array/",
+                                        "leetcode": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
+                                        "youtube": "https://www.youtube.com/watch?v=5qGrJbHhqFs"
+                                    }
+                                },
+                                {
+                                    "title": "Median of Two Sorted Arrays",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/median-of-two-sorted-arrays-of-different-sizes/",
+                                        "leetcode": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
+                                        "youtube": "https://www.youtube.com/watch?v=LPFhl65R7ww"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Backtracking",
+                    "topics": [
+                        {
+                            "title": "Classic Backtracking",
+                            "subtopics": [
+                                {
+                                    "title": "Permutations of an Array",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/write-a-c-program-for-permutations-of-a-given-string/",
+                                        "leetcode": "https://leetcode.com/problems/permutations/",
+                                        "youtube": "https://www.youtube.com/watch?v=QuR969uMICM"
+                                    }
+                                },
+                                {
+                                    "title": "Combination Sum",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/combinational-sum/",
+                                        "leetcode": "https://leetcode.com/problems/combination-sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=JAymJds8hnE"
+                                    }
+                                },
+                                {
+                                    "title": "N-Queens Problem",
+                                    "difficulty": "hard",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/n-queen-problem-backtracking-3/",
+                                        "leetcode": "https://leetcode.com/problems/n-queens/",
+                                        "youtube": "https://www.youtube.com/watch?v=i05Ju7AftcM"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Greedy",
+                    "topics": [
+                        {
+                            "title": "Greedy Essentials",
+                            "subtopics": [
+                                {
+                                    "title": "Activity Selection Problem",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/",
+                                        "leetcode": "",
+                                        "youtube": "https://www.youtube.com/watch?v=26Bt6_hA_5k"
+                                    }
+                                },
+                                {
+                                    "title": "Fractional Knapsack",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/fractional-knapsack-problem/",
+                                        "leetcode": "",
+                                        "youtube": "https://www.youtube.com/watch?v=PMTFOaNl2i8"
+                                    }
+                                },
+                                {
+                                    "title": "Job Sequencing Problem",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/job-sequencing-problem/",
+                                        "leetcode": "",
+                                        "youtube": "https://www.youtube.com/watch?v=GafjS0FfAC0"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Graphs",
+                    "topics": [
+                        {
+                            "title": "Graph Problem Solving",
+                            "subtopics": [
+                                {
+                                    "title": "Topological Sort",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/topological-sorting/",
+                                        "leetcode": "https://leetcode.com/problems/course-schedule/",
+                                        "youtube": "https://www.youtube.com/watch?v=ddTC4Zovtbc"
+                                    }
+                                },
+                                {
+                                    "title": "Shortest Path (Dijkstra)",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm/",
+                                        "leetcode": "",
+                                        "youtube": "https://www.youtube.com/watch?v=pSqmAO-m7Lk"
+                                    }
+                                },
+                                {
+                                    "title": "Detect Cycle in Undirected Graph (BFS/DFS)",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/detect-cycle-undirected-graph/",
+                                        "leetcode": "https://leetcode.com/problems/course-schedule/",
+                                        "youtube": "https://www.youtube.com/watch?v=bXmHaySHm_o"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Dynamic Programming",
+                    "topics": [
+                        {
+                            "title": "DP Practice",
+                            "subtopics": [
+                                {
+                                    "title": "Subset Sum Problem",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/subset-sum-problem-dp-25/",
+                                        "leetcode": "https://leetcode.com/problems/partition-equal-subset-sum/",
+                                        "youtube": "https://www.youtube.com/watch?v=s6ATEkipzow"
+                                    }
+                                },
+                                {
+                                    "title": "Longest Palindromic Subsequence",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/longest-palindromic-subsequence-dp-12/",
+                                        "leetcode": "https://leetcode.com/problems/longest-palindromic-subsequence/",
+                                        "youtube": "https://www.youtube.com/watch?v=Rvu1pFVwpv0"
+                                    }
+                                },
+                                {
+                                    "title": "Longest Increasing Subsequence",
+                                    "difficulty": "medium",
+                                    "status": "not-started",
+                                    "links": {
+                                        "gfg": "https://www.geeksforgeeks.org/longest-increasing-subsequence-dp-3/",
+                                        "leetcode": "https://leetcode.com/problems/longest-increasing-subsequence/",
+                                        "youtube": "https://www.youtube.com/watch?v=on2hvxBXJH4"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
