@@ -1,4 +1,6 @@
 require("dotenv").config();
+const validateEnv = require("./config/validateEnv.js");
+validateEnv();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -87,6 +89,7 @@ app.use("/api/sheets", generalLimiter, sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
 app.use("/api/user", generalLimiter, userSheetProgressRoutes);
 const booksRoutes = require("./routes/booksRoutes");
+const { required } = require("joi");
 app.use("/api/resume", generalLimiter, resumeRoutes);
 app.use(
   "/api/ai/generate-questions",
