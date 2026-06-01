@@ -17,6 +17,27 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "User already exists" });
         }
 
+        // validate password strength
+        const passwordErrors = [];
+        if (password.length < 8) {
+            passwordErrors.push("Password must be at least 8 characters");
+        }
+        if (!/[A-Z]/.test(password)) {
+            passwordErrors.push("Password must contain at least one uppercase letter");
+        }
+        if (!/[a-z]/.test(password)) {
+            passwordErrors.push("Password must contain at least one lowercase letter");
+        }
+        if (!/\d/.test(password)) {
+            passwordErrors.push("Password must contain at least one digit");
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            passwordErrors.push("Password must contain at least one special character");
+        }
+        if (passwordErrors.length > 0) {
+            return res.status(400).json({ message: passwordErrors.join(". ") });
+        }
+
         // hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);

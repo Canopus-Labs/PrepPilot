@@ -35,7 +35,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={isDisabled}
-      className={`${fullWidth ? "w-full" : ""} flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 group ${variants[variant]} ${sizes[size]} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`${fullWidth ? "w-full" : ""} flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 group ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {loading ? (
         <>
