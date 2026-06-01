@@ -106,7 +106,42 @@ app.use(
 app.use("/api/books", generalLimiter, booksRoutes);
 
 //Serve uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+const fs = require("fs");
+
+app.get("/uploads/:filename", protect, (req, res) => {
+  const { filename } = req.params;
+
+  // Allow only safe filenames
+  const safeName =
+    /^[a-zA-Z0-9._-]+$/.test(filename);
+
+  if (!safeName) {
+    return res
+      .status(400)
+      .json({ message: "Invalid filename" });
+  }
+
+  const uploadsDir =
+    path.join(__dirname, "uploads");
+
+  const filePath =
+    path.join(uploadsDir, filename);
+
+  // Prevent path traversal
+  if (!filePath.startsWith(uploadsDir)) {
+    return res
+      .status(403)
+      .json({ message: "Access denied" });
+  }
+
+  if (!fs.existsSync(filePath)) {
+    return res
+      .status(404)
+      .json({ message: "File not found" });
+  }
+
+  res.sendFile(filePath);
+});
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
