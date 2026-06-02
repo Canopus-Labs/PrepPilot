@@ -32,6 +32,7 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import ResumeParser from "./pages/ResumeBuilder/ResumeParser";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
@@ -218,6 +219,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <ResumeAnalyzer />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/resume-parser"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ResumeParser />
                         </PageTransition>
                       </ProtectedRoute>
                     }
