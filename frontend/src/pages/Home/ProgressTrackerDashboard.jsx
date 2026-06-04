@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import moment from "moment";
 import {
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import AchievementBadge from "../../components/AchievementBadge";
-
+import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { CARD_BG } from "../../utils/data";
@@ -123,6 +123,7 @@ const ResumeCard = ({ resume, navigate }) => (
 );
 
 const ProgressTrackerDashboard = () => {
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -173,26 +174,39 @@ const ProgressTrackerDashboard = () => {
   },
 ];
 
+const achievementsSynced = useRef(null);
 useEffect(() => {
-  if (loading) return;
+    if (loading || !user?._id || achievementsSynced.current === user._id) return;
+    achievementsSynced.current = user._id;
 
-  const storageKey = "toasted_badges";
-  const already = JSON.parse(localStorage.getItem(storageKey) || "[]");
-  const alreadySet = new Set(already);
+    const fetchAndUpdateAchievements = async () => {
+        try {
+            // Get already unlocked achievements from backend
+            const res = await axiosInstance.get("/api/user/achievements");
+            const alreadyUnlocked = new Set(res.data.unlockedAchievements || []);
 
-  const newlyUnlocked = achievements.filter(
-    (b) => b.unlocked && !alreadySet.has(b.title)
-  );
+            const newlyUnlocked = achievements.filter(
+                (b) => b.unlocked && !alreadyUnlocked.has(b.title)
+            );
 
-  newlyUnlocked.forEach((badge) => {
-    toast.success(`🏆 Badge unlocked: ${badge.title}!`);
-    alreadySet.add(badge.title);
-  });
+            newlyUnlocked.forEach((badge) => {
+                toast.success(`🏆 Badge unlocked: ${badge.title}!`);
+                alreadyUnlocked.add(badge.title);
+            });
 
-  if (newlyUnlocked.length > 0) {
-    localStorage.setItem(storageKey, JSON.stringify([...alreadySet]));
-  }
-}, [loading, achievements]);
+            if (newlyUnlocked.length > 0) {
+                // Save updated achievements to backend
+                await axiosInstance.post("/api/user/achievements", {
+                    unlockedAchievements: [...alreadyUnlocked],
+                });
+            }
+        } catch (err) {
+            console.error("Failed to sync achievements:", err);
+        }
+    };
+
+    fetchAndUpdateAchievements();
+}, [loading, user, sessions, resumes, sheetProgress]);
 
 
   useEffect(() => {

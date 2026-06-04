@@ -94,6 +94,8 @@ const sheetJsonUpload = require("./routes/sheetJsonUpload");
 app.use("/api/sheets", generalLimiter, sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
 app.use("/api/user", generalLimiter, userSheetProgressRoutes);
+const achievementRoutes = require("./routes/achievementRoutes");
+app.use("/api/user", generalLimiter, achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 const { required } = require("joi");
 app.use("/api/resume", generalLimiter, resumeRoutes);
