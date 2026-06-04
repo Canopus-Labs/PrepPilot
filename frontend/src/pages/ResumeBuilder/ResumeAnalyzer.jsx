@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target } from "lucide-react";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -9,7 +9,16 @@ const ResumeAnalyzer = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
 
+  useEffect(() => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
   const handleFileDrop = (e) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
@@ -154,13 +163,13 @@ const ResumeAnalyzer = () => {
                 {file ? (
                 <div className="flex flex-col items-center text-center px-6 w-full h-full">
                   <iframe
-                    src={URL.createObjectURL(file)}
+                    src={previewUrl}
                     className="w-full h-48 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm mb-3"
-                    title="Resume Preview"
+                    title="File Preview"
                   />
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">{file.name}</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB • PDF Document
+                    {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type.includes('pdf') ? 'PDF Document' : 'Image'}
                   </p>
                   <button 
                     onClick={(e) => { e.preventDefault(); setFile(null); }}
