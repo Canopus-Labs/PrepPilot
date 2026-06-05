@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import ThemeToggle from "../ThemeToggle";
@@ -22,19 +22,41 @@ import {
   MessageSquare,
   Lightbulb,
   ChevronDown,
+  ChevronUp,
+  ChevronRight,
   Github,
   BookOpen,
   BookMarked,
   CalendarDays,
+  Clock,
+  LogIn,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "../../context/themeContext";
 
 const Sidebar = () => {
   const { user } = useContext(UserContext);
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const settingsRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".settings-menu-container")) {
+        setIsSettingsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const userInitial =
     user?.name?.charAt(0)?.toUpperCase() ||
@@ -302,57 +324,135 @@ const Sidebar = () => {
       </div>
 
       {/* Bottom Actions */}
-      <div className="p-4 border-t border-white/5 space-y-1">
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200">
-          <Settings size={18} />
-          Settings
-        </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200">
-          <HelpCircle size={18} />
-          Help & Support
-        </button>
+      <div className="p-4 border-t border-white/5 relative settings-menu-container" ref={settingsRef}>
+        {isSettingsOpen && (
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-[#1e293b] border border-white/10 rounded-xl p-2 shadow-2xl z-50 flex flex-col gap-1">
+            <button className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-200">
+              <div className="flex items-center gap-3">
+                <Clock size={18} />
+                <span>Activity</span>
+              </div>
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+                <span>Theme</span>
+              </div>
+              <ChevronRight size={16} className="text-gray-500" />
+            </button>
+            <button
+              onClick={() => {
+                setIsSettingsOpen(false);
+                navigate("/feedback");
+              }}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <MessageSquare size={18} />
+                <span>Send feedback</span>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setIsSettingsOpen(false);
+                navigate("/support");
+              }}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <HelpCircle size={18} />
+                <span>Help & Support</span>
+              </div>
+              <ChevronRight size={16} className="text-gray-500" />
+            </button>
+            
+            <div className="h-px bg-white/5 my-1 mx-2" />
 
-        <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-3 px-2">
+            {user ? (
+              <button
+                onClick={() => {
+                  setIsSettingsOpen(false);
+                  localStorage.clear();
+                  window.location.reload();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left"
+              >
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsSettingsOpen(false);
+                  setShowLoginModal(true);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-violet-400 hover:bg-violet-500/10 transition-all duration-200 text-left"
+              >
+                <LogIn size={18} />
+                <span>Sign In</span>
+              </button>
+            )}
+
+            <div className="h-px bg-white/5 my-1 mx-2" />
+
+            <div className="px-3 py-2 flex flex-col gap-0.5 text-left select-none">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span>Chennai, Tamil Nadu, India</span>
+              </div>
+              <span className="text-[10px] text-gray-500 pl-3.5">
+                From your IP address • <span className="hover:underline cursor-pointer text-violet-400/80">Update location</span>
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-3 min-w-0">
             {user ? (
               user.profileImageUrl ? (
                 <img
                   src={user.profileImageUrl}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full border border-white/10 object-cover"
+                  className="w-9 h-9 rounded-full border border-white/10 object-cover"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-violet-600 to-fuchsia-600">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-violet-600 to-fuchsia-600 shrink-0 shadow-md">
                   {userInitial}
                 </div>
               )
             ) : (
-              <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-gray-400 bg-white/5 border border-white/10">
-                <UserIcon size={16} />
+              <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-gray-400 bg-white/5 border border-white/10 shrink-0">
+                <UserIcon size={18} />
               </div>
             )}
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-white max-w-[100px] truncate">
-                {user ? user.name || user.email : "Guest"}
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold text-white truncate max-w-[110px]" title={user ? user.name || "User" : "Guest"}>
+                {user ? user.name || "User" : "Guest"}
               </span>
+              {user?.email && (
+                <span className="text-[10px] text-gray-400 truncate max-w-[110px]" title={user.email}>
+                  {user.email}
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
-            <ThemeToggle />
-            {user && (
-              <button
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.reload();
-                }}
-                className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
-                title="Logout"
-              >
-                <LogOut size={16} />
-              </button>
-            )}
-          </div>
+          <button
+            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            className={`relative p-2 rounded-xl transition-all duration-200 shrink-0 ${
+              isSettingsOpen
+                ? "bg-white/10 text-white scale-105"
+                : "text-gray-400 hover:bg-white/5 hover:text-white hover:scale-105"
+            }`}
+            aria-label="Toggle Settings Menu"
+          >
+            <Settings size={20} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 border border-[#111827]" />
+          </button>
         </div>
       </div>
     </div>
