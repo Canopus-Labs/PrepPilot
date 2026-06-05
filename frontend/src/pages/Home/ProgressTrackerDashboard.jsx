@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import moment from "moment";
 import {
@@ -12,7 +12,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
-
+import AchievementBadge from "../../components/AchievementBadge";
+import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { CARD_BG } from "../../utils/data";
@@ -122,6 +123,7 @@ const ResumeCard = ({ resume, navigate }) => (
 );
 
 const ProgressTrackerDashboard = () => {
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -129,6 +131,83 @@ const ProgressTrackerDashboard = () => {
   const [sessions, setSessions] = useState([]);
   const [resumes, setResumes] = useState([]);
   const [sheetProgress, setSheetProgress] = useState([]);
+
+  const achievements = [
+  {
+    title: "First Interview",
+    description: "Create your first mock interview session",
+    unlocked: sessions.length >= 1,
+  },
+  {
+    title: "Interview Pro",
+    description: "Complete 5 interview sessions",
+    unlocked: sessions.length >= 5,
+  },
+  {
+    title: "Interview Master",
+    description: "Complete 10 interview sessions",
+    unlocked: sessions.length >= 10,
+  },
+  {
+    title: "Resume Builder",
+    description: "Create your first resume",
+    unlocked: resumes.length >= 1,
+  },
+  {
+    title: "Resume Expert",
+    description: "Create 3 resumes",
+    unlocked: resumes.length >= 3,
+  },
+  {
+    title: "DSA Beginner",
+    description: "Reach 50% progress in any sheet",
+    unlocked: sheetProgress.some(
+      (sheet) => sheet.percentage >= 50
+    ),
+  },
+  {
+    title: "DSA Master",
+    description: "Reach 100% progress in any sheet",
+    unlocked: sheetProgress.some(
+      (sheet) => sheet.percentage >= 100
+    ),
+  },
+];
+
+const achievementsSynced = useRef(null);
+useEffect(() => {
+    if (loading || !user?._id || achievementsSynced.current === user._id) return;
+    achievementsSynced.current = user._id;
+
+    const fetchAndUpdateAchievements = async () => {
+        try {
+            // Get already unlocked achievements from backend
+            const res = await axiosInstance.get("/api/user/achievements");
+            const alreadyUnlocked = new Set(res.data.unlockedAchievements || []);
+
+            const newlyUnlocked = achievements.filter(
+                (b) => b.unlocked && !alreadyUnlocked.has(b.title)
+            );
+
+            newlyUnlocked.forEach((badge) => {
+                toast.success(`🏆 Badge unlocked: ${badge.title}!`);
+                alreadyUnlocked.add(badge.title);
+            });
+
+            if (newlyUnlocked.length > 0) {
+                // Save updated achievements to backend
+                await axiosInstance.post("/api/user/achievements", {
+                    unlockedAchievements: [...alreadyUnlocked],
+                });
+            }
+        } catch (err) {
+            console.error("Failed to sync achievements:", err);
+        }
+    };
+
+    fetchAndUpdateAchievements();
+}, [loading, user, sessions, resumes, sheetProgress]);
+
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -245,6 +324,32 @@ const ProgressTrackerDashboard = () => {
             gradientClass="bg-white dark:bg-black/20"
           />
         </div>
+        
+        {/* ACHIEVEMENTS */}
+        <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold"> 🏆 Achievements </h2>
+          <span className="text-sm text-gray-500">
+            {
+            achievements.filter(
+          (badge) => badge.unlocked
+        ).length
+        }{" "}
+        / {achievements.length} unlocked
+        </span>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {achievements.map((badge) => (
+            <AchievementBadge
+            key={badge.title}
+            title={badge.title}
+            description={badge.description}
+            unlocked={badge.unlocked}
+            />
+            ))}
+            </div>
+            </div>
 
         {/* MAIN CONTENT SPLIT */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

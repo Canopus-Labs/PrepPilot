@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS, BASE_URL } from "../utils/apiPaths";
+import toast from "react-hot-toast";
+
 
 export const UserContext = createContext();
 
@@ -35,10 +37,12 @@ export const UserProvider = ({ children }) => {
     }, []);
 
     const updateUser = (userData) => {
-        setUser(userData);
+    setUser(userData);
+    if (userData.token) {
         localStorage.setItem("token", userData.token);
-        setLoading(false);
-    };
+    }
+    setLoading(false);
+};
     const clearUser = () => {
         setUser(null);
         setSheetProgress([]);
@@ -50,8 +54,8 @@ export const UserProvider = ({ children }) => {
             const progressRes = await axiosInstance.get("/api/user/sheet-progress");
             setSheetProgress(progressRes.data.progressList || []);
         } catch (error) {
-            setSheetProgress([]);
-        }
+    toast.error("Unable to refresh progress. Please try again.");
+}
     };
     return (
         <UserContext.Provider value={{ user, loading, updateUser, clearUser, sheetProgress, refreshSheetProgress }}>

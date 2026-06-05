@@ -28,7 +28,7 @@ const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
 exports.createSession = async (req, res) => {
   try {
   const {role , experience , topicsToFocus , description , question }= req.body;
-    const userId = req.user._id || req.user.id; // support both _id and id
+    const userId = req.user._id || req.user.id;
 
     // Count existing sessions for this user
     const sessionCount = await Session.countDocuments({
@@ -87,7 +87,8 @@ exports.createSession = async (req, res) => {
  */
 exports.getMySessions = async (req, res) => {
     try {
-      const session = await Session.find({ user: req.user.id })
+      const userId = req.user._id || req.user.id;
+      const session = await Session.find({ user: userId })
         .sort({ createdAt: -1 })
         .populate("questions");
       res.status(200).json(session);
@@ -150,8 +151,11 @@ exports.deleteSession = async (req, res) => {
         return res.status(404).json({message:"Session not found"});
         
     }
+    
+    const userId = req.user._id || req.user.id;
+
     // Check if logged-in user owns this session
-    if(session.user.toString() !== req.user.id){
+    if(session.user.toString() !== userId.toString()){
         return res.status(401)
         .json({message:"Not authorized to delete this session"})
     }

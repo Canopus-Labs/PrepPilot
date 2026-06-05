@@ -2,7 +2,6 @@ const requiredEnvVars = Object.freeze([
   "MONGO_URI",
   "JWT_SECRET",
   "GEMINI_API_KEY",
-  "PORT",
 ]);
 
 const validateEnv = () => {
@@ -24,7 +23,7 @@ const validateEnv = () => {
     });
 
     console.error(
-      "\n⚠️ Please add the missing environment variables to your .env file.\n"
+      "\n⚠️ Please add the missing environment variables to your .env file.\n",
     );
 
     process.exit(1);

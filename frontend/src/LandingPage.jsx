@@ -1,11 +1,13 @@
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
 import { useNavigate } from "react-router-dom";
+
 import {
   LuSparkles,
   LuChevronRight,
   LuArrowRight,
+  LuArrowUp,
   LuUsers,
 } from "react-icons/lu";
 import { VscGitMerge } from "react-icons/vsc";
@@ -128,6 +130,7 @@ const LandingPage = () => {
   const [currentPage, setCurrentPage] = useState("login");
   const [pendingRoute, setPendingRoute] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleCTA = () => {
     if (!user) {
@@ -152,6 +155,24 @@ const LandingPage = () => {
     } else {
       navigate(route);
     }
+  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -344,7 +365,9 @@ const LandingPage = () => {
               <div
                 className="bento-card flex flex-col rounded-3xl overflow-hidden bg-white/70 border border-slate-200 dark:bg-[#0f0f14]/90 dark:border-white/8 shadow-sm backdrop-blur-sm"
                 style={{
-                  minHeight: "600px",
+                  background: "rgba(15,15,20,0.90)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  minHeight: "700px",
                 }}
               >
                 {/* Card interior – stacked list items */}
@@ -408,7 +431,9 @@ const LandingPage = () => {
               <div
                 className="bento-card flex flex-col rounded-3xl overflow-hidden bg-white/70 border border-slate-200 dark:bg-[#0f0f14]/90 dark:border-white/8 shadow-sm backdrop-blur-sm"
                 style={{
-                  minHeight: "600px",
+                  background: "rgba(15,15,20,0.90)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  minHeight: "723px",
                 }}
               >
                 {/* Orbit visual */}
@@ -490,7 +515,9 @@ const LandingPage = () => {
               <div
                 className="bento-card flex flex-col rounded-3xl overflow-hidden bg-white/70 border border-slate-200 dark:bg-[#0f0f14]/90 dark:border-white/8 shadow-sm backdrop-blur-sm"
                 style={{
-                  minHeight: "600px",
+                  background: "rgba(15,15,20,0.90)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  minHeight: "723px",
                 }}
               >
                 {/* Filter chips interior */}
@@ -792,7 +819,69 @@ const LandingPage = () => {
           <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
         </footer>
       </div>
+      {/* Premium Back To Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            onClick={scrollToTop}
+            initial={{
+              opacity: 0,
+              scale: 0.7,
+              y: 40,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.7,
+              y: 40,
+            }}
+            whileHover={{
+              scale: 1.08,
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.95,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+            className="fixed bottom-6 right-6 z-[9999]"
+            aria-label="Back To Top"
+          >
+            {/* Glow */}
+            <div className="absolute inset-0 bg-violet-600 rounded-full blur-xl opacity-40" />
 
+            {/* Button */}
+            <div
+              className="
+          relative
+          w-10
+          h-10
+          rounded-xl
+          flex
+          items-center
+          justify-center
+          text-white
+          border
+          border-white/10
+          backdrop-blur-xl
+        "
+              style={{
+                background:
+                  "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                boxShadow:
+                  "0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
+              }}
+            >
+              <LuArrowUp className="text-xl" />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
       {/* ─────────────────────────────────
           AUTH MODAL
       ───────────────────────────────── */}

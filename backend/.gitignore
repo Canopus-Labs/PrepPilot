@@ -79,3 +79,4 @@ Thumbs.db
 # Uploads folder (if it contains user-generated content)
 uploads/*
 !uploads/.gitkeep
+uploads/

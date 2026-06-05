@@ -170,13 +170,14 @@ html.dark {
 
   /* Bento card hover glow */
   .bento-card {
+    box-shadow: 0 0 18px rgb(187 187 225 / 40%);
     transition:
       box-shadow 0.3s ease,
       transform 0.3s ease,
       border-color 0.3s ease;
   }
   .bento-card:hover {
-    box-shadow: 0 0 32px 0 rgba(139, 139, 226, 0.22);
+    box-shadow: 0 0 32px 0 rgb(124 124 202 / 94%);
     transform: translateY(-3px);
     border-color: rgba(139, 139, 226, 0.5);
   }

@@ -224,7 +224,6 @@ const Sidebar = () => {
 
   const renderNavItems = () => {
     return NAV_ITEMS.map((item) => {
-      // Handle header items with collapsible content
       if (item.isHeader) {
         return (
           <div key={item.id}>
@@ -271,7 +270,6 @@ const Sidebar = () => {
         );
       }
 
-      // Handle non-header items (like Dashboard)
       const isActive = location.pathname.startsWith(item.path);
       const Icon = item.icon;
 
@@ -460,12 +458,10 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <div className="hidden md:block h-full shrink-0 z-20">
         <SidebarContent />
       </div>
 
-      {/* Mobile Top Bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#111827] border-b border-white/5 flex items-center justify-between px-4 z-40">
         <Link to="/" className="flex items-center gap-2">
           <h2 className="text-[20px] font-extrabold text-white tracking-tight">
@@ -480,7 +476,6 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div
@@ -493,10 +488,8 @@ const Sidebar = () => {
         </div>
       )}
 
-      {/* Spacer for mobile top bar so content doesn't tuck under */}
       <div className="md:hidden h-16 w-full shrink-0"></div>
 
-      {/* Login Modal */}
       <Modal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
