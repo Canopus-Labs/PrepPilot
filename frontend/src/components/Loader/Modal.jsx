@@ -18,6 +18,16 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
       document.removeEventListener("keydown", handleEsc);
     };
   }, [isOpen, onClose]);
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
