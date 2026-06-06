@@ -893,7 +893,7 @@ const LandingPage = () => {
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Community</h3>
         <ul className="space-y-2.5 text-sm">
-          <li><a href="https://github.com/yourusername/PrepPilot" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
+          <li><a href="https://github.com/Canopus-Labs/PrepPilot.git" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
           <li><a href="/repository-hive" className="hover:text-white transition-colors duration-200">Repository Hive</a></li>
           <li><a href="/oss-blog" className="hover:text-white transition-colors duration-200">OSS Blog</a></li>
           <li><a href="/oss-events" className="hover:text-white transition-colors duration-200">Events</a></li>
