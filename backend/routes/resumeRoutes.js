@@ -1,8 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { compileResume, analyzeResume, saveResume, getMyResumes } = require('../controllers/resumeController');
+const {
+    compileResume,
+    analyzeResume,
+    saveResume,
+    getMyResumes,
+    getResumeById,
+    updateResume,
+    deleteResume
+} = require('../controllers/resumeController');
 const { protect } = require('../middlewares/authMiddleware');
-const { upload, uploadResume } = require('../middlewares/uploadMiddleware');
+const { uploadResume } = require('../middlewares/uploadMiddleware');
 
 // @route   POST /api/resume/compile
 // @desc    Compile LaTeX code to PDF
@@ -19,5 +27,17 @@ router.post('/save', protect, saveResume);
 // @route   GET /api/resume/my-resumes
 // @desc    Get all saved resumes for logged-in user
 router.get('/my-resumes', protect, getMyResumes);
+
+// @route   GET /api/resume/:id
+// @desc    Get a saved resume owned by the logged-in user
+router.get('/:id', protect, getResumeById);
+
+// @route   PUT /api/resume/:id
+// @desc    Update a saved resume owned by the logged-in user
+router.put('/:id', protect, updateResume);
+
+// @route   DELETE /api/resume/:id
+// @desc    Delete a saved resume owned by the logged-in user
+router.delete('/:id', protect, deleteResume);
 
 module.exports = router;

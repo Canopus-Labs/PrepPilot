@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Sparkles } from "lucide-react";
+import { CalendarClock, Check, Edit3, FileText, Plus, RefreshCw, Trash2, X } from "lucide-react";
+import toast from "react-hot-toast";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
 
 // Sample initial templates
 export const RESUME_TEMPLATES = [
@@ -23,9 +26,99 @@ export const RESUME_TEMPLATES = [
 
 const ResumeTemplates = () => {
   const navigate = useNavigate();
+  const [savedResumes, setSavedResumes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [draftTitle, setDraftTitle] = useState("");
+  const [busyId, setBusyId] = useState(null);
+
+  const fetchSavedResumes = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await axiosInstance.get(API_PATHS.RESUME.GET_ALL);
+      setSavedResumes(response.data.resumes || []);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load saved resumes.");
+      toast.error("Failed to load saved resumes");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSavedResumes();
+  }, [fetchSavedResumes]);
 
   const handleSelectTemplate = (id) => {
     navigate(`/resume-builder/${id}`);
+  };
+
+  const handleStartRename = (resume) => {
+    setEditingId(resume._id);
+    setDraftTitle(resume.title);
+  };
+
+  const handleCancelRename = () => {
+    setEditingId(null);
+    setDraftTitle("");
+  };
+
+  const handleRename = async (resumeId) => {
+    const title = draftTitle.trim();
+
+    if (!title) {
+      toast.error("Resume title cannot be empty");
+      return;
+    }
+
+    setBusyId(resumeId);
+    try {
+      const response = await axiosInstance.put(API_PATHS.RESUME.UPDATE(resumeId), { title });
+      const updatedResume = response.data.resume;
+
+      setSavedResumes((prev) =>
+        prev.map((resume) => (resume._id === resumeId ? updatedResume : resume))
+      );
+      toast.success("Resume renamed");
+      handleCancelRename();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to rename resume");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDelete = async (resume) => {
+    const confirmed = window.confirm(`Delete "${resume.title}"? This cannot be undone.`);
+
+    if (!confirmed) return;
+
+    setBusyId(resume._id);
+    try {
+      await axiosInstance.delete(API_PATHS.RESUME.DELETE(resume._id));
+      setSavedResumes((prev) => prev.filter((item) => item._id !== resume._id));
+      toast.success("Resume deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete resume");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const formatDate = (value) => {
+    if (!value) return "Recently updated";
+
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(value));
   };
 
   return (
@@ -48,8 +141,145 @@ const ResumeTemplates = () => {
         </div>
       </div>
 
+      {/* Saved Resumes */}
+      <section className="max-w-6xl mx-auto mb-12">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Saved Resumes</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              Continue editing, rename, or remove your saved LaTeX resumes.
+            </p>
+          </div>
+          <button
+            onClick={fetchSavedResumes}
+            disabled={isLoading}
+            className="h-10 w-10 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#151c2f] text-gray-500 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition"
+            title="Refresh saved resumes"
+          >
+            <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+          </button>
+        </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#151c2f] px-5 py-4 text-sm font-semibold text-gray-500 dark:text-gray-300 flex items-center gap-2">
+            <RefreshCw size={16} className="animate-spin" />
+            Loading saved resumes...
+          </div>
+        ) : savedResumes.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-gray-200 dark:border-white/10 bg-white/70 dark:bg-[#151c2f]/70 px-5 py-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
+            No saved resumes yet. Start from a blank project or choose a template below.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {savedResumes.map((resume) => {
+              const isEditing = editingId === resume._id;
+              const isBusy = busyId === resume._id;
+
+              return (
+                <div
+                  key={resume._id}
+                  className="group rounded-xl bg-white dark:bg-[#151c2f] border border-gray-200 dark:border-white/5 shadow-sm hover:shadow-md transition-all min-h-[190px] p-5 flex flex-col"
+                >
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="w-11 h-11 rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-300 flex items-center justify-center shrink-0">
+                      <FileText size={22} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {isEditing ? (
+                        <input
+                          value={draftTitle}
+                          onChange={(e) => setDraftTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleRename(resume._id);
+                            if (e.key === "Escape") handleCancelRename();
+                          }}
+                          className="w-full rounded-lg border border-violet-200 dark:border-violet-500/30 bg-gray-50 dark:bg-black/20 px-3 py-2 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-violet-500/30"
+                          autoFocus
+                        />
+                      ) : (
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
+                          {resume.title}
+                        </h3>
+                      )}
+                      <div className="mt-2 flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        <CalendarClock size={14} />
+                        Updated {formatDate(resume.updatedAt)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => navigate(`/resume-builder/${resume._id}`)}
+                      disabled={isBusy || isEditing}
+                      className="flex-1 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400/60 disabled:cursor-not-allowed text-white text-sm font-bold px-3 py-2 transition"
+                    >
+                      Open
+                    </button>
+
+                    {isEditing ? (
+                      <>
+                        <button
+                          onClick={() => handleRename(resume._id)}
+                          disabled={isBusy}
+                          className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition"
+                          title="Save title"
+                        >
+                          {isBusy ? <RefreshCw size={16} className="animate-spin" /> : <Check size={16} />}
+                        </button>
+                        <button
+                          onClick={handleCancelRename}
+                          disabled={isBusy}
+                          className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition"
+                          title="Cancel rename"
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleStartRename(resume)}
+                          disabled={isBusy}
+                          className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition"
+                          title="Rename resume"
+                        >
+                          <Edit3 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(resume)}
+                          disabled={isBusy}
+                          className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition"
+                          title="Delete resume"
+                        >
+                          {isBusy ? <RefreshCw size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {/* Grid of Templates */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-6xl mx-auto">
+      <section className="max-w-6xl mx-auto">
+        <div className="mb-4">
+          <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Templates</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+            Pick a starting point for a new resume.
+          </p>
+        </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         
         {/* Blank Project Card */}
         <button
@@ -97,6 +327,7 @@ const ResumeTemplates = () => {
           </button>
         ))}
       </div>
+      </section>
     </div>
   );
 };
