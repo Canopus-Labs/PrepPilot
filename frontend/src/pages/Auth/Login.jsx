@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Button/Button";
@@ -8,11 +8,17 @@ import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { LuArrowRight } from "react-icons/lu";
 
-const Login = ({ setCurrentPage, onLoginSuccess }) => {
+const Login = ({ setCurrentPage, onLoginSuccess, setHasUnsavedAuthData }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setHasUnsavedAuthData(Boolean(email || password));
+  
+    return () => setHasUnsavedAuthData(false);
+  }, [email, password, setHasUnsavedAuthData]);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
