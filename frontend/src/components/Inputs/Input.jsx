@@ -24,8 +24,10 @@ const Input = ({ value, onChange, label, placeholder, type }) => {
         />
         {type === "password" && (
           <span
-            className="absolute right-3 cursor-pointer select-none text-gray-400 hover:text-gray-300 transition-colors"
-            onClick={toggleShowPassword}
+          className="absolute right-3 cursor-pointer select-none text-gray-400 hover:text-gray-300 transition-colors"
+          onClick={toggleShowPassword}
+          title={showPassword ? "Hide Password" : "Show Password"}
+         aria-label={showPassword ? "Hide Password" : "Show Password"}
           >
             {showPassword ? (
               <FaRegEye size={18} />
