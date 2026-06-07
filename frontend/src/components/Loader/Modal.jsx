@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { modalVariants, backdropVariants } from "../../utils/animations";
 
@@ -22,6 +22,46 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
       document.body.style.overflow = "";
     };
   }, [isOpen, onClose]);
+  const modalRef = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return;
+  
+    const modal = modalRef.current;
+  
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (firstElement) {
+      firstElement.focus();
+   }
+  
+    const handleTabKey = (e) => {
+      if (e.key !== "Tab") return;
+  
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+  
+    document.addEventListener("keydown", handleTabKey);
+  
+    return () => {
+      document.removeEventListener("keydown", handleTabKey);
+    };
+  }, [isOpen, children]);
 
   return (
     <AnimatePresence>
@@ -36,6 +76,9 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
         >
           <motion.div
             className="relative flex flex-col bg-white dark:bg-[#151c2f] border border-gray-100 dark:border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh] overflow-y-auto"
+            ref={modalRef}
+            className="relative flex flex-col bg-white dark:bg-[#151c2f] border border-gray-100 dark:border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]
+            overflow-y-auto"
             variants={modalVariants}
             initial="initial"
             animate="animate"

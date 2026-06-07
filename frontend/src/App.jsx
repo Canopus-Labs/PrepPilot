@@ -32,7 +32,8 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
-import Settings from "./pages/Settings/Settings";
+import SendFeedback from "./pages/Settings/SendFeedback";
+import HelpSupport from "./pages/Settings/HelpSupport";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
