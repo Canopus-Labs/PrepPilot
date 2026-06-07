@@ -10,6 +10,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { BASE_URL } from "../../utils/apiPaths";
+import BookmarkButton from "../../components/BookmarkButton";
+import { RESOURCE_TYPES } from "../../constants/resourceTypes";
 
 const NotesBooks = () => {
   const [categories, setCategories] = useState([]);
@@ -210,6 +212,14 @@ const NotesBooks = () => {
                         </p>
                       </div>
                       <Download size={16} className="text-gray-500" />
+                      <BookmarkButton
+                        resourceId={item.id || item.name}
+                        resourceType={RESOURCE_TYPES.BOOK}
+                        title={item.name}
+                        description={`${category.title} — ${item.name}`}
+                        metadata={{ url: item.url, category: category.title, size: item.size }}
+                        className="!p-1.5"
+                      />
                     </a>
                   ))}
                 </div>

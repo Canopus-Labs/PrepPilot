@@ -33,6 +33,7 @@ import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
 import Settings from "./pages/Settings/Settings";
+import SavedItems from "./pages/SavedItems/SavedItems";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
@@ -285,6 +286,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <Settings />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/saved-items"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <SavedItems />
                         </PageTransition>
                       </ProtectedRoute>
                     }

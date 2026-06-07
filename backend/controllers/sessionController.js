@@ -1,5 +1,6 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
+const Bookmark = require("../models/Bookmark");
 
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
@@ -160,7 +161,16 @@ exports.deleteSession = async (req, res) => {
         .json({message:"Not authorized to delete this session"})
     }
     // First , delete all question linked to this session
+    const questionIds = (session.questions || []).map((q) => q.toString());
     await Question.deleteMany({session : session._id});
+
+    // Cascade-delete any bookmarks referencing these questions
+    if (questionIds.length > 0) {
+      Bookmark.deleteMany({
+        resourceId: { $in: questionIds },
+        resourceType: "AI_QUESTION",
+      }).catch((err) => console.error("Bookmark cascade cleanup error:", err));
+    }
 
     // then delete the session 
     await session.deleteOne();

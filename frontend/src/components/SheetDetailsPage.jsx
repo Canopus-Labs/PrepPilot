@@ -7,9 +7,11 @@ import React, { useState, useEffect, useCallback, memo } from "react";
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
+import BookmarkButton from "./BookmarkButton";
+import { RESOURCE_TYPES } from "../constants/resourceTypes";
 
 // Optimized row component to prevent 150+ re-renders on a single click
-const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
+const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle, sheetId }) => {
   let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
   const diffStr = (sub.difficulty || "").toLowerCase();
   if (diffStr === 'easy') diffColor = "bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-800/20";
@@ -80,6 +82,15 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
         <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide min-w-[60px] text-center ${diffColor}`}>
           {sub.difficulty}
         </div>
+
+        <BookmarkButton
+          resourceId={`${sheetId}-${sectionIdx}-${topicIdx}-${subIdx}`}
+          resourceType={RESOURCE_TYPES.DSA}
+          title={sub.title}
+          description={`DSA — ${sub.difficulty || "Unknown"} difficulty`}
+          metadata={{ sheetId, difficulty: sub.difficulty, links: sub.links }}
+          className="!p-1.5"
+        />
       </div>
     </div>
   );
@@ -302,6 +313,7 @@ function SheetDetail() {
                             completed={completed}
                             followed={followed}
                             onToggle={handleCompleteToggle}
+                            sheetId={id}
                           />
                         );
                       })}

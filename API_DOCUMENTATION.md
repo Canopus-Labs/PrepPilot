@@ -537,3 +537,110 @@ Response:
   "message": "API is working!"
 }
 ```
+
+---
+
+## Bookmarks Routes
+
+### Create Bookmark
+- `POST /api/bookmarks`
+- Private
+
+Request Body:
+```json
+{
+  "resourceId": "exp-1",
+  "resourceType": "INTERVIEW_EXPERIENCE",
+  "title": "Google SWE Interview",
+  "description": "5-round process spanning 3 weeks",
+  "metadata": {
+    "company": "Google",
+    "difficulty": "Hard",
+    "offerReceived": true
+  }
+}
+```
+
+Supported resource types:
+- `AI_QUESTION`
+- `DSA`
+- `APTITUDE`
+- `BOOK`
+- `PROJECT`
+- `INTERVIEW_EXPERIENCE`
+
+Response:
+```json
+{
+  "success": true,
+  "bookmark": {
+    "_id": "6426c5a5...",
+    "user": "6426c5a5...",
+    "resourceId": "exp-1",
+    "resourceType": "INTERVIEW_EXPERIENCE",
+    "title": "Google SWE Interview",
+    "description": "5-round process spanning 3 weeks",
+    "metadata": { "company": "Google", "difficulty": "Hard" },
+    "createdAt": "2026-06-06T...",
+    "updatedAt": "2026-06-06T..."
+  }
+}
+```
+Errors:
+- `400` missing required fields or invalid resourceType
+- `409` resource already bookmarked (duplicate)
+- `401` not authorized
+- `500` server error
+
+### Get Bookmarks
+- `GET /api/bookmarks`
+- Private
+
+Query Parameters:
+| Parameter | Type   | Default | Description |
+|-----------|--------|---------|-------------|
+| type      | string | -       | Filter by resourceType (e.g., `BOOK`) |
+| search    | string | -       | Search in title and description |
+| page      | number | 1       | Page number |
+| limit     | number | 20      | Items per page (max 100) |
+
+Examples:
+```
+GET /api/bookmarks
+GET /api/bookmarks?type=BOOK
+GET /api/bookmarks?search=algorithm&page=1&limit=10
+```
+
+Response:
+```json
+{
+  "success": true,
+  "bookmarks": [
+    { "_id": "...", "resourceId": "...", "resourceType": "BOOK", "title": "...", ... }
+  ],
+  "total": 42,
+  "page": 1,
+  "totalPages": 3
+}
+```
+Errors:
+- `401` not authorized
+- `500` server error
+
+### Remove Bookmark
+- `DELETE /api/bookmarks/:id`
+- Private
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Bookmark removed"
+}
+```
+Errors:
+- `401` not authorized
+- `403` not the bookmark owner
+- `404` bookmark not found
+- `500` server error
+
