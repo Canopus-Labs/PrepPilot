@@ -121,6 +121,7 @@ const SignUp = ({ setCurrentPage }) => {
           label="Full Name"
           placeholder="John Doe"
           type="text"
+          autoComplete="name"
         />
 
         {/* Email Input */}
@@ -130,6 +131,7 @@ const SignUp = ({ setCurrentPage }) => {
           label="Email Address"
           placeholder="your@email.com"
           type="text"
+          autoComplete="email"
         />
 
         {/* Password Input */}
@@ -139,6 +141,7 @@ const SignUp = ({ setCurrentPage }) => {
           label="Password"
           placeholder="Min 8 characters"
           type="password"
+          autoComplete="new-password"
         />
 
         {/* Error Message */}

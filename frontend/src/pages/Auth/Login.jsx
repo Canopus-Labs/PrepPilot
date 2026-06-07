@@ -86,6 +86,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
           label="Email Address"
           placeholder="your@email.com"
           type="text"
+          autoComplete="email"
         />
 
         <Input
@@ -94,6 +95,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
           label="Password"
           placeholder="Min 8 characters"
           type="password"
+          autoComplete="current-password"
         />
 
         {/* Error Message */}
