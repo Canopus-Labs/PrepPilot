@@ -128,6 +128,7 @@ const LandingPage = () => {
 
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [currentPage, setCurrentPage] = useState("login");
+  const [hasUnsavedAuthData, setHasUnsavedAuthData] = useState(false);
   const [pendingRoute, setPendingRoute] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -888,9 +889,18 @@ const LandingPage = () => {
       <Modal
         isOpen={openAuthModal}
         onClose={() => {
+          if (hasUnsavedAuthData) {
+            const confirmClose = window.confirm(
+              "You have unsaved form data. Are you sure you want to close?"
+            );
+        
+            if (!confirmClose) return;
+          }
+        
           setOpenAuthModal(false);
           setCurrentPage("login");
           setPendingRoute(null);
+          setHasUnsavedAuthData(false);
         }}
         hideHeader
       >
@@ -898,6 +908,7 @@ const LandingPage = () => {
           {currentPage === "login" && (
             <Login
               setCurrentPage={setCurrentPage}
+              setHasUnsavedAuthData={setHasUnsavedAuthData}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
                 if (pendingRoute) {
@@ -910,7 +921,9 @@ const LandingPage = () => {
             />
           )}
           {currentPage === "signup" && (
-            <SignUp setCurrentPage={setCurrentPage} />
+            <SignUp setCurrentPage={setCurrentPage} 
+            setHasUnsavedAuthData={setHasUnsavedAuthData}
+            />
           )}
         </div>
       </Modal>

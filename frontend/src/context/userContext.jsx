@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
-import { API_PATHS, BASE_URL } from "../utils/apiPaths";
+import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
 
 

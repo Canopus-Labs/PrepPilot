@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Button/Button";
@@ -10,13 +10,27 @@ import { UserContext } from "../../context/userContext";
 import uploadImage from "../../utils/uploadimage";
 import { LuArrowRight } from "react-icons/lu";
 
-const SignUp = ({ setCurrentPage }) => {
+const SignUp = ({ setCurrentPage, setHasUnsavedAuthData, }) => {
   const [profilePic, setProfilePic] = useState(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setHasUnsavedAuthData(
+      Boolean(fullName || email || password || profilePic)
+    );
+  
+    return () => setHasUnsavedAuthData(false);
+  }, [
+    fullName,
+    email,
+    password,
+    profilePic,
+    setHasUnsavedAuthData,
+  ]);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
