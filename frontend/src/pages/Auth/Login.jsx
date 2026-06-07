@@ -86,6 +86,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
           label="Email Address"
           placeholder="your@email.com"
           type="text"
+          autoFocus
         />
 
         <Input
