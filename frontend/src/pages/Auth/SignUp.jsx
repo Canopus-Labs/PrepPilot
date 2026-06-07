@@ -116,34 +116,49 @@ const SignUp = ({ setCurrentPage }) => {
 
         {/* Full Name Input */}
         <Input
-          value={fullName}
-          onChange={({ target }) => setFullName(target.value)}
-          label="Full Name"
-          placeholder="John Doe"
-          type="text"
-        />
+  value={fullName}
+  onChange={({ target }) => setFullName(target.value)}
+  label="Full Name"
+  placeholder="John Doe"
+  type="text"
+  aria-invalid={!!error && !fullName}
+  aria-describedby={error && !fullName ? "signup-error" : undefined}
+/>
 
         {/* Email Input */}
         <Input
-          value={email}
-          onChange={({ target }) => setEmail(target.value)}
-          label="Email Address"
-          placeholder="your@email.com"
-          type="text"
-        />
+  value={email}
+  onChange={({ target }) => setEmail(target.value)}
+  label="Email Address"
+  placeholder="your@email.com"
+  type="text"
+  aria-invalid={!!error && !validateEmail(email)}
+  aria-describedby={
+    error && !validateEmail(email)
+      ? "signup-error"
+      : undefined
+  }
+/>
 
         {/* Password Input */}
         <Input
-          value={password}
-          onChange={({ target }) => setPassword(target.value)}
-          label="Password"
-          placeholder="Min 8 characters"
-          type="password"
-        />
+  value={password}
+  onChange={({ target }) => setPassword(target.value)}
+  label="Password"
+  placeholder="Min 8 characters"
+  type="password"
+  aria-invalid={!!error}
+  aria-describedby={error ? "signup-error" : undefined}
+/>
 
         {/* Error Message */}
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <div
+  id="signup-error"
+  role="alert"
+  aria-live="polite"
+  className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
+>
             <p className="text-red-400 text-sm font-medium">{error}</p>
           </div>
         )}
