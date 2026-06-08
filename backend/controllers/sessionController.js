@@ -1,9 +1,8 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
-
+const User = require("../models/User");
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
-
 
 /**
  * Create a new practice session and associated questions.
@@ -25,47 +24,50 @@ const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
  * @example
  * 201 {"success": true, "session": {"_id":"...","role":"Backend Engineer",...}}
  */
+
 exports.createSession = async (req, res) => {
   try {
-  const {role , experience , topicsToFocus , description , question }= req.body;
+    const { role, experience, topicsToFocus, description, question } = req.body;
     const userId = req.user._id || req.user.id;
 
-    // Count existing sessions for this user
-    const sessionCount = await Session.countDocuments({
-      user: userId,
-    });
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId, sessionCount: { $lt: MAX_SESSIONS } },
+      { $inc: { sessionCount: 1 } },
+      { new: true, select: "sessionCount" }
+    );
 
-    // Check session limit
-    if (sessionCount >= MAX_SESSIONS) {
+    if (!updatedUser) {
+      // Either user not found, or limit already reached — either way, block creation.
       return res.status(403).json({
         success: false,
-        message: `Session limit reached. You already have ${sessionCount} sessions. Please delete old sessions before creating new ones.`,
-        currentCount: sessionCount,
+        message: `Session limit reached. You have reached the maximum of ${MAX_SESSIONS} sessions. Please delete old sessions before creating new ones.`,
         maxLimit: MAX_SESSIONS,
       });
     }
 
-  const session = await Session.create({
-    user : userId,
-    role,
-    experience,
-    topicsToFocus,
-    description
-  });
+    const session = await Session.create({
+      user: userId,
+      role,
+      experience,
+      topicsToFocus,
+      description,
+    });
+
     const questionDocs = await Promise.all(
-        (question || []).map(async (q)=>{
-            const questionDoc = await Question.create({
-                session:session._id,
-                question:q.question,
-                answer:q.answer,
-            });
-            return questionDoc._id;
-        })
+      (question || []).map(async (q) => {
+        const questionDoc = await Question.create({
+          session: session._id,
+          question: q.question,
+          answer: q.answer,
+        });
+        return questionDoc._id;
+      })
     );
 
-    session.questions=questionDocs;
+    session.questions = questionDocs;
     await session.save();
-    res.status(201).json({success:true, session});
+
+    res.status(201).json({ success: true, session });
   } catch (error) {
     console.error("CreateSession error:", error);
     res.status(500).json({ success: false, message: "Server Error" });
@@ -165,7 +167,13 @@ exports.deleteSession = async (req, res) => {
     // then delete the session 
     await session.deleteOne();
 
-    res.status(200).json({message:"Session delete sucessfully"});
+    // Decrement the atomic counter; floor at 0 to guard against legacy data
+    // where sessionCount may not have been initialised.
+    await User.findByIdAndUpdate(userId, [
+      { $set: { sessionCount: { $max: [{ $subtract: ["$sessionCount", 1] }, 0] } } },
+    ]);
+
+    res.status(200).json({ message: "Session delete sucessfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error" });
   }
