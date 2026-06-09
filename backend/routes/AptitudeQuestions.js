@@ -2,9 +2,15 @@ const express = require("express");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { validateAiPrompt } = require("../middlewares/validateAiPrompt");
 const { sanitizeAiPrompt } = require("../middlewares/sanitizeAiPrompt");
-
+const { z } = require("zod");
 const router = express.Router();
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const QuestionSchema = z.object({
+  question: z.string().min(1),
+  options: z.array(z.string()).length(4),
+  answer: z.string(),
+});
+const QuestionsSchema = z.array(QuestionSchema);
 
 // GET /api/questions?topic=Probability
 router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
@@ -69,6 +75,18 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
     let questions;
     try {
       questions = JSON.parse(cleanedText);
+
+const validationResult =
+  QuestionsSchema.safeParse(questions);
+
+if (!validationResult.success) {
+  return res.status(500).json({
+    error: "Invalid AI response schema",
+    details: validationResult.error.errors,
+  });
+}
+
+questions = validationResult.data;
     } catch (err) {
       console.error("Gemini raw response:", rawText);
       console.error("Parse error:", err);
@@ -89,3 +107,21 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
   }
 });
 module.exports = router;
+const QuestionSchema = z
+  .object({
+    question: z.string().min(1),
+    options: z.array(z.string()).length(4),
+    answer: z.string(),
+  })
+  .refine(
+    (data) => data.options.includes(data.answer),
+    {
+      message:
+        "Answer must match one of the provided options",
+      path: ["answer"],
+    }
+  );
+  console.error(
+  "AI schema validation failed:",
+  validationResult.error
+);
