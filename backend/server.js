@@ -111,6 +111,8 @@ app.use(
   protect,
   generateConceptExplanation,
 );
+const bookmarkRoutes = require("./routes/bookmarkRoutes");
+app.use("/api/bookmarks", generalLimiter, bookmarkRoutes);
 app.use("/api/books", generalLimiter, booksRoutes);
 
 //Serve uploads folder

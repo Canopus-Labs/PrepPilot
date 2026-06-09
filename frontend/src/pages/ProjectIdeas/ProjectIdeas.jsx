@@ -17,6 +17,8 @@ import {
   Star,
   Zap,
 } from "lucide-react";
+import BookmarkButton from "../../components/BookmarkButton";
+import { RESOURCE_TYPES } from "../../constants/resourceTypes";
 
 // ─────────────────────────────────────────────────────────
 // Config
@@ -168,6 +170,14 @@ const IdeaCard = ({ idea, domain, index }) => {
                 {idea.tagline}
               </p>
             </div>
+            <BookmarkButton
+              resourceId={`proj-${idea.title ? idea.title.replace(/\s+/g, "-").substring(0, 60).toLowerCase() : index}`}
+              resourceType={RESOURCE_TYPES.PROJECT}
+              title={idea.title}
+              description={idea.tagline}
+              metadata={{ techStack: idea.techStack, features: idea.features, difficulty: idea.difficulty, domain: idea.domain || domain, githubSearch: idea.githubSearch }}
+              className="!p-1.5 shrink-0"
+            />
           </div>
 
           <div className="flex items-center gap-2">

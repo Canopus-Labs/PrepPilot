@@ -49,6 +49,12 @@ const Sidebar = () => {
       icon: LayoutDashboard,
     },
     {
+      id: "saved-items",
+      title: "Saved Items",
+      path: "/saved-items",
+      icon: BookMarked,
+    },
+    {
       id: "aptitude",
       title: "Aptitude",
       isHeader: true,

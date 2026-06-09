@@ -155,6 +155,7 @@ const InterviewPrep = () => {
                     }
                     isPinned={data?.isPinned}
                     onTogglePin={() => toggleQuestionPinStatus(data._id)}
+                    questionId={data._id}
                   />
 
                   {/* Load More button after last card */}
