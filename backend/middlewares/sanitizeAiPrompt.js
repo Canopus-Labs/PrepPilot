@@ -1,18 +1,18 @@
 
 const sanitizeAiPrompt = (req, res, next) => {
-  if (req.body && typeof req.body.prompt === "string") {
-    req.body.prompt = req.body.prompt
+  const sanitize = (value) =>
+    value
       .replace(/<[^>]*>?/gm, "")        // remove HTML tags
       .replace(/[^\x20-\x7E\n]/g, "")   // remove hidden control chars
       .trim();
-      req.body.role = req.body.role
-      .replace(/<[^>]*>?/gm, "")        // remove HTML tags
-      .replace(/[^\x20-\x7E\n]/g, "")   // remove hidden control chars
-      .trim();
-      req.body.topic = req.body.topic
-      .replace(/<[^>]*>?/gm, "")        // remove HTML tags
-      .replace(/[^\x20-\x7E\n]/g, "")   // remove hidden control chars
-      .trim();
+
+  for (const source of [req.body, req.query]) {
+    if (!source) continue;
+    for (const key of ["prompt", "role", "topic"]) {
+      if (typeof source[key] === "string") {
+        source[key] = sanitize(source[key]);
+      }
+    }
   }
 
   next();

@@ -281,25 +281,21 @@ const App = () => {
                     }
                   />
                   <Route
-<Route
-  path="/support"
-  element={
-    <PageTransition>
-      <HelpSupport />
-    </PageTransition>
-  }
-/>
-
-<Route
-  path="/settings"
-  element={
-    <ProtectedRoute>
-      <PageTransition>
-        <Settings />
-      </PageTransition>
-    </ProtectedRoute>
-  }
-/>
+                    path="/support"
+                    element={
+                      <PageTransition>
+                        <HelpSupport />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Settings />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                 </Route>
