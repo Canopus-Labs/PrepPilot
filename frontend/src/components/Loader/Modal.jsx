@@ -52,6 +52,8 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
 
             <button
               type="button"
+              aria-label="Close authentication modal"
+              title="Close"
               className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full p-1.5 flex items-center justify-center absolute top-4 right-4 transition-all duration-200 z-10"
               onClick={onClose}
             >

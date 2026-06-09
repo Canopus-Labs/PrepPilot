@@ -121,6 +121,7 @@ const SignUp = ({ setCurrentPage }) => {
           label="Full Name"
           placeholder="John Doe"
           type="text"
+          autoFocus
         />
 
         {/* Email Input */}

@@ -32,6 +32,7 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 
 const ProtectedRoute = ({ children }) => {
@@ -276,6 +277,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <NotesBooks />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/support"
+                    element={
+                      <PageTransition>
+                        <HelpSupport />
                       </PageTransition>
                     }
                   />

@@ -349,34 +349,33 @@ const Settings = () => {
     }
   };
   // Delete Account
- const handleDeleteAccount = async () => {
+  const handleDeleteAccount = async () => {
     const deleteToast = toast.loading("Deleting account...");
     try {
-        await axiosInstance.delete(API_PATHS.AUTH.DELETE_ACCOUNT);
+      await axiosInstance.delete(API_PATHS.AUTH.DELETE_ACCOUNT);
 
-        toast.success("Account deleted permanently. Goodbye!", {
-            id: deleteToast,
-        });
+      toast.success("Account deleted permanently. Goodbye!", {
+        id: deleteToast,
+      });
 
-        navigate("/");
+      navigate("/");
 
-        setTimeout(() => {
-            clearUser();
-        }, 100);
-
+      setTimeout(() => {
+        clearUser();
+      }, 100);
     } catch (err) {
-        toast.error(err.response?.data?.message || "Failed to delete account", {
-            id: deleteToast,
-        });
+      toast.error(err.response?.data?.message || "Failed to delete account", {
+        id: deleteToast,
+      });
     } finally {
-        setShowDeleteConfirm(false);
+      setShowDeleteConfirm(false);
     }
-};
+  };
 
   return (
-    <div className="flex h-full min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-slate-200 transition-colors duration-300">
+    <div className="flex flex-col lg:flex-row h-full min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-slate-200 transition-colors duration-300">
       {/* Settings Navigation Sidebar */}
-      <div className="w-64 border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex flex-col p-4">
+      <div className="hidden lg:flex w-64 border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex-col p-4">
         {/* Back Link */}
         <button
           onClick={() => navigate("/dashboard")}
@@ -386,10 +385,10 @@ const Settings = () => {
           Back to Profile
         </button>
         {/* Navigation Tabs */}
-        <nav className="flex flex-col gap-1.5 flex-grow">
+        <nav className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:flex md:flex-col">
           <button
             onClick={() => setActiveSection("basic-info")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm ${
               activeSection === "basic-info"
                 ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
                 : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
@@ -400,7 +399,7 @@ const Settings = () => {
           </button>
           <button
             onClick={() => setActiveSection("profile-details")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm ${
               activeSection === "profile-details"
                 ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
                 : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
@@ -411,7 +410,7 @@ const Settings = () => {
           </button>
           <button
             onClick={() => setActiveSection("platform")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm${
               activeSection === "platform"
                 ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
                 : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
@@ -422,7 +421,7 @@ const Settings = () => {
           </button>
           <button
             onClick={() => setActiveSection("visibility")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm${
               activeSection === "visibility"
                 ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
                 : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
@@ -433,7 +432,7 @@ const Settings = () => {
           </button>
           <button
             onClick={() => setActiveSection("accounts")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm ${
               activeSection === "accounts"
                 ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
                 : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
@@ -444,8 +443,69 @@ const Settings = () => {
           </button>
         </nav>
       </div>
+
+      {/* Mobile & Tablet Navigation */}
+<div className="block lg:hidden border-b border-slate-800 p-4">
+  <nav className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    {[
+      {
+        id: "basic-info",
+        label: "Basic Info",
+        icon: <User size={18} />,
+      },
+      {
+        id: "profile-details",
+        label: "Profile Details",
+        icon: <FileText size={18} />,
+      },
+      {
+        id: "platform",
+        label: "Platform",
+        icon: <Sliders size={18} />,
+      },
+      {
+        id: "visibility",
+        label: "Visibility",
+        icon: <Lock size={18} />,
+      },
+      {
+        id: "accounts",
+        label: "Accounts",
+        icon: <Shield size={18} />,
+      },
+    ].map((item) => (
+      <button
+        key={item.id}
+        onClick={() => setActiveSection(item.id)}
+        className={`
+          flex items-center justify-center gap-2
+          rounded-xl h-14
+          text-sm font-medium
+          transition-all duration-200
+
+          ${
+            activeSection === item.id
+              ? "bg-slate-800 text-white border border-slate-700"
+              : "bg-slate-900/40 text-slate-400 border border-slate-800 hover:bg-slate-800/60 hover:text-white"
+          }
+
+          ${
+            item.id === "accounts"
+              ? "md:col-span-2"
+              : ""
+          }
+        `}
+      >
+        {item.icon}
+        <span>{item.label}</span>
+      </button>
+    ))}
+  </nav>
+</div>
+
+
       {/* Main Settings Content Area */}
-      <div className="flex-1 overflow-y-auto p-8 max-w-4xl">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 max-w-5xl w-full">
         {/* ================= BASIC INFO SECTION ================= */}
         {activeSection === "basic-info" && (
           <div className="space-y-8 animate-fadeIn">
@@ -467,7 +527,7 @@ const Settings = () => {
                 </h3>
 
                 {/* Photo uploader */}
-                <div className="flex items-center gap-6 mb-8">
+                <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                   <div
                     className="relative cursor-pointer group"
                     onClick={handlePhotoClick}
@@ -509,7 +569,7 @@ const Settings = () => {
                   </div>
                 </div>
                 {/* Form fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                       First Name
@@ -872,7 +932,7 @@ const Settings = () => {
                     Update Changes
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                       GitHub Profile
@@ -1264,7 +1324,7 @@ const Settings = () => {
               </div>
               {/* Delete Account */}
               <div className="border-t border-slate-200/60 dark:border-slate-800 pt-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col lg:flex-row md:items-center justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-bold text-red-600 mb-1">
                       Delete Account
