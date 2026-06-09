@@ -844,17 +844,75 @@ const LandingPage = () => {
         {/* ─────────────────────────────────
             FOOTER
         ───────────────────────────────── */}
-        <footer className="border-t border-white/6 py-8 px-4 text-center text-sm text-gray-500">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <img
-              src="/PrepPilot-Logo.png"
-              alt="PrepPilot Logo"
-              className="w-5 h-5 object-contain"
-            />
-            <span className="font-semibold text-gray-400">PrepPilot AI</span>
-          </div>
-          <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
-        </footer>
+        <footer className="w-full border-t border-white/5 bg-[#0B0F19] text-gray-400 font-sans mt-20">
+  <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 sm:px-8 lg:px-12">
+    
+    {/* Main Multi-Column Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5">
+      
+      {/* Brand Info Column */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="flex items-center gap-2">
+          <img
+            src="/PrepPilot-Logo.png"
+            alt="PrepPilot Logo"
+            className="w-6 h-6 object-contain"
+          />
+          <span className="font-bold text-xl tracking-tight text-white">
+            PrepPilot AI
+          </span>
+        </div>
+        <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+          Your ultimate companion for crushing technical interviews with AI-powered questions, real-time feedback, and comprehensive preparation tools.
+        </p>
+      </div>
+
+      {/* Column 2: Platform Features */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Features</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="/ai-helper" className="hover:text-white transition-colors duration-200">AI Question Gen</a></li>
+          <li><a href="/coding-sheets" className="hover:text-white transition-colors duration-200">DSA Sheets</a></li>
+          <li><a href="/compiler" className="hover:text-white transition-colors duration-200">Code Compiler</a></li>
+          <li><a href="/assessment" className="hover:text-white transition-colors duration-200">Skill Tests</a></li>
+        </ul>
+      </div>
+
+      {/* Column 3: Resources */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Resources</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</a></li>
+          <li><a href="/notes-books" className="hover:text-white transition-colors duration-200">Books Library</a></li>
+          <li><a href="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</a></li>
+          <li><a href="/interview-experiences" className="hover:text-white transition-colors duration-200">Experiences</a></li>
+        </ul>
+      </div>
+
+      {/* Column 4: Community */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Community</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="https://github.com/Canopus-Labs/PrepPilot.git" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
+          <li><a href="/repository-hive" className="hover:text-white transition-colors duration-200">Repository Hive</a></li>
+          <li><a href="/oss-blog" className="hover:text-white transition-colors duration-200">OSS Blog</a></li>
+          <li><a href="/oss-events" className="hover:text-white transition-colors duration-200">Events</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    {/* Bottom Bar Container */}
+    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+      <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
+      <div className="flex space-x-6">
+        <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
+        <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
       </div>
       {/* Premium Back To Top Button */}
       <AnimatePresence>
@@ -932,11 +990,12 @@ const LandingPage = () => {
         hideHeader
       >
         <div>
-          {currentPage === "login" && (
+          <div className={currentPage === "login" ? "block" : "hidden"}>
             <Login
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
+          
                 if (pendingRoute) {
                   navigate(pendingRoute);
                   setPendingRoute(null);
@@ -945,10 +1004,11 @@ const LandingPage = () => {
                 }
               }}
             />
-          )}
-          {currentPage === "signup" && (
+          </div>
+          
+          <div className={currentPage === "signup" ? "block" : "hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
-          )}
+          </div>
         </div>
       </Modal>
     </>

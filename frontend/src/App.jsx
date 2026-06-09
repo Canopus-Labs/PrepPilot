@@ -32,6 +32,7 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import SavedItems from "./pages/SavedItems/SavedItems";
 
@@ -281,13 +282,25 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/settings"
-                    element={
-                      <ProtectedRoute>
-                        <PageTransition>
-                          <Settings />
-                        </PageTransition>
-                      </ProtectedRoute>
+<Route
+  path="/support"
+  element={
+    <PageTransition>
+      <HelpSupport />
+    </PageTransition>
+  }
+/>
+
+<Route
+  path="/settings"
+  element={
+    <ProtectedRoute>
+      <PageTransition>
+        <Settings />
+      </PageTransition>
+    </ProtectedRoute>
+  }
+/>
                     }
                   />
                   <Route

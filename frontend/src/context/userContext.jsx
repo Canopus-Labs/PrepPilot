@@ -20,19 +20,24 @@ export const UserProvider = ({ children }) => {
             return;
         }
 
-        const fetchUser = async () => {
-            try {
-                const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
-                setUser(response.data);
-                // Fetch all sheet progress for user
-                const progressRes = await axiosInstance.get("/api/user/sheet-progress");
-                setSheetProgress(progressRes.data.progressList || []);
-            } catch (error) {
-                clearUser();
-            } finally {
-                setLoading(false);
-            }
-        };
+ const fetchUser = async () => {
+    try {
+        const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
+        setUser(response.data);
+    } catch (error) {
+        clearUser(); // only logs out if AUTH fails 
+        return;
+    } finally {
+        setLoading(false);
+    }
+    try {
+        const progressRes = await axiosInstance.get("/api/user/sheet-progress");
+        setSheetProgress(progressRes.data.progressList || []);
+    } catch (error) {
+        console.error("Failed to load progress:", error);
+        toast.error("Failed to load progress. Please try again.");
+    }
+};
         fetchUser();
     }, []);
 
