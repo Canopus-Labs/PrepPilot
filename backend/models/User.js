@@ -47,7 +47,9 @@ const UserSchema = new mongoose.Schema(
             notificationsEnabled: { type: Boolean, default: true }
         },
         
-        unlockedAchievements: { type: [String], default: [] }
+        unlockedAchievements: { type: [String], default: [] },
+        sessionCount: { type: Number, default: 0, min: 0 }
+
     },
     { timestamps: true }
 );
