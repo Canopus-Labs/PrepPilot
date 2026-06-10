@@ -1,0 +1,61 @@
+name: "📚 Documentation Update"
+description: "Suggest improvements, corrections, or additions to the documentation"
+title: "[Docs]: "
+labels: ["documentation"]
+
+body:
+
+* type: markdown
+  attributes:
+  value: |
+  Help us improve the project's documentation by providing the details below.
+
+* type: input
+  id: section
+  attributes:
+  label: "Documentation Section"
+  description: "Which part of the documentation needs improvement?"
+  placeholder: "README, Installation Guide, API Docs, Contributing Guide, etc."
+  validations:
+  required: true
+
+* type: textarea
+  id: current-issue
+  attributes:
+  label: "Current Issue"
+  description: "Describe what is unclear, incorrect, outdated, or missing."
+  placeholder: "The installation instructions are missing..."
+  validations:
+  required: true
+
+* type: textarea
+  id: suggested-change
+  attributes:
+  label: "Suggested Changes"
+  description: "Explain the changes you would like to see."
+  placeholder: "Add a section explaining..."
+  validations:
+  required: true
+
+* type: textarea
+  id: benefits
+  attributes:
+  label: "Benefits"
+  description: "How would this documentation improvement help users or contributors?"
+  placeholder: "This would make onboarding easier for new contributors..."
+
+* type: textarea
+  id: references
+  attributes:
+  label: "References / Examples"
+  description: "Provide links, screenshots, or examples from other projects if applicable."
+
+* type: checkboxes
+  id: checks
+  attributes:
+  label: "Checklist"
+  options:
+  - label: "I have checked that this documentation issue has not already been reported."
+  required: true
+  - label: "I am willing to contribute the documentation update myself."
+  required: false
