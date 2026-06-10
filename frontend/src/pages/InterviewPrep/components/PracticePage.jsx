@@ -167,6 +167,7 @@ const PracticePage = () => {
                     question={q.question}
                     options={q.options}
                     answer={q.answer}
+                    topic={selectedTopic}
                   />
                 ))}
               </div>

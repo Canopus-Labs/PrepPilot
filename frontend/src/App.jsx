@@ -32,7 +32,9 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
+import SavedItems from "./pages/SavedItems/SavedItems";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
@@ -280,11 +282,33 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/settings"
+<Route
+  path="/support"
+  element={
+    <PageTransition>
+      <HelpSupport />
+    </PageTransition>
+  }
+/>
+
+<Route
+  path="/settings"
+  element={
+    <ProtectedRoute>
+      <PageTransition>
+        <Settings />
+      </PageTransition>
+    </ProtectedRoute>
+  }
+/>
+                    }
+                  />
+                  <Route
+                    path="/saved-items"
                     element={
                       <ProtectedRoute>
                         <PageTransition>
-                          <Settings />
+                          <SavedItems />
                         </PageTransition>
                       </ProtectedRoute>
                     }

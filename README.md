@@ -45,6 +45,8 @@ Whether you're preparing for your dream job or sharpening your technical skills,
 | 📱 **Fully Responsive**               | Seamless experience across desktop, tablet, and mobile devices                |
 | 🎨 **Modern Dark Mode**               | Beautiful UI with theme toggle for comfortable viewing                        |
 | ⚡ **Real-time Feedback**             | Instant AI-powered explanations and answer evaluations                        |
+| 🔖 **Bookmark & Saved Resources**    | Save important interview preparation resources and access them later from a dedicated Saved Items dashboard with search and filtering support |
+| 📌 **Personalized Learning**          | Save resources for later revision using the Bookmark & Saved Resources System |
 
 ## 🛠️ Technology Stack
 
@@ -191,12 +193,16 @@ PrepPilot/
 │
 ├── 📂 backend/                        # Express.js REST API Server
 │   ├── 📂 config/                    # Database & environment configuration
+│   ├── 📂 constants/                 # Constant values & enums
+│   │   └── resourceTypes.js          # Shared resource type enums
+│   │
 │   ├── 📂 controllers/               # Business logic & request handlers
 │   │   ├── aiController.js           # AI/Gemini API integration
 │   │   ├── authController.js         # Authentication logic
 │   │   ├── questionController.js     # Question management
 │   │   ├── resumeController.js       # Resume operations
 │   │   ├── sessionController.js      # Session management
+│   │   ├── bookmarkController.js     # Bookmarks management
 │   │   └── userSheetProgressController.js # Progress tracking
 │   │
 │   ├── 📂 middlewares/               # Express middlewares
@@ -213,6 +219,7 @@ PrepPilot/
 │   │   ├── Session.js                # Practice sessions
 │   │   ├── Sheet.js                  # Question sheets (DSA, etc.)
 │   │   ├── Book.js                   # Reference books
+│   │   ├── Bookmark.js               # Bookmark schema
 │   │   └── UserSheetProgress.js      # User progress tracking
 │   │
 │   ├── 📂 routes/                    # API endpoints
@@ -224,6 +231,7 @@ PrepPilot/
 │   │   ├── booksRoutes.js            # Books endpoints
 │   │   ├── AptitudeQuestions.js      # Aptitude test endpoints
 │   │   ├── sheetJsonUpload.js        # Sheet upload
+│   │   ├── bookmarkRoutes.js         # Bookmark endpoints
 │   │   └── userSheetProgressRoutes.js# Progress endpoints
 │   │
 │   ├── 📂 utils/                     # Utility functions
@@ -260,6 +268,7 @@ PrepPilot/
 │   │   │   ├── SheetDetailsPage.jsx  # Sheet details view
 │   │   │   ├── ThemeToggle.jsx       # Dark/Light mode
 │   │   │   ├── Drawer.jsx            # Navigation drawer
+│   │   │   ├── BookmarkButton.jsx    # Bookmark button component
 │   │   │   │
 │   │   │   ├── 📂 Cards/             # Card components
 │   │   │   │   ├── QuestionCard.jsx
@@ -284,6 +293,15 @@ PrepPilot/
 │   │   │   ├── userContext.jsx       # User state management
 │   │   │   └── themeContext.jsx      # Theme state management
 │   │   │
+│   │   ├── 📂 hooks/                 # Custom React hooks
+│   │   │   └── useBookmarks.js       # Bookmark hook for UI and state
+│   │   │
+│   │   ├── 📂 services/              # API services
+│   │   │   └── bookmarkService.js    # Bookmark API service
+│   │   │
+│   │   ├── 📂 constants/             # Enums & config constants
+│   │   │   └── resourceTypes.js      # Shared resource type labels
+│   │   │
 │   │   ├── 📂 pages/                 # Page components (route-based)
 │   │   │   ├── 📂 Auth/              # Login/Signup pages
 │   │   │   ├── 📂 Home/              # Home/Dashboard
@@ -292,6 +310,8 @@ PrepPilot/
 │   │   │   ├── 📂 ResumeBuilder/     # Resume builder
 │   │   │   ├── 📂 NotesBooks/        # Reference books
 │   │   │   ├── 📂 ProjectIdeas/      # Project ideas
+│   │   │   ├── 📂 SavedItems/        # Saved items dashboard
+│   │   │   │   └── SavedItems.jsx
 │   │   │   └── 📂 OpenSource/        # Open source resources
 │   │   │
 │   │   ├── 📂 utils/                 # Utility functions
@@ -500,6 +520,14 @@ POST   /api/auth/login          - Login user
 POST   /api/auth/logout         - Logout user
 GET    /api/auth/profile        - Get user profile
 PUT    /api/auth/profile        - Update user profile
+```
+
+### Bookmarks Endpoints
+
+```
+POST   /api/bookmarks           - Create a bookmark
+GET    /api/bookmarks           - Get all user bookmarks (supports ?type, ?search, ?page, ?limit)
+DELETE /api/bookmarks/:id       - Remove a bookmark by ID
 ```
 
 ### AI Endpoints
