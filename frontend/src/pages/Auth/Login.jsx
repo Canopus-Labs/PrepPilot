@@ -7,30 +7,13 @@ import { API_PATHS } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { LuArrowRight } from "react-icons/lu";
-const [rememberMe, setRememberMe] = useState(false);
-<div className="flex items-center gap-2 mt-2">
-  <input
-    id="rememberMe"
-    type="checkbox"
-    checked={rememberMe}
-    onChange={(e) => setRememberMe(e.target.checked)}
-    className="cursor-pointer"
-  />
-
-  <label
-    htmlFor="rememberMe"
-    className="text-sm text-gray-400 cursor-pointer"
-  >
-    Remember Me
-  </label>
-</div>
-
 
 const Login = ({ setCurrentPage, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -58,10 +41,10 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
 
       if (token) {
         if (rememberMe) {
-  localStorage.setItem("token", token);
-} else {
-  sessionStorage.setItem("token", token);
-}
+          localStorage.setItem("token", token);
+        } else {
+          sessionStorage.setItem("token", token);
+        }
         updateUser(response.data);
         if (onLoginSuccess) {
           onLoginSuccess();
@@ -103,20 +86,6 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
       {/* Form */}
       <form onSubmit={handleLogin} className="space-y-4">
         <Input
-
-  value={email}
-  onChange={({ target }) => setEmail(target.value)}
-  label="Email Address"
-  placeholder="your@email.com"
-  type="text"
-  aria-invalid={!!error && !validateEmail(email)}
-  aria-describedby={
-    error && !validateEmail(email)
-      ? "login-error"
-      : undefined
-  }
-/>
-
           value={email}
           onChange={({ target }) => setEmail(target.value)}
           label="Email Address"
@@ -125,25 +94,36 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
           autoFocus
         />
 
-
         <Input
-  value={password}
-  onChange={({ target }) => setPassword(target.value)}
-  label="Password"
-  placeholder="Min 8 characters"
-  type="password"
-  aria-invalid={!!error}
-  aria-describedby={error ? "login-error" : undefined}
-/>
+          value={password}
+          onChange={({ target }) => setPassword(target.value)}
+          label="Password"
+          placeholder="Min 8 characters"
+          type="password"
+        />
+
+        {/* Remember Me */}
+        <div className="flex items-center gap-2 mt-2">
+          <input
+            id="rememberMe"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="cursor-pointer"
+          />
+          <label htmlFor="rememberMe" className="text-sm text-gray-400 cursor-pointer">
+            Remember Me
+          </label>
+        </div>
 
         {/* Error Message */}
         {error && (
-  <div
-    id="login-error"
-    role="alert"
-    aria-live="polite"
-    className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
-  >
+          <div
+            id="login-error"
+            role="alert"
+            aria-live="polite"
+            className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
+          >
             <p className="text-red-400 text-sm font-medium">{error}</p>
           </div>
         )}

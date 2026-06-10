@@ -27,7 +27,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 overflow-y-auto p-4 pt-8"
+          className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 p-4 pt-8"
           variants={backdropVariants}
           initial="initial"
           animate="animate"
@@ -35,7 +35,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
           onClick={onClose}
         >
           <motion.div
-            className="relative flex flex-col bg-white dark:bg-[#151c2f] border border-gray-100 dark:border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh] overflow-y-auto"
+            className="relative flex flex-col bg-white dark:bg-[#151c2f] border border-gray-100 dark:border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]"
             variants={modalVariants}
             initial="initial"
             animate="animate"
@@ -60,7 +60,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
               ✕
             </button>
 
-            <div className="w-full overflow-y-auto max-h-[90vh] pr-1">
+            <div className="w-full overflow-y-auto scrollbar-hide">
               {children}
             </div>
           </motion.div>
