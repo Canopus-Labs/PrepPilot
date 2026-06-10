@@ -18,10 +18,12 @@ const aiRoutes = require("./routes/aiRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
+const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
 // Remove ES Module import for cors. Use CommonJS require below.
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(generalHeaders); 
 // CORS settings: derive from env
 // FRONTEND_ORIGIN=primary production frontend
 // EXTRA_ORIGINS=comma separated additional origins (staging, preview, etc.)
@@ -85,7 +87,7 @@ connectDB()
 app.use(express.json());
 
 //Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
 app.use("/api/question", generalLimiter, questionRoutes);
 app.use("/api", aiRoutes);
@@ -101,12 +103,14 @@ const { required } = require("joi");
 app.use("/api/resume", generalLimiter, resumeRoutes);
 app.use(
   "/api/ai/generate-questions",
+  sensitiveRouteHeaders,
   aiLimiter,
   protect,
   generateInterviewQuestions,
 );
 app.use(
   "/api/ai/generate-explanation",
+  sensitiveRouteHeaders,
   aiLimiter,
   protect,
   generateConceptExplanation,
