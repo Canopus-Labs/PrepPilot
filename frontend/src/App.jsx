@@ -2,7 +2,6 @@ import Compiler from "./components/Compiler";
 import SkillAssessment from "./components/SkillAssessment";
 import DsaSheet from "./components/SheetDetailsPage";
 import SheetList from "./components/SheetList";
-// ...existing code...
 import UserProvider from "./context/userContext";
 import ThemeProvider from "./context/themeContext";
 import React from "react";
@@ -10,9 +9,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import VerifyEmail from "./pages/Auth/verifyEmail";
 import LandingPage from "./LandingPage";
 import Dashboard from "./pages/Home/Dashboard";
 import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
@@ -32,6 +33,8 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import HelpSupport from "./pages/Support/HelpSupport";
+import Settings from "./pages/Settings/Settings";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
@@ -42,67 +45,79 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const BuggyComponent = () => {
+  throw new Error("This is a simulated crash to test the Error Boundary component!");
+};
+
 const App = () => {
   return (
     <ThemeProvider>
       <UserProvider>
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
+        <ErrorBoundary>
+          <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
           <Router>
             <AnimatePresence mode="wait">
               <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <PageTransition>
-                      <LandingPage />
-                    </PageTransition>
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={
-                    <PageTransition>
-                      <Login />
-                    </PageTransition>
-                  }
-                />
                 {/* Routes without Sidebar */}
                 <Route
                   path="/"
                   element={
-                    <PageTransition>
-                      <LandingPage />
-                    </PageTransition>
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <LandingPage />
+                      </PageTransition>
+                    </ErrorBoundary>
                   }
                 />
                 <Route
                   path="/login"
                   element={
-                    <PageTransition>
-                      <Login />
-                    </PageTransition>
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <Login />
+                      </PageTransition>
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/verify-email"
+                  element={
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <VerifyEmail />
+                      </PageTransition>
+                    </ErrorBoundary>
                   }
                 />
                 <Route
                   path="/interview-prep/:sessionId"
                   element={
-                    <PageTransition>
-                      <InterviewPrep />
-                    </PageTransition>
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <InterviewPrep />
+                      </PageTransition>
+                    </ErrorBoundary>
                   }
                 />
+                {import.meta.env.DEV && (
+                  <Route
+                    path="/test-error"
+                    element={<BuggyComponent />}
+                  />
+                )}
                 <Route
                   path="/resume-builder/:id"
                   element={
                     <ProtectedRoute>
-                      <PageTransition>
-                        <ResumeEditor />
-                      </PageTransition>
+                      <ErrorBoundary>
+                        <PageTransition>
+                          <ResumeEditor />
+                        </PageTransition>
+                      </ErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
 
-                {/* Routes with Sidebar (MainLayout) */}
                 <Route
                   element={
                     <MainLayout>
@@ -118,6 +133,12 @@ const App = () => {
                       </PageTransition>
                     }
                   />
+                  {import.meta.env.DEV && (
+                    <Route
+                      path="/layout-test-error"
+                      element={<BuggyComponent />}
+                    />
+                  )}
                   <Route
                     path="/ai-helper"
                     element={
@@ -270,6 +291,24 @@ const App = () => {
                       </PageTransition>
                     }
                   />
+                  <Route
+                    path="/support"
+                    element={
+                      <PageTransition>
+                        <HelpSupport />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Settings />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
                 </Route>
               </Routes>
             </AnimatePresence>
@@ -282,7 +321,8 @@ const App = () => {
               },
             }}
           />
-        </div>
+          </div>
+        </ErrorBoundary>
       </UserProvider>
     </ThemeProvider>
   );

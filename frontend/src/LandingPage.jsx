@@ -1,11 +1,13 @@
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
 import { useNavigate } from "react-router-dom";
+
 import {
   LuSparkles,
   LuChevronRight,
   LuArrowRight,
+  LuArrowUp,
   LuUsers,
 } from "react-icons/lu";
 import { VscGitMerge } from "react-icons/vsc";
@@ -15,7 +17,7 @@ import SignUp from "./pages/Auth/SignUp";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
-import ThemeToggle from "./components/ThemeToggle";
+
 
 /* ─────────────────────────────────────────────
    Reusable animated section wrapper
@@ -127,6 +129,7 @@ const LandingPage = () => {
   const [currentPage, setCurrentPage] = useState("login");
   const [pendingRoute, setPendingRoute] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleCTA = () => {
     if (!user) {
@@ -151,6 +154,24 @@ const LandingPage = () => {
     } else {
       navigate(route);
     }
+  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -209,7 +230,7 @@ const LandingPage = () => {
 
             {/* Right buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              <ThemeToggle />
+              
               {user ? (
                 <ProfileInfoCard />
               ) : (
@@ -357,7 +378,7 @@ const LandingPage = () => {
                 style={{
                   background: "rgba(15,15,20,0.90)",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "600px",
+                  minHeight: "700px",
                 }}
               >
                 {/* Card interior – stacked list items */}
@@ -427,7 +448,7 @@ const LandingPage = () => {
                 style={{
                   background: "rgba(15,15,20,0.90)",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "600px",
+                  minHeight: "723px",
                 }}
               >
                 {/* Orbit visual */}
@@ -515,7 +536,7 @@ const LandingPage = () => {
                 style={{
                   background: "rgba(15,15,20,0.90)",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "600px",
+                  minHeight: "723px",
                 }}
               >
                 {/* Filter chips interior */}
@@ -823,19 +844,139 @@ const LandingPage = () => {
         {/* ─────────────────────────────────
             FOOTER
         ───────────────────────────────── */}
-        <footer className="border-t border-white/6 py-8 px-4 text-center text-sm text-gray-500">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <img
-              src="/PrepPilot-Logo.png"
-              alt="PrepPilot Logo"
-              className="w-5 h-5 object-contain"
-            />
-            <span className="font-semibold text-gray-400">PrepPilot AI</span>
-          </div>
-          <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
-        </footer>
+        <footer className="w-full border-t border-white/5 bg-[#0B0F19] text-gray-400 font-sans mt-20">
+  <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 sm:px-8 lg:px-12">
+    
+    {/* Main Multi-Column Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5">
+      
+      {/* Brand Info Column */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="flex items-center gap-2">
+          <img
+            src="/PrepPilot-Logo.png"
+            alt="PrepPilot Logo"
+            className="w-6 h-6 object-contain"
+          />
+          <span className="font-bold text-xl tracking-tight text-white">
+            PrepPilot AI
+          </span>
+        </div>
+        <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+          Your ultimate companion for crushing technical interviews with AI-powered questions, real-time feedback, and comprehensive preparation tools.
+        </p>
       </div>
 
+      {/* Column 2: Platform Features */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Features</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="/ai-helper" className="hover:text-white transition-colors duration-200">AI Question Gen</a></li>
+          <li><a href="/coding-sheets" className="hover:text-white transition-colors duration-200">DSA Sheets</a></li>
+          <li><a href="/compiler" className="hover:text-white transition-colors duration-200">Code Compiler</a></li>
+          <li><a href="/assessment" className="hover:text-white transition-colors duration-200">Skill Tests</a></li>
+        </ul>
+      </div>
+
+      {/* Column 3: Resources */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Resources</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</a></li>
+          <li><a href="/notes-books" className="hover:text-white transition-colors duration-200">Books Library</a></li>
+          <li><a href="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</a></li>
+          <li><a href="/interview-experiences" className="hover:text-white transition-colors duration-200">Experiences</a></li>
+        </ul>
+      </div>
+
+      {/* Column 4: Community */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Community</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="https://github.com/Canopus-Labs/PrepPilot.git" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
+          <li><a href="/repository-hive" className="hover:text-white transition-colors duration-200">Repository Hive</a></li>
+          <li><a href="/oss-blog" className="hover:text-white transition-colors duration-200">OSS Blog</a></li>
+          <li><a href="/oss-events" className="hover:text-white transition-colors duration-200">Events</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    {/* Bottom Bar Container */}
+    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+      <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
+      <div className="flex space-x-6">
+        <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
+        <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+      </div>
+      {/* Premium Back To Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            onClick={scrollToTop}
+            initial={{
+              opacity: 0,
+              scale: 0.7,
+              y: 40,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.7,
+              y: 40,
+            }}
+            whileHover={{
+              scale: 1.08,
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.95,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+            className="fixed bottom-6 right-6 z-[9999]"
+            aria-label="Back To Top"
+          >
+            {/* Glow */}
+            <div className="absolute inset-0 bg-violet-600 rounded-full blur-xl opacity-40" />
+
+            {/* Button */}
+            <div
+              className="
+          relative
+          w-10
+          h-10
+          rounded-xl
+          flex
+          items-center
+          justify-center
+          text-white
+          border
+          border-white/10
+          backdrop-blur-xl
+        "
+              style={{
+                background:
+                  "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                boxShadow:
+                  "0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
+              }}
+            >
+              <LuArrowUp className="text-xl" />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
       {/* ─────────────────────────────────
           AUTH MODAL
       ───────────────────────────────── */}
@@ -843,17 +984,17 @@ const LandingPage = () => {
         isOpen={openAuthModal}
         onClose={() => {
           setOpenAuthModal(false);
-          setCurrentPage("login");
           setPendingRoute(null);
         }}
         hideHeader
       >
         <div>
-          {currentPage === "login" && (
+          <div className={currentPage === "login" ? "block" : "hidden"}>
             <Login
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
+          
                 if (pendingRoute) {
                   navigate(pendingRoute);
                   setPendingRoute(null);
@@ -862,10 +1003,11 @@ const LandingPage = () => {
                 }
               }}
             />
-          )}
-          {currentPage === "signup" && (
+          </div>
+          
+          <div className={currentPage === "signup" ? "block" : "hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
-          )}
+          </div>
         </div>
       </Modal>
     </>

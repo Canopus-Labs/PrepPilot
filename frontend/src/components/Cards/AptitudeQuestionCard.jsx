@@ -15,7 +15,7 @@ const AptitudeQuestionCard = ({ question, options, answer }) => {
     if (!answer) return false;
     const ansString = String(answer).trim().toLowerCase();
     const optString = String(opt).trim().toLowerCase();
-    return ansString === optString || ansString === optionLabel.toLowerCase() || optString.includes(ansString) || ansString.includes(optString);
+    return ansString === optionLabel.toLowerCase() || ansString === optString;
   };
 
   return (

@@ -5,7 +5,20 @@ const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const { sanitizeAiPrompt } = require('../middlewares/sanitizeAiPrompt');
 
-// Shared handler for text generation (used by multiple route aliases)
+/**
+ * Shared handler for text generation using Gemini.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ * @throws {Error} When prompt validation fails or AI generation fails.
+ * @example
+ * POST /api/generate
+ * {
+ *   "prompt": "Explain event delegation in JavaScript."
+ * }
+ * @example
+ * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
+ */
 async function generateHandler(req, res) {
   const { prompt } = req.body || {};
   if (!prompt || !prompt.trim()) {
@@ -70,6 +83,18 @@ router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generate
 router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 
 // List available models
+/**
+ * List available Gemini models configured for the backend.
+ * @route GET /api/models
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When listing models fails.
+ * @example
+ * GET /api/models
+ * @example
+ * 200 {"availableModels": ["gemini-2.5-flash"], "configured": "models/gemini-2.5-flash", "note": "..."}
+ */
 router.get("/models", async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);

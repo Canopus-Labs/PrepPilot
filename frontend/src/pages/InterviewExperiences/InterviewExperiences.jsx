@@ -470,36 +470,41 @@ const SubmitModal = ({ onClose, onAdd }) => {
     offerReceived: "Yes", rounds: "", summary: "", tips: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Build a minimal experience object from the form
-    const newExp = {
-      id: Date.now(),
-      company: form.company.trim(),
-      role: form.role.trim(),
-      experience: form.experience || "N/A",
-      difficulty: form.difficulty,
-      offerReceived: form.offerReceived === "Yes",
-      date: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
-      rounds: form.rounds
-        ? form.rounds.split("\n").filter(Boolean).map((r, i) => ({
-            name: `Round ${i + 1}`,
-            type: "Coding",
-            description: r,
-          }))
-        : [],
-      summary: form.summary.trim(),
-      tips: form.tips
-        ? form.tips.split("\n").filter(Boolean)
-        : [],
-      tags: [form.difficulty, form.role.split(" ")[0]].filter(Boolean),
-      color: `hsl(${(form.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`,
-    };
-    onAdd(newExp);
-    setSubmitted(true);
+    setSubmitting(true);
+    // Simulate brief submission delay for UX feedback
+    setTimeout(() => {
+      const newExp = {
+        id: Date.now(),
+        company: form.company.trim(),
+        role: form.role.trim(),
+        experience: form.experience || "N/A",
+        difficulty: form.difficulty,
+        offerReceived: form.offerReceived === "Yes",
+        date: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
+        rounds: form.rounds
+          ? form.rounds.split("\n").filter(Boolean).map((r, i) => ({
+              name: `Round ${i + 1}`,
+              type: "Coding",
+              description: r,
+            }))
+          : [],
+        summary: form.summary.trim(),
+        tips: form.tips
+          ? form.tips.split("\n").filter(Boolean)
+          : [],
+        tags: [form.difficulty, form.role.split(" ")[0]].filter(Boolean),
+        color: `hsl(${(form.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`,
+      };
+      onAdd(newExp);
+      setSubmitting(false);
+      setSubmitted(true);
+    }, 600);
   };
 
   const inputCls =
@@ -606,10 +611,20 @@ const SubmitModal = ({ onClose, onAdd }) => {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold transition-all shadow-md hover:shadow-violet-500/25"
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition-all shadow-md hover:shadow-violet-500/25"
               >
-                <Send size={16} />
-                Submit Experience
+                {submitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    Submit Experience
+                  </>
+                )}
               </button>
             </form>
           )}

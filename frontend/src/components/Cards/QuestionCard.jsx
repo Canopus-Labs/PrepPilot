@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { LuChevronDown, LuPin, LuPinOff, LuSparkles } from "react-icons/lu";
+import toast from "react-hot-toast";
+import {
+  LuChevronDown,
+  LuPin,
+  LuPinOff,
+  LuSparkles,
+  LuCopy,
+} from "react-icons/lu";
 import AIResponsePreview from '../../pages/InterviewPrep/components/AIResponsePreview';
 
 const QuestionCard = ({
@@ -13,6 +20,15 @@ const QuestionCard = ({
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const copyToClipboard = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied!`);
+    } catch {
+      toast.error(`Failed to copy ${label.toLowerCase()}`);
+    }
   };
 
   return (
@@ -43,6 +59,14 @@ const QuestionCard = ({
             </button>
           )}
 
+            <button
+              className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500             dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10             dark:hover:text-violet-300 transition-all"
+              onClick={() => copyToClipboard(question, "Question")}
+              title="Copy Question"
+            >
+              <LuCopy size={18} />
+            </button>
+
           {onLearnMore && (
             <button
               className="flex items-center gap-2 text-sm font-semibold text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-500/10 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-500/20 border border-fuchsia-100 dark:border-fuchsia-500/20 px-4 py-2.5 rounded-xl transition-all duration-300 shadow-sm"
@@ -70,8 +94,22 @@ const QuestionCard = ({
 
       {/* Answer section */}
       {isExpanded && answer && (
-        <div className="mt-6 pt-5 border-t border-gray-100 dark:border-white/10 text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-          <AIResponsePreview content={answer} />
+        <div className="mt-6 pt-5 border-t border-gray-100 dark:border-white/10">
+      
+          <div className="flex justify-end mb-4">
+            <button
+              className="flex items-center gap-2 text-sm font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 hover:bg-violet-100 dark:hover:bg-violet-500/20 border border-violet-100 dark:border-violet-500/20 px-4 py-2 rounded-xl transition-all duration-300"
+              onClick={() => copyToClipboard(answer, "Answer")}
+            >
+              <LuCopy size={16} />
+              <span>Copy Answer</span>
+            </button>
+          </div>
+      
+          <div className="text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+            <AIResponsePreview content={answer} />
+          </div>
+      
         </div>
       )}
     </div>

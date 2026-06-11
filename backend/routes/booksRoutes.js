@@ -49,7 +49,18 @@ async function listFilesRecursive(prefix) {
   return files;
 }
 
-// List books directly from GitHub repo structure (recursive per top-level dir)
+/**
+ * List programming book categories and files sourced from the GitHub repository.
+ * @route GET /api/books/
+ * @param {import('express').Request} _req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When the GitHub API cannot be reached.
+ * @example
+ * GET /api/books/
+ * @example
+ * 200 {"categories": [{"id":"...","title":"...","items":[...]}], "warnings": []}
+ */
 router.get("/", async (_req, res) => {
   try {
     const rootUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents?ref=${BRANCH}`;
@@ -97,7 +108,18 @@ router.get("/", async (_req, res) => {
   }
 });
 
-// Optional redirector for direct downloads when given a full GitHub file URL
+/**
+ * Redirect to a GitHub raw file URL for direct download.
+ * @route GET /api/books/download
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {void}
+ * @throws {Error} When the url query parameter is missing.
+ * @example
+ * GET /api/books/download?url=https://raw.githubusercontent.com/.../file.pdf
+ * @example
+ * 302 redirect to raw file URL
+ */
 router.get("/download", (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).json({ message: "url query is required" });

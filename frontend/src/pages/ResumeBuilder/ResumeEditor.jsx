@@ -4,7 +4,7 @@ import Split from "react-split";
 import Editor from "@monaco-editor/react";
 import { ArrowLeft, Download, Play, RefreshCw, FileText, Save } from "lucide-react";
 import toast from "react-hot-toast";
-import ThemeToggle from "../../components/ThemeToggle";
+
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
@@ -169,7 +169,7 @@ const ResumeEditor = () => {
         title: id === "jakes-resume" ? "Jake's Resume" : id === "deedy-cv" ? "Deedy CV" : "Document",
         latexCode: code
       });
-      toast.success("Resume saved to Dashboard!");
+      toast.success("Resume saved successfully!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to save resume to Dashboard");
@@ -246,7 +246,7 @@ const ResumeEditor = () => {
           </button>
 
           <div className="h-6 w-px bg-gray-300 dark:bg-white/10 mx-1"></div>
-          <ThemeToggle />
+          
         </div>
       </div>
 

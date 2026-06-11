@@ -3,13 +3,37 @@ const {
   conceptExplainPrompt,
   questionAnswerPrompt,
 } = require("../utils/prompts");
+const Session = require("../models/Session");
+const Question = require("../models/Question");
 
-// Initialize Gemini with API key from .env
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// @desc    Generate interview questions and answers using Gemini
-// @route   POST /api/ai/generate-questions
-// @access  Private
+
+/**
+ * Generate interview questions and answers using the Gemini AI service.
+ * @route POST /api/ai/generate-questions
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required request fields are missing or Gemini fails.
+ * @example
+ * POST /api/ai/generate-questions
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "role": "Frontend Engineer",
+ *   "experience": "2 years",
+ *   "topicsToFocus": ["React", "JavaScript"],
+ *   "numberOfQuestions": 5
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "question": [
+ *     {"question": "Explain the virtual DOM.", "answer": "..."},
+ *     ...
+ *   ]
+ * }
+ */
 const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
@@ -18,24 +42,41 @@ const generateInterviewQuestions = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Build prompt
+    // Fetch questions the user has already seen for this role + topic
+    const pastSessions = await Session.find({
+      user: req.user._id,
+      role,
+      topicsToFocus,
+    }).select("questions");
+
+    const pastQuestionIds = pastSessions.flatMap((s) => s.questions);
+
+    const pastQuestions = await Question.find({
+      _id: { $in: pastQuestionIds },
+    }).select("question");
+
+    const seenQuestions = pastQuestions.map((q) => q.question);
+
+    // Build prompt with seen questions so Gemini avoids repeating them
     const prompt = questionAnswerPrompt({
       role,
       experience,
       topicsToFocus,
       numberOfQuestions,
+      seenQuestions,
     });
 
-    // Use stable Gemini model
     const candidateModels = [
       process.env.GEMINI_MODEL,
       "models/gemini-2.5-flash",
       "models/gemini-flash-latest",
       "models/gemini-2.0-flash",
     ].filter(Boolean);
+
     let lastErr = null;
     let result = null;
     let usedModel = null;
+
     for (const m of candidateModels) {
       try {
         console.log(`Trying model: ${m}`);
@@ -50,32 +91,31 @@ const generateInterviewQuestions = async (req, res) => {
         continue;
       }
     }
+
     if (!result) throw lastErr || new Error("All Gemini models failed");
 
     const rawText = await result.response.text();
-    // Robustly clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
     let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "") // remove all leading ```json or ```
-      .replace(/(\s*```\s*)+$/i, "") // remove all trailing ```
+      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+      .replace(/(\s*```\s*)+$/i, "")
       .trim();
 
     try {
       const data = JSON.parse(cleanedText);
-      // Handle array response (questions) vs object response
       if (Array.isArray(data)) {
         res.status(200).json({ model: usedModel, question: data });
       } else {
         res.status(200).json({ model: usedModel, ...data });
       }
     } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText); // Log the cleaned text
+      console.error("Gemini returned invalid JSON:", cleanedText);
       res.status(500).json({
         message: "Gemini returned invalid JSON",
         raw: rawText,
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error); // Log the error
+    console.error("Gemini API Error:", error);
     res.status(500).json({
       message: "Failed to generate questions",
       error: error.message,
@@ -83,9 +123,25 @@ const generateInterviewQuestions = async (req, res) => {
   }
 };
 
-// @desc    Generate explanation for a concept/question
-// @route   POST /api/ai/generate-explanation
-// @access  Private
+/**
+ * Generate an explanation for a technical concept or question.
+ * @route POST /api/ai/generate-explanation
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When the request is invalid or Gemini generation fails.
+ * @example
+ * POST /api/ai/generate-explanation
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "question": "What is a closure in JavaScript?"
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "explanation": "..."
+ * }
+ */
 const generateConceptExplanation = async (req, res) => {
   try {
     const { question } = req.body;

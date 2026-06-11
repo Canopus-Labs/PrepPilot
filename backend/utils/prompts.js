@@ -1,5 +1,10 @@
 
-const questionAnswerPrompt = ({ role, experience, topicsToFocus, numberOfQuestions }) => `
+const questionAnswerPrompt = ({ role, experience, topicsToFocus, numberOfQuestions, seenQuestions = [] }) => {
+  const avoidSection = seenQuestions.length > 0
+    ? `\nAvoid generating questions similar to these, which the user has already seen:\n${seenQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}\n`
+    : "";
+
+  return `
 You are an AI trained to generate technical interview questions and answers.
 
 Task:
@@ -12,6 +17,7 @@ Task:
     - If the answer naturally requires a code example, include exactly ONE short, simple code block.
     - Use basic markdown formatting (bold, italics, bullet points).
     - DO NOT generate excessively long explanations; the user will request more details separately if needed.
+${avoidSection}
 - Return a pure JSON array like:
 [
   {
@@ -23,6 +29,7 @@ Task:
 
 Important: Do NOT add any extra text. Only return valid JSON.
 `;
+};
 
 const conceptExplainPrompt = (question) => (`
 You are an AI trained to generate explanations for a given interview question.

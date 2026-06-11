@@ -2,6 +2,21 @@ const axios = require('axios');
 const FormData = require('form-data');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+/**
+ * Compile LaTeX resume code to a PDF document.
+ * @route POST /api/resume/compile
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When no LaTeX code is provided or compilation fails.
+ * @example
+ * POST /api/resume/compile
+ * {
+ *   "code": "\\documentclass{article}..."
+ * }
+ * @example
+ * 200 <PDF binary response>
+ */
 const compileResume = async (req, res) => {
     try {
         const { code } = req.body;
@@ -59,6 +74,28 @@ const compileResume = async (req, res) => {
     }
 }
 
+/**
+ * Analyze an uploaded PDF resume using Gemini and return structured feedback.
+ * @route POST /api/resume/analyze
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When no file is uploaded or AI analysis fails.
+ * @example
+ * POST /api/resume/analyze
+ * Content-Type: multipart/form-data
+ * resume: <file.pdf>
+ * targetRole: "Software Engineer"
+ * @example
+ * 200 {
+ *   "resumeScore": 85,
+ *   "roleMatch": 90,
+ *   "missingSkills": ["Docker"],
+ *   "missingProjects": ["Open Source Contributions"],
+ *   "atsCompatibility": {"status":"Good","remarks":"Document structure is parseable."},
+ *   "suggestions": ["Add a summary section."]
+ * }
+ */
 const analyzeResume = async (req, res) => {
     try {
         if (!req.file) {
@@ -148,6 +185,24 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
 
 const Resume = require("../models/Resume");
 
+/**
+ * Save or update a user's resume record.
+ * @route POST /api/resume/save
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required fields are missing or save fails.
+ * @example
+ * POST /api/resume/save
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "title": "Senior Engineer Resume",
+ *   "latexCode": "\\documentclass{article}...",
+ *   "resumeId": "6426c5a5..." // optional for update
+ * }
+ * @example
+ * 200 {"success": true, "resume": {"_id":"...","title":"..."}}
+ */
 const saveResume = async (req, res) => {
     try {
         const { title, latexCode, resumeId } = req.body;
@@ -179,6 +234,19 @@ const saveResume = async (req, res) => {
     }
 };
 
+/**
+ * Retrieve saved resumes for the authenticated user.
+ * @route GET /api/resume/my-resumes
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When retrieval fails.
+ * @example
+ * GET /api/resume/my-resumes
+ * Authorization: Bearer eyJhb...
+ * @example
+ * 200 {"success": true, "resumes": [{"_id":"...","title":"...","latexCode":"..."}]}
+ */
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id || req.user.id;

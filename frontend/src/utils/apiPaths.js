@@ -4,10 +4,16 @@ export const BASE_URL =
 
 export const API_PATHS = {
     AUTH: {
-        REGISTER: "/api/auth/register", // Signup
-        LOGIN: "/api/auth/login", // Authenticate user & return JWT token
-        GET_PROFILE: "/api/auth/profile", // Get logged-in user details
-    },
+    REGISTER: "/api/auth/register",
+    LOGIN: "/api/auth/login",
+    VERIFY_EMAIL: "/api/auth/verify-email",
+    RESEND_VERIFICATION: "/api/auth/resend-verification",
+    GET_PROFILE: "/api/auth/profile",
+
+    UPDATE_PROFILE: "/api/auth/profile",
+    CHANGE_PASSWORD: "/api/auth/change-password",
+    DELETE_ACCOUNT: "/api/auth/delete-account",
+},
     IMAGE: {
         UPLOAD_IMAGE: "/api/auth/upload-image", // Upload profile picture
     },

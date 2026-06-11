@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import ThemeToggle from "../ThemeToggle";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
 import {
@@ -202,7 +201,6 @@ const Sidebar = () => {
 
   const renderNavItems = () => {
     return NAV_ITEMS.map((item) => {
-      // Handle header items with collapsible content
       if (item.isHeader) {
         return (
           <div key={item.id}>
@@ -249,7 +247,6 @@ const Sidebar = () => {
         );
       }
 
-      // Handle non-header items (like Dashboard)
       const isActive = location.pathname.startsWith(item.path);
       const Icon = item.icon;
 
@@ -303,12 +300,29 @@ const Sidebar = () => {
 
       {/* Bottom Actions */}
       <div className="p-4 border-t border-white/5 space-y-1">
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200">
+        <button
+          onClick={() => {
+            navigate("/settings");
+            setMobileMenuOpen(false);
+          }}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            location.pathname.startsWith("/settings")
+              ? "bg-violet-600/10 text-violet-400 font-semibold"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`}
+        >
           <Settings size={18} />
           Settings
         </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200">
-          <HelpCircle size={18} />
+        <button 
+          onClick={() => navigate("/support")}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
+            location.pathname === "/support"
+              ? "bg-violet-600/10 text-violet-400"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <HelpCircle size={18} className={location.pathname === "/support" ? "text-violet-400" : ""} />
           Help & Support
         </button>
 
@@ -339,7 +353,7 @@ const Sidebar = () => {
           </div>
 
           <div className="flex items-center gap-1">
-            <ThemeToggle />
+            
             {user && (
               <button
                 onClick={() => {
@@ -360,12 +374,10 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <div className="hidden md:block h-full shrink-0 z-20">
         <SidebarContent />
       </div>
 
-      {/* Mobile Top Bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#111827] border-b border-white/5 flex items-center justify-between px-4 z-40">
         <Link to="/" className="flex items-center gap-2">
           <h2 className="text-[20px] font-extrabold text-white tracking-tight">
@@ -380,7 +392,6 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div
@@ -393,10 +404,8 @@ const Sidebar = () => {
         </div>
       )}
 
-      {/* Spacer for mobile top bar so content doesn't tuck under */}
       <div className="md:hidden h-16 w-full shrink-0"></div>
 
-      {/* Login Modal */}
       <Modal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
