@@ -124,6 +124,13 @@ const SignUp = ({ setCurrentPage }) => {
   aria-invalid={!!error && !fullName}
   aria-describedby={error && !fullName ? "signup-error" : undefined}
 />
+          value={fullName}
+          onChange={({ target }) => setFullName(target.value)}
+          label="Full Name"
+          placeholder="John Doe"
+          type="text"
+          autoFocus
+        />
 
         {/* Email Input */}
         <Input

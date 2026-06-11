@@ -38,5 +38,10 @@ export const API_PATHS = {
         ANALYZE: "/api/resume/analyze", // AI Resume Analyzer via Gemini
         SAVE: "/api/resume/save", // Save resume to backend
         GET_ALL: "/api/resume/my-resumes", // Get all user's saved resumes
-    }
+    },
+    BOOKMARKS: {
+        ADD: "/api/bookmarks", // Create a bookmark
+        GET_ALL: "/api/bookmarks", // Get all user bookmarks (supports ?type, ?search, ?page, ?limit)
+        REMOVE: (id) => `/api/bookmarks/${id}`, // Remove a bookmark by ID
+    },
 };

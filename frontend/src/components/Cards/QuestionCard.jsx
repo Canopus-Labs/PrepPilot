@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { LuChevronDown, LuPin, LuPinOff, LuSparkles } from "react-icons/lu";
 import AIResponsePreview from '../../pages/InterviewPrep/components/AIResponsePreview';
+import BookmarkButton from "../BookmarkButton";
+import { RESOURCE_TYPES } from "../../constants/resourceTypes";
 
 const QuestionCard = ({
   question,
@@ -8,6 +10,7 @@ const QuestionCard = ({
   onLearnMore,
   isPinned,
   onTogglePin,
+  questionId,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -29,6 +32,15 @@ const QuestionCard = ({
         </div>
 
         <div className="flex items-center justify-start sm:ml-auto gap-3 shrink-0">
+          {questionId && (
+            <BookmarkButton
+              resourceId={questionId}
+              resourceType={RESOURCE_TYPES.AI_QUESTION}
+              title={question}
+              description={answer ? answer.substring(0, 200) : ""}
+              metadata={{ questionId }}
+            />
+          )}
           {onTogglePin && (
             <button
               className={`p-2 rounded-xl transition-colors duration-200 flex items-center justify-center ${

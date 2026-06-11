@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import BookmarkButton from "../BookmarkButton";
+import { RESOURCE_TYPES } from "../../constants/resourceTypes";
 
-const AptitudeQuestionCard = ({ question, options, answer }) => {
+const AptitudeQuestionCard = ({ question, options, answer, topic }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+
+  // Generate a stable ID from the question text for bookmarking
+  const resourceId = `apt-${question ? question.replace(/\s+/g, "-").substring(0, 60).toLowerCase() : Date.now()}`;
 
   const handleOptionClick = (opt) => {
     if (selectedOption !== null) return;
@@ -20,17 +25,27 @@ const AptitudeQuestionCard = ({ question, options, answer }) => {
 
   return (
     <div className="relative bg-white dark:bg-white/10 backdrop-blur-md border border-gray-200 dark:border-white/20 rounded-xl p-5 mb-4 shadow-sm hover:shadow-md transition-shadow duration-300">
-      {/* Expand button */}
-      <button
-        className="absolute top-4 right-4 text-gray-400 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <ChevronDown
-          className={`w-5 h-5 transform transition-transform duration-300 ${
-            isExpanded ? "rotate-180" : ""
-          }`}
+      {/* Action buttons */}
+      <div className="absolute top-4 right-4 flex items-center gap-1.5">
+        <BookmarkButton
+          resourceId={resourceId}
+          resourceType={RESOURCE_TYPES.APTITUDE}
+          title={question}
+          description={`Aptitude question${topic ? " — " + topic : ""}`}
+          metadata={{ options, answer, topic: topic || "" }}
+          className="!p-1.5"
         />
-      </button>
+        <button
+          className="text-gray-400 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <ChevronDown
+            className={`w-5 h-5 transform transition-transform duration-300 ${
+              isExpanded ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </div>
 
       {/* Question */}
       <div

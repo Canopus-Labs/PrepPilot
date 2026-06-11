@@ -20,6 +20,8 @@ import {
   Brain,
   Send,
 } from "lucide-react";
+import BookmarkButton from "../../components/BookmarkButton";
+import { RESOURCE_TYPES } from "../../constants/resourceTypes";
 
 // ──────────────────────────────────────────────
 // Static Sample Data
@@ -322,6 +324,14 @@ const ExperienceCard = ({ exp, onClick }) => (
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{exp.role}</p>
       </div>
+      <BookmarkButton
+        resourceId={`exp-${exp.id}`}
+        resourceType={RESOURCE_TYPES.INTERVIEW_EXPERIENCE}
+        title={`${exp.company} — ${exp.role}`}
+        description={exp.summary}
+        metadata={{ company: exp.company, role: exp.role, difficulty: exp.difficulty, offerReceived: exp.offerReceived, date: exp.date, color: exp.color }}
+        className="!p-1.5 shrink-0"
+      />
     </div>
 
     {/* Stats row */}
