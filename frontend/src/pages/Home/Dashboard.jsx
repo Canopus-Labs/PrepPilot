@@ -18,15 +18,23 @@ import { CARD_BG } from "../../utils/data";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ open: false, data: null });
 
   const fetchAllSessions = async () => {
+    setLoading(true);
+    setFetchError("");
     try {
       const response = await axiosInstance.get(API_PATHS.SESSION.GET_ALL);
       setSessions(response.data);
     } catch (error) {
       console.error("Error fetching sessions:", error);
+      setFetchError("Unable to load your interview sessions.");
+      toast.error("Failed to load sessions");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,7 +69,40 @@ const Dashboard = () => {
           </div>
 
           {/* Sessions Grid */}
-          {sessions.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
+                  key={item}
+                  className="min-h-[220px] rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-5 shadow-sm animate-pulse"
+                >
+                  <div className="h-5 w-2/3 rounded bg-gray-200 dark:bg-white/10 mb-4" />
+                  <div className="h-3 w-full rounded bg-gray-100 dark:bg-white/10 mb-2" />
+                  <div className="h-3 w-5/6 rounded bg-gray-100 dark:bg-white/10 mb-8" />
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="h-10 rounded-lg bg-gray-100 dark:bg-white/10" />
+                    <div className="h-10 rounded-lg bg-gray-100 dark:bg-white/10" />
+                  </div>
+                  <div className="h-9 w-28 rounded-full bg-gray-200 dark:bg-white/10" />
+                </div>
+              ))}
+            </div>
+          ) : fetchError ? (
+            <div className="flex flex-col items-center justify-center py-20 px-6 mt-8 text-center border border-red-200 dark:border-red-500/30 rounded-2xl bg-red-50/60 dark:bg-red-500/10 shadow-sm">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Could not load sessions
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 max-w-sm mb-6 text-sm leading-relaxed">
+                {fetchError} Please check your connection and try again.
+              </p>
+              <button
+                onClick={fetchAllSessions}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-lg font-medium shadow-sm hover:bg-violet-700 transition-colors duration-200"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : sessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sessions.map((data, index) => (
                 <SummaryCard
