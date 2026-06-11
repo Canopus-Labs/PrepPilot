@@ -31,7 +31,7 @@ const SignUp = ({ setCurrentPage }) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[@$!%*?&]/.test(password),
+    special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password),
   };
 
   const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
@@ -48,7 +48,7 @@ const SignUp = ({ setCurrentPage }) => {
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }
     if (!/[a-z]/.test(password)) { setError("Password must contain at least one lowercase letter."); return; }
     if (!/[0-9]/.test(password)) { setError("Password must contain at least one number."); return; }
-    if (!/[@$!%*?&]/.test(password)) { setError("Password must contain at least one special character (@$!%*?&)."); return; }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password)) { setError("Password must contain at least one special character (e.g. !@#$%^&*)."); return; }
 
     setError("");
     setLoading(true);
