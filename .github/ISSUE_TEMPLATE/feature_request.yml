@@ -1,0 +1,78 @@
+name: "🚀 Feature Request"
+description: "Suggest a new feature, enhancement, or project idea"
+title: "[Feature]: "
+labels: ["enhancement"]
+
+body:
+
+* type: markdown
+  attributes:
+  value: |
+  Have an idea to improve the project? We'd love to hear it!
+
+* type: textarea
+  id: feature-description
+  attributes:
+  label: "Feature/Project Proposal"
+  description: "Describe the feature, enhancement, or project idea."
+  placeholder: "I would like to propose..."
+  validations:
+  required: true
+
+* type: textarea
+  id: problem-solved
+  attributes:
+  label: "Problem Statement"
+  description: "What problem does this solve or what limitation does it address?"
+  placeholder: "Currently..."
+  validations:
+  required: true
+
+* type: textarea
+  id: proposed-solution
+  attributes:
+  label: "Proposed Solution"
+  description: "Describe your suggested solution."
+  placeholder: "The project could..."
+  validations:
+  required: true
+
+* type: textarea
+  id: alternatives
+  attributes:
+  label: "Alternatives Considered"
+  description: "Have you considered any alternative approaches?"
+  placeholder: "Another possible solution is..."
+
+* type: textarea
+  id: benefits
+  attributes:
+  label: "Benefits"
+  description: "How would this improve the project or user experience?"
+  placeholder: "This feature would..."
+
+* type: dropdown
+  id: priority
+  attributes:
+  label: "Priority"
+  description: "How impactful is this feature?"
+  options:
+  - Low
+  - Medium
+  - High
+
+* type: textarea
+  id: additional-context
+  attributes:
+  label: "Additional Context"
+  description: "Add mockups, screenshots, references, or any extra details."
+
+* type: checkboxes
+  id: checks
+  attributes:
+  label: "Checklist"
+  options:
+  - label: "I have searched existing issues and discussions before creating this request."
+  required: true
+  - label: "I am willing to work on this feature if it is approved."
+  required: false
