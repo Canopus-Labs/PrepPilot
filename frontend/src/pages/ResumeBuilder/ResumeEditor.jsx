@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Split from "react-split";
 import Editor from "@monaco-editor/react";
@@ -91,27 +91,33 @@ Hello World!
 \\end{document}`
 };
 
+const getTemplateTitle = (templateId) => {
+  if (templateId === "jakes-resume") return "Jake's Resume";
+  if (templateId === "deedy-cv") return "Deedy CV";
+  if (templateId === "harvard-pro") return "Harvard Professional";
+  if (templateId === "blank") return "Document";
+  return "Saved Resume";
+};
+
 const ResumeEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isTemplateResume = Boolean(TEMPLATE_CODE[id]);
   const [code, setCode] = useState(TEMPLATE_CODE[id] || TEMPLATE_CODE["blank"]);
+  const [resumeTitle, setResumeTitle] = useState(getTemplateTitle(id));
+  const [savedResumeId, setSavedResumeId] = useState(isTemplateResume ? null : id);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [isCompiling, setIsCompiling] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
-
-  // Initial Compile
-  useEffect(() => {
-    compileLatex();
-    // eslint-disable-next-line
-  }, []);
 
   const handleEditorChange = (value) => {
     setCode(value);
   };
 
-  const compileLatex = async () => {
-    if (!code.trim()) return;
+  const compileLatex = async (latexCode = code) => {
+    if (!latexCode.trim()) return;
     
     setIsCompiling(true);
     setError(null);
@@ -119,7 +125,7 @@ const ResumeEditor = () => {
     try {
       const response = await axiosInstance.post(
         API_PATHS.RESUME.COMPILE,
-        { code },
+        { code: latexCode },
         { responseType: 'blob' }
       );
 
@@ -130,8 +136,7 @@ const ResumeEditor = () => {
          throw new Error("LaTeX syntax error. Please check your code.");
       }
       
-      const newPdfUrl = URL.createObjectURL(blob);
-      setPdfUrl(newPdfUrl);
+      setPdfUrl(URL.createObjectURL(blob));
 
     } catch (err) {
       console.error(err);
@@ -154,25 +159,81 @@ const ResumeEditor = () => {
     }
   };
 
+  useEffect(() => {
+    const loadResume = async () => {
+      if (TEMPLATE_CODE[id]) {
+        const templateCode = TEMPLATE_CODE[id];
+        setCode(templateCode);
+        setResumeTitle(getTemplateTitle(id));
+        setSavedResumeId(null);
+        await compileLatex(templateCode);
+        return;
+      }
+
+      setIsLoadingResume(true);
+      setError(null);
+
+      try {
+        const response = await axiosInstance.get(API_PATHS.RESUME.GET_ONE(id));
+        const resume = response.data.resume;
+
+        setCode(resume.latexCode);
+        setResumeTitle(resume.title);
+        setSavedResumeId(resume._id);
+        await compileLatex(resume.latexCode);
+      } catch (err) {
+        console.error(err);
+        toast.error(err.response?.data?.message || "Failed to load saved resume");
+        setError("Unable to load this saved resume. Please go back and try again.");
+      } finally {
+        setIsLoadingResume(false);
+      }
+    };
+
+    loadResume();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [pdfUrl]);
+
   const downloadPdf = () => {
     if (!pdfUrl) return;
     const a = document.createElement("a");
     a.href = pdfUrl;
-    a.download = `resume_${id || 'draft'}.pdf`;
+    a.download = `${resumeTitle || "resume"}.pdf`;
     a.click();
   };
 
   const saveToDashboard = async () => {
     setIsSaving(true);
     try {
-      await axiosInstance.post(API_PATHS.RESUME.SAVE, {
-        title: id === "jakes-resume" ? "Jake's Resume" : id === "deedy-cv" ? "Deedy CV" : "Document",
-        latexCode: code
-      });
-      toast.success("Resume saved successfully!");
+      if (savedResumeId) {
+        const response = await axiosInstance.put(API_PATHS.RESUME.UPDATE(savedResumeId), {
+          title: resumeTitle,
+          latexCode: code
+        });
+
+        setResumeTitle(response.data.resume.title);
+        toast.success("Resume updated successfully!");
+      } else {
+        const response = await axiosInstance.post(API_PATHS.RESUME.SAVE, {
+          title: resumeTitle,
+          latexCode: code
+        });
+        const savedResume = response.data.resume;
+
+        setSavedResumeId(savedResume._id);
+        setResumeTitle(savedResume.title);
+        toast.success("Resume saved successfully!");
+        navigate(`/resume-builder/${savedResume._id}`, { replace: true });
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to save resume to Dashboard");
+      toast.error(err.response?.data?.message || "Failed to save resume to Dashboard");
     } finally {
       setIsSaving(false);
     }
@@ -196,15 +257,15 @@ const ResumeEditor = () => {
             <FileText size={18} className="text-violet-500" />
             <span className="font-semibold text-sm">main.tex</span>
             <span className="text-xs text-gray-400 ml-2 font-medium bg-gray-200 dark:bg-white/5 px-2 py-0.5 rounded-sm">
-              {id === "jakes-resume" ? "Jake's Resume" : id === "deedy-cv" ? "Deedy CV" : "Document"}
+              {resumeTitle}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={compileLatex}
-            disabled={isCompiling}
+            onClick={() => compileLatex()}
+            disabled={isCompiling || isLoadingResume}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-sm font-bold text-white shadow-sm transition-all ${
               isCompiling 
                 ? "bg-emerald-500/50 cursor-wait shadow-none" 
@@ -230,7 +291,7 @@ const ResumeEditor = () => {
 
           <button
             onClick={saveToDashboard}
-            disabled={!code || isCompiling || isSaving}
+            disabled={!code || isCompiling || isSaving || isLoadingResume}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-all ${
               isSaving
                 ? "bg-violet-500/50 cursor-wait shadow-none text-white"
@@ -242,7 +303,7 @@ const ResumeEditor = () => {
             ) : (
               <Save size={14} className="fill-current" />
             )}
-            Save to Dashboard
+            {savedResumeId ? "Save Changes" : "Save to Dashboard"}
           </button>
 
           <div className="h-6 w-px bg-gray-300 dark:bg-white/10 mx-1"></div>
@@ -293,9 +354,14 @@ const ResumeEditor = () => {
                Preview
              </div>
              <div className="flex-1 relative overflow-auto p-4 md:p-8 flex justify-center bg-[#525659] dark:bg-[#1a1a1a]">
-               {error ? (
+               {isLoadingResume ? (
+                 <div className="m-auto text-gray-400 dark:text-gray-500 flex flex-col items-center gap-3">
+                   <RefreshCw size={32} className="animate-spin text-gray-300 dark:text-gray-600" />
+                   <span className="font-medium tracking-wide">Loading saved resume...</span>
+                 </div>
+               ) : error ? (
                  <div className="w-full max-w-lg m-auto bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 p-4 rounded-xl text-red-600 dark:text-red-400 flex flex-col gap-2">
-                   <h4 className="font-bold flex items-center gap-2">⚠️ Compilation Error</h4>
+                   <h4 className="font-bold flex items-center gap-2">Compilation Error</h4>
                    <p className="text-sm font-medium whitespace-pre-wrap">{error}</p>
                  </div>
                ) : pdfUrl ? (

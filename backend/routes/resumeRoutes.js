@@ -1,9 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { compileResume, analyzeResume, saveResume, getMyResumes } = require('../controllers/resumeController');
+const {
+    compileResume,
+    analyzeResume,
+    saveResume,
+    getMyResumes,
+    getResumeById,
+    updateResume,
+    deleteResume
+} = require('../controllers/resumeController');
 const { protect } = require('../middlewares/authMiddleware');
+<<<<<<< HEAD
+const { uploadResume } = require('../middlewares/uploadMiddleware');
+=======
 const { upload, uploadResume } = require('../middlewares/uploadMiddleware');
 const { aiLimiter } = require('../middlewares/rateLimiter');
+>>>>>>> e3e9615988419aac90062a9c382f60ff9c5ef0b7
 
 // @route   POST /api/resume/compile
 // @desc    Compile LaTeX code to PDF
@@ -25,4 +37,20 @@ router.post('/save', protect, saveResume);
 // @access  Private
 router.get('/my-resumes', protect, getMyResumes);
 
+<<<<<<< HEAD
+// @route   GET /api/resume/:id
+// @desc    Get a saved resume owned by the logged-in user
+router.get('/:id', protect, getResumeById);
+
+// @route   PUT /api/resume/:id
+// @desc    Update a saved resume owned by the logged-in user
+router.put('/:id', protect, updateResume);
+
+// @route   DELETE /api/resume/:id
+// @desc    Delete a saved resume owned by the logged-in user
+router.delete('/:id', protect, deleteResume);
+
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> e3e9615988419aac90062a9c382f60ff9c5ef0b7

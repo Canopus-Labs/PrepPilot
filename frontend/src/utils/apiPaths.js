@@ -40,5 +40,8 @@ export const API_PATHS = {
         ANALYZE: "/api/resume/analyze", // AI Resume Analyzer via Gemini
         SAVE: "/api/resume/save", // Save resume to backend
         GET_ALL: "/api/resume/my-resumes", // Get all user's saved resumes
+        GET_ONE: (id) => `/api/resume/${id}`, // Get one saved resume
+        UPDATE: (id) => `/api/resume/${id}`, // Update a saved resume
+        DELETE: (id) => `/api/resume/${id}`, // Delete a saved resume
     }
 };

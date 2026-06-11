@@ -184,6 +184,19 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
 }
 
 const Resume = require("../models/Resume");
+const mongoose = require("mongoose");
+
+const getUserId = (req) => req.user._id || req.user.id;
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+const findOwnedResume = (resumeId, userId) => {
+    if (!isValidObjectId(resumeId)) {
+        return null;
+    }
+
+    return Resume.findOne({ _id: resumeId, user: userId });
+};
 
 /**
  * Save or update a user's resume record.
@@ -206,7 +219,7 @@ const Resume = require("../models/Resume");
 const saveResume = async (req, res) => {
     try {
         const { title, latexCode, resumeId } = req.body;
-        const userId = req.user._id || req.user.id;
+        const userId = getUserId(req);
 
         if (!title || !latexCode) {
             return res.status(400).json({ success: false, message: "Title and LaTeX code are required." });
@@ -214,11 +227,19 @@ const saveResume = async (req, res) => {
 
         let resume;
         if (resumeId) {
+            if (!isValidObjectId(resumeId)) {
+                return res.status(400).json({ success: false, message: "Invalid resume id." });
+            }
+
             resume = await Resume.findOneAndUpdate(
                 { _id: resumeId, user: userId },
                 { title, latexCode },
                 { new: true }
             );
+
+            if (!resume) {
+                return res.status(404).json({ success: false, message: "Resume not found." });
+            }
         } else {
             resume = await Resume.create({
                 user: userId,
@@ -249,7 +270,7 @@ const saveResume = async (req, res) => {
  */
 const getMyResumes = async (req, res) => {
     try {
-        const userId = req.user._id || req.user.id;
+        const userId = getUserId(req);
         const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
         res.status(200).json({ success: true, resumes });
     } catch (error) {
@@ -258,4 +279,102 @@ const getMyResumes = async (req, res) => {
     }
 };
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes };
+/**
+ * Retrieve a single saved resume for the authenticated user.
+ * @route GET /api/resume/:id
+ */
+const getResumeById = async (req, res) => {
+    try {
+        const resume = await findOwnedResume(req.params.id, getUserId(req));
+
+        if (!resume) {
+            return res.status(404).json({ success: false, message: "Resume not found." });
+        }
+
+        res.status(200).json({ success: true, resume });
+    } catch (error) {
+        console.error("Get Resume Error:", error);
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
+
+/**
+ * Update a saved resume for the authenticated user.
+ * @route PUT /api/resume/:id
+ */
+const updateResume = async (req, res) => {
+    try {
+        const { title, latexCode } = req.body;
+        const updates = {};
+
+        if (title !== undefined) {
+            if (typeof title !== "string" || !title.trim()) {
+                return res.status(400).json({ success: false, message: "Title cannot be empty." });
+            }
+            updates.title = title.trim();
+        }
+
+        if (latexCode !== undefined) {
+            if (typeof latexCode !== "string" || !latexCode.trim()) {
+                return res.status(400).json({ success: false, message: "LaTeX code cannot be empty." });
+            }
+            updates.latexCode = latexCode;
+        }
+
+        if (!Object.keys(updates).length) {
+            return res.status(400).json({ success: false, message: "No valid fields provided for update." });
+        }
+
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(404).json({ success: false, message: "Resume not found." });
+        }
+
+        const resume = await Resume.findOneAndUpdate(
+            { _id: req.params.id, user: getUserId(req) },
+            updates,
+            { new: true }
+        );
+
+        if (!resume) {
+            return res.status(404).json({ success: false, message: "Resume not found." });
+        }
+
+        res.status(200).json({ success: true, resume });
+    } catch (error) {
+        console.error("Update Resume Error:", error);
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
+
+/**
+ * Delete a saved resume for the authenticated user.
+ * @route DELETE /api/resume/:id
+ */
+const deleteResume = async (req, res) => {
+    try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(404).json({ success: false, message: "Resume not found." });
+        }
+
+        const resume = await Resume.findOneAndDelete({ _id: req.params.id, user: getUserId(req) });
+
+        if (!resume) {
+            return res.status(404).json({ success: false, message: "Resume not found." });
+        }
+
+        res.status(200).json({ success: true, message: "Resume deleted successfully." });
+    } catch (error) {
+        console.error("Delete Resume Error:", error);
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
+
+module.exports = {
+    compileResume,
+    analyzeResume,
+    saveResume,
+    getMyResumes,
+    getResumeById,
+    updateResume,
+    deleteResume
+};
