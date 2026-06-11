@@ -3,7 +3,11 @@ const assert = require("node:assert/strict");
 
 const router = require("../routes/authRoutes");
 const { protect } = require("../middlewares/authMiddleware");
-const { authLimiter, generalLimiter } = require("../middlewares/rateLimiter");
+const {
+  authLimiter,
+  generalLimiter,
+  sensitiveAuthLimiter,
+} = require("../middlewares/rateLimiter");
 const {
   getUserProfile,
   updateUserProfile,
@@ -58,22 +62,26 @@ test("PUT /profile includes protect and generalLimiter in order", () => {
   assert.ok(stack.indexOf(generalLimiter) < stack.indexOf(updateUserProfile));
 });
 
-test("PUT /change-password is reserved for the sensitive limiter phase", () => {
+test("PUT /change-password includes protect and sensitiveAuthLimiter in order", () => {
   const stack = getRouteStack("PUT", "/change-password");
 
   assert.ok(stack);
   assert.equal(stack.includes(protect), true);
   assert.equal(stack.includes(generalLimiter), false);
-  assert.ok(stack.indexOf(protect) < stack.indexOf(changePassword));
+  assert.equal(stack.includes(sensitiveAuthLimiter), true);
+  assert.ok(stack.indexOf(protect) < stack.indexOf(sensitiveAuthLimiter));
+  assert.ok(stack.indexOf(sensitiveAuthLimiter) < stack.indexOf(changePassword));
 });
 
-test("DELETE /delete-account is reserved for the sensitive limiter phase", () => {
+test("DELETE /delete-account includes protect and sensitiveAuthLimiter in order", () => {
   const stack = getRouteStack("DELETE", "/delete-account");
 
   assert.ok(stack);
   assert.equal(stack.includes(protect), true);
   assert.equal(stack.includes(generalLimiter), false);
-  assert.ok(stack.indexOf(protect) < stack.indexOf(deleteUserAccount));
+  assert.equal(stack.includes(sensitiveAuthLimiter), true);
+  assert.ok(stack.indexOf(protect) < stack.indexOf(sensitiveAuthLimiter));
+  assert.ok(stack.indexOf(sensitiveAuthLimiter) < stack.indexOf(deleteUserAccount));
 });
 
 test("POST /upload-image includes generalLimiter before the upload handler", () => {
