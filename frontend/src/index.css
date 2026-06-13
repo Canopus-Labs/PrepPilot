@@ -303,3 +303,18 @@ html.dark {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-left {
+  display: flex;
+  width: max-content;
+  animation: scroll-left 40s linear infinite;
+}
