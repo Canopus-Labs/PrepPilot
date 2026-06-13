@@ -6,6 +6,7 @@ import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import uploadImage from "../../utils/uploadimage";
 import toast from "react-hot-toast";
+import { getPasswordStrength } from "../../utils/passwordStrength";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -90,7 +91,7 @@ const Settings = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const passwordInfo = getPasswordStrength(newPassword);
   // Show / Hide Password Toggles
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -332,6 +333,14 @@ const Settings = () => {
       toast.error("New password and confirm password do not match");
       return;
     }
+    const { checks } = getPasswordStrength(newPassword);
+
+    const isValid = Object.values(checks).every(Boolean);
+
+    if (!isValid) {
+      toast.error("Password must meet all security requirements");
+      return;
+    }
     const saveToast = toast.loading("Updating password...");
     try {
       await axiosInstance.put(API_PATHS.AUTH.CHANGE_PASSWORD, {
@@ -371,6 +380,18 @@ const Settings = () => {
       setShowDeleteConfirm(false);
     }
   };
+  
+  const Requirement = ({ valid, text }) => (
+    <li className="flex items-center gap-2">
+      {valid ? (
+        <Check size={14} className="text-green-500" />
+      ) : (
+        <X size={14} className="text-red-500" />
+      )}
+
+      <span>{text}</span>
+    </li>
+  );
 
   return (
     <div className="flex flex-col lg:flex-row h-full min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-slate-200 transition-colors duration-300">
@@ -445,39 +466,39 @@ const Settings = () => {
       </div>
 
       {/* Mobile & Tablet Navigation */}
-<div className="block lg:hidden border-b border-slate-800 p-4">
-  <nav className="grid grid-cols-1 md:grid-cols-2 gap-3">
-    {[
-      {
-        id: "basic-info",
-        label: "Basic Info",
-        icon: <User size={18} />,
-      },
-      {
-        id: "profile-details",
-        label: "Profile Details",
-        icon: <FileText size={18} />,
-      },
-      {
-        id: "platform",
-        label: "Platform",
-        icon: <Sliders size={18} />,
-      },
-      {
-        id: "visibility",
-        label: "Visibility",
-        icon: <Lock size={18} />,
-      },
-      {
-        id: "accounts",
-        label: "Accounts",
-        icon: <Shield size={18} />,
-      },
-    ].map((item) => (
-      <button
-        key={item.id}
-        onClick={() => setActiveSection(item.id)}
-        className={`
+      <div className="block lg:hidden border-b border-slate-800 p-4">
+        <nav className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            {
+              id: "basic-info",
+              label: "Basic Info",
+              icon: <User size={18} />,
+            },
+            {
+              id: "profile-details",
+              label: "Profile Details",
+              icon: <FileText size={18} />,
+            },
+            {
+              id: "platform",
+              label: "Platform",
+              icon: <Sliders size={18} />,
+            },
+            {
+              id: "visibility",
+              label: "Visibility",
+              icon: <Lock size={18} />,
+            },
+            {
+              id: "accounts",
+              label: "Accounts",
+              icon: <Shield size={18} />,
+            },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`
           flex items-center justify-center gap-2
           rounded-xl h-14
           text-sm font-medium
@@ -489,20 +510,15 @@ const Settings = () => {
               : "bg-slate-900/40 text-slate-400 border border-slate-800 hover:bg-slate-800/60 hover:text-white"
           }
 
-          ${
-            item.id === "accounts"
-              ? "md:col-span-2"
-              : ""
-          }
+          ${item.id === "accounts" ? "md:col-span-2" : ""}
         `}
-      >
-        {item.icon}
-        <span>{item.label}</span>
-      </button>
-    ))}
-  </nav>
-</div>
-
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {/* Main Settings Content Area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 max-w-5xl w-full">
@@ -1283,6 +1299,56 @@ const Settings = () => {
                       </button>
                     </div>
                   </div>
+                  {newPassword && (
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Password Strength</span>
+                        <span>{passwordInfo.strength}</span>
+                      </div>
+
+                      <div className="h-2 rounded bg-slate-200 overflow-hidden">
+                        <div
+                          className={`h-full transition-all ${
+                            passwordInfo.strength === "Weak"
+                              ? "bg-red-500 w-1/3"
+                              : passwordInfo.strength === "Medium"
+                                ? "bg-yellow-500 w-2/3"
+                                : "bg-green-500 w-full"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {newPassword && (
+                    <ul className="mt-3 space-y-1 text-xs">
+                      <Requirement
+                        valid={passwordInfo.checks.minLength}
+                        text="Minimum 8 characters"
+                      />
+
+                      <Requirement
+                        valid={passwordInfo.checks.uppercase}
+                        text="At least one uppercase letter"
+                      />
+
+                      <Requirement
+                        valid={passwordInfo.checks.lowercase}
+                        text="At least one lowercase letter"
+                      />
+
+                      <Requirement
+                        valid={passwordInfo.checks.number}
+                        text="At least one number"
+                      />
+
+                      <Requirement
+                        valid={passwordInfo.checks.special}
+                        text="At least one special character"
+                      />
+                    </ul>
+                  )}
+
                   {/* Confirm Password */}
                   <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
                     <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">
