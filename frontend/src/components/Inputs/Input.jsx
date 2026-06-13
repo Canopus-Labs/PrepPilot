@@ -9,7 +9,7 @@ const Input = ({ value, onChange, label, placeholder, type }) => {
 
   return (
     <div className="mb-5 w-full min-w-0">
-      <label className="text-xs font-semibold text-gray-300 block mb-2">
+      <label className="text-sm font-semibold text-gray-700 block mb-2">
         {label}
       </label>
       <div className="relative flex items-center w-full min-w-0 group">
@@ -18,7 +18,7 @@ const Input = ({ value, onChange, label, placeholder, type }) => {
             type === "password" ? (showPassword ? "text" : "password") : type
           }
           placeholder={placeholder}
-          className="w-full min-w-0 bg-white/5 border border-white/15 hover:border-white/25 focus:border-violet-500/50 rounded-lg py-2.5 px-4 pr-10 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+          className="w-full min-w-0 bg-white border border-violet-300 hover:border-violet-400 focus:border-violet-500 rounded-lg py-2.5 px-4 pr-10 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
           value={value}
           onChange={(e) => onChange(e)}
         />

@@ -4,13 +4,22 @@ const { protect } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 
-// Save or update user sheet progress
+/**
+ * Save or update progress for a user sheet.
+ * @route POST /api/user/sheet-progress
+ */
 router.post('/sheet-progress', protect, saveProgress);
 
-// Get user sheet progress for a specific sheet
+/**
+ * Get progress for a specific user sheet.
+ * @route GET /api/user/sheet-progress/:sheetId
+ */
 router.get('/sheet-progress/:sheetId', protect, getProgress);
 
-// Get all sheet progress for the logged-in user
+/**
+ * Get all sheet progress records for the authenticated user.
+ * @route GET /api/user/sheet-progress
+ */
 router.get('/sheet-progress', protect, require('../controllers/userSheetProgressController').getAllProgress);
 
 module.exports = router;

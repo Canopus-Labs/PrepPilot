@@ -1,6 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
+import Button from "../../components/Button/Button";
 import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosinstance";
@@ -9,13 +10,27 @@ import { UserContext } from "../../context/userContext";
 import uploadImage from "../../utils/uploadimage";
 import { LuArrowRight } from "react-icons/lu";
 
-const SignUp = ({ setCurrentPage }) => {
+const SignUp = ({ setCurrentPage, setHasUnsavedAuthData, }) => {
   const [profilePic, setProfilePic] = useState(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setHasUnsavedAuthData(
+      Boolean(fullName || email || password || profilePic)
+    );
+  
+    return () => setHasUnsavedAuthData(false);
+  }, [
+    fullName,
+    email,
+    password,
+    profilePic,
+    setHasUnsavedAuthData,
+  ]);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -33,8 +48,24 @@ const SignUp = ({ setCurrentPage }) => {
       setError("Please enter a valid email address");
       return;
     }
-    if (!password) {
-      setError("Please enter a password (min 8 characters)");
+    if (!password || password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError("Password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[a-z]/.test(password)) {
+      setError("Password must contain at least one lowercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      setError("Password must contain at least one number.");
+      return;
+    }
+    if (!/[@$!%*?&]/.test(password)) {
+      setError("Password must contain at least one special character (@$!%*?&).");
       return;
     }
     setError("");
@@ -132,23 +163,15 @@ const SignUp = ({ setCurrentPage }) => {
         )}
 
         {/* Sign Up Button */}
-        <button
+        <Button
           type="submit"
-          disabled={loading}
-          className="w-full mt-6 flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 group"
+          loading={loading}
+          loadingText="Creating account..."
+          icon={<LuArrowRight className="group-hover:translate-x-1 transition-transform" />}
+          className="mt-6"
         >
-          {loading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Creating account...
-            </>
-          ) : (
-            <>
-              Create Account
-              <LuArrowRight className="text-base group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        </button>
+          Create Account
+        </Button>
 
         {/* Login Link */}
         <div className="mt-6 pt-4 border-t border-white/10">

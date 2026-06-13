@@ -169,7 +169,7 @@ const ResumeEditor = () => {
         title: id === "jakes-resume" ? "Jake's Resume" : id === "deedy-cv" ? "Deedy CV" : "Document",
         latexCode: code
       });
-      toast.success("Resume saved to Dashboard!");
+      toast.success("Resume saved successfully!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to save resume to Dashboard");

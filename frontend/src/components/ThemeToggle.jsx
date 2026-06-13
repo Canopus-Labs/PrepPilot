@@ -11,11 +11,17 @@ const ThemeToggle = () => {
       style={{
         backgroundColor: theme === "dark" ? "rgba(55, 65, 81, 0.8)" : "rgba(229, 231, 235, 0.8)",
       }}
-      aria-label="Toggle theme"
-      title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+    aria-label={
+    theme === "light"
+      ? "Switch to dark mode"
+      : "Switch to light mode"
+    }
+    aria-pressed={theme === "dark"}
+    title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
       {theme === "light" ? (
         <svg
+          aria-hidden="true"
           className="w-5 h-5"
           style={{ color: "#1F2937" }}
           fill="none"
@@ -31,6 +37,7 @@ const ThemeToggle = () => {
         </svg>
       ) : (
         <svg
+          aria-hidden="true"
           className="w-5 h-5"
           style={{ color: "#FCD34D" }}
           fill="none"

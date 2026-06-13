@@ -39,15 +39,16 @@ export default function ServicesMarquee() {
           <div
             key={idx}
             className="min-w-[150px] sm:min-w-[220px] md:min-w-[250px] 
-                       p-3 sm:p-6 rounded-xl border border-white/20 shadow-lg
-                       bg-white/10 backdrop-blur-md hover:bg-white/20 
-                       transition-all duration-300 flex-shrink-0"
+                       p-3 sm:p-6 rounded-xl shadow-lg flex-shrink-0
+                       bg-white/70 border border-slate-200 hover:bg-white/90
+                       dark:bg-white/5 dark:border-white/7 dark:hover:bg-white/10
+                       backdrop-blur-md transition-all duration-300"
             style={{ maxWidth: "100%" }}
           >
-            <h3 className="text-base sm:text-lg font-semibold text-white drop-shadow mb-1 sm:mb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white drop-shadow-sm mb-1 sm:mb-2">
               {service.title}
             </h3>
-            <p className="text-gray-100 text-xs sm:text-[12px]">
+            <p className="text-slate-600 dark:text-gray-300 text-xs sm:text-[12px]">
               {service.description}
             </p>
           </div>

@@ -1,11 +1,13 @@
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
 import { useNavigate } from "react-router-dom";
+
 import {
   LuSparkles,
   LuChevronRight,
   LuArrowRight,
+  LuArrowUp,
   LuUsers,
 } from "react-icons/lu";
 import { VscGitMerge } from "react-icons/vsc";
@@ -16,6 +18,7 @@ import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
 import ThemeToggle from "./components/ThemeToggle";
+import { useTheme } from "./context/themeContext";
 
 /* ─────────────────────────────────────────────
    Reusable animated section wrapper
@@ -44,8 +47,8 @@ const HowStep = ({ step, active, onClick, index }) => (
     whileHover={{ x: 4 }}
     className={`w-full text-left p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden group ${
       active
-        ? "border-violet-500/70 bg-gradient-to-br from-violet-500/15 to-violet-900/20 shadow-lg shadow-violet-500/20"
-        : "border-white/10 bg-white/5 hover:border-violet-400/40 hover:bg-white/10"
+        ? "border-violet-500 bg-gradient-to-br from-violet-500/10 to-violet-600/5 shadow-md shadow-violet-500/10 dark:border-violet-500/70 dark:bg-gradient-to-br dark:from-violet-500/15 dark:to-violet-900/20 dark:shadow-lg dark:shadow-violet-500/20"
+        : "border-slate-200 bg-slate-50 hover:border-violet-400/40 hover:bg-slate-100/80 dark:border-white/10 dark:bg-white/5 dark:hover:border-violet-400/40 dark:hover:bg-white/10"
     }`}
   >
     {/* Animated background gradient on hover */}
@@ -67,7 +70,7 @@ const HowStep = ({ step, active, onClick, index }) => (
         className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
           active
             ? "bg-gradient-to-br from-violet-500 to-violet-700 text-white"
-            : "bg-white/10 text-gray-400 group-hover:bg-violet-500/20 group-hover:text-violet-300"
+            : "bg-black/5 dark:bg-white/10 text-slate-500 dark:text-gray-400 group-hover:bg-violet-500/20 group-hover:text-violet-600 dark:group-hover:text-violet-300"
         }`}
       >
         {step.id}
@@ -75,7 +78,7 @@ const HowStep = ({ step, active, onClick, index }) => (
       <div className="flex-1">
         <span
           className={`font-bold text-sm sm:text-base transition-colors block ${
-            active ? "text-white" : "text-gray-300 group-hover:text-white"
+            active ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-gray-300 group-hover:text-slate-900 dark:group-hover:text-white"
           }`}
         >
           {step.title}
@@ -89,8 +92,8 @@ const HowStep = ({ step, active, onClick, index }) => (
         transition={{ duration: 0.3 }}
         className={`ml-auto flex-shrink-0 ${
           active
-            ? "text-violet-400"
-            : "text-gray-500 group-hover:text-violet-300"
+            ? "text-violet-600 dark:text-violet-400"
+            : "text-slate-400 dark:text-gray-500 group-hover:text-violet-600 dark:group-hover:text-violet-300"
         }`}
       >
         <LuChevronRight />
@@ -107,7 +110,7 @@ const HowStep = ({ step, active, onClick, index }) => (
           transition={{ duration: 0.32, ease: "easeOut" }}
           className="overflow-hidden relative z-10"
         >
-          <p className="text-sm text-gray-300 pl-6 leading-relaxed">
+          <p className="text-sm text-slate-600 dark:text-gray-300 pl-6 leading-relaxed">
             {step.description}
           </p>
         </motion.div>
@@ -125,8 +128,10 @@ const LandingPage = () => {
 
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [currentPage, setCurrentPage] = useState("login");
+  const [hasUnsavedAuthData, setHasUnsavedAuthData] = useState(false);
   const [pendingRoute, setPendingRoute] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleCTA = () => {
     if (!user) {
@@ -152,13 +157,31 @@ const LandingPage = () => {
       navigate(route);
     }
   };
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <>
       {/* ══════════════════════════════════════
           PAGE WRAPPER – dark bg + dot grid
       ══════════════════════════════════════ */}
-      <div className="w-full min-h-screen bg-gray-950 dark:bg-gray-950 text-white relative overflow-hidden selection:bg-violet-700/40">
+      <div className="w-full min-h-screen bg-slate-50 dark:bg-gray-950 text-slate-900 dark:text-white relative overflow-hidden selection:bg-violet-700/40">
         {/* Ambient glow blobs */}
         <div className="pointer-events-none absolute top-[-200px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-violet-600/15 rounded-full blur-[120px]" />
         <div className="pointer-events-none absolute top-[40%] right-[-150px] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px]" />
@@ -172,15 +195,7 @@ const LandingPage = () => {
         >
           {/* Floating pill – true glassmorphism: ~40% opacity + strong blur */}
           <div
-            className="max-w-[1200px] mx-auto flex items-center justify-between gap-6 px-5 sm:px-7 rounded-full"
-            style={{
-              height: "64px",
-              background: "rgba(0,0,0,0.40)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              boxShadow: "0 2px 24px 0 rgba(0,0,0,0.30)",
-            }}
+            className="max-w-[1200px] mx-auto flex items-center justify-between gap-6 px-5 sm:px-7 rounded-full h-16 bg-white/40 dark:bg-black/40 border border-black/10 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-black/30 backdrop-blur-md"
           >
             {/* Logo – with PrepPilot-Logo.png */}
             <div className="flex items-center gap-2.5 flex-shrink-0">
@@ -189,7 +204,7 @@ const LandingPage = () => {
                 alt="PrepPilot Logo"
                 className="w-8 h-8 object-contain"
               />
-              <span className="font-bold text-[15px] text-white tracking-tight whitespace-nowrap">
+              <span className="font-bold text-[15px] text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
                 PrepPilot <span className="text-violet-400">AI</span>
               </span>
             </div>
@@ -200,7 +215,7 @@ const LandingPage = () => {
                 <button
                   key={item.route}
                   onClick={() => handleNav(item.route)}
-                  className="px-3.5 py-2 text-sm text-gray-300 hover:text-white transition-colors duration-150 whitespace-nowrap"
+                  className="px-3.5 py-2 text-sm text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 whitespace-nowrap"
                 >
                   {item.label}
                 </button>
@@ -217,11 +232,7 @@ const LandingPage = () => {
                   {/* Login – outlined dark button (like opensox "Contribute") */}
                   <button
                     onClick={() => setOpenAuthModal(true)}
-                    className="hidden sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
-                    style={{
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                    }}
+                    className="hidden sm:flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl transition-all duration-150 text-slate-700 hover:text-slate-900 bg-black/5 border border-black/10 hover:bg-black/10 dark:text-gray-200 dark:hover:text-white dark:bg-white/5 dark:border-white/12 dark:hover:bg-white/10"
                   >
                     <VscGitMerge className="text-base" />
                     Login
@@ -268,7 +279,7 @@ const LandingPage = () => {
           </FadeIn>
 
           <FadeIn delay={0.08}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
               Crack Every Interview with{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-blue-400">
                 AI‑Powered
@@ -278,7 +289,7 @@ const LandingPage = () => {
           </FadeIn>
 
           <FadeIn delay={0.15}>
-            <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
               Get role-specific questions, expand answers when you need them,
               dive deeper into concepts, and organize everything your way. From
               preparation to mastery—your ultimate interview toolkit is here.
@@ -296,13 +307,13 @@ const LandingPage = () => {
               </button>
               <button
                 onClick={() => navigate("/ai-helper")}
-                className="flex items-center gap-2 text-violet-300 border border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10 font-semibold px-8 py-3.5 rounded-full text-base transition-all duration-200"
+                className="flex items-center gap-2 text-violet-600 border border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10 dark:text-violet-300 dark:border-violet-500/40 dark:hover:bg-violet-500/10 font-semibold px-8 py-3.5 rounded-full text-base transition-all duration-200"
               >
                 <LuSparkles className="text-sm" />
                 Try AI Assistance
               </button>
             </div>
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-slate-500 dark:text-gray-500">
               No signup required for AI Assistance ✦ Free to explore
             </p>
           </FadeIn>
@@ -311,14 +322,14 @@ const LandingPage = () => {
         {/* ─────────────────────────────────
             STATS STRIP
         ───────────────────────────────── */}
-        <section className="relative border-y border-white/6 py-14 px-4">
+        <section className="relative border-y border-slate-200 dark:border-white/6 py-14 px-4">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
             {STATS.map((stat, i) => (
               <FadeIn key={stat.id} delay={i * 0.07} className="text-center">
                 <div className="stat-number text-4xl sm:text-5xl font-extrabold mb-1 tracking-tight">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-400 font-medium">
+                <div className="text-sm text-slate-600 dark:text-gray-400 font-medium">
                   {stat.label}
                 </div>
               </FadeIn>
@@ -329,7 +340,7 @@ const LandingPage = () => {
         {/* ─────────────────────────────────
             MARQUEE / SERVICES STRIP
         ───────────────────────────────── */}
-        <div className="border-b border-white/6 py-4">
+        <div className="border-b border-slate-200 dark:border-white/6 py-4">
           <ServicesMarquee />
         </div>
 
@@ -339,7 +350,7 @@ const LandingPage = () => {
         <section className="py-24">
           <div className="max-w-6xl mx-auto px-4 mb-8">
             <FadeIn className="text-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight">
                 Supercharge Your{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                   Interview Journey
@@ -353,11 +364,11 @@ const LandingPage = () => {
             {/* ── CARD 1: Personalized Recommendations ── */}
             <FadeIn delay={0.05}>
               <div
-                className="bento-card flex flex-col rounded-3xl overflow-hidden"
+                className="bento-card flex flex-col rounded-3xl overflow-hidden bg-white/70 border border-slate-200 dark:bg-[#0f0f14]/90 dark:border-white/8 shadow-sm backdrop-blur-sm"
                 style={{
                   background: "rgba(15,15,20,0.90)",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "600px",
+                  minHeight: "700px",
                 }}
               >
                 {/* Card interior – stacked list items */}
@@ -386,11 +397,7 @@ const LandingPage = () => {
                   ].map((item, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-4 px-5 py-4 rounded-xl"
-                      style={{
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                      }}
+                      className="flex items-center gap-4 px-5 py-4 rounded-xl bg-slate-50 border border-slate-200/60 dark:bg-white/5 dark:border-white/7"
                     >
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
@@ -399,20 +406,20 @@ const LandingPage = () => {
                         {item.icon}
                       </div>
                       <div>
-                        <p className="text-white text-base font-semibold leading-tight">
+                        <p className="text-slate-900 dark:text-white text-base font-semibold leading-tight">
                           {item.label}
                         </p>
-                        <p className="text-gray-500 text-sm mt-1">{item.sub}</p>
+                        <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">{item.sub}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 {/* Card footer – title + subtitle */}
                 <div className="px-10 pb-10 pt-4">
-                  <h3 className="text-white font-bold text-2xl mb-2">
+                  <h3 className="text-slate-900 dark:text-white font-bold text-2xl mb-2">
                     Personalized Recommendations
                   </h3>
-                  <p className="text-gray-400 text-base">
+                  <p className="text-slate-600 dark:text-gray-400 text-base">
                     Get curated prep tracks tailored to your target role and
                     experience level.
                   </p>
@@ -423,11 +430,11 @@ const LandingPage = () => {
             {/* ── CARD 2: AI-Powered Search (orbit hub) ── */}
             <FadeIn delay={0.12}>
               <div
-                className="bento-card flex flex-col rounded-3xl overflow-hidden"
+                className="bento-card flex flex-col rounded-3xl overflow-hidden bg-white/70 border border-slate-200 dark:bg-[#0f0f14]/90 dark:border-white/8 shadow-sm backdrop-blur-sm"
                 style={{
                   background: "rgba(15,15,20,0.90)",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "600px",
+                  minHeight: "723px",
                 }}
               >
                 {/* Orbit visual */}
@@ -465,15 +472,13 @@ const LandingPage = () => {
                   ].map((orb, i) => (
                     <div
                       key={i}
-                      className="absolute w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                      className="absolute w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-white border border-slate-200 dark:bg-[#1e1e28]/95 dark:border-white/12 shadow-md"
                       style={{
                         top: orb.top,
                         left: orb.left,
                         right: orb.right,
                         bottom: orb.bottom,
                         transform: orb.transform,
-                        background: "rgba(30,30,40,0.95)",
-                        border: "1px solid rgba(255,255,255,0.12)",
                         boxShadow: "0 0 12px rgba(139,92,246,0.2)",
                       }}
                     >
@@ -484,10 +489,8 @@ const LandingPage = () => {
                   {/* Center hub */}
                   <div className="relative z-10 flex items-center justify-center">
                     <div
-                      className="px-6 py-4 rounded-2xl text-white font-bold text-lg"
+                      className="px-6 py-4 rounded-2xl text-slate-900 dark:text-white font-bold text-lg bg-white border border-violet-500/30 dark:bg-[#14141c]/98 dark:border-violet-500/40"
                       style={{
-                        background: "rgba(20,20,28,0.98)",
-                        border: "1px solid rgba(139,92,246,0.4)",
                         boxShadow: "0 0 32px rgba(139,92,246,0.25)",
                       }}
                     >
@@ -497,10 +500,10 @@ const LandingPage = () => {
                 </div>
                 {/* Card footer */}
                 <div className="px-10 pb-10 pt-4">
-                  <h3 className="text-white font-bold text-2xl mb-2">
+                  <h3 className="text-slate-900 dark:text-white font-bold text-2xl mb-2">
                     Seamless AI Assistance
                   </h3>
-                  <p className="text-gray-400 text-base">
+                  <p className="text-slate-600 dark:text-gray-400 text-base">
                     Ask anything — get instant explanations, hints, and
                     deep-dive concept breakdowns.
                   </p>
@@ -511,22 +514,18 @@ const LandingPage = () => {
             {/* ── CARD 3: Precision Filters (tag chips) ── */}
             <FadeIn delay={0.2}>
               <div
-                className="bento-card flex flex-col rounded-3xl overflow-hidden"
+                className="bento-card flex flex-col rounded-3xl overflow-hidden bg-white/70 border border-slate-200 dark:bg-[#0f0f14]/90 dark:border-white/8 shadow-sm backdrop-blur-sm"
                 style={{
                   background: "rgba(15,15,20,0.90)",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "600px",
+                  minHeight: "723px",
                 }}
               >
                 {/* Filter chips interior */}
                 <div className="flex-1 p-8 flex flex-col gap-4">
                   {/* Difficulty group */}
                   <div
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
+                    className="rounded-2xl p-4 bg-slate-50 border border-slate-200/60 dark:bg-white/4 dark:border-white/7"
                   >
                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
                       🎚 Difficulty
@@ -534,10 +533,10 @@ const LandingPage = () => {
                     <div className="flex flex-wrap gap-2">
                       {["Easy", "Medium", "Hard", "Expert"].map((tag, i) => {
                         const colors = [
-                          "text-green-400 border-green-500/30 bg-green-500/10",
-                          "text-yellow-400 border-yellow-500/30 bg-yellow-500/10",
-                          "text-orange-400 border-orange-500/30 bg-orange-500/10",
-                          "text-red-400 border-red-500/30 bg-red-500/10",
+                          "text-green-600 border-green-500/30 bg-green-500/10 dark:text-green-400",
+                          "text-yellow-600 border-yellow-500/30 bg-yellow-500/10 dark:text-yellow-400",
+                          "text-orange-600 border-orange-500/30 bg-orange-500/10 dark:text-orange-400",
+                          "text-red-600 border-red-500/30 bg-red-500/10 dark:text-red-400",
                         ];
                         return (
                           <span
@@ -553,11 +552,7 @@ const LandingPage = () => {
 
                   {/* Role type group */}
                   <div
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
+                    className="rounded-2xl p-4 bg-slate-50 border border-slate-200/60 dark:bg-white/4 dark:border-white/7"
                   >
                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
                       💼 Role Type
@@ -567,7 +562,7 @@ const LandingPage = () => {
                         (tag) => (
                           <span
                             key={tag}
-                            className="text-sm font-semibold px-4 py-2 rounded-full border text-violet-300 border-violet-500/30 bg-violet-500/10"
+                            className="text-sm font-semibold px-4 py-2 rounded-full border text-violet-600 border-violet-500/30 bg-violet-500/10 dark:text-violet-300 dark:border-violet-500/30 dark:bg-violet-500/10"
                           >
                             {tag}
                           </span>
@@ -578,11 +573,7 @@ const LandingPage = () => {
 
                   {/* Tech stack group */}
                   <div
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
+                    className="rounded-2xl p-4 bg-slate-50 border border-slate-200/60 dark:bg-white/4 dark:border-white/7"
                   >
                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
                       🔧 Tech Stack
@@ -592,7 +583,7 @@ const LandingPage = () => {
                         (tag) => (
                           <span
                             key={tag}
-                            className="text-sm font-semibold px-4 py-2 rounded-full border text-blue-300 border-blue-500/30 bg-blue-500/10"
+                            className="text-sm font-semibold px-4 py-2 rounded-full border text-blue-600 border-blue-500/30 bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30 dark:bg-blue-500/10"
                           >
                             {tag}
                           </span>
@@ -603,10 +594,10 @@ const LandingPage = () => {
                 </div>
                 {/* Card footer */}
                 <div className="px-10 pb-10 pt-4">
-                  <h3 className="text-white font-bold text-2xl mb-2">
+                  <h3 className="text-slate-900 dark:text-white font-bold text-2xl mb-2">
                     Precision Filters
                   </h3>
-                  <p className="text-gray-400 text-base">
+                  <p className="text-slate-600 dark:text-gray-400 text-base">
                     Zero in on questions by difficulty, role type, and your tech
                     stack.
                   </p>
@@ -629,7 +620,7 @@ const LandingPage = () => {
               <span className="text-xs font-semibold tracking-widest text-violet-400 uppercase mb-3 block">
                 How it Works
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white">
                 Simple Steps to{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                   Interview Ready
@@ -682,11 +673,8 @@ const LandingPage = () => {
 
                         {/* Main card */}
                         <div
-                          className="relative rounded-3xl border overflow-hidden backdrop-blur-sm"
+                          className="relative rounded-3xl border overflow-hidden backdrop-blur-sm bg-white/80 border-slate-200 dark:bg-gradient-to-br dark:from-[rgba(20,15,40,0.95)] dark:to-[rgba(30,20,60,0.85)] dark:border-violet-500/30"
                           style={{
-                            background:
-                              "linear-gradient(135deg, rgba(20,15,40,0.95) 0%, rgba(30,20,60,0.85) 100%)",
-                            border: "1px solid rgba(139,92,246,0.3)",
                             boxShadow:
                               "0 20px 60px -20px rgba(139,92,246,0.18)",
                           }}
@@ -718,10 +706,10 @@ const LandingPage = () => {
                               transition={{ delay: 0.15 }}
                               className="space-y-4"
                             >
-                              <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
                                 {step.title}
                               </h3>
-                              <p className="text-gray-300 text-base leading-relaxed max-w-sm mx-auto">
+                              <p className="text-slate-600 dark:text-gray-300 text-base leading-relaxed max-w-sm mx-auto">
                                 {step.description}
                               </p>
                             </motion.div>
@@ -737,10 +725,7 @@ const LandingPage = () => {
                                 </span>
                               </div>
                               <div
-                                className="relative h-1.5 rounded-full overflow-hidden"
-                                style={{
-                                  background: "rgba(255,255,255,0.1)",
-                                }}
+                                className="relative h-1.5 rounded-full overflow-hidden bg-black/10 dark:bg-white/10"
                               >
                                 <motion.div
                                   initial={{ width: "0%" }}
@@ -799,13 +784,13 @@ const LandingPage = () => {
             <div className="w-[600px] h-[300px] bg-violet-600/15 rounded-full blur-[100px]" />
           </div>
           <FadeIn className="relative text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-5 leading-tight">
               Ready to Ace Your{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                 Next Interview?
               </span>
             </h2>
-            <p className="text-gray-400 mb-10 text-base sm:text-lg">
+            <p className="text-slate-600 dark:text-gray-400 mb-10 text-base sm:text-lg">
               Join thousands of learners who have transformed their interview
               preparation with PrepPilot AI.
             </p>
@@ -823,28 +808,99 @@ const LandingPage = () => {
         {/* ─────────────────────────────────
             FOOTER
         ───────────────────────────────── */}
-        <footer className="border-t border-white/6 py-8 px-4 text-center text-sm text-gray-500">
+        <footer className="border-t border-slate-200 dark:border-white/6 py-8 px-4 text-center text-sm text-gray-500">
           <div className="flex items-center justify-center gap-2 mb-2">
             <img
               src="/PrepPilot-Logo.png"
               alt="PrepPilot Logo"
               className="w-5 h-5 object-contain"
             />
-            <span className="font-semibold text-gray-400">PrepPilot AI</span>
+            <span className="font-semibold text-slate-700 dark:text-gray-400">PrepPilot AI</span>
           </div>
           <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
         </footer>
       </div>
+      {/* Premium Back To Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            onClick={scrollToTop}
+            initial={{
+              opacity: 0,
+              scale: 0.7,
+              y: 40,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.7,
+              y: 40,
+            }}
+            whileHover={{
+              scale: 1.08,
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.95,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+            className="fixed bottom-6 right-6 z-[9999]"
+            aria-label="Back To Top"
+          >
+            {/* Glow */}
+            <div className="absolute inset-0 bg-violet-600 rounded-full blur-xl opacity-40" />
 
+            {/* Button */}
+            <div
+              className="
+          relative
+          w-10
+          h-10
+          rounded-xl
+          flex
+          items-center
+          justify-center
+          text-white
+          border
+          border-white/10
+          backdrop-blur-xl
+        "
+              style={{
+                background:
+                  "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                boxShadow:
+                  "0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
+              }}
+            >
+              <LuArrowUp className="text-xl" />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
       {/* ─────────────────────────────────
           AUTH MODAL
       ───────────────────────────────── */}
       <Modal
         isOpen={openAuthModal}
         onClose={() => {
+          if (hasUnsavedAuthData) {
+            const confirmClose = window.confirm(
+              "You have unsaved form data. Are you sure you want to close?"
+            );
+        
+            if (!confirmClose) return;
+          }
+        
           setOpenAuthModal(false);
           setCurrentPage("login");
           setPendingRoute(null);
+          setHasUnsavedAuthData(false);
         }}
         hideHeader
       >
@@ -852,6 +908,7 @@ const LandingPage = () => {
           {currentPage === "login" && (
             <Login
               setCurrentPage={setCurrentPage}
+              setHasUnsavedAuthData={setHasUnsavedAuthData}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
                 if (pendingRoute) {
@@ -864,7 +921,9 @@ const LandingPage = () => {
             />
           )}
           {currentPage === "signup" && (
-            <SignUp setCurrentPage={setCurrentPage} />
+            <SignUp setCurrentPage={setCurrentPage} 
+            setHasUnsavedAuthData={setHasUnsavedAuthData}
+            />
           )}
         </div>
       </Modal>

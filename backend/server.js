@@ -1,4 +1,6 @@
 require("dotenv").config();
+const validateEnv = require("./config/validateEnv.js");
+validateEnv();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -19,7 +21,7 @@ const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 // Remove ES Module import for cors. Use CommonJS require below.
 const app = express();
 
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 // CORS settings: derive from env
 // FRONTEND_ORIGIN=primary production frontend
 // EXTRA_ORIGINS=comma separated additional origins (staging, preview, etc.)
@@ -37,12 +39,14 @@ const allowedOrigins = new Set(originEnvList);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   const renderPattern =
-    /^https:\/\/interview-prep(?:aration)?-ai-[a-z0-9-]+\.onrender\.com$/;
+    /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot-backend)-[a-z0-9-]+\.onrender\.com$/;
+  const localhostPattern =
+    /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
   if (
     origin &&
     (allowedOrigins.has(origin) ||
       renderPattern.test(origin) ||
-      /^http:\/\/127\.0\.0\.1:5\d{3}$/.test(origin))
+      localhostPattern.test(origin))
   ) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Vary", "Origin");
@@ -64,11 +68,17 @@ app.use((req, res, next) => {
 });
 
 connectDB()
-  .then(() => {
-    console.log("MongoDB connected successfully");
+  .then((success) => {
+    if (success) {
+      console.log("MongoDB connected successfully");
+    } else {
+      console.warn(
+        "⚠️ Failed to connect to MongoDB - server will run without database connection",
+      );
+    }
   })
   .catch((err) => {
-    console.error("MongoDB connection error:", err);
+    console.error("Database connection error:", err.message);
   });
 
 // middleware
@@ -84,7 +94,10 @@ const sheetJsonUpload = require("./routes/sheetJsonUpload");
 app.use("/api/sheets", generalLimiter, sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
 app.use("/api/user", generalLimiter, userSheetProgressRoutes);
+const achievementRoutes = require("./routes/achievementRoutes");
+app.use("/api/user", generalLimiter, achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
+const { required } = require("joi");
 app.use("/api/resume", generalLimiter, resumeRoutes);
 app.use(
   "/api/ai/generate-questions",
@@ -112,7 +125,7 @@ app.get("/api/test", (req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server connected and running on port ${PORT}`);
   if (process.env.NODE_ENV === "production") {
     console.log("Allowed CORS origins (production):");
@@ -133,4 +146,16 @@ server.on("error", (err) => {
   } else {
     console.error("Server error:", err);
   }
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
 });

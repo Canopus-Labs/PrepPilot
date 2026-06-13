@@ -7,9 +7,31 @@ const {
 // Initialize Gemini with API key from .env
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// @desc    Generate interview questions and answers using Gemini
-// @route   POST /api/ai/generate-questions
-// @access  Private
+/**
+ * Generate interview questions and answers using the Gemini AI service.
+ * @route POST /api/ai/generate-questions
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required request fields are missing or Gemini fails.
+ * @example
+ * POST /api/ai/generate-questions
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "role": "Frontend Engineer",
+ *   "experience": "2 years",
+ *   "topicsToFocus": ["React", "JavaScript"],
+ *   "numberOfQuestions": 5
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "question": [
+ *     {"question": "Explain the virtual DOM.", "answer": "..."},
+ *     ...
+ *   ]
+ * }
+ */
 const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
@@ -83,9 +105,25 @@ const generateInterviewQuestions = async (req, res) => {
   }
 };
 
-// @desc    Generate explanation for a concept/question
-// @route   POST /api/ai/generate-explanation
-// @access  Private
+/**
+ * Generate an explanation for a technical concept or question.
+ * @route POST /api/ai/generate-explanation
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When the request is invalid or Gemini generation fails.
+ * @example
+ * POST /api/ai/generate-explanation
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "question": "What is a closure in JavaScript?"
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "explanation": "..."
+ * }
+ */
 const generateConceptExplanation = async (req, res) => {
   try {
     const { question } = req.body;
