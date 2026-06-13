@@ -57,23 +57,9 @@ const registerUser = async (req, res) => {
         }
 
         const userExists = await User.findOne({ email });
-if (userExists) {
-    if (!userExists.isEmailVerified) {
-        // Resend a fresh verification email instead of rejecting
-        userExists.emailVerificationToken = crypto.randomBytes(32).toString("hex");
-        userExists.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await userExists.save();
-
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${userExists.emailVerificationToken}`;
-        await sendVerificationEmail(userExists.email, verificationUrl);
-
-        return res.status(200).json({
-            success: true,
-            message: "This email is already registered but not verified. We've resent the verification link to your inbox.",
-        });
-    }
-    return res.status(400).json({ success: false, message: "A user with this email already exists." });
-}
+        if (userExists) {
+            return res.status(400).json({ success: false, message: "A user with this email already exists." });
+        }
 
         // hash password
         const salt = await bcrypt.genSalt(10);
@@ -83,11 +69,11 @@ if (userExists) {
         const nameParts = name.trim().split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
-        
+
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // create new user
+        // Auto-verify user — email verification temporarily disabled
         const user = await User.create({
             name,
             email,
@@ -105,16 +91,19 @@ if (userExists) {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            emailVerificationToken: crypto.randomBytes(32).toString("hex"),
-            emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            isEmailVerified: true, // skip email verification until SMTP is configured
         });
-        // Build verification URL and send email
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
-        await sendVerificationEmail(user.email, verificationUrl);
 
-        res.status(201).json({
+        const token = generateToken(user._id);
+
+        return res.status(201).json({
             success: true,
-            message: "Account created. Please check your email to verify your account before logging in.",
+            message: "Account created successfully. You can now log in.",
+            token,
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
         console.error("Register error:", error.message);

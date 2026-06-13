@@ -5,9 +5,7 @@ import { modalVariants, backdropVariants } from "../../utils/animations";
 const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
 
     if (isOpen) {
@@ -44,9 +42,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
           >
             {!hideHeader && (
               <div className="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-white/10 pb-3">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {title}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
               </div>
             )}
 
@@ -60,7 +56,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
               ✕
             </button>
 
-            <div className="w-full overflow-y-auto scrollbar-hide">
+            <div className="w-full overflow-y-auto max-h-[90vh] pr-1">
               {children}
             </div>
           </motion.div>
