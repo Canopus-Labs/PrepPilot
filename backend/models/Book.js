@@ -40,10 +40,70 @@ const bookSchema = new mongoose.Schema(
       index: true,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
-// Index for frequently queried fields
+// ── Indexes ───────────────────────────────────────────────
 bookSchema.index({ name: "text" });
 
+// ── Virtuals ──────────────────────────────────────────────
+
+/** Human-readable file size (e.g. "2.50 MB") */
+bookSchema.virtual("sizeInMB").get(function () {
+  if (!this.size) return "0 MB";
+  return (this.size / (1024 * 1024)).toFixed(2) + " MB";
+});
+
+/** True if file exceeds 10 MB */
+bookSchema.virtual("isLargeFile").get(function () {
+  return this.size > 10 * 1024 * 1024;
+});
+
+// ── Pre-save Middleware ───────────────────────────────────
+
+/** Normalize category to lowercase before persisting */
+bookSchema.pre("save", function (next) {
+  if (this.isModified("category")) {
+    this.category = this.category.trim().toLowerCase();
+  }
+  next();
+});
+
+// ── Static Methods ────────────────────────────────────────
+
+/**
+ * Find books by category (case-insensitive).
+ * @param {string} category
+ */
+bookSchema.statics.findByCategory = function (category) {
+  return this.find({ category: category.trim().toLowerCase() });
+};
+
+/**
+ * Full-text search on book name.
+ * @param {string} query
+ */
+bookSchema.statics.findByName = function (query) {
+  return this.find(
+    { $text: { $search: query } },
+    { score: { $meta: "textScore" } },
+  ).sort({ score: { $meta: "textScore" } });
+};
+
+// ── Instance Methods ──────────────────────────────────────
+
+/**
+ * Returns a lean object safe for API responses (strips __v).
+ */
+bookSchema.methods.toSafeObject = function () {
+  const obj = this.toObject();
+  delete obj.__v;
+  return obj;
+};
+
+// ─────────────────────────────────────────────────────────
 module.exports = mongoose.model("Book", bookSchema);
