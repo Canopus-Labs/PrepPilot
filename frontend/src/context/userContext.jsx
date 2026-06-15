@@ -14,25 +14,32 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         if (user) return;
 
-        const accessToken = localStorage.getItem("token");
+        const accessToken =
+  localStorage.getItem("token") ||
+  sessionStorage.getItem("token");
         if (!accessToken) {
             setLoading(false);
             return;
         }
 
-        const fetchUser = async () => {
-            try {
-                const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
-                setUser(response.data);
-                // Fetch all sheet progress for user
-                const progressRes = await axiosInstance.get("/api/user/sheet-progress");
-                setSheetProgress(progressRes.data.progressList || []);
-            } catch (error) {
-                clearUser();
-            } finally {
-                setLoading(false);
-            }
-        };
+ const fetchUser = async () => {
+    try {
+        const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
+        setUser(response.data);
+    } catch (error) {
+        clearUser(); // only logs out if AUTH fails 
+        return;
+    } finally {
+        setLoading(false);
+    }
+    try {
+        const progressRes = await axiosInstance.get("/api/user/sheet-progress");
+        setSheetProgress(progressRes.data.progressList || []);
+    } catch (error) {
+        console.error("Failed to load progress:", error);
+        toast.error("Failed to load progress. Please try again.");
+    }
+};
         fetchUser();
     }, []);
 
@@ -47,6 +54,7 @@ export const UserProvider = ({ children }) => {
         setUser(null);
         setSheetProgress([]);
         localStorage.removeItem("token");
+sessionStorage.removeItem("token");
     };
     // Optionally, add a function to refresh sheet progress
     const refreshSheetProgress = async () => {

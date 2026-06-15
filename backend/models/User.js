@@ -47,7 +47,12 @@ const UserSchema = new mongoose.Schema(
             notificationsEnabled: { type: Boolean, default: true }
         },
         
-        unlockedAchievements: { type: [String], default: [] }
+        unlockedAchievements: { type: [String], default: [] },
+
+        //Email Verification
+        isEmailVerified: { type: Boolean, default: false },
+        emailVerificationToken: { type: String, default: null },
+        emailVerificationExpires: { type: Date, default: null },
     },
     { timestamps: true }
 );

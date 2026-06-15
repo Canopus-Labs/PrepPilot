@@ -13,6 +13,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import VerifyEmail from "./pages/Auth/verifyEmail";
 import LandingPage from "./LandingPage";
 import Dashboard from "./pages/Home/Dashboard";
 import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
@@ -32,8 +33,9 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
-
+import NotFound from "./pages/NotFound";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) return null;
@@ -73,6 +75,16 @@ const App = () => {
                     <ErrorBoundary>
                       <PageTransition>
                         <Login />
+                      </PageTransition>
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/verify-email"
+                  element={
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <VerifyEmail />
                       </PageTransition>
                     </ErrorBoundary>
                   }
@@ -280,6 +292,14 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/support"
+                    element={
+                      <PageTransition>
+                        <HelpSupport />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
                     path="/settings"
                     element={
                       <ProtectedRoute>
@@ -290,6 +310,14 @@ const App = () => {
                     }
                   />
                 </Route>
+                <Route
+                 path="*"
+                 element={
+                    <PageTransition>
+                      <NotFound />
+                      </PageTransition>
+                    }
+                 />
               </Routes>
             </AnimatePresence>
           </Router>

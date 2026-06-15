@@ -1,6 +1,9 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const { sendVerificationEmail } = require("../utils/sendEmail");
+const { validatePassword } = require('../utils/passwordPolicy');
 
 /**
  * Generate a JWT token for the authenticated user.
@@ -18,66 +21,15 @@ const generateToken = (userId) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
-
-        if (!password || password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long."
-            });
-        }
-
-        if (!/[A-Z]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one uppercase letter."
-            });
-        }
-
-        if (!/[a-z]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one lowercase letter."
-            });
-        }
-
-        if (!/[0-9]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one number."
-            });
-        }
-
-        if (!/[@$!%*?&]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one special character (@$!%*?&)."
-            });
+        
+        const { valid, errors } = validatePassword(password);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: errors[0] });
         }
 
         const userExists = await User.findOne({ email });
         if (userExists) {
-            return res.status(400).json({ success: false, message: "A user with this email already exists" });
-        }
-
-        // validate password strength
-        const passwordErrors = [];
-        if (password.length < 8) {
-            passwordErrors.push("Password must be at least 8 characters");
-        }
-        if (!/[A-Z]/.test(password)) {
-            passwordErrors.push("Password must contain at least one uppercase letter");
-        }
-        if (!/[a-z]/.test(password)) {
-            passwordErrors.push("Password must contain at least one lowercase letter");
-        }
-        if (!/\d/.test(password)) {
-            passwordErrors.push("Password must contain at least one digit");
-        }
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            passwordErrors.push("Password must contain at least one special character");
-        }
-        if (passwordErrors.length > 0) {
-            return res.status(400).json({ message: passwordErrors.join(". ") });
+            return res.status(400).json({ success: false, message: "A user with this email already exists." });
         }
 
         // hash password
@@ -88,11 +40,11 @@ const registerUser = async (req, res) => {
         const nameParts = name.trim().split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
-        
+
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // create new user
+        // Auto-verify user — email verification temporarily disabled
         const user = await User.create({
             name,
             email,
@@ -109,21 +61,23 @@ const registerUser = async (req, res) => {
                 workExperience: "",
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
-            platformPreferences: { theme: "light", notificationsEnabled: true }
+            platformPreferences: { theme: "light", notificationsEnabled: true },
+            isEmailVerified: true, // skip email verification until SMTP is configured
         });
 
-        // Return user data with JWT
-        res.status(201).json({
+        const token = generateToken(user._id);
+
+        return res.status(201).json({
+            success: true,
+            message: "Account created successfully. You can now log in.",
+            token,
             _id: user._id,
             name: user.name,
             email: user.email,
             profileImageUrl: user.profileImageUrl,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            prepPilotId: user.prepPilotId,
-            token: generateToken(user._id),
         });
     } catch (error) {
+        console.error("Register error:", error.message);
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
     }
 };
@@ -135,26 +89,109 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         const user = await User.findOne({ email });
-        if(!user){
-            return res.status(401).json({ success: false, message: "Invalid email or password provided" })
+        if (!user) {
+            return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
-        // compare password
+        // Verify password against stored hash
         const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch){
-            return res.status(401).json({ success: false, message: "Invalid email or password provided" });
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
-        // return user data with JWT
+        // Block login until email is verified
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                success: false,
+                message: "Please verify your email before logging in. Check your inbox for the verification link.",
+            });
+        }
+
         res.json({
-            _id:user._id,
-            name:user.name,
-            email:user.email,
-            profileImageUrl:user.profileImageUrl,
-            token:generateToken(user._id),
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            profileImageUrl: user.profileImageUrl,
+            token: generateToken(user._id),
         });
-    }catch(error){
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    }
+};
+
+/**
+ * Verify a user's email address via the token link sent to their inbox.
+ * @route GET /api/auth/verify-email
+ */
+const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({ success: false, message: "Verification token is missing." });
+        }
+
+        // Find user with matching token that hasn't expired yet
+        const user = await User.findOne({
+            emailVerificationToken: token,
+            emailVerificationExpires: { $gt: new Date() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "This verification link is invalid or has expired. Please register again.",
+            });
+        }
+
+        // Mark email as verified and clear the token fields
+        user.isEmailVerified = true;
+        user.emailVerificationToken = null;
+        user.emailVerificationExpires = null;
+        await user.save();
+
+        res.json({ success: true, message: "Email verified successfully. You can now log in." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    }
+};
+
+/**
+ * Resend verification email to an unverified user.
+ * @route POST /api/auth/resend-verification
+ */
+const resendVerificationEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email });
+
+        // Return success even if user not found — avoids exposing which emails are registered
+        if (!user) {
+            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
+        }
+
+        // If already verified, no need to resend
+        if (user.isEmailVerified) {
+            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
+        }
+
+        // Generate a fresh token and reset expiry to 24 hours from now
+        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await user.save();
+
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl);
+
+        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+    } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
     }
 };
@@ -324,4 +361,4 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+module.exports = { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };

@@ -3,12 +3,77 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { validateAiPrompt } = require("../middlewares/validateAiPrompt");
 const { sanitizeAiPrompt } = require("../middlewares/sanitizeAiPrompt");
 
+const NodeCache = require("node-cache");
+
+const questionCache = new NodeCache({
+  stdTTL: 3600,
+});
+
 const router = express.Router();
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const MAX_RETRIES = 3;
+const INITIAL_DELAY = 1000;
+
+function isRetryableError(error) {
+  const status = error?.status || error?.code;
+
+  return (
+    status === 429 ||
+    status === 503 ||
+    error?.message?.toLowerCase().includes("timeout") ||
+    error?.message?.toLowerCase().includes("network")
+  );
+}
+
+async function generateWithRetry(model, prompt) {
+  let lastError;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      return await model.generateContent([prompt]);
+    } catch (error) {
+      lastError = error;
+
+      if (!isRetryableError(error)) {
+        throw error;
+      }
+
+      if (attempt === MAX_RETRIES - 1) {
+        throw error;
+      }
+
+      const delay = INITIAL_DELAY * Math.pow(2, attempt);
+
+      console.warn(
+        `[Gemini Retry] Attempt ${attempt + 1}/${MAX_RETRIES} failed. Retrying in ${delay}ms`
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
 
 // GET /api/questions?topic=Probability
 router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
   const { topic } = req.query;
+  const cacheKey = `questions:${topic.toLowerCase()}`;
+
+const cachedQuestions =
+  questionCache.get(cacheKey);
+
+if (cachedQuestions) {
+  console.log(
+    `[Cache HIT] Topic: ${topic}`
+  );
+
+  return res.json(cachedQuestions);
+}
+
+console.log(
+  `[Cache MISS] Topic: ${topic}`
+);
   if (!topic) return res.status(400).json({ error: "Topic is required" });
 
   const prompt = `
@@ -42,22 +107,29 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
       try {
         console.log(`[Aptitude] Trying model: ${m}`);
         const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
+
+        result = await generateWithRetry(
+          model,
+          prompt
+        );
         usedModel = m;
         console.log(`[Aptitude] Successfully used model: ${m}`);
         break;
       } catch (e) {
-        console.error(`[Aptitude] Model ${m} failed:`, e.message);
+        console.error(
+          `[Aptitude] Model ${m} exhausted retries:`,
+          e.message
+        );
         lastErr = e;
         continue;
       }
     }
 
     if (!result) {
-        return res.status(500).json({ 
-            error: "Failed to generate questions. Gemini API Key is missing or invalid.", 
-            details: lastErr ? lastErr.message : "All Gemini models failed" 
-        });
+      return res.status(500).json({
+        error: "Failed to generate questions. Gemini API Key is missing or invalid.",
+        details: lastErr ? lastErr.message : "All Gemini models failed"
+      });
     }
 
     const rawText = await result.response.text();
@@ -80,7 +152,12 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
           raw: rawText,
         });
     }
-    res.json(questions);
+    questionCache.set(
+  cacheKey,
+  questions
+);
+
+res.json(questions);
   } catch (error) {
     console.error("Gemini API error:", error);
     res

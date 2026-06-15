@@ -295,3 +295,11 @@ html.dark {
   color: var(--color-text-light);
   box-shadow: 0 4px 24px 0 var(--color-accent-yellow);
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

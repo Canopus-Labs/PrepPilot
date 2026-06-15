@@ -258,7 +258,6 @@ PrepPilot/
 │   │   │   ├── SkillAssessment.jsx   # Skill tests
 │   │   │   ├── SheetList.jsx         # Question sheets list
 │   │   │   ├── SheetDetailsPage.jsx  # Sheet details view
-│   │   │   ├── ThemeToggle.jsx       # Dark/Light mode
 │   │   │   ├── Drawer.jsx            # Navigation drawer
 │   │   │   │
 │   │   │   ├── 📂 Cards/             # Card components
@@ -648,6 +647,16 @@ This project stands on the shoulders of amazing open-source projects and communi
 - [ ] Real interview connections
 - [ ] Job board integration
 - [ ] Company-specific preparation
+
+## 🙌 Thanks to Our Amazing Contributors
+
+We owe a huge thank you to the brilliant individuals who help build, refine, and maintain this Project! Every contribution—whether fixing a layout bug, optimization, or polishing documentation—makes a massive difference. 
+
+<a href="https://github.com/Canopus-Labs/PrepPilot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Canopus-Labs/PrepPilot" alt="Contributors Profile Pictures" />
+</a>
+
+
 
 ## 💬 Community & Support
 

@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import ThemeToggle from "../ThemeToggle";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
 import {
@@ -315,8 +314,15 @@ const Sidebar = () => {
           <Settings size={18} />
           Settings
         </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200">
-          <HelpCircle size={18} />
+        <button 
+          onClick={() => navigate("/support")}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
+            location.pathname === "/support"
+              ? "bg-violet-600/10 text-violet-400"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <HelpCircle size={18} className={location.pathname === "/support" ? "text-violet-400" : ""} />
           Help & Support
         </button>
 
@@ -347,7 +353,7 @@ const Sidebar = () => {
           </div>
 
           <div className="flex items-center gap-1">
-            <ThemeToggle />
+            
             {user && (
               <button
                 onClick={() => {
