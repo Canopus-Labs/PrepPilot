@@ -3,7 +3,7 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
-const { sanitizeAiPrompt } = require('../middlewares/sanitizeAiPrompt');
+const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 
 /**
  * Shared handler for text generation using Gemini.
