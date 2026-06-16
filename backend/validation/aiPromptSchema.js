@@ -1,6 +1,5 @@
 const Joi = require("joi");
 
-// Patterns used in prompt injection / jailbreak attempts
 const blockedPatterns = [
   /ignore previous instructions/i,
   /system prompt/i,
@@ -10,7 +9,18 @@ const blockedPatterns = [
   /pretend to be/i,
   /you are now/i,
   /<script.*?>.*?<\/script>/i,
+  /\bdan\b/i,
+  /developer mode/i,
+  /disregard all/i,
+  /ignore all instructions/i,
+  /forget previous/i,
+  /override instructions/i,
+  /you have no restrictions/i,
+  /act as if/i,
+  /simulate being/i,
+  /do anything now/i,
 ];
+
 
 // custom validator
 const safePrompt = (value, helpers) => {

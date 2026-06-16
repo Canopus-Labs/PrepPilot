@@ -17,6 +17,7 @@ import SignUp from "./pages/Auth/SignUp";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
+import { Star } from "lucide-react"; // Import Star icon for testimonials
 
 
 /* ─────────────────────────────────────────────
@@ -116,6 +117,116 @@ const HowStep = ({ step, active, onClick, index }) => (
       )}
     </AnimatePresence>
   </motion.button>
+);
+
+/* ─────────────────────────────────────────────
+   Testimonial Data
+───────────────────────────────────────────── */
+const TESTIMONIALS = [
+  {
+    id: 1,
+    name: "Sarah Chen",
+    role: "Software Engineer, Google",
+    rating: 5,
+    review: "PrepPilot AI was a game-changer for my Google interviews. The AI-generated questions were spot on, and the detailed explanations helped me understand complex topics deeply. Highly recommend!",
+    tags: ["DSA", "System Design", "Google"],
+    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+  },
+  {
+    id: 2,
+    name: "David Lee",
+    role: "Frontend Developer, Meta",
+    rating: 5,
+    review: "The UI design questions and React deep-dives were incredibly helpful for my Meta interview. The platform's ability to simulate real interview scenarios is unmatched.",
+    tags: ["Frontend", "React", "Meta"],
+    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+  },
+  {
+    id: 3,
+    name: "Priya Sharma",
+    role: "SDE-2, Amazon",
+    rating: 4,
+    review: "Amazon's LP questions are tricky, but PrepPilot's behavioral prep helped me structure my STAR stories perfectly. Landed the offer!",
+    tags: ["Behavioral", "Leadership Principles", "Amazon"],
+    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
+  },
+  {
+    id: 4,
+    name: "Michael Brown",
+    role: "Backend Engineer, Microsoft",
+    rating: 5,
+    review: "The OOP design questions and system design challenges were excellent. PrepPilot helped me refine my approach and articulate my solutions clearly.",
+    tags: ["OOP Design", "System Design", "Microsoft"],
+    avatar: "https://randomuser.me/api/portraits/men/4.jpg",
+  },
+  {
+    id: 5,
+    name: "Jessica Wong",
+    role: "Junior Developer",
+    rating: 4,
+    review: "As a fresher, I found the 'Easy' and 'Medium' DSA sheets invaluable. PrepPilot made learning fun and boosted my confidence for my first job.",
+    tags: ["DSA", "Entry Level", "Fresher"],
+    avatar: "https://randomuser.me/api/portraits/women/5.jpg",
+  },
+  {
+    id: 6,
+    name: "Omar Khan",
+    role: "DevOps Engineer",
+    rating: 5,
+    review: "The project ideas section gave me inspiration for my portfolio, and the compiler helped me practice coding challenges efficiently. Great tool!",
+    tags: ["DevOps", "Projects", "Coding"],
+    avatar: "https://randomuser.me/api/portraits/men/6.jpg",
+  },
+  {
+    id: 7,
+    name: "Emily White",
+    role: "Data Scientist",
+    rating: 4,
+    review: "Even for data science roles, the system design and problem-solving sections were beneficial. The AI explanations are a lifesaver!",
+    tags: ["Problem Solving", "AI", "Data Science"],
+    avatar: "https://randomuser.me/api/portraits/women/7.jpg",
+  },
+];
+
+/* ─────────────────────────────────────────────
+   Star Rating Component
+───────────────────────────────────────────── */
+const StarRating = ({ count }) => (
+  <div className="flex items-center gap-0.5">
+    {[1, 2, 3, 4, 5].map((n) => (
+      <Star
+        key={n}
+        size={14}
+        className={n <= count ? "text-amber-400 fill-amber-400" : "text-gray-600"}
+      />
+    ))}
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   Testimonial Card Component
+───────────────────────────────────────────── */
+const TestimonialCard = ({ testimonial }) => (
+  <div className="flex-none w-80 p-6 bg-white/5 border border-white/10 rounded-2xl shadow-lg flex flex-col gap-4">
+    <div className="flex items-center justify-between">
+      <StarRating count={testimonial.rating} />
+      <div className="flex flex-wrap gap-1">
+        {testimonial.tags.map((tag) => (
+          <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400">
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+    <p className="text-sm text-gray-300 leading-relaxed flex-1">"{testimonial.review}"</p>
+    <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/5">
+      <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 rounded-full object-cover border-2 border-violet-500/50" />
+      <div>
+        <p className="text-sm font-semibold text-white">{testimonial.name}</p>
+        <p className="text-xs text-gray-400">{testimonial.role}</p>
+      </div>
+    </div>
+  </div>
 );
 
 /* ─────────────────────────────────────────────
@@ -807,6 +918,39 @@ const LandingPage = () => {
                     ),
                   )}
                 </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────
+            TESTIMONIALS – auto-scrolling carousel
+        ───────────────────────────────── */}
+        <section className="py-24 px-4 border-t border-white/6 relative overflow-hidden">
+          <div className="max-w-6xl mx-auto relative z-10">
+            <FadeIn className="text-center mb-16">
+              <span className="text-xs font-semibold tracking-widest text-violet-400 uppercase mb-3 block">
+                What Our Users Say
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+                Trusted by{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
+                  Thousands of Developers
+                </span>
+              </h2>
+            </FadeIn>
+
+            {/* Testimonials Scroller */}
+            <div className="relative overflow-hidden py-8">
+              {/* Fading overlays */}
+              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
+
+              <div className="flex space-x-6 animate-scroll-left">
+                {/* Duplicate testimonials for seamless loop */}
+                {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
+                  <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
+                ))}
               </div>
             </div>
           </div>
