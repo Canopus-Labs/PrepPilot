@@ -5,6 +5,7 @@ const { sanitizeAiPrompt } = require("../middlewares/sanitizeAiPrompt");
 
 const router = express.Router();
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const GEMINI_TIMEOUT = parseInt(process.env.GEMINI_TIMEOUT, 10) || 30000;
 
 // GET /api/questions?topic=Probability
 router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
@@ -39,17 +40,28 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
     let usedModel = null;
 
     for (const m of candidateModels) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT);
       try {
         console.log(`[Aptitude] Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
+        const model = ai.getGenerativeModel({ model: m }, { signal: controller.signal });
         result = await model.generateContent([prompt]);
         usedModel = m;
         console.log(`[Aptitude] Successfully used model: ${m}`);
         break;
       } catch (e) {
+        if (e.name === "AbortError" || (e.message && e.message.includes("abort"))) {
+          const timeoutErr = new Error(`Gemini API call timed out after ${GEMINI_TIMEOUT}ms for model ${m}`);
+          timeoutErr.name = "TimeoutError";
+          console.error(`[Aptitude][Timeout] Model ${m} timed out:`, timeoutErr.message);
+          lastErr = timeoutErr;
+          break;
+        }
         console.error(`[Aptitude] Model ${m} failed:`, e.message);
         lastErr = e;
         continue;
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
@@ -83,6 +95,12 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
     res.json(questions);
   } catch (error) {
     console.error("Gemini API error:", error);
+    if (error.name === "TimeoutError") {
+      return res.status(504).json({
+        error: "Request timed out",
+        details: error.message,
+      });
+    }
     res
       .status(500)
       .json({ error: "Failed to generate questions", details: error.message });

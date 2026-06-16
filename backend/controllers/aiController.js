@@ -6,6 +6,7 @@ const {
 
 // Initialize Gemini with API key from .env
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const GEMINI_TIMEOUT = parseInt(process.env.GEMINI_TIMEOUT, 10) || 30000;
 
 // @desc    Generate interview questions and answers using Gemini
 // @route   POST /api/ai/generate-questions
@@ -37,17 +38,28 @@ const generateInterviewQuestions = async (req, res) => {
     let result = null;
     let usedModel = null;
     for (const m of candidateModels) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT);
       try {
         console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
+        const model = ai.getGenerativeModel({ model: m }, { signal: controller.signal });
         result = await model.generateContent([prompt]);
         usedModel = m;
         console.log(`Successfully used model: ${m}`);
         break;
       } catch (e) {
+        if (e.name === "AbortError" || (e.message && e.message.includes("abort"))) {
+          const timeoutErr = new Error(`Gemini API call timed out after ${GEMINI_TIMEOUT}ms for model ${m}`);
+          timeoutErr.name = "TimeoutError";
+          console.error(`[Timeout] Model ${m} timed out:`, timeoutErr.message);
+          lastErr = timeoutErr;
+          break;
+        }
         console.error(`Model ${m} failed:`, e.message);
         lastErr = e;
         continue;
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
     if (!result) throw lastErr || new Error("All Gemini models failed");
@@ -76,6 +88,12 @@ const generateInterviewQuestions = async (req, res) => {
     }
   } catch (error) {
     console.error("Gemini API Error:", error); // Log the error
+    if (error.name === "TimeoutError") {
+      return res.status(504).json({
+        message: "Request timed out",
+        error: error.message,
+      });
+    }
     res.status(500).json({
       message: "Failed to generate questions",
       error: error.message,
@@ -105,17 +123,28 @@ const generateConceptExplanation = async (req, res) => {
     let result = null;
     let usedModel = null;
     for (const m of candidateModels) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT);
       try {
         console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
+        const model = ai.getGenerativeModel({ model: m }, { signal: controller.signal });
         result = await model.generateContent([prompt]);
         usedModel = m;
         console.log(`Successfully used model: ${m}`);
         break;
       } catch (e) {
+        if (e.name === "AbortError" || (e.message && e.message.includes("abort"))) {
+          const timeoutErr = new Error(`Gemini API call timed out after ${GEMINI_TIMEOUT}ms for model ${m}`);
+          timeoutErr.name = "TimeoutError";
+          console.error(`[Timeout] Model ${m} timed out:`, timeoutErr.message);
+          lastErr = timeoutErr;
+          break;
+        }
         console.error(`Model ${m} failed:`, e.message);
         lastErr = e;
         continue;
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
     if (!result) throw lastErr || new Error("All Gemini models failed");
@@ -139,6 +168,12 @@ const generateConceptExplanation = async (req, res) => {
     }
   } catch (error) {
     console.error("Gemini API Error:", error);
+    if (error.name === "TimeoutError") {
+      return res.status(504).json({
+        message: "Request timed out",
+        error: error.message,
+      });
+    }
     res.status(500).json({
       message: "Failed to generate explanation",
       error: error.message,

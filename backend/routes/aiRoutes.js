@@ -5,6 +5,8 @@ const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const { sanitizeAiPrompt } = require('../middlewares/sanitizeAiPrompt');
 
+const GEMINI_TIMEOUT = parseInt(process.env.GEMINI_TIMEOUT, 10) || 30000;
+
 // Shared handler for text generation (used by multiple route aliases)
 async function generateHandler(req, res) {
   const { prompt } = req.body || {};
@@ -30,14 +32,25 @@ async function generateHandler(req, res) {
     let result = null;
     let usedModel = null;
     for (const m of candidateModels) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT);
       try {
-        const model = genAI.getGenerativeModel({ model: m });
+        const model = genAI.getGenerativeModel({ model: m }, { signal: controller.signal });
         result = await model.generateContent(prompt);
         usedModel = m;
         break;
       } catch (e) {
+        if (e.name === "AbortError" || (e.message && e.message.includes("abort"))) {
+          const timeoutErr = new Error(`Gemini API call timed out after ${GEMINI_TIMEOUT}ms for model ${m}`);
+          timeoutErr.name = "TimeoutError";
+          console.error(`[AI][Timeout] Model ${m} timed out:`, timeoutErr.message);
+          lastErr = timeoutErr;
+          break;
+        }
         lastErr = e;
         continue;
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
     if (!result) throw lastErr || new Error("All Gemini models failed");
@@ -58,6 +71,12 @@ async function generateHandler(req, res) {
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
     console.error("[AI] Generation failed:", error.message);
+    if (error.name === "TimeoutError") {
+      return res.status(504).json({
+        error: "Request timed out",
+        detail: error.message,
+      });
+    }
     return res
       .status(500)
       .json({ error: "Failed to generate content", detail: error.message });

@@ -59,6 +59,8 @@ const compileResume = async (req, res) => {
     }
 }
 
+const GEMINI_TIMEOUT = parseInt(process.env.GEMINI_TIMEOUT, 10) || 30000;
+
 const analyzeResume = async (req, res) => {
     try {
         if (!req.file) {
@@ -102,8 +104,10 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
         let result = null;
 
         for (const m of candidateModels) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT);
             try {
-                const model = genAI.getGenerativeModel({ model: m });
+                const model = genAI.getGenerativeModel({ model: m }, { signal: controller.signal });
                 result = await model.generateContent([
                     prompt,
                     {
@@ -115,8 +119,17 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
                 ]);
                 break; // Stop on first success
             } catch (e) {
+                if (e.name === "AbortError" || (e.message && e.message.includes("abort"))) {
+                    const timeoutErr = new Error(`Gemini API call timed out after ${GEMINI_TIMEOUT}ms for model ${m}`);
+                    timeoutErr.name = "TimeoutError";
+                    console.error(`[Timeout] Model ${m} timed out:`, timeoutErr.message);
+                    lastErr = timeoutErr;
+                    break;
+                }
                 lastErr = e;
                 continue;
+            } finally {
+                clearTimeout(timeoutId);
             }
         }
 
@@ -142,6 +155,12 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
 
     } catch (error) {
         console.error("Resume Analysis Error:", error);
+        if (error.name === "TimeoutError") {
+            return res.status(504).json({
+                message: "Request timed out",
+                error: error.message,
+            });
+        }
         res.status(500).json({ message: "Failed to analyze resume", error: error.message });
     }
 }
