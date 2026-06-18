@@ -52,6 +52,7 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState("basic-info");
   // Profile Photo Upload State
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const fileInputRef = useRef(null);
   // Form Fields State - Basic Info
   const [firstName, setFirstName] = useState("");
@@ -156,6 +157,28 @@ const Settings = () => {
       setUploadingPhoto(false);
     }
   };
+  const handleRemovePhoto = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove your profile picture?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await axiosInstance.put(API_PATHS.AUTH.UPDATE_PROFILE, {
+        profileImageUrl: null,
+      });
+
+      updateUser(response.data);
+
+      toast.success("Profile picture removed successfully");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to remove profile picture",
+      );
+    }
+  };
+
   // Handle Save Basic Info
   const handleSaveBasicInfo = async (e) => {
     e.preventDefault();
@@ -544,10 +567,7 @@ const Settings = () => {
 
                 {/* Photo uploader */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
-                  <div
-                    className="relative cursor-pointer group"
-                    onClick={handlePhotoClick}
-                  >
+                  <div className="relative group">
                     {user?.profileImageUrl ? (
                       <img
                         src={user.profileImageUrl}
@@ -559,10 +579,41 @@ const Settings = () => {
                         {user?.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
                     )}
+                    {showPhotoMenu && (
+                      <div className="absolute top-full left-0 mt-2 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPhotoMenu(false);
+                            handlePhotoClick();
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700"
+                        >
+                          Upload Photo
+                        </button>
+
+                        {user?.profileImageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowPhotoMenu(false);
+                              handleRemovePhoto();
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          >
+                            Remove Photo
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <button
                       type="button"
                       disabled={uploadingPhoto}
-                      className="absolute bottom-0 right-0 p-1.5 bg-blue-600 dark:bg-violet-600 text-white rounded-full hover:scale-105 transition-transform shadow-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPhotoMenu((prev) => !prev);
+                      }}
+                      className="absolute bottom-0 right-0 p-1.5 bg-blue-600 dark:bg-violet-600 rounded-full text-white shadow-lg"
                     >
                       <Pencil size={14} />
                     </button>
