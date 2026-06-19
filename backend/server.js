@@ -60,14 +60,16 @@ app.use((req, res, next) => {
       global.__rejectedCors.add(origin);
       console.warn("[CORS] Rejected origin:", origin);
     }
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(403);
+    }
   }
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     return res.sendStatus(200);
   }
   next();
-});
 
 connectDB()
   .then((success) => {
