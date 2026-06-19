@@ -127,6 +127,9 @@ const Dashboard = () => {
         <DeleteAlertContent
           content="Are you sure you want to delete this session?"
           onDelete={() => deleteSession(openDeleteAlert.data)}
+          onCancel={() =>
+            setOpenDeleteAlert({ open: false, data: null })
+          }
         />
       </Modal>
     </>
