@@ -52,6 +52,7 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState("basic-info");
   // Profile Photo Upload State
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const fileInputRef = useRef(null);
   // Form Fields State - Basic Info
   const [firstName, setFirstName] = useState("");
@@ -98,6 +99,7 @@ const Settings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // Modals
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
   // Populate user data
   useEffect(() => {
     if (user) {
@@ -156,6 +158,28 @@ const Settings = () => {
       setUploadingPhoto(false);
     }
   };
+  const handleRemovePhoto = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove your profile picture?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await axiosInstance.put(API_PATHS.AUTH.UPDATE_PROFILE, {
+        profileImageUrl: null,
+      });
+
+      updateUser(response.data);
+
+      toast.success("Profile picture removed successfully");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to remove profile picture",
+      );
+    }
+  };
+
   // Handle Save Basic Info
   const handleSaveBasicInfo = async (e) => {
     e.preventDefault();
@@ -362,7 +386,6 @@ const Settings = () => {
     const deleteToast = toast.loading("Deleting account...");
     try {
       await axiosInstance.delete(API_PATHS.AUTH.DELETE_ACCOUNT);
-
       toast.success("Account deleted permanently. Goodbye!", {
         id: deleteToast,
       });
@@ -378,9 +401,10 @@ const Settings = () => {
       });
     } finally {
       setShowDeleteConfirm(false);
+      setDeleteConfirmationText("");
     }
   };
-  
+
   const Requirement = ({ valid, text }) => (
     <li className="flex items-center gap-2">
       {valid ? (
@@ -464,7 +488,6 @@ const Settings = () => {
           </button>
         </nav>
       </div>
-
       {/* Mobile & Tablet Navigation */}
       <div className="block lg:hidden border-b border-slate-800 p-4">
         <nav className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -519,7 +542,6 @@ const Settings = () => {
           ))}
         </nav>
       </div>
-
       {/* Main Settings Content Area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 max-w-5xl w-full">
         {/* ================= BASIC INFO SECTION ================= */}
@@ -544,10 +566,7 @@ const Settings = () => {
 
                 {/* Photo uploader */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
-                  <div
-                    className="relative cursor-pointer group"
-                    onClick={handlePhotoClick}
-                  >
+                  <div className="relative group">
                     {user?.profileImageUrl ? (
                       <img
                         src={user.profileImageUrl}
@@ -559,10 +578,41 @@ const Settings = () => {
                         {user?.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
                     )}
+                    {showPhotoMenu && (
+                      <div className="absolute top-full left-0 mt-2 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPhotoMenu(false);
+                            handlePhotoClick();
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700"
+                        >
+                          Upload Photo
+                        </button>
+
+                        {user?.profileImageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowPhotoMenu(false);
+                              handleRemovePhoto();
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          >
+                            Remove Photo
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <button
                       type="button"
                       disabled={uploadingPhoto}
-                      className="absolute bottom-0 right-0 p-1.5 bg-blue-600 dark:bg-violet-600 text-white rounded-full hover:scale-105 transition-transform shadow-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPhotoMenu((prev) => !prev);
+                      }}
+                      className="absolute bottom-0 right-0 p-1.5 bg-blue-600 dark:bg-violet-600 rounded-full text-white shadow-lg"
                     >
                       <Pencil size={14} />
                     </button>
@@ -1415,35 +1465,58 @@ const Settings = () => {
       </div>
       {/* ================= DELETE CONFIRMATION MODAL ================= */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white dark:bg-[#0f172a] rounded-xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl p-6 animate-scaleIn">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Delete Account?
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Delete Account</h3>
+
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               Are you sure you want to delete your account? This action is
               permanent and cannot be undone. All your session data, progress
               tracker, and profile configurations will be deleted forever.
             </p>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                Type DELETE to confirm
+              </label>
+
+              <input
+                type="text"
+                value={deleteConfirmationText}
+                onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-sm"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
               <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-lg text-xs transition-colors cursor-pointer"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteConfirmationText("");
+                }}
+                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-4 py-2 rounded-lg"
               >
                 Cancel
               </button>
+
               <button
                 onClick={handleDeleteAccount}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg text-xs transition-colors cursor-pointer"
+                disabled={deleteConfirmationText !== "DELETE"}
+                className={`px-4 py-2 rounded-lg text-white ${
+                  deleteConfirmationText === "DELETE"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-red-300 cursor-not-allowed"
+                }`}
               >
                 Permanently Delete
               </button>
             </div>
           </div>
         </div>
-      )}
+      )}{" "}
     </div>
   );
 };
+
 export default Settings;

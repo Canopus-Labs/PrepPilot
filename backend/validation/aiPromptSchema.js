@@ -34,7 +34,7 @@ const safePrompt = (value, helpers) => {
 
 const aiPromptSchema = Joi.object({
   prompt: Joi.string()
-    .min(3)
+    .min(1)
     .max(500)
     .required()
     .custom(safePrompt, "Prompt Injection Protection"),

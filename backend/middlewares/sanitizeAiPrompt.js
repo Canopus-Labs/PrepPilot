@@ -1,5 +1,6 @@
 const sanitizeField = (value) => {
   if (typeof value !== "string") return value;
+
   return value
     .replace(/<[^>]*>?/gm, "")
     .replace(/[^\x20-\x7E\n]/g, "")
@@ -12,6 +13,7 @@ const sanitizeAiPrompt = (req, res, next) => {
     req.body.role = sanitizeField(req.body.role);
     req.body.topic = sanitizeField(req.body.topic);
   }
+
   next();
 };
 
