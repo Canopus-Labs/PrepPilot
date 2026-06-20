@@ -2,6 +2,7 @@ import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
 import React, { useContext, useState, useEffect } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   LuSparkles,
@@ -1050,7 +1051,7 @@ const LandingPage = () => {
     <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
       <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
       <div className="flex space-x-6">
-        <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
+        <a href="/privacy-policy" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
         <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
       </div>
     </div>
