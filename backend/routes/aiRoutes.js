@@ -25,7 +25,7 @@ const offTopicCache = new NodeCache({ stdTTL: 3600 });
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt, history = [] } = req.body || {};
+  const { prompt, history = [], systemInstruction } = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
   }
@@ -73,7 +73,7 @@ async function generateHandler(req, res) {
       try {
         const model = genAI.getGenerativeModel({ 
           model: m,
-          systemInstruction: `You are PrepPilot AI Mentor.
+          systemInstruction: systemInstruction || `You are PrepPilot AI Mentor.
 1. Allow friendly greetings and casual onboarding conversation.
 2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
 3. Politely redirect unrelated conversations.
@@ -106,6 +106,10 @@ async function generateHandler(req, res) {
     if (!result) throw lastErr || new Error("All Gemini models failed");
 
     const rawText = await result.response.text();
+    console.log("Incoming Prompt:", prompt);
+    console.log("Model Used:", usedModel);
+    console.log("Raw Gemini Response:", rawText);
+
     let cleanedText = rawText
       .replace(/^[\s`]*json\s*/i, "")
       .replace(/^\s*```/i, "")
