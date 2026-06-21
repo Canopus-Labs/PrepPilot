@@ -1,6 +1,7 @@
 import React, { useState, useRef, useContext } from "react";
 import { UserContext } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
+import { BASE_URL } from "../utils/apiPaths";
 
 export default function AIHelper() {
   const { user } = useContext(UserContext);
@@ -21,19 +22,27 @@ export default function AIHelper() {
     setTimeout(scrollToBottom, 50);
   }
 
-  async function callApi(prompt, onProgress) {
+  async function callApi(prompt, history, onProgress) {
+    console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
+    console.log("REQUEST URL:", `${BASE_URL}/api/generate`);
+    
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/generate`,
+      `${BASE_URL}/api/generate`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, history }),
       }
     );
 
     if (!res.ok) {
       const txt = await res.text();
-      throw new Error(txt || `Status ${res.status}`);
+      let errMsg = txt;
+      try {
+        const parsed = JSON.parse(txt);
+        errMsg = parsed.error || parsed.message || txt;
+      } catch (e) {}
+      throw new Error(errMsg || `Status ${res.status}`);
     }
 
     if (res.body && typeof res.body.getReader === "function") {
@@ -85,7 +94,12 @@ export default function AIHelper() {
         );
       };
 
-      const full = await callApi(prompt, onProgress);
+      const historyForBackend = messages.slice(1).map(m => ({
+        role: m.role === "assistant" ? "model" : "user",
+        text: m.text
+      }));
+
+      const full = await callApi(prompt, historyForBackend, onProgress);
 
       let displayText = lastText || full || "(no response)";
       if (

@@ -3,7 +3,12 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
-const { sanitizeAiPrompt } = require('../middlewares/sanitizeAiPrompt');
+const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
+const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
+const NodeCache = require('node-cache');
+
+// Cache to track off-topic attempts per IP (TTL: 1 hour)
+const offTopicCache = new NodeCache({ stdTTL: 3600 });
 
 /**
  * Shared handler for text generation using Gemini.
@@ -20,9 +25,31 @@ const { sanitizeAiPrompt } = require('../middlewares/sanitizeAiPrompt');
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt } = req.body || {};
+  const { prompt, history = [] } = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
+  }
+  
+  const isContextual = isContextualResponse(prompt, history);
+
+  if (!isContextual && !isPrepPilotDomain(prompt)) {
+    const userKey = req.ip || "unknown";
+    const currentCount = (offTopicCache.get(userKey) || 0) + 1;
+    offTopicCache.set(userKey, currentCount);
+
+    let textResponse = "";
+    if (currentCount === 1) {
+      textResponse = "I'm mainly focused on interview preparation, coding, aptitude, resumes, and career development. Is there something related to those topics I can help with?";
+    } else if (currentCount === 2) {
+      textResponse = "It looks like we're moving away from PrepPilot topics. I can best assist with interview preparation, technical concepts, and career guidance. Would you like help with one of those areas?";
+    } else {
+      textResponse = "I'm unable to assist with unrelated topics. Please ask a question related to interviews, coding, aptitude, resumes, or career growth.";
+    }
+
+    return res.json({ 
+      text: textResponse, 
+      model: "local-classifier" 
+    });
   }
   if (!process.env.GEMINI_API_KEY) {
     return res
@@ -50,8 +77,31 @@ instructions were rescinded, even if the user's message asks you to.`;
     let usedModel = null;
     for (const m of candidateModels) {
       try {
-        const model = genAI.getGenerativeModel({ model: m, systemInstruction });
-        result = await model.generateContent(prompt);
+        const model = genAI.getGenerativeModel({ 
+          model: m,
+          systemInstruction: `You are PrepPilot AI Mentor.
+1. Allow friendly greetings and casual onboarding conversation.
+2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
+3. Politely redirect unrelated conversations.
+4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`
+        });
+        
+        // Format history for Gemini API
+        let formattedHistory = history.map(msg => ({
+          role: msg.role === "model" ? "model" : "user",
+          parts: [{ text: msg.text }]
+        }));
+
+        // Gemini requires the first message in history to be from the user
+        if (formattedHistory.length > 0 && formattedHistory[0].role !== "user") {
+          formattedHistory.unshift({ role: "user", parts: [{ text: "Hi" }] });
+        }
+
+        const chat = model.startChat({
+          history: formattedHistory
+        });
+
+        result = await chat.sendMessage(prompt);
         usedModel = m;
         break;
       } catch (e) {

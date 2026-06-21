@@ -320,6 +320,11 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Original password and new password are required" });
         }
 
+        const { valid, errors } = validatePassword(newPassword);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: errors[0] });
+        }
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });

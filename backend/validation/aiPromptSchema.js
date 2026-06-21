@@ -1,9 +1,5 @@
 const Joi = require("joi");
 
-// Patterns used in prompt injection / jailbreak attempts.
-// This is a defense-in-depth layer, not the primary fix — the primary fix is
-// keeping user data out of the instruction segment entirely (see the
-// systemInstruction added to generateHandler in the routes file).
 const blockedPatterns = [
   /ignore (the )?(above|previous) instructions/i,
   /disregard (the )?(above|previous) instructions/i,
@@ -15,9 +11,21 @@ const blockedPatterns = [
   /you are now/i,
   /new instructions?:/i,
   /<script.*?>.*?<\/script>/i,
+  /\bdan\b/i,
+  /developer mode/i,
+  /disregard all/i,
+  /ignore all instructions/i,
+  /forget previous/i,
+  /override instructions/i,
+  /you have no restrictions/i,
+  /act as if/i,
+  /simulate being/i,
+  /do anything now/i,
 ];
 
-const noInjectionPatterns = (value, helpers) => {
+
+// custom validator
+const safePrompt = (value, helpers) => {
   for (const pattern of blockedPatterns) {
     if (pattern.test(value)) {
       return helpers.error("any.invalid");
@@ -45,22 +53,16 @@ const safePrompt = (value, helpers) => noInjectionPatterns(value, helpers);
 
 const aiPromptSchema = Joi.object({
   prompt: Joi.string()
-    .min(3)
-    .max(1000)
+    .min(1)
+    .max(500)
     .required()
     .custom(safePrompt, "Prompt Injection Protection"),
-
-  role: Joi.string()
-    .min(2)
-    .max(50)
-    .optional()
-    .custom(safeLabel, "Role Injection Protection"),
-
-  topic: Joi.string()
-    .min(2)
-    .max(100)
-    .optional()
-    .custom(safeLabel, "Topic Injection Protection"),
+  history: Joi.array().items(
+    Joi.object({
+      role: Joi.string().valid("user", "model").required(),
+      text: Joi.string().allow("").required()
+    })
+  ).optional()
 });
 
 module.exports = aiPromptSchema;

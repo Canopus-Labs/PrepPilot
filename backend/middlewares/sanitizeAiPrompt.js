@@ -1,23 +1,20 @@
-const sanitize = (value) =>
-  value
-    .replace(/<[^>]*>?/gm, "")      // remove HTML tags
-    .replace(/[^\x20-\x7E\n]/g, "") // remove hidden control chars
+const sanitizeField = (value) => {
+  if (typeof value !== "string") return value;
+
+  return value
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/[^\x20-\x7E\n]/g, "")
     .trim();
+};
 
 const sanitizeAiPrompt = (req, res, next) => {
-  if (req.body && typeof req.body.prompt === "string") {
-    req.body.prompt = sanitize(req.body.prompt);
-  }
-
-  if (req.body && typeof req.body.role === "string") {
-    req.body.role = sanitize(req.body.role);
-  }
-
-  if (req.body && typeof req.body.topic === "string") {
-    req.body.topic = sanitize(req.body.topic);
+  if (req.body) {
+    req.body.prompt = sanitizeField(req.body.prompt);
+    req.body.role = sanitizeField(req.body.role);
+    req.body.topic = sanitizeField(req.body.topic);
   }
 
   next();
 };
 
-module.exports = { sanitizeAiPrompt };
+module.exports = sanitizeAiPrompt;

@@ -35,6 +35,9 @@ axiosInstance.interceptors.response.use(
         // handle common error globally
         if(error.response){
             if(error.response.status === 401){
+                // Clear the invalid token from storage
+                localStorage.removeItem("token");
+                sessionStorage.removeItem("token");
                 //redirect to login page
                 window.location.href="/";
             }

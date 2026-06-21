@@ -31,6 +31,10 @@ const addQuestionToSession = async (req, res) => {
     if (!session) {
       return res.status(404).json({ success: false, message: "Requested session could not be found" });
     }
+
+    if (session.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
+    }
     const createdQuestions = await Question.insertMany(
       questions.map((q) => ({
         session: sessionId,
