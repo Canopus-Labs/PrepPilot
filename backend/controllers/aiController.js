@@ -2,12 +2,52 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const {
   conceptExplainPrompt,
   questionAnswerPrompt,
+  conceptExplainSystemInstruction,
+  questionAnswerSystemInstruction,
 } = require("../utils/prompts");
 const Session = require("../models/Session");
 const Question = require("../models/Question");
 
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+const CANDIDATE_MODELS = [
+  process.env.GEMINI_MODEL,
+  "models/gemini-2.5-flash",
+  "models/gemini-flash-latest",
+  "models/gemini-2.0-flash",
+].filter(Boolean);
+
+/**
+ * Try each candidate model in order with a given system instruction + prompt,
+ * returning the first successful result.
+ */
+const generateWithFallback = async (systemInstruction, prompt) => {
+  let lastErr = null;
+
+  for (const m of CANDIDATE_MODELS) {
+    try {
+      console.log(`Trying model: ${m}`);
+      const model = ai.getGenerativeModel({
+        model: m,
+        systemInstruction,
+      });
+      const result = await model.generateContent([prompt]);
+      console.log(`Successfully used model: ${m}`);
+      return { result, usedModel: m };
+    } catch (e) {
+      console.error(`Model ${m} failed:`, e.message);
+      lastErr = e;
+    }
+  }
+
+  throw lastErr || new Error("All Gemini models failed");
+};
+
+const stripCodeFences = (rawText) =>
+  rawText
+    .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+    .replace(/(\s*```\s*)+$/i, "")
+    .trim();
 
 /**
  * Generate interview questions and answers using the Gemini AI service.
@@ -57,7 +97,7 @@ const generateInterviewQuestions = async (req, res) => {
 
     const seenQuestions = pastQuestions.map((q) => q.question);
 
-    // Build prompt with seen questions so Gemini avoids repeating them
+    // Pure data payload — no instructions live here anymore
     const prompt = questionAnswerPrompt({
       role,
       experience,
@@ -66,39 +106,13 @@ const generateInterviewQuestions = async (req, res) => {
       seenQuestions,
     });
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-
-    if (!result) throw lastErr || new Error("All Gemini models failed");
+    const { result, usedModel } = await generateWithFallback(
+      questionAnswerSystemInstruction,
+      prompt
+    );
 
     const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = stripCodeFences(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
@@ -149,40 +163,16 @@ const generateConceptExplanation = async (req, res) => {
       return res.status(400).json({ message: "Missing question" });
     }
 
+    // Pure data payload — no instructions live here anymore
     const prompt = conceptExplainPrompt(question);
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-    if (!result) throw lastErr || new Error("All Gemini models failed");
+    const { result, usedModel } = await generateWithFallback(
+      conceptExplainSystemInstruction,
+      prompt
+    );
 
     const rawText = await result.response.text();
-    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
-    let cleanedText = rawText
-      .replace(/^\s*```json\s*/i, "")
-      .replace(/^\s*```\s*/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = stripCodeFences(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
