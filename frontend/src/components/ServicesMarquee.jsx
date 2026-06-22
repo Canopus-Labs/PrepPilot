@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 
 export default function ServicesMarquee() {
@@ -24,15 +23,9 @@ export default function ServicesMarquee() {
 
   return (
     <div className="w-full overflow-hidden pb-6 sm:pb-10 relative">
-      <motion.div
-        className="flex gap-3 sm:gap-6 whitespace-nowrap"
-        animate={{ x: ["0%", "-100%"] }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "loop",
-          duration,
-          ease: "linear",
-        }}
+      <div
+        className="flex gap-3 sm:gap-6 whitespace-nowrap animate-marquee-left"
+        style={{ animationDuration: `${duration}s` }}
       >
         {/* Duplicate services 3 times for seamless scroll on mobile */}
         {[...SERVICES, ...SERVICES, ...SERVICES].map((service, idx) => (
@@ -52,7 +45,7 @@ export default function ServicesMarquee() {
             </p>
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

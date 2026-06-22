@@ -17,7 +17,19 @@ import SignUp from "./pages/Auth/SignUp";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
-import { Star } from "lucide-react"; // Import Star icon for testimonials
+import {
+  Star,
+  Target,
+  Brain,
+  Zap,
+  BarChart3,
+  MessageSquare,
+  FileText,
+  Search,
+  SlidersHorizontal,
+  Briefcase,
+  Wrench,
+} from "lucide-react";
 
 
 /* ─────────────────────────────────────────────
@@ -496,22 +508,22 @@ const LandingPage = () => {
                 <div className="flex-1 p-10 flex flex-col gap-4">
                   {[
                     {
-                      icon: "🎯",
+                      icon: Target,
                       label: "Frontend Engineer Track",
                       sub: "React · TypeScript · Performance",
                     },
                     {
-                      icon: "🧠",
+                      icon: Brain,
                       label: "System Design Deep Dive",
                       sub: "HLD · LLD · Scalability",
                     },
                     {
-                      icon: "⚡",
+                      icon: Zap,
                       label: "DSA Mastery Sprint",
                       sub: "Arrays · Graphs · DP",
                     },
                     {
-                      icon: "📊",
+                      icon: BarChart3,
                       label: "Behavioral Interview Prep",
                       sub: "STAR · Leadership · Culture",
                     },
@@ -525,10 +537,10 @@ const LandingPage = () => {
                       }}
                     >
                       <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
+                        className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                         style={{ background: "rgba(139,92,246,0.15)" }}
                       >
-                        {item.icon}
+                        <item.icon className="w-6 h-6 text-violet-300" />
                       </div>
                       <div>
                         <p className="text-white text-base font-semibold leading-tight">
@@ -581,23 +593,23 @@ const LandingPage = () => {
                   {/* Orbiting tool icons */}
                   {[
                     {
-                      emoji: "💬",
+                      icon: MessageSquare,
                       top: "8%",
                       left: "50%",
                       transform: "translateX(-50%)",
                     },
                     {
-                      emoji: "📝",
+                      icon: FileText,
                       top: "50%",
                       right: "6%",
                       transform: "translateY(-50%)",
                     },
-                    { emoji: "🔍", bottom: "10%", left: "20%", transform: "" },
-                    { emoji: "📊", top: "20%", left: "8%", transform: "" },
+                    { icon: Search, bottom: "10%", left: "20%", transform: "" },
+                    { icon: BarChart3, top: "20%", left: "8%", transform: "" },
                   ].map((orb, i) => (
                     <div
                       key={i}
-                      className="absolute w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                      className="absolute w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{
                         top: orb.top,
                         left: orb.left,
@@ -609,7 +621,7 @@ const LandingPage = () => {
                         boxShadow: "0 0 12px rgba(139,92,246,0.2)",
                       }}
                     >
-                      {orb.emoji}
+                      <orb.icon className="w-6 h-6 text-violet-300" />
                     </div>
                   ))}
 
@@ -660,8 +672,9 @@ const LandingPage = () => {
                       border: "1px solid rgba(255,255,255,0.07)",
                     }}
                   >
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                      🎚 Difficulty
+                    <p className="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                      <SlidersHorizontal className="w-4 h-4" />
+                      Difficulty
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {["Easy", "Medium", "Hard", "Expert"].map((tag, i) => {
@@ -691,8 +704,9 @@ const LandingPage = () => {
                       border: "1px solid rgba(255,255,255,0.07)",
                     }}
                   >
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                      💼 Role Type
+                    <p className="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                      <Briefcase className="w-4 h-4" />
+                      Role Type
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {["Frontend", "Backend", "Full Stack", "DevOps"].map(
@@ -716,8 +730,9 @@ const LandingPage = () => {
                       border: "1px solid rgba(255,255,255,0.07)",
                     }}
                   >
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                      🔧 Tech Stack
+                    <p className="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                      <Wrench className="w-4 h-4" />
+                      Tech Stack
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {["React", "Node.js", "Python", "TypeScript"].map(

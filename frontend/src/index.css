@@ -212,6 +212,47 @@ html.dark {
     overflow: hidden;
   }
 
+  /* Testimonials auto-scroll (pauses on hover so users can read) */
+  @keyframes scroll-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-scroll-left {
+    width: max-content;
+    animation: scroll-left 40s linear infinite;
+  }
+  .animate-scroll-left:hover {
+    animation-play-state: paused;
+  }
+
+  /* Services marquee (pauses on hover so users can read cards) */
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-33.333%);
+    }
+  }
+  .animate-marquee-left {
+    width: max-content;
+    animation: marquee-left linear infinite;
+  }
+  .animate-marquee-left:hover {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-scroll-left,
+    .animate-marquee-left {
+      animation: none;
+    }
+  }
+
   /* Stats number gradient */
   .stat-number {
     background: linear-gradient(
