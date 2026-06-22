@@ -19,7 +19,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
 import { Star } from "lucide-react"; // Import Star icon for testimonials
 
-
 /* ─────────────────────────────────────────────
    Reusable animated section wrapper
 ───────────────────────────────────────────── */
@@ -128,7 +127,8 @@ const TESTIMONIALS = [
     name: "Sarah Chen",
     role: "Software Engineer, Google",
     rating: 5,
-    review: "PrepPilot AI was a game-changer for my Google interviews. The AI-generated questions were spot on, and the detailed explanations helped me understand complex topics deeply. Highly recommend!",
+    review:
+      "PrepPilot AI was a game-changer for my Google interviews. The AI-generated questions were spot on, and the detailed explanations helped me understand complex topics deeply. Highly recommend!",
     tags: ["DSA", "System Design", "Google"],
     avatar: "https://randomuser.me/api/portraits/women/1.jpg",
   },
@@ -137,7 +137,8 @@ const TESTIMONIALS = [
     name: "David Lee",
     role: "Frontend Developer, Meta",
     rating: 5,
-    review: "The UI design questions and React deep-dives were incredibly helpful for my Meta interview. The platform's ability to simulate real interview scenarios is unmatched.",
+    review:
+      "The UI design questions and React deep-dives were incredibly helpful for my Meta interview. The platform's ability to simulate real interview scenarios is unmatched.",
     tags: ["Frontend", "React", "Meta"],
     avatar: "https://randomuser.me/api/portraits/men/2.jpg",
   },
@@ -146,7 +147,8 @@ const TESTIMONIALS = [
     name: "Priya Sharma",
     role: "SDE-2, Amazon",
     rating: 4,
-    review: "Amazon's LP questions are tricky, but PrepPilot's behavioral prep helped me structure my STAR stories perfectly. Landed the offer!",
+    review:
+      "Amazon's LP questions are tricky, but PrepPilot's behavioral prep helped me structure my STAR stories perfectly. Landed the offer!",
     tags: ["Behavioral", "Leadership Principles", "Amazon"],
     avatar: "https://randomuser.me/api/portraits/women/3.jpg",
   },
@@ -155,7 +157,8 @@ const TESTIMONIALS = [
     name: "Michael Brown",
     role: "Backend Engineer, Microsoft",
     rating: 5,
-    review: "The OOP design questions and system design challenges were excellent. PrepPilot helped me refine my approach and articulate my solutions clearly.",
+    review:
+      "The OOP design questions and system design challenges were excellent. PrepPilot helped me refine my approach and articulate my solutions clearly.",
     tags: ["OOP Design", "System Design", "Microsoft"],
     avatar: "https://randomuser.me/api/portraits/men/4.jpg",
   },
@@ -164,7 +167,8 @@ const TESTIMONIALS = [
     name: "Jessica Wong",
     role: "Junior Developer",
     rating: 4,
-    review: "As a fresher, I found the 'Easy' and 'Medium' DSA sheets invaluable. PrepPilot made learning fun and boosted my confidence for my first job.",
+    review:
+      "As a fresher, I found the 'Easy' and 'Medium' DSA sheets invaluable. PrepPilot made learning fun and boosted my confidence for my first job.",
     tags: ["DSA", "Entry Level", "Fresher"],
     avatar: "https://randomuser.me/api/portraits/women/5.jpg",
   },
@@ -173,7 +177,8 @@ const TESTIMONIALS = [
     name: "Omar Khan",
     role: "DevOps Engineer",
     rating: 5,
-    review: "The project ideas section gave me inspiration for my portfolio, and the compiler helped me practice coding challenges efficiently. Great tool!",
+    review:
+      "The project ideas section gave me inspiration for my portfolio, and the compiler helped me practice coding challenges efficiently. Great tool!",
     tags: ["DevOps", "Projects", "Coding"],
     avatar: "https://randomuser.me/api/portraits/men/6.jpg",
   },
@@ -182,7 +187,8 @@ const TESTIMONIALS = [
     name: "Emily White",
     role: "Data Scientist",
     rating: 4,
-    review: "Even for data science roles, the system design and problem-solving sections were beneficial. The AI explanations are a lifesaver!",
+    review:
+      "Even for data science roles, the system design and problem-solving sections were beneficial. The AI explanations are a lifesaver!",
     tags: ["Problem Solving", "AI", "Data Science"],
     avatar: "https://randomuser.me/api/portraits/women/7.jpg",
   },
@@ -197,7 +203,9 @@ const StarRating = ({ count }) => (
       <Star
         key={n}
         size={14}
-        className={n <= count ? "text-amber-400 fill-amber-400" : "text-gray-600"}
+        className={
+          n <= count ? "text-amber-400 fill-amber-400" : "text-gray-600"
+        }
       />
     ))}
   </div>
@@ -212,15 +220,24 @@ const TestimonialCard = ({ testimonial }) => (
       <StarRating count={testimonial.rating} />
       <div className="flex flex-wrap gap-1">
         {testimonial.tags.map((tag) => (
-          <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400">
+          <span
+            key={tag}
+            className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400"
+          >
             {tag}
           </span>
         ))}
       </div>
     </div>
-    <p className="text-sm text-gray-300 leading-relaxed flex-1">"{testimonial.review}"</p>
+    <p className="text-sm text-gray-300 leading-relaxed flex-1">
+      "{testimonial.review}"
+    </p>
     <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/5">
-      <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 rounded-full object-cover border-2 border-violet-500/50" />
+      <img
+        src={testimonial.avatar}
+        alt={testimonial.name}
+        className="w-10 h-10 rounded-full object-cover border-2 border-violet-500/50"
+      />
       <div>
         <p className="text-sm font-semibold text-white">{testimonial.name}</p>
         <p className="text-xs text-gray-400">{testimonial.role}</p>
@@ -341,7 +358,6 @@ const LandingPage = () => {
 
             {/* Right buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              
               {user ? (
                 <ProfileInfoCard />
               ) : (
@@ -948,9 +964,14 @@ const LandingPage = () => {
 
               <div className="flex space-x-6 animate-scroll-left">
                 {/* Duplicate testimonials for seamless loop */}
-                {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
-                  <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
-                ))}
+                {[...TESTIMONIALS, ...TESTIMONIALS].map(
+                  (testimonial, index) => (
+                    <TestimonialCard
+                      key={`${testimonial.id}-${index}`}
+                      testimonial={testimonial}
+                    />
+                  ),
+                )}
               </div>
             </div>
           </div>
@@ -989,74 +1010,176 @@ const LandingPage = () => {
             FOOTER
         ───────────────────────────────── */}
         <footer className="w-full border-t border-white/5 bg-[#0B0F19] text-gray-400 font-sans mt-20">
-  <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 sm:px-8 lg:px-12">
-    
-    {/* Main Multi-Column Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5">
-      
-      {/* Brand Info Column */}
-      <div className="lg:col-span-2 space-y-4">
-        <div className="flex items-center gap-2">
-          <img
-            src="/PrepPilot-Logo.png"
-            alt="PrepPilot Logo"
-            className="w-6 h-6 object-contain"
-          />
-          <span className="font-bold text-xl tracking-tight text-white">
-            PrepPilot AI
-          </span>
-        </div>
-        <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
-          Your ultimate companion for crushing technical interviews with AI-powered questions, real-time feedback, and comprehensive preparation tools.
-        </p>
-      </div>
+          <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 sm:px-8 lg:px-12">
+            {/* Main Multi-Column Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5">
+              {/* Brand Info Column */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/PrepPilot-Logo.png"
+                    alt="PrepPilot Logo"
+                    className="w-6 h-6 object-contain"
+                  />
+                  <span className="font-bold text-xl tracking-tight text-white">
+                    PrepPilot AI
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+                  Your ultimate companion for crushing technical interviews with
+                  AI-powered questions, real-time feedback, and comprehensive
+                  preparation tools.
+                </p>
+              </div>
 
-      {/* Column 2: Platform Features */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Features</h3>
-        <ul className="space-y-2.5 text-sm">
-          <li><a href="/ai-helper" className="hover:text-white transition-colors duration-200">AI Question Gen</a></li>
-          <li><a href="/coding-sheets" className="hover:text-white transition-colors duration-200">DSA Sheets</a></li>
-          <li><a href="/compiler" className="hover:text-white transition-colors duration-200">Code Compiler</a></li>
-          <li><a href="/assessment" className="hover:text-white transition-colors duration-200">Skill Tests</a></li>
-        </ul>
-      </div>
+              {/* Column 2: Platform Features */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white tracking-wider uppercase">
+                  Features
+                </h3>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <a
+                      href="/ai-helper"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      AI Question Gen
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/coding-sheets"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      DSA Sheets
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/compiler"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Code Compiler
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/assessment"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Skill Tests
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
-      {/* Column 3: Resources */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Resources</h3>
-        <ul className="space-y-2.5 text-sm">
-          <li><a href="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</a></li>
-          <li><a href="/notes-books" className="hover:text-white transition-colors duration-200">Books Library</a></li>
-          <li><a href="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</a></li>
-          <li><a href="/interview-experiences" className="hover:text-white transition-colors duration-200">Experiences</a></li>
-        </ul>
-      </div>
+              {/* Column 3: Resources */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white tracking-wider uppercase">
+                  Resources
+                </h3>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <a
+                      href="/resume-builder"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Resume Builder
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/notes-books"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Books Library
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/project-ideas"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Project Ideas
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/interview-experiences"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Experiences
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
-      {/* Column 4: Community */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Community</h3>
-        <ul className="space-y-2.5 text-sm">
-          <li><a href="https://github.com/Canopus-Labs/PrepPilot.git" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
-          <li><a href="/repository-hive" className="hover:text-white transition-colors duration-200">Repository Hive</a></li>
-          <li><a href="/oss-blog" className="hover:text-white transition-colors duration-200">OSS Blog</a></li>
-          <li><a href="/oss-events" className="hover:text-white transition-colors duration-200">Events</a></li>
-        </ul>
-      </div>
+              {/* Column 4: Community */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-white tracking-wider uppercase">
+                  Community
+                </h3>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <a
+                      href="https://github.com/Canopus-Labs/PrepPilot.git"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      GitHub
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/repository-hive"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Repository Hive
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/oss-blog"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      OSS Blog
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/oss-events"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      Events
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-    </div>
-
-    {/* Bottom Bar Container */}
-    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-      <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
-      <div className="flex space-x-6">
-        <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-        <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
-      </div>
-    </div>
-
-  </div>
-</footer>
+            {/* Bottom Bar Container */}
+            <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+              <p>
+                © {new Date().getFullYear()} PrepPilot AI. All rights reserved.
+              </p>
+              <div className="flex space-x-6">
+                <a href="#" className="hover:text-gray-300 transition-colors">
+                  Privacy Policy
+                </a>
+                <a href="#" className="hover:text-gray-300 transition-colors">
+                  Terms of Service
+                </a>
+                <a
+                  href="/cookies"
+                  className="hover:text-gray-300 transition-colors"
+                >
+                  Cookies
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
       {/* Premium Back To Top Button */}
       <AnimatePresence>
@@ -1110,8 +1233,7 @@ const LandingPage = () => {
           backdrop-blur-xl
         "
               style={{
-                background:
-                  "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
                 boxShadow:
                   "0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
               }}
@@ -1138,7 +1260,7 @@ const LandingPage = () => {
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
-          
+
                 if (pendingRoute) {
                   navigate(pendingRoute);
                   setPendingRoute(null);
@@ -1148,7 +1270,7 @@ const LandingPage = () => {
               }}
             />
           </div>
-          
+
           <div className={currentPage === "signup" ? "block" : "hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
           </div>
