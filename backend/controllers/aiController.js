@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Joi = require("joi");
 const {
   conceptExplainPrompt,
   questionAnswerPrompt,
@@ -8,7 +9,6 @@ const Session = require("../models/Session");
 const Question = require("../models/Question");
 
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 
 /**
  * Generate interview questions and answers using the Gemini AI service.
@@ -103,6 +103,21 @@ const generateInterviewQuestions = async (req, res) => {
 
     try {
       const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const questionsSchema = Joi.array().items(
+        Joi.object({
+          question: Joi.string().required(),
+          answer: Joi.string().required(),
+        })
+      );
+      const { error: validationError } = questionsSchema.validate(
+        Array.isArray(data) ? data : data.question
+      );
+      if (validationError) {
+        return res.status(500).json({ message: "Invalid AI response format", details: validationError.message });
+      }
+
       if (Array.isArray(data)) {
         res.status(200).json({ model: usedModel, question: data });
       } else {
@@ -187,6 +202,17 @@ const generateConceptExplanation = async (req, res) => {
 
     try {
       const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const explanationSchema = Joi.object({
+        title: Joi.string().required(),
+        explanation: Joi.string().required(),
+      });
+      const { error: validationError } = explanationSchema.validate(data);
+      if (validationError) {
+        return res.status(500).json({ message: "Invalid AI response format", details: validationError.message });
+      }
+
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
       res.status(500).json({
