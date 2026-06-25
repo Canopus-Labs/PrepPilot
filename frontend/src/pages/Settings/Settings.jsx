@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
+import useUnsavedChangesWarning from "../../hooks/useUnsavedChangesWarning";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import { useTheme } from "../../context/themeContext";
@@ -64,6 +65,7 @@ const Settings = () => {
   const [degree, setDegree] = useState("");
   const [branch, setBranch] = useState("");
   const [graduationYear, setGraduationYear] = useState("");
+  const [initialFormData, setInitialFormData] = useState(null);
   // Form Fields State - Profile Details
   const [profileDetailsActiveTab, setProfileDetailsActiveTab] =
     useState("about-me");
@@ -112,6 +114,18 @@ const Settings = () => {
       setDegree(user.educationDetails?.degree || "");
       setBranch(user.educationDetails?.branch || "");
       setGraduationYear(user.educationDetails?.graduationYear || "");
+
+      setInitialFormData({
+  firstName: user.firstName || "",
+  lastName: user.lastName || "",
+  bio: user.bio || "",
+  country: user.country || "",
+  school: user.educationDetails?.school || "",
+  degree: user.educationDetails?.degree || "",
+  branch: user.educationDetails?.branch || "",
+  graduationYear: user.educationDetails?.graduationYear || "",
+});
+
       setAboutMeText(user.profileDetails?.aboutMe || "");
       setEducationText(user.profileDetails?.education || "");
       setAchievementsText(user.profileDetails?.achievements || "");
@@ -127,6 +141,24 @@ const Settings = () => {
       );
     }
   }, [user]);
+
+  const currentFormData = {
+  firstName,
+  lastName,
+  bio,
+  country,
+  school,
+  degree,
+  branch,
+  graduationYear,
+};
+
+const hasUnsavedChanges =
+  initialFormData &&
+  JSON.stringify(currentFormData) !== JSON.stringify(initialFormData);
+
+  useUnsavedChangesWarning(hasUnsavedChanges);
+
   // Handle Profile Picture Upload
   const handlePhotoClick = () => {
     fileInputRef.current.click();
@@ -198,11 +230,24 @@ const Settings = () => {
         },
       };
       const response = await axiosInstance.put(
-        API_PATHS.AUTH.UPDATE_PROFILE,
-        payload,
-      );
-      updateUser(response.data);
-      toast.success("Basic info updated successfully!", { id: saveToast });
+  API_PATHS.AUTH.UPDATE_PROFILE,
+  payload,
+);
+
+updateUser(response.data);
+
+setInitialFormData({
+  firstName,
+  lastName,
+  bio,
+  country,
+  school,
+  degree,
+  branch,
+  graduationYear,
+});
+
+toast.success("Basic info updated successfully!", { id: saveToast });
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update profile", {
         id: saveToast,
