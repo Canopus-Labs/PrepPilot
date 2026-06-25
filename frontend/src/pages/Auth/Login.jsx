@@ -105,6 +105,27 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
                 Remember Me
               </label>
             </div>
+        <Input
+  value={password}
+  onChange={({ target }) => setPassword(target.value)}
+  label="Password"
+  placeholder="Min 8 characters"
+  type="password"
+  aria-invalid={!!error}
+  aria-describedby={error ? "login-error" : undefined}
+/>
+
+        {/* Error Message */}
+        {error && (
+  <div
+    id="login-error"
+    role="alert"
+    aria-live="polite"
+    className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
+  >
+            <p className="text-red-400 text-sm font-medium">{error}</p>
+          </div>
+        )}
 
             {error && (
               <div id="login-error" role="alert" aria-live="polite" className="p-3 mt-4 bg-red-500/10 border border-red-500/30 rounded-lg">
