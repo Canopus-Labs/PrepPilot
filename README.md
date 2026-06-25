@@ -21,6 +21,25 @@
 
 ---
 
+## Table of Contents
+
+- [🚀 About PrepPilot](#-about-preppilot)
+- [✨ Key Features](#-key-features)
+- [🛠️ Technology Stack](#%EF%B8%8F-technology-stack)
+- [⚡ Quick Start Guide](#-quick-start-guide)
+- [📁 Project Structure](#-project-structure)
+- [🤝 Contributing Guidelines](#-contributing-guidelines)
+- [� Troubleshooting & FAQs](#-troubleshooting--faqs)
+- [📖 API Documentation](#-api-documentation)
+- [🚀 Deployment Guide](#-deployment-guide)
+- [📄 License](#-license)
+- [🙌 Acknowledgments & Credits](#-acknowledgments--credits)
+- [🎯 Roadmap](#-roadmap)
+- [🙌 Thanks to Our Amazing Contributors](#-thanks-to-our-amazing-contributors)
+- [💬 Community & Support](#-community--support)
+
+---
+
 ## 🚀 About PrepPilot
 
 PrepPilot is a comprehensive full-stack web application designed to transform your interview preparation journey. Leveraging cutting-edge AI technology and an intuitive interface, PrepPilot generates role-specific interview questions, provides detailed explanations, and helps you track your progress in real-time.

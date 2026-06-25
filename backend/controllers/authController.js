@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
+const { validatePassword } = require('../utils/passwordPolicy');
 
 /**
  * Generate a JWT token for the authenticated user.
@@ -20,40 +21,10 @@ const generateToken = (userId) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
-
-        if (!password || password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long."
-            });
-        }
-
-        if (!/[A-Z]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one uppercase letter."
-            });
-        }
-
-        if (!/[a-z]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one lowercase letter."
-            });
-        }
-
-        if (!/[0-9]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one number."
-            });
-        }
-
-        if (!/[@$!%*?&]/.test(password)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must contain at least one special character (@$!%*?&)."
-            });
+        
+        const { valid, errors } = validatePassword(password);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: errors[0] });
         }
 
         const userExists = await User.findOne({ email });

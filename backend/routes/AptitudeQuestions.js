@@ -1,7 +1,7 @@
 const express = require("express");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { validateAiPrompt } = require("../middlewares/validateAiPrompt");
-const { sanitizeAiPrompt } = require("../middlewares/sanitizeAiPrompt");
+const sanitizeAiPrompt = require("../middlewares/sanitizeAiPrompt");
 
 const NodeCache = require("node-cache");
 

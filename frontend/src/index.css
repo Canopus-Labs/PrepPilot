@@ -303,3 +303,85 @@ html.dark {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ==========================================
+   Responsive Enhancements
+   ========================================== */
+
+/* Small Laptops */
+@media screen and (max-width: 992px) {
+  html {
+    font-size: 95%;
+  }
+
+  .glass-panel,
+  .bento-card {
+    padding: 1rem;
+  }
+
+  .btn-small {
+    padding: 0.5rem 1.25rem;
+  }
+}
+
+/* Tablets */
+@media screen and (max-width: 768px) {
+  html {
+    font-size: 90%;
+  }
+
+  .input-box {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .btn-small,
+  .btn-primary {
+    width: 100%;
+  }
+
+  .glass-panel,
+  .bento-card {
+    padding: 0.875rem;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+  }
+}
+
+/* Mobile Devices */
+@media screen and (max-width: 480px) {
+  html {
+    font-size: 87.5%;
+  }
+
+  .input-box {
+    padding: 0.625rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .btn-primary,
+  .btn-small {
+    width: 100%;
+    font-size: 0.8125rem;
+    padding: 0.75rem;
+  }
+
+  .glass-panel,
+  .bento-card {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .dot-grid-bg {
+    background-size: 20px 20px;
+  }
+}
+

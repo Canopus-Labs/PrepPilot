@@ -80,6 +80,16 @@ const App = () => {
                   }
                 />
                 <Route
+                  path="/signup"
+                  element={
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <SignUp />
+                      </PageTransition>
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
                   path="/verify-email"
                   element={
                     <ErrorBoundary>
@@ -327,7 +337,7 @@ const App = () => {
               style: {
                 fontSize: "13px",
               },
-            }}
+            }} 
           />
           </div>
         </ErrorBoundary>
