@@ -10,7 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import CompanyPrep from "./pages/CompanyPrep/CompanyPrep";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import VerifyEmail from "./pages/Auth/verifyEmail";
@@ -248,6 +248,14 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+  path="/company-prep"
+  element={
+    <PageTransition>
+      <CompanyPrep />
+    </PageTransition>
+  }
+/>
                   <Route
                     path="/interview-experiences"
                     element={
