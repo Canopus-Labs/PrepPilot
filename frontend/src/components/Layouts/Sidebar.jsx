@@ -86,6 +86,12 @@ const Sidebar = () => {
           icon: Briefcase,
         },
         {
+      id: "company-prep",
+      title: "Company-wise Prep",
+      path: "/company-prep",
+      icon: LayoutDashboard
+    },
+        {
           id: "assessment",
           title: "Skill Assessment",
           path: "/assessment",
