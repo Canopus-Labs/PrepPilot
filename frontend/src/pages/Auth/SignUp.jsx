@@ -37,12 +37,20 @@ const SignUp = ({ setCurrentPage }) => {
   const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
   const passwordStrength =
     strengthScore <= 2 ? "Weak" : strengthScore <= 4 ? "Medium" : "Strong";
-
+  // Checks if the string has at least one number (0-9)
+  function containsNumber(str) {
+    return /\d/.test(str);
+  }
+  // Checks if the string has at least one alphanumeric character (letter or number)
+  function containsAlphanumeric(str) {
+    return /[a-zA-Z0-9]/.test(str);
+  }
   const handleSignup = async (e) => {
     e.preventDefault();
     let profileImageUrl = "";
 
     if (!fullName) { setError("Please enter your full name"); return; }
+    if(containsNumber(fullName) || !containsAlphanumeric(fullName)) { setError("Full name should not contain numbers or special characters"); return; }
     if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
     if (!password || password.length < 8) { setError("Password must be at least 8 characters long."); return; }
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }
