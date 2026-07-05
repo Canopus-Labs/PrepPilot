@@ -51,7 +51,7 @@ const SignUp = ({ setCurrentPage }) => {
 
     if (!fullName) { setError("Please enter your full name"); return; }
     if(containsNumber(fullName) || !containsAlphanumeric(fullName)) { setError("Full name should not contain numbers or special characters"); return; }
-    if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
+    if (!validateEmail(email) && !email.endsWith(".com") && !email.includes("@")) { setError("Please enter a valid email address"); return; }
     if (!password || password.length < 8) { setError("Password must be at least 8 characters long."); return; }
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }
     if (!/[a-z]/.test(password)) { setError("Password must contain at least one lowercase letter."); return; }
