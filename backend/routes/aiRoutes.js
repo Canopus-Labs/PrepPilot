@@ -6,6 +6,7 @@ const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
 const NodeCache = require('node-cache');
+const AIChat = require('../models/AIChat');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
@@ -25,7 +26,7 @@ const offTopicCache = new NodeCache({ stdTTL: 3600 });
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt, history = [], systemInstruction } = req.body || {};
+  const { prompt,history =[], systemInstruction,userId} = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
   }
@@ -122,6 +123,27 @@ async function generateHandler(req, res) {
       usedModel,
       Date.now() - start,
     );
+    if (userId) {
+      try {
+        await AIChat.findOneAndUpdate(
+          { user: userId },
+          {
+            $push: {
+              messages: {
+                $each: [
+                  { role: 'user', text: prompt },
+                  { role: 'model', text: cleanedText }
+                ]
+              }
+            }
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`[AI] Successfully saved messages for user: ${userId}`);
+      } catch (err) {
+        console.error("[AI] Failed to save messages to database:", err);
+      }
+    }
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
     console.error("[AI] Generation failed:", error.message);
@@ -132,9 +154,9 @@ async function generateHandler(req, res) {
 }
 
 // Primary route used by frontend
-router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/generate', aiLimiter, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
-router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/ai/generate', aiLimiter, sanitizeAiPrompt, generateHandler);
 
 // List available models
 /**
@@ -163,5 +185,13 @@ router.get("/models", async (req, res) => {
     res.status(500).json({ error: "Failed to list models", detail: e.message });
   }
 });
-
+router.get('/history/:userId', async (req, res) => {
+  try {
+    const chat = await AIChat.findOne({ user: req.params.userId });
+    return res.json(chat || { messages: [] });
+  } catch (error) {
+    console.error("[AI] Fetch history error:", error);
+    return res.status(500).json({ error: "Failed to fetch history" });
+  }
+});
 module.exports = router;
