@@ -10,7 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import InteractiveCursor from './components/InteractiveCursor';
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import VerifyEmail from "./pages/Auth/verifyEmail";
@@ -34,6 +34,7 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import JobsForYou from "./pages/Jobs/JobsForYou";
 import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
@@ -56,6 +57,7 @@ const App = () => {
       <UserProvider>
         <ErrorBoundary>
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
+          <InteractiveCursor />
           <Router>
             <AnimatePresence mode="wait">
               <Routes>
@@ -310,6 +312,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <Settings />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/jobs"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <JobsForYou />
                         </PageTransition>
                       </ProtectedRoute>
                     }
