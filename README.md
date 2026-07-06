@@ -126,7 +126,7 @@ Before getting started, ensure you have the following installed:
 #### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/PrepPilot.git
+git clone https://github.com/Canopus-Labs/PrepPilot.git
 cd PrepPilot
 ```
 
