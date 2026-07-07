@@ -9,6 +9,7 @@ const questionCache = new NodeCache({
   stdTTL: 3600,
 });
 
+// Tracks in-flight question generation requests to coalesce concurrent cache misses.
 const pendingQuestionRequests = new Map();
 
 const router = express.Router();
@@ -143,7 +144,10 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
   );
 
   try {
+    // Reuse an ongoing generation request to prevent duplicate Gemini API calls.
     if (pendingQuestionRequests.has(cacheKey)) {
+      console.log(`[Coalesced] Topic: ${topic}`);
+
       const inFlightRequest = pendingQuestionRequests.get(cacheKey);
       let coalescedQuestions = await inFlightRequest;
       return res.json(coalescedQuestions);
@@ -189,6 +193,7 @@ router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
     res.status(500).json(response);
 
   } finally {
+    // Always clear the registry entry so future cache misses can trigger a new generation.
     pendingQuestionRequests.delete(cacheKey);
   }
 });
