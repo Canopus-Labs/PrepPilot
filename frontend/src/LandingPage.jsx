@@ -17,7 +17,7 @@ import SignUp from "./pages/Auth/SignUp";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
-import { Star } from "lucide-react"; // Import Star icon for testimonials
+import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
 import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
 
 
@@ -208,7 +208,7 @@ const StarRating = ({ count }) => (
    Testimonial Card Component
 ───────────────────────────────────────────── */
 const TestimonialCard = ({ testimonial }) => (
-  <div className="flex-none w-80 p-6 bg-white/5 border border-white/10 rounded-2xl shadow-lg flex flex-col gap-4">
+  <div className="w-full h-full p-6 bg-white/5 border border-white/10 rounded-2xl shadow-lg flex flex-col gap-4">
     <div className="flex items-center justify-between">
       <StarRating count={testimonial.rating} />
       <div className="flex flex-wrap gap-1">
@@ -242,6 +242,60 @@ const LandingPage = () => {
   const [pendingRoute, setPendingRoute] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const [visibleCards, setVisibleCards] = useState(3);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCards(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCards(2);
+      } else {
+        setVisibleCards(3);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const maxIndex = Math.max(0, TESTIMONIALS.length - visibleCards);
+    if (currentIndex > maxIndex) {
+      setCurrentIndex(maxIndex);
+    }
+  }, [visibleCards, currentIndex]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = prevIndex + 1;
+        const maxIndex = TESTIMONIALS.length - visibleCards;
+        return nextIndex > maxIndex ? 0 : nextIndex;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [visibleCards, isPaused]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - 1;
+      const maxIndex = TESTIMONIALS.length - visibleCards;
+      return nextIndex < 0 ? maxIndex : nextIndex;
+    });
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      const maxIndex = TESTIMONIALS.length - visibleCards;
+      return nextIndex > maxIndex ? 0 : nextIndex;
+    });
+  };
 
   const handleCTA = () => {
     if (!user) {
@@ -350,7 +404,15 @@ const LandingPage = () => {
                   {/* Login – outlined dark button (like opensox "Contribute") */}
                   <button
                     onClick={() => setOpenAuthModal(true)}
-                    className="hidden sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
+                    className="hidden cursor-pointer sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 0 24px 4px rgba(124,58,237,0.65)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 0 16px 2px rgba(124,58,237,0.45)")
+                    }
                     style={{
                       background: "rgba(255,255,255,0.06)",
                       border: "1px solid rgba(255,255,255,0.12)",
@@ -362,7 +424,7 @@ const LandingPage = () => {
                   {/* Get Started – solid violet pill */}
                   <button
                     onClick={handleCTA}
-                    className="flex items-center gap-2 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-all duration-150"
+                    className="flex items-center gap-2 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-all duration-150 cursor-pointer"
                     style={{
                       background:
                         "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
@@ -783,16 +845,66 @@ const LandingPage = () => {
             </FadeIn>
 
             {/* Testimonials Scroller */}
-            <div className="relative overflow-hidden py-8">
+            <div 
+              className="relative overflow-hidden py-8"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               {/* Fading overlays */}
               <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
 
-              <div className="flex space-x-6 animate-scroll-left">
-                {/* Duplicate testimonials for seamless loop */}
-                {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
-                  <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
-                ))}
+              {/* Slider Track Wrapper */}
+              <div className="overflow-hidden">
+                <div 
+                  className="flex transition-transform duration-500 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`
+                  }}
+                >
+                  {TESTIMONIALS.map((testimonial) => (
+                    <div 
+                      key={testimonial.id}
+                      className="flex-none p-3"
+                      style={{ width: `${100 / visibleCards}%` }}
+                    >
+                      <TestimonialCard testimonial={testimonial} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Navigation Arrows and Dot Indicators */}
+              <div className="flex justify-between items-center mt-8 px-4">
+                <button
+                  onClick={handlePrev}
+                  className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-violet-500/50 text-white transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  aria-label="Previous testimonial"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                {/* Dots indicators */}
+                <div className="flex space-x-2">
+                  {Array.from({ length: TESTIMONIALS.length - visibleCards + 1 }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        currentIndex === idx ? "w-6 bg-violet-500 shadow-lg shadow-violet-500/50" : "w-2.5 bg-white/20 hover:bg-white/40"
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNext}
+                  className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-violet-500/50 text-white transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  aria-label="Next testimonial"
+                >
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
           </div>

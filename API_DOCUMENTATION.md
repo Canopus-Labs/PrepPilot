@@ -589,6 +589,9 @@ Errors:
 ### List Books
 - `GET /api/books/`
 - Public
+- Optional query params:
+  - `page` (default `1`)
+  - `limit` (default `20`)
 
 Response `200`:
 ```json
@@ -598,6 +601,14 @@ Response `200`:
       "id": "algorithms",
       "title": "Algorithms",
       "count": 10,
+      "pagination": {
+        "totalItems": 10,
+        "totalPages": 1,
+        "currentPage": 1,
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "limit": 20
+      },
       "items": [{"id": "...", "name": "...", "size": 1234, "url": "..."}]
     }
   ],

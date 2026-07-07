@@ -133,6 +133,7 @@ app.use(
 app.use("/api/jobs", jobRoutes);
 
 app.use("/api/books", generalLimiter, booksRoutes);
+app.use("/api/jobs", generalLimiter, jobRoutes);
 
 //Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
@@ -143,6 +144,14 @@ app.get("/api/test", (req, res) => {
 });
 
 // Remove duplicate CORS middleware (already set above)
+
+// Daily job cache refresh — warm on boot, then every 24 hours.
+// Only runs when Adzuna is configured; otherwise refreshJobCache() no-ops.
+if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
+  const { refreshJobCache } = require("./controllers/jobController");
+  refreshJobCache();
+  setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
+}
 
 // Start Server
 const PORT = process.env.PORT || 5000;

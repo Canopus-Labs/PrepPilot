@@ -40,5 +40,8 @@ export const API_PATHS = {
         ANALYZE: "/api/resume/analyze", // AI Resume Analyzer via Gemini
         SAVE: "/api/resume/save", // Save resume to backend
         GET_ALL: "/api/resume/my-resumes", // Get all user's saved resumes
-    }
+    },
+    JOBS: {
+        GET: "/api/jobs",  // GET /api/jobs?role=...&country=...
+    },
 };

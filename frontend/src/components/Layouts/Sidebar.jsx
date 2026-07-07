@@ -8,6 +8,7 @@ import {
   Bot,
   BrainCircuit,
   Briefcase,
+  BriefcaseBusiness,
   Code2,
   Target,
   Settings,
@@ -96,6 +97,19 @@ const Sidebar = () => {
           title: "Interview Experiences",
           path: "/interview-experiences",
           icon: MessageSquare,
+        },
+      ],
+    },
+    {
+      id: "jobs",
+      title: "Jobs",
+      isHeader: true,
+      items: [
+        {
+          id: "jobs-for-you",
+          title: "Jobs for You",
+          path: "/jobs",
+          icon: BriefcaseBusiness,
         },
       ],
     },
