@@ -1,8 +1,8 @@
-import React, { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
-import Modal from "../Loader/Modal";
-import Login from "../../pages/Auth/Login";
+import React, { useContext, useState } from"react";
+import { Link, useLocation, useNavigate } from"react-router-dom";
+import { UserContext } from"../../context/userContext";
+import Modal from"../Loader/Modal";
+import Login from"../../pages/Auth/Login";
 import {
   LayoutDashboard,
   Bot,
@@ -28,7 +28,7 @@ import {
   CalendarDays,
   ScrollText,
   Grid3x3,
-} from "lucide-react";
+} from"lucide-react";
 
 const Sidebar = () => {
   const { user } = useContext(UserContext);
@@ -40,172 +40,171 @@ const Sidebar = () => {
 
   const userInitial =
     user?.name?.charAt(0)?.toUpperCase() ||
-    user?.email?.charAt(0)?.toUpperCase() ||
-    "U";
+    user?.email?.charAt(0)?.toUpperCase() ||"U";
 
   const NAV_ITEMS = [
     {
-      id: "dashboard",
-      title: "Dashboard",
-      path: "/dashboard",
+      id:"dashboard",
+      title:"Dashboard",
+      path:"/dashboard",
       icon: LayoutDashboard,
     },
     {
-      id: "aptitude",
-      title: "Aptitude",
+      id:"aptitude",
+      title:"Aptitude",
       isHeader: true,
       items: [
         {
-          id: "aptitude-builder",
-          title: "Cognitive Builder",
-          path: "/aptitude",
+          id:"aptitude-builder",
+          title:"Cognitive Builder",
+          path:"/aptitude",
           icon: BrainCircuit,
         },
       ],
     },
     {
-      id: "cognitive-skills",
-      title: "Cognitive Skills",
+      id:"cognitive-skills",
+      title:"Cognitive Skills",
       isHeader: true,
       items: [
         {
-          id: "cognitive-games",
-          title: "Cognitive Games",
-          path: "/cognitive-games",
+          id:"cognitive-games",
+          title:"Cognitive Games",
+          path:"/cognitive-games",
           icon: Grid3x3,
         },
       ],
     },
     {
-      id: "dsa",
-      title: "DSA",
+      id:"dsa",
+      title:"DSA",
       isHeader: true,
       items: [
         {
-          id: "coding-sheets",
-          title: "DSA Master Sheets",
-          path: "/coding-sheets",
+          id:"coding-sheets",
+          title:"DSA Master Sheets",
+          path:"/coding-sheets",
           icon: Code2,
         },
       ],
     },
     {
-      id: "interview",
-      title: "Interview",
+      id:"interview",
+      title:"Interview",
       isHeader: true,
       items: [
         {
-          id: "role-prep",
-          title: "Role-Specific Prep",
-          path: "/role-prep",
+          id:"role-prep",
+          title:"Role-Specific Prep",
+          path:"/role-prep",
           icon: Briefcase,
         },
         {
-          id: "assessment",
-          title: "Skill Assessment",
-          path: "/assessment",
+          id:"assessment",
+          title:"Skill Assessment",
+          path:"/assessment",
           icon: Target,
         },
         {
-          id: "interview-experiences",
-          title: "Interview Experiences",
-          path: "/interview-experiences",
+          id:"interview-experiences",
+          title:"Interview Experiences",
+          path:"/interview-experiences",
           icon: MessageSquare,
         },
       ],
     },
     {
-      id: "jobs",
-      title: "Jobs",
+      id:"jobs",
+      title:"Jobs",
       isHeader: true,
       items: [
         {
-          id: "jobs-for-you",
-          title: "Jobs for You",
-          path: "/jobs",
+          id:"jobs-for-you",
+          title:"Jobs for You",
+          path:"/jobs",
           icon: BriefcaseBusiness,
         },
       ],
     },
     {
-      id: "project",
-      title: "Project",
+      id:"project",
+      title:"Project",
       isHeader: true,
       items: [
         {
-          id: "project-ideas",
-          title: "Project Ideas",
-          path: "/project-ideas",
+          id:"project-ideas",
+          title:"Project Ideas",
+          path:"/project-ideas",
           icon: Lightbulb,
         },
       ],
     },
     {
-      id: "resume",
-      title: "Resume Section",
+      id:"resume",
+      title:"Resume Section",
       isHeader: true,
       items: [
         {
-          id: "resume-builder",
-          title: "Resume Builder",
-          path: "/resume-builder",
+          id:"resume-builder",
+          title:"Resume Builder",
+          path:"/resume-builder",
           icon: FileText,
         },
         {
-          id: "resume-analyzer",
-          title: "Resume Analyzer",
-          path: "/resume-analyzer",
+          id:"resume-analyzer",
+          title:"Resume Analyzer",
+          path:"/resume-analyzer",
           icon: Zap,
         },
       ],
     },
     {
-      id: "ai-tools",
-      title: "AI Tools",
+      id:"ai-tools",
+      title:"AI Tools",
       isHeader: true,
       items: [
         {
-          id: "ai-assistance",
-          title: "AI Assistance",
-          path: "/ai-assistance",
+          id:"ai-assistance",
+          title:"AI Assistance",
+          path:"/ai-assistance",
           icon: Bot,
         },
       ],
     },
     {
-      id: "open-source",
-      title: "Open Source",
+      id:"open-source",
+      title:"Open Source",
       isHeader: true,
       items: [
         {
-          id: "repository-hive",
-          title: "Repository Hive",
-          path: "/repository-hive",
+          id:"repository-hive",
+          title:"Repository Hive",
+          path:"/repository-hive",
           icon: Github,
         },
         {
-          id: "oss-blog",
-          title: "OSS Learning Hub",
-          path: "/oss-blog",
+          id:"oss-blog",
+          title:"OSS Learning Hub",
+          path:"/oss-blog",
           icon: BookOpen,
         },
         {
-          id: "oss-events",
-          title: "Conferences & Events",
-          path: "/oss-events",
+          id:"oss-events",
+          title:"Conferences & Events",
+          path:"/oss-events",
           icon: CalendarDays,
         },
       ],
     },
     {
-      id: "notes-books",
-      title: "Notes & Books",
+      id:"notes-books",
+      title:"Notes & Books",
       isHeader: true,
       items: [
         {
-          id: "notes-books-home",
-          title: "Notes & Books",
-          path: "/notes-books",
+          id:"notes-books-home",
+          title:"Notes & Books",
+          path:"/notes-books",
           icon: BookMarked,
         },
       ],
@@ -213,7 +212,7 @@ const Sidebar = () => {
   ];
 
   const handleServiceClick = (item) => {
-    if ((item.title === "Cognitive Builder" || item.title === "Cognitive Games") && !user) {
+    if ((item.title ==="Cognitive Builder" || item.title ==="Cognitive Games") && !user) {
       setShowLoginModal(true);
     } else {
       navigate(item.path);
@@ -235,13 +234,13 @@ const Sidebar = () => {
           <div key={item.id}>
             <button
               onClick={() => toggleSection(item.id)}
-              className="w-full flex items-center justify-between pt-4 pb-2 px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors group"
+              className="w-full flex items-center justify-between pt-4 pb-2 px-3 text-[11px] font-bold text-text-muted uppercase tracking-wider hover:text-gray-400 transition-colors group"
             >
               <span>{item.title}</span>
               <ChevronDown
                 size={16}
                 className={`transition-transform duration-300 ${
-                  expandedSections[item.id] ? "rotate-180" : ""
+                  expandedSections[item.id] ?"rotate-180" :""
                 }`}
               />
             </button>
@@ -258,13 +257,13 @@ const Sidebar = () => {
                       onClick={() => handleServiceClick(navItem)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                         isActive
-                          ? "bg-violet-600/10 text-violet-400"
-                          : "hover:bg-white/5 hover:text-white"
+                          ?"bg-violet-600/10 text-violet-400"
+                          :"hover:bg-white/5 hover:text-white"
                       }`}
                     >
                       <Icon
                         size={18}
-                        className={`${isActive ? "text-violet-400" : "text-gray-400 group-hover:text-gray-200"}`}
+                        className={`${isActive ?"text-violet-400" :"text-gray-400 group-hover:text-gray-200"}`}
                       />
                       {navItem.title}
                     </button>
@@ -285,13 +284,13 @@ const Sidebar = () => {
           onClick={() => handleServiceClick(item)}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
             isActive
-              ? "bg-violet-600/10 text-violet-400"
-              : "hover:bg-white/5 hover:text-white"
+              ?"bg-violet-600/10 text-violet-400"
+              :"hover:bg-white/5 hover:text-white"
           }`}
         >
           <Icon
             size={18}
-            className={`${isActive ? "text-violet-400" : "text-gray-400 group-hover:text-gray-200"}`}
+            className={`${isActive ?"text-violet-400" :"text-gray-400 group-hover:text-gray-200"}`}
           />
           {item.title}
         </button>
@@ -314,7 +313,7 @@ const Sidebar = () => {
             className="w-7 h-7 object-contain"
           />
           <h2 className="text-[22px] font-extrabold text-white tracking-tight">
-            PrepPilot{" "}
+            PrepPilot{""}
             <span className="text-violet-500 drop-shadow-[0_0_8px_rgba(167,139,250,0.3)]">
               AI
             </span>
@@ -336,8 +335,8 @@ const Sidebar = () => {
           }}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
             location.pathname.startsWith("/settings")
-              ? "bg-violet-600/10 text-violet-400 font-semibold"
-              : "text-gray-400 hover:bg-white/5 hover:text-white"
+              ?"bg-violet-600/10 text-violet-400 font-semibold"
+              :"text-gray-400 hover:bg-white/5 hover:text-white"
           }`}
         >
           <Settings size={18} />
@@ -350,8 +349,8 @@ const Sidebar = () => {
           }}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
             location.pathname.startsWith("/terms-and-conditions")
-              ? "bg-violet-600/10 text-violet-400 font-semibold"
-              : "text-gray-400 hover:bg-white/5 hover:text-white"
+              ?"bg-violet-600/10 text-violet-400 font-semibold"
+              :"text-gray-400 hover:bg-white/5 hover:text-white"
           }`}
         >
           <ScrollText size={18} />
@@ -360,12 +359,12 @@ const Sidebar = () => {
         <button 
           onClick={() => navigate("/support")}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
-            location.pathname === "/support"
-              ? "bg-violet-600/10 text-violet-400"
-              : "text-gray-400 hover:bg-white/5 hover:text-white"
+            location.pathname ==="/support"
+              ?"bg-violet-600/10 text-violet-400"
+              :"text-gray-400 hover:bg-white/5 hover:text-white"
           }`}
         >
-          <HelpCircle size={18} className={location.pathname === "/support" ? "text-violet-400" : ""} />
+          <HelpCircle size={18} className={location.pathname ==="/support" ?"text-violet-400" :""} />
           Help & Support
         </button>
 
@@ -390,7 +389,7 @@ const Sidebar = () => {
             )}
             <div className="flex flex-col">
               <span className="text-sm font-bold text-white max-w-[100px] truncate">
-                {user ? user.name || user.email : "Guest"}
+                {user ? user.name || user.email :"Guest"}
               </span>
             </div>
           </div>

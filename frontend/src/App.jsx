@@ -1,44 +1,44 @@
-import Compiler from "./components/Compiler";
-import SkillAssessment from "./components/SkillAssessment";
-import DsaSheet from "./components/SheetDetailsPage";
-import SheetList from "./components/SheetList";
-import UserProvider from "./context/userContext";
-import ThemeProvider from "./context/themeContext";
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import { AnimatePresence } from "framer-motion";
-import PageTransition from "./components/animations/PageTransition";
-import ErrorBoundary from "./components/ErrorBoundary";
+import Compiler from"./components/Compiler";
+import SkillAssessment from"./components/SkillAssessment";
+import DsaSheet from"./components/SheetDetailsPage";
+import SheetList from"./components/SheetList";
+import UserProvider from"./context/userContext";
+import ThemeProvider from"./context/themeContext";
+import React from"react";
+import { BrowserRouter as Router, Routes, Route } from"react-router-dom";
+import { Toaster } from"react-hot-toast";
+import { AnimatePresence } from"framer-motion";
+import PageTransition from"./components/animations/PageTransition";
+import ErrorBoundary from"./components/ErrorBoundary";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import VerifyEmail from "./pages/Auth/verifyEmail";
-import LandingPage from "./LandingPage";
-import Dashboard from "./pages/Home/Dashboard";
-import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
-import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
-import AIHelper from "./components/AIHepler";
-import PracticePage from "./pages/InterviewPrep/components/PracticePage";
-import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
-import { useContext } from "react";
-import { UserContext } from "./context/userContext";
-import MainLayout from "./components/Layouts/MainLayout";
-import { Navigate, Outlet } from "react-router-dom";
-import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
-import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
-import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
-import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
-import TermsandConditions from "./pages/Terms/TermsandConditions";
-import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
-import RepositoryHive from "./pages/OpenSource/RepositoryHive";
-import OSSBlog from "./pages/OpenSource/OSSBlog";
-import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
-import NotesBooks from "./pages/NotesBooks/NotesBooks";
-import JobsForYou from "./pages/Jobs/JobsForYou";
-import HelpSupport from "./pages/Support/HelpSupport";
-import Settings from "./pages/Settings/Settings";
-import NotFound from "./pages/NotFound";
+import Login from"./pages/Auth/Login";
+import SignUp from"./pages/Auth/SignUp";
+import VerifyEmail from"./pages/Auth/verifyEmail";
+import LandingPage from"./LandingPage";
+import Dashboard from"./pages/Home/Dashboard";
+import ProgressTrackerDashboard from"./pages/Home/ProgressTrackerDashboard";
+import InterviewPrep from"./pages/InterviewPrep/InterviewPrep";
+import AIHelper from"./components/AIHepler";
+import PracticePage from"./pages/InterviewPrep/components/PracticePage";
+import CognitiveGamesPage from"./pages/CognitiveGames/CognitiveGamesPage";
+import { useContext } from"react";
+import { UserContext } from"./context/userContext";
+import MainLayout from"./components/Layouts/MainLayout";
+import { Navigate, Outlet } from"react-router-dom";
+import ResumeTemplates from"./pages/ResumeBuilder/ResumeTemplates";
+import ResumeEditor from"./pages/ResumeBuilder/ResumeEditor";
+import ResumeAnalyzer from"./pages/ResumeBuilder/ResumeAnalyzer";
+import InterviewExperiences from"./pages/InterviewExperiences/InterviewExperiences";
+import TermsandConditions from"./pages/Terms/TermsandConditions";
+import ProjectIdeas from"./pages/ProjectIdeas/ProjectIdeas";
+import RepositoryHive from"./pages/OpenSource/RepositoryHive";
+import OSSBlog from"./pages/OpenSource/OSSBlog";
+import OpenSourceEvents from"./pages/OpenSource/OpenSourceEvents";
+import NotesBooks from"./pages/NotesBooks/NotesBooks";
+import JobsForYou from"./pages/Jobs/JobsForYou";
+import HelpSupport from"./pages/Support/HelpSupport";
+import Settings from"./pages/Settings/Settings";
+import NotFound from"./pages/NotFound";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) return null;
@@ -360,9 +360,9 @@ const App = () => {
           </Router>
           <Toaster
             toastOptions={{
-              className: "",
+              className:"",
               style: {
-                fontSize: "13px",
+                fontSize:"13px",
               },
             }}
           />

@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from "lucide-react";
+import React, { Component } from"react";
+import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from"lucide-react";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -24,27 +24,27 @@ class ErrorBoundary extends Component {
   }
 
   handleReset = () => {
-    const variant = this.props.variant || "fullscreen";
+    const variant = this.props.variant ||"fullscreen";
     this.setState({
       hasError: false,
       error: null,
       errorInfo: null,
       showDetails: false,
     });
-    if (variant !== "section") {
+    if (variant !=="section") {
       window.location.reload();
     }
   };
 
   handleGoHome = () => {
-    const variant = this.props.variant || "fullscreen";
+    const variant = this.props.variant ||"fullscreen";
     this.setState({
       hasError: false,
       error: null,
       errorInfo: null,
       showDetails: false,
     });
-    window.location.href = variant === "section" ? "/dashboard" : "/";
+    window.location.href = variant ==="section" ?"/dashboard" :"/";
   };
 
   toggleDetails = () => {
@@ -53,9 +53,9 @@ class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
-      const variant = this.props.variant || "fullscreen";
+      const variant = this.props.variant ||"fullscreen";
 
-      if (variant === "section") {
+      if (variant ==="section") {
         return (
           <div className="w-full min-h-[400px] flex items-center justify-center bg-transparent text-[var(--color-text-dark)] p-4 transition-colors duration-300">
             <div className="max-w-xl w-full text-center space-y-6 glass-panel p-6 md:p-8 rounded-2xl shadow-xl border border-[var(--color-border)] dot-grid-bg relative overflow-hidden bg-white/40 dark:bg-black/20 backdrop-blur-sm">
@@ -75,7 +75,7 @@ class ErrorBoundary extends Component {
                 <h2 className="text-xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-[var(--color-primary)] to-indigo-500 bg-clip-text text-transparent animate-text-shine">
                   Component Rendering Failed
                 </h2>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs md:text-sm text-text-muted max-w-sm mx-auto leading-relaxed">
                   An error occurred in this section. You can retry rendering or use the sidebar navigation to switch pages.
                 </p>
               </div>
@@ -90,14 +90,14 @@ class ErrorBoundary extends Component {
                     <span className="truncate pr-4">
                       Error: {this.state.error.message || String(this.state.error)}
                     </span>
-                    <span className="flex items-center gap-1.5 text-[10px] text-gray-500 font-normal shrink-0">
-                      {this.state.showDetails ? "Hide details" : "Show details"}
+                    <span className="flex items-center gap-1.5 text-[10px] text-text-muted font-normal shrink-0">
+                      {this.state.showDetails ?"Hide details" :"Show details"}
                       {this.state.showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </span>
                   </button>
 
                   {this.state.showDetails && (
-                    <div className="p-3 border-t border-[var(--color-border)] font-mono text-[10px] overflow-x-auto bg-gray-50 dark:bg-gray-900/40 text-gray-600 dark:text-gray-400 max-h-40 custom-scrollbar whitespace-pre-wrap select-text">
+                    <div className="p-3 border-t border-[var(--color-border)] font-mono text-[10px] overflow-x-auto bg-gray-50 dark:bg-gray-900/40 text-text-secondary  max-h-40 custom-scrollbar whitespace-pre-wrap select-text">
                       {this.state.errorInfo ? (
                         this.state.errorInfo.componentStack
                       ) : (
@@ -119,7 +119,7 @@ class ErrorBoundary extends Component {
                 </button>
                 <button
                   onClick={this.handleGoHome}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold transition-all duration-300 cursor-pointer border border-[var(--color-border)]"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-primary text-sm font-semibold transition-all duration-300 cursor-pointer border border-[var(--color-border)]"
                 >
                   <Home size={16} />
                   Go to Dashboard
@@ -150,7 +150,7 @@ class ErrorBoundary extends Component {
               <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl bg-gradient-to-r from-red-500 via-[var(--color-primary)] to-indigo-500 bg-clip-text text-transparent animate-text-shine">
                 Oops! Something Went Wrong
               </h1>
-              <p className="text-base text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+              <p className="text-base text-text-muted max-w-md mx-auto leading-relaxed">
                 An unexpected crash occurred. We've captured the diagnostics and secured the application state.
               </p>
             </div>
@@ -165,14 +165,14 @@ class ErrorBoundary extends Component {
                   <span className="truncate pr-4">
                     Error: {this.state.error.message || String(this.state.error)}
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs text-gray-500 font-normal shrink-0">
-                    {this.state.showDetails ? "Hide stack" : "Show stack"}
+                  <span className="flex items-center gap-1.5 text-xs text-text-muted font-normal shrink-0">
+                    {this.state.showDetails ?"Hide stack" :"Show stack"}
                     {this.state.showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </span>
                 </button>
 
                 {this.state.showDetails && (
-                  <div className="p-4 border-t border-[var(--color-border)] font-mono text-xs overflow-x-auto bg-gray-50 dark:bg-gray-900/40 text-gray-600 dark:text-gray-400 max-h-60 custom-scrollbar whitespace-pre-wrap select-text">
+                  <div className="p-4 border-t border-[var(--color-border)] font-mono text-xs overflow-x-auto bg-gray-50 dark:bg-gray-900/40 text-text-secondary  max-h-60 custom-scrollbar whitespace-pre-wrap select-text">
                     {this.state.errorInfo ? (
                       this.state.errorInfo.componentStack
                     ) : (
@@ -194,7 +194,7 @@ class ErrorBoundary extends Component {
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold transition-all duration-300 cursor-pointer border border-[var(--color-border)]"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-primary font-semibold transition-all duration-300 cursor-pointer border border-[var(--color-border)]"
               >
                 <Home size={18} />
                 Go Home

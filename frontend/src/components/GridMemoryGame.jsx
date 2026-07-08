@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from"react";
 
 // ─── Game config ───────────────────────────────────────────────────────────────
 const LEVELS = [
@@ -27,7 +27,7 @@ function buildGrid(lvl) {
   const positions = shuffle([...Array(total).keys()]);
   const coloredSet = new Set(positions.slice(0, colored));
   return Array.from({ length: total }, (_, i) => ({
-    colored: coloredSet.has(i), clicked: false, state: "idle",
+    colored: coloredSet.has(i), clicked: false, state:"idle",
   }));
 }
 
@@ -54,16 +54,16 @@ const GridMemoryGame = () => {
   }, []);
 
   useEffect(() => {
-    if (phase !== "preview") return;
+    if (phase !=="preview") return;
     previewRef.current = setTimeout(() => {
-      setGrid((g) => g.map((c) => ({ ...c, state: "idle" })));
+      setGrid((g) => g.map((c) => ({ ...c, state:"idle" })));
       setPhase("playing");
     }, LEVELS[level].preview * 1000);
     return () => clearTimeout(previewRef.current);
   }, [phase, level]);
 
   useEffect(() => {
-    if (phase !== "playing") return;
+    if (phase !=="playing") return;
     if (timeLeft <= 0) { setPhase("timeup"); return; }
     timerRef.current = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timerRef.current);
@@ -72,10 +72,10 @@ const GridMemoryGame = () => {
   useEffect(() => () => clearTimers(), []);
 
   const handleCellClick = (i) => {
-    if (phase !== "playing") return;
+    if (phase !=="playing") return;
     const cell = grid[i];
     if (cell.clicked) return;
-    setGrid((g) => g.map((c, idx) => idx === i ? { ...c, clicked: true, state: c.colored ? "correct" : "wrong" } : c));
+    setGrid((g) => g.map((c, idx) => idx === i ? { ...c, clicked: true, state: c.colored ?"correct" :"wrong" } : c));
     if (cell.colored) {
       const nr = remaining - 1; const ns = score + 10;
       setRemaining(nr); setScore(ns);
@@ -92,19 +92,19 @@ const GridMemoryGame = () => {
   const CELL = 58;
 
   const cellClass = (c) => {
-    if (phase === "preview") return c.colored ? "bg-violet-600" : "bg-gray-200 dark:bg-white/10";
-    if (c.state === "correct") return "bg-emerald-500";
-    if (c.state === "wrong") return "bg-red-500";
-    return "bg-gray-200 dark:bg-white/10 hover:bg-violet-300 dark:hover:bg-violet-700/50 cursor-pointer";
+    if (phase ==="preview") return c.colored ?"bg-violet-600" :"bg-gray-200 dark:bg-white/10";
+    if (c.state ==="correct") return"bg-emerald-500";
+    if (c.state ==="wrong") return"bg-red-500";
+    return"bg-gray-200 dark:bg-white/10 hover:bg-violet-300 dark:hover:bg-violet-700/50 cursor-pointer";
   };
 
   // Start screen
-  if (phase === "start") {
+  if (phase ==="start") {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="text-6xl mb-5">🧠</div>
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Grid Memory Challenge</h3>
-        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-sm mx-auto mb-8">
+        <h3 className="text-2xl font-bold text-text-primary mb-3">Grid Memory Challenge</h3>
+        <p className="text-text-muted text-sm leading-relaxed max-w-sm mx-auto mb-8">
           Purple cells will flash briefly — memorise their positions, then click them all from memory.
           3 wrong clicks = game over. Beat all 8 levels!
         </p>
@@ -124,7 +124,7 @@ const GridMemoryGame = () => {
       <div className="flex gap-1 mb-5">
         {LEVELS.map((_, i) => (
           <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${
-            i < level ? "bg-violet-600" : i === level ? "bg-violet-400" : "bg-gray-200 dark:bg-white/10"
+            i < level ?"bg-violet-600" : i === level ?"bg-violet-400" :"bg-gray-200 dark:bg-white/10"
           }`} />
         ))}
       </div>
@@ -132,8 +132,8 @@ const GridMemoryGame = () => {
       {/* Stats */}
       <div className="flex gap-2 mb-4 flex-wrap">
         {[["Mistakes", `${mistakes}/3`], ["Remaining", remaining], ["Score", score], ["Time", `${timeLeft}s`]].map(([label, val]) => (
-          <div key={label} className={`bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm font-semibold ${
-            label === "Time" && timeLeft <= 5 ? "text-red-500" : "text-gray-800 dark:text-gray-100"
+          <div key={label} className={`bg-card border border-border-color rounded-lg px-3 py-1.5 text-sm font-semibold ${
+            label ==="Time" && timeLeft <= 5 ?"text-red-500" :"text-text-primary dark:text-gray-100"
           }`}>
             <span className="text-gray-400 font-normal">{label} </span>{val}
           </div>
@@ -144,72 +144,72 @@ const GridMemoryGame = () => {
       </div>
 
       {/* Timer bar */}
-      {(phase === "playing" || phase === "preview") && (
+      {(phase ==="playing" || phase ==="preview") && (
         <div className="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full mb-4 overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-1000 linear ${timeLeft <= 5 ? "bg-red-500" : "bg-violet-500"}`}
+          <div className={`h-full rounded-full transition-all duration-1000 linear ${timeLeft <= 5 ?"bg-red-500" :"bg-violet-500"}`}
             style={{ width: `${pct}%` }} />
         </div>
       )}
 
       {/* Phase label */}
       <p className="text-center text-xs font-semibold text-violet-500 dark:text-violet-400 mb-5 h-4">
-        {phase === "preview" ? "Memorise the purple cells…" : phase === "playing" ? "Click all the purple cells!" : ""}
+        {phase ==="preview" ?"Memorise the purple cells…" : phase ==="playing" ?"Click all the purple cells!" :""}
       </p>
 
       {/* Grid */}
       <div className="mx-auto w-fit" style={{
-        display: "grid",
+        display:"grid",
         gridTemplateColumns: `repeat(${lvl.cols}, ${CELL}px)`,
-        gap: "7px",
+        gap:"7px",
       }}>
         {grid.map((c, i) => (
           <div
             key={i}
             onClick={() => handleCellClick(i)}
-            className={`rounded-lg transition-all duration-150 ${cellClass(c)} ${c.clicked ? "cursor-default" : ""}`}
+            className={`rounded-lg transition-all duration-150 ${cellClass(c)} ${c.clicked ?"cursor-default" :""}`}
             style={{ width: CELL, height: CELL }}
           />
         ))}
       </div>
 
       {/* Result overlay */}
-      {(phase === "won" || phase === "lost" || phase === "timeup") && (
+      {(phase ==="won" || phase ==="lost" || phase ==="timeup") && (
         <div className="text-center mt-8">
           <div className="text-5xl mb-4">
-            {phase === "won" ? (isLast ? "🏆" : "🎉") : phase === "lost" ? "❌" : "⏰"}
+            {phase ==="won" ? (isLast ?"🏆" :"🎉") : phase ==="lost" ?"❌" :"⏰"}
           </div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {phase === "won"
-              ? isLast ? "All levels complete!" : `Level ${level + 1} complete!`
-              : phase === "lost" ? "Too many mistakes!" : "Time's up!"}
+          <h3 className="text-xl font-bold text-text-primary mb-2">
+            {phase ==="won"
+              ? isLast ?"All levels complete!" : `Level ${level + 1} complete!`
+              : phase ==="lost" ?"Too many mistakes!" :"Time's up!"}
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">
-            {phase === "won"
-              ? `Found all ${lvl.colored} cells with ${mistakes} mistake${mistakes !== 1 ? "s" : ""}. Score: ${score}`
-              : phase === "lost"
+          <p className="text-text-muted text-sm leading-relaxed mb-6">
+            {phase ==="won"
+              ? `Found all ${lvl.colored} cells with ${mistakes} mistake${mistakes !== 1 ?"s" :""}. Score: ${score}`
+              : phase ==="lost"
               ? `You made 3 mistakes on Level ${level + 1}. Study the pattern and try again.`
-              : `Ran out of time on Level ${level + 1}. ${remaining} cell${remaining !== 1 ? "s" : ""} left to find.`}
+              : `Ran out of time on Level ${level + 1}. ${remaining} cell${remaining !== 1 ?"s" :""} left to find.`}
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
-            {phase === "won" && !isLast && (
+            {phase ==="won" && !isLast && (
               <button onClick={() => startLevel(level + 1)}
                 className="bg-violet-600 hover:bg-violet-700 text-white font-bold px-6 py-2.5 rounded-full transition-colors text-sm shadow">
                 Next Level →
               </button>
             )}
-            {phase === "won" && isLast && (
+            {phase ==="won" && isLast && (
               <button onClick={() => startLevel(0)}
                 className="bg-violet-600 hover:bg-violet-700 text-white font-bold px-6 py-2.5 rounded-full transition-colors text-sm shadow">
                 🔁 Play Again
               </button>
             )}
             <button onClick={() => startLevel(level)}
-              className="bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-white font-semibold px-6 py-2.5 rounded-full transition-colors text-sm">
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-text-secondary font-semibold px-6 py-2.5 rounded-full transition-colors text-sm">
               🔄 Retry
             </button>
-            {phase !== "won" && (
+            {phase !=="won" && (
               <button onClick={() => setPhase("start")}
-                className="bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-white font-semibold px-6 py-2.5 rounded-full transition-colors text-sm">
+                className="bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-text-secondary font-semibold px-6 py-2.5 rounded-full transition-colors text-sm">
                 Start Over
               </button>
             )}

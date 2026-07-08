@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { LuPlus } from "react-icons/lu";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import moment from "moment";
-import { User, PlusCircle } from "lucide-react";
+import React, { useEffect, useState } from"react";
+import { LuPlus } from"react-icons/lu";
+import toast from"react-hot-toast";
+import { useNavigate } from"react-router-dom";
+import moment from"moment";
+import { User, PlusCircle } from"lucide-react";
+import ThemeToggle from "../../components/ThemeToggle";
 
+import SummaryCard from"../../components/Cards/SummaryCard";
+import Modal from"../../components/Loader/Modal";
+import CreateSessionForm from"./CreateSessionForm";
+import DeleteAlertContent from"../../components/DeleteAlertContent";
 
-import SummaryCard from "../../components/Cards/SummaryCard";
-import Modal from "../../components/Loader/Modal";
-import CreateSessionForm from "./CreateSessionForm";
-import DeleteAlertContent from "../../components/DeleteAlertContent";
-
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import { CARD_BG } from "../../utils/data";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
+import { CARD_BG } from"../../utils/data";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -49,15 +49,20 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white md:px-10 relative overflow-hidden transition-colors duration-300">
+      <div className="min-h-screen bg-background text-text-primary md:px-10 relative overflow-hidden transition-colors duration-300">
         <div className="container mx-auto pt-8 pb-16 px-4 md:px-0 relative z-10">
-          <div className="mb-8 md:mb-10">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
-              Your Interview Sessions
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
-              Manage, review, and dynamically create your AI-driven mock interview sessions.
-            </p>
+          <div className="mb-8 md:mb-10 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-text-primary transition-colors duration-300 tracking-tight">
+                Your Interview Sessions
+              </h1>
+              <p className="text-text-muted mt-2 text-sm md:text-base">
+                Manage, review, and dynamically create your AI-driven mock interview sessions.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Sessions Grid */}
@@ -67,27 +72,27 @@ const Dashboard = () => {
                 <SummaryCard
                   key={data._id}
                   colors={CARD_BG[index % CARD_BG.length]}
-                  role={data.role || ""}
-                  topicsToFocus={data.topicsToFocus || ""}
-                  experience={data.experience || "-"}
-                  questions={data.questions?.length || "-"}
-                  description={data.description || ""}
-                  lastupdated={data.updatedAt ? moment(data.updatedAt).format("Do MMM YYYY") : ""}
+                  role={data.role ||""}
+                  topicsToFocus={data.topicsToFocus ||""}
+                  experience={data.experience ||"-"}
+                  questions={data.questions?.length ||"-"}
+                  description={data.description ||""}
+                  lastupdated={data.updatedAt ? moment(data.updatedAt).format("Do MMM YYYY") :""}
                   onSelect={() => navigate(`/interview-prep/${data._id}`)}
                   onDelete={() => setOpenDeleteAlert({ open: true, data })}
                 />
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 px-6 mt-8 text-center border border-gray-200 dark:border-white/10 rounded-2xl bg-gray-50/50 dark:bg-gray-800/20 shadow-sm">
-              <div className="flex items-center justify-center w-16 h-16 mb-5 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-400 dark:text-gray-500 shadow-sm">
+            <div className="flex flex-col items-center justify-center py-20 px-6 mt-8 text-center border border-border-color rounded-2xl bg-gray-50/50 dark:bg-gray-800/20 shadow-sm">
+              <div className="flex items-center justify-center w-16 h-16 mb-5 rounded-2xl bg-card border border-border-color text-text-muted shadow-sm">
                 <User size={28} strokeWidth={1.5} />
               </div>
               
-              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-lg md:text-xl font-bold text-text-primary mb-2">
                 No interview sessions
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-8 text-sm leading-relaxed">
+              <p className="text-text-muted max-w-sm mb-8 text-sm leading-relaxed">
                 You don't have any mock interview sessions yet. Create your first session to start practicing with our AI interviewer.
               </p>
               

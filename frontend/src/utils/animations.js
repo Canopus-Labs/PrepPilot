@@ -7,7 +7,7 @@ export const pageVariants = {
 
 export const pageTransition = {
   duration: 0.4,
-  ease: "easeInOut",
+  ease:"easeInOut",
 };
 
 export const fadeInVariants = {
@@ -62,7 +62,7 @@ export const backdropVariants = {
 
 export const expandVariants = {
   initial: { opacity: 0, height: 0 },
-  animate: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
+  animate: { opacity: 1, height:"auto", transition: { duration: 0.3 } },
   exit: { opacity: 0, height: 0, transition: { duration: 0.2 } },
 };
 

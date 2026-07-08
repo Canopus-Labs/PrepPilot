@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from"react";
 import {
   Search,
   Github,
@@ -8,28 +8,28 @@ import {
   Code,
   Loader,
   AlertCircle,
-} from "lucide-react";
-import { motion } from "framer-motion";
+} from"lucide-react";
+import { motion } from"framer-motion";
 
 const FILTER_OPTIONS = [
   {
-    id: "good-first-issue",
-    label: "Good First Issue",
-    topic: "good-first-issue",
+    id:"good-first-issue",
+    label:"Good First Issue",
+    topic:"good-first-issue",
   },
   {
-    id: "beginner-friendly",
-    label: "Beginner Friendly",
-    topic: "beginner-friendly",
+    id:"beginner-friendly",
+    label:"Beginner Friendly",
+    topic:"beginner-friendly",
   },
-  { id: "documentation", label: "Documentation", topic: "documentation" },
-  { id: "bug-fix", label: "Bug Fix", topic: "bug-fix" },
-  { id: "feature", label: "Feature Request", topic: "feature" },
-  { id: "open-source", label: "Open Source", topic: "open-source" },
-  { id: "hacktoberfest", label: "Hacktoberfest", topic: "hacktoberfest" },
-  { id: "python", label: "Python", topic: "language:python" },
-  { id: "javascript", label: "JavaScript", topic: "language:javascript" },
-  { id: "java", label: "Java", topic: "language:java" },
+  { id:"documentation", label:"Documentation", topic:"documentation" },
+  { id:"bug-fix", label:"Bug Fix", topic:"bug-fix" },
+  { id:"feature", label:"Feature Request", topic:"feature" },
+  { id:"open-source", label:"Open Source", topic:"open-source" },
+  { id:"hacktoberfest", label:"Hacktoberfest", topic:"hacktoberfest" },
+  { id:"python", label:"Python", topic:"language:python" },
+  { id:"javascript", label:"JavaScript", topic:"language:javascript" },
+  { id:"java", label:"Java", topic:"language:java" },
 ];
 
 const RepositoryHive = () => {
@@ -63,18 +63,18 @@ const RepositoryHive = () => {
         queryParams.push(searchQuery.trim());
       }
 
-      const query = queryParams.join(" ");
+      const query = queryParams.join("");
       const sortMap = {
-        stars: "sort=stars&order=desc",
-        recent: "sort=updated&order=desc",
-        forks: "sort=forks&order=desc",
+        stars:"sort=stars&order=desc",
+        recent:"sort=updated&order=desc",
+        forks:"sort=forks&order=desc",
       };
 
       const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sortMap[sortBy]}&per_page=30`;
 
       const response = await fetch(url, {
         headers: {
-          Accept: "application/vnd.github.v3+json",
+          Accept:"application/vnd.github.v3+json",
         },
       });
 
@@ -86,7 +86,7 @@ const RepositoryHive = () => {
       setRepositories(data.items || []);
     } catch (err) {
       setError(
-        err.message || "Failed to fetch repositories. Please try again later.",
+        err.message ||"Failed to fetch repositories. Please try again later.",
       );
       setRepositories([]);
     } finally {
@@ -113,7 +113,7 @@ const RepositoryHive = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -127,11 +127,11 @@ const RepositoryHive = () => {
               size={32}
               className="text-violet-600 dark:text-violet-400"
             />
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-4xl font-bold text-text-primary">
               Repository Hive
             </h1>
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-text-secondary">
             Discover open-source projects perfect for contributing. Find
             repositories with good first issues and beginner-friendly
             contributions.
@@ -151,9 +151,9 @@ const RepositoryHive = () => {
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                onKeyPress={(e) => e.key ==="Enter" && handleSearch()}
                 placeholder="Search repositories (e.g., react, django, kubernetes)..."
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-4 py-3 rounded-lg border border-border-color  bg-card text-text-primary placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <button
@@ -168,22 +168,22 @@ const RepositoryHive = () => {
 
           {/* Sort Options */}
           <div className="flex gap-3 mb-6">
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+            <span className="text-sm font-semibold text-gray-700  flex items-center">
               Sort by:
             </span>
             <div className="flex gap-2">
               {[
-                { id: "stars", label: "⭐ Most Stars" },
-                { id: "recent", label: "📅 Recently Updated" },
-                { id: "forks", label: "🔀 Most Forks" },
+                { id:"stars", label:"⭐ Most Stars" },
+                { id:"recent", label:"📅 Recently Updated" },
+                { id:"forks", label:"🔀 Most Forks" },
               ].map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setSortBy(option.id)}
                   className={`px-4 py-2 rounded-lg border transition-all font-medium text-sm ${
                     sortBy === option.id
-                      ? "bg-violet-600 text-white border-violet-600"
-                      : "border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-violet-400 dark:hover:border-violet-400"
+                      ?"bg-violet-600 text-white border-violet-600"
+                      :"border-border-color  text-gray-700  hover:border-violet-400 dark:hover:border-violet-400"
                   }`}
                 >
                   {option.label}
@@ -200,7 +200,7 @@ const RepositoryHive = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-8"
         >
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-lg font-bold text-text-primary mb-4">
             Filter by Topics
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -210,8 +210,8 @@ const RepositoryHive = () => {
                 onClick={() => toggleFilter(filter.id)}
                 className={`px-4 py-2 rounded-lg border-2 font-medium text-sm transition-all ${
                   selectedFilters.includes(filter.id)
-                    ? "bg-violet-600/10 border-violet-600 text-violet-600 dark:text-violet-400"
-                    : "border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-400 hover:border-violet-400 dark:hover:border-violet-400"
+                    ?"bg-violet-600/10 border-violet-600 text-violet-600 dark:text-violet-400"
+                    :"border-border-color  text-gray-700  hover:border-violet-400 dark:hover:border-violet-400"
                 }`}
               >
                 {filter.label}
@@ -244,7 +244,7 @@ const RepositoryHive = () => {
               size={40}
               className="text-violet-600 dark:text-violet-400 animate-spin mb-4"
             />
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-text-secondary">
               Loading repositories...
             </p>
           </div>
@@ -267,7 +267,7 @@ const RepositoryHive = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-6 hover:border-violet-400 dark:hover:border-violet-400 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
+                className="group bg-card border border-border-color rounded-lg p-6 hover:border-violet-400 dark:hover:border-violet-400 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
               >
                 {/* Header */}
                 <div className="mb-4">
@@ -277,16 +277,16 @@ const RepositoryHive = () => {
                       className="text-violet-600 dark:text-violet-400 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <h3 className="text-base font-bold text-text-primary truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                         {repo.name}
                       </h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      <p className="text-xs text-text-secondary  truncate">
                         {repo.owner.login}
                       </p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                    {repo.description || "No description available"}
+                  <p className="text-sm text-text-secondary  line-clamp-2">
+                    {repo.description ||"No description available"}
                   </p>
                 </div>
 
@@ -298,7 +298,7 @@ const RepositoryHive = () => {
                         size={14}
                         className="text-violet-600 dark:text-violet-400"
                       />
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded">
+                      <span className="text-xs font-medium text-gray-700  bg-surface px-2 py-1 rounded">
                         {repo.language}
                       </span>
                     </div>
@@ -315,7 +315,7 @@ const RepositoryHive = () => {
                         </span>
                       ))}
                       {repo.topics.length > 3 && (
-                        <span className="text-xs px-2 py-1 text-gray-600 dark:text-gray-400">
+                        <span className="text-xs px-2 py-1 text-text-secondary">
                           +{repo.topics.length - 3}
                         </span>
                       )}
@@ -324,24 +324,24 @@ const RepositoryHive = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/10 text-sm">
+                <div className="flex items-center justify-between pt-4 border-t border-border-color text-sm">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1 text-text-secondary">
                       <Star size={14} />
                       <span className="font-medium">
                         {repo.stargazers_count}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1 text-text-secondary">
                       <GitFork size={14} />
                       <span className="font-medium">{repo.forks_count}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1 text-text-secondary">
                       <Eye size={14} />
                       <span className="font-medium">{repo.watchers_count}</span>
                     </div>
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-text-secondary">
                     {repo.open_issues_count} issues
                   </div>
                 </div>
@@ -359,9 +359,9 @@ const RepositoryHive = () => {
           >
             <Github
               size={48}
-              className="mx-auto text-gray-400 dark:text-gray-600 mb-4"
+              className="mx-auto text-gray-400 dark:text-text-secondary mb-4"
             />
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <p className="text-text-secondary  text-lg">
               No repositories found. Try adjusting your filters or search query.
             </p>
           </motion.div>
@@ -372,7 +372,7 @@ const RepositoryHive = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-8 text-center text-gray-600 dark:text-gray-400"
+            className="mt-8 text-center text-text-secondary"
           >
             <p>Showing {repositories.length} repositories</p>
           </motion.div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from"react";
 import {
   LuChevronDown,
   LuFileText,
@@ -6,24 +6,24 @@ import {
   LuTriangleAlert,
   LuShield,
   LuGlobe,
-} from "react-icons/lu";
+} from"react-icons/lu";
 
 const sectionsData = [
-  { id: "intro",        title: "Introduction",          icon: LuFileText      },
-  { id: "acceptance",  title: "Acceptance of Terms",    icon: LuUser          },
-  { id: "user-accounts", title: "User Accounts",        icon: LuUser          },
-  { id: "use-of-service", title: "Use of Service",      icon: LuGlobe         },
-  { id: "prohibited",  title: "Prohibited Conduct",     icon: LuTriangleAlert },
-  { id: "intellectual", title: "Intellectual Property", icon: LuShield        },
-  { id: "termination", title: "Termination",            icon: LuTriangleAlert },
-  { id: "liability",   title: "Limitation of Liability", icon: LuShield       },
-  { id: "governing",   title: "Governing Law",          icon: LuGlobe         },
-  { id: "changes",     title: "Changes to Terms",       icon: LuFileText      },
+  { id:"intro",        title:"Introduction",          icon: LuFileText      },
+  { id:"acceptance",  title:"Acceptance of Terms",    icon: LuUser          },
+  { id:"user-accounts", title:"User Accounts",        icon: LuUser          },
+  { id:"use-of-service", title:"Use of Service",      icon: LuGlobe         },
+  { id:"prohibited",  title:"Prohibited Conduct",     icon: LuTriangleAlert },
+  { id:"intellectual", title:"Intellectual Property", icon: LuShield        },
+  { id:"termination", title:"Termination",            icon: LuTriangleAlert },
+  { id:"liability",   title:"Limitation of Liability", icon: LuShield       },
+  { id:"governing",   title:"Governing Law",          icon: LuGlobe         },
+  { id:"changes",     title:"Changes to Terms",       icon: LuFileText      },
 ];
 
 const getSectionContent = (id) => {
   switch (id) {
-    case "intro":
+    case"intro":
       return (
         <p>
           These Terms and Conditions govern your use of PrepPilot AI and its
@@ -31,7 +31,7 @@ const getSectionContent = (id) => {
           these terms.
         </p>
       );
-    case "acceptance":
+    case"acceptance":
       return (
         <p>
           By creating an account or using PrepPilot AI, you confirm that you
@@ -39,7 +39,7 @@ const getSectionContent = (id) => {
           well as our Privacy Policy.
         </p>
       );
-    case "user-accounts":
+    case"user-accounts":
       return (
         <ul className="list-disc pl-5 space-y-1.5">
           <li>You must provide accurate and complete information when creating an account.</li>
@@ -47,7 +47,7 @@ const getSectionContent = (id) => {
           <li>You must notify us immediately of any unauthorized use of your account.</li>
         </ul>
       );
-    case "use-of-service":
+    case"use-of-service":
       return (
         <p>
           PrepPilot AI is intended for personal and professional interview
@@ -55,7 +55,7 @@ const getSectionContent = (id) => {
           in violation of these terms.
         </p>
       );
-    case "prohibited":
+    case"prohibited":
       return (
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Sharing or selling access to your account</li>
@@ -64,7 +64,7 @@ const getSectionContent = (id) => {
           <li>Uploading malicious code or content</li>
         </ul>
       );
-    case "intellectual":
+    case"intellectual":
       return (
         <p>
           All content, features, and functionality on PrepPilot AI are owned by
@@ -72,29 +72,29 @@ const getSectionContent = (id) => {
           property laws.
         </p>
       );
-    case "termination":
+    case"termination":
       return (
         <p>
           We reserve the right to suspend or terminate your account at our
           discretion if you violate these terms.
         </p>
       );
-    case "liability":
+    case"liability":
       return (
         <p>
-          PrepPilot AI is provided "as is". We are not liable for any indirect,
+          PrepPilot AI is provided"as is". We are not liable for any indirect,
           incidental, or consequential damages arising from your use of the
           service.
         </p>
       );
-    case "governing":
+    case"governing":
       return (
         <p>
           These Terms shall be governed by and construed in accordance with the
           laws of India.
         </p>
       );
-    case "changes":
+    case"changes":
       return (
         <p>
           We may update these Terms from time to time. Continued use of the
@@ -122,7 +122,7 @@ const TermsandConditions = () => {
     setTimeout(() => {
       const el = document.getElementById(id);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.scrollIntoView({ behavior:"smooth", block:"start" });
       }
     }, 50);
   };
@@ -144,20 +144,20 @@ const TermsandConditions = () => {
           if (entry.isIntersecting) setActiveSection(entry.target.id);
         });
       },
-      { threshold: 0.3, rootMargin: "-60px 0px -40% 0px" }
+      { threshold: 0.3, rootMargin:"-60px 0px -40% 0px" }
     );
     document.querySelectorAll(".policy-section").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="min-h-full bg-white dark:bg-[#0b1120] text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <div className="min-h-full bg-background text-text-primary transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex gap-8">
 
         {/* LEFT — Table of Contents */}
         <aside className="hidden lg:block w-56 flex-shrink-0">
           <div className="sticky top-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 flex items-center gap-2">
               <LuFileText size={13} />
               Table of Contents
             </p>
@@ -171,17 +171,17 @@ const TermsandConditions = () => {
                     onClick={() => openAndScrollTo(s.id)}
                     className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-all duration-150 ${
                       isActive
-                        ? "bg-violet-500/10 text-violet-600 dark:text-violet-400 font-semibold"
-                        : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5"
+                        ?"bg-violet-500/10 text-violet-600 dark:text-violet-400 font-semibold"
+                        :"text-text-muted hover:text-text-primary dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5"
                     }`}
                   >
-                    <Icon size={13} className={isActive ? "text-violet-500" : "text-gray-400"} />
+                    <Icon size={13} className={isActive ?"text-violet-500" :"text-gray-400"} />
                     {s.title}
                   </button>
                 );
               })}
             </nav>
-            <p className="mt-6 text-[10px] text-gray-400 dark:text-gray-600">
+            <p className="mt-6 text-[10px] text-gray-400 dark:text-text-secondary">
               Last Updated: June 20, 2026
             </p>
           </div>
@@ -194,10 +194,10 @@ const TermsandConditions = () => {
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-400 bg-violet-500/10 border border-violet-500/20 px-3 py-1 rounded-full mb-3">
               <LuFileText size={11} /> Legal
             </span>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-text-primary">
               Terms and Conditions
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-text-muted mt-1">
               Please read these terms carefully before using PrepPilot AI.
             </p>
           </div>
@@ -211,7 +211,7 @@ const TermsandConditions = () => {
                 <div
                   id={sec.id}
                   key={sec.id}
-                  className="policy-section border border-gray-200 dark:border-white/8 rounded-xl overflow-hidden bg-gray-50 dark:bg-white/[0.03] scroll-mt-6"
+                  className="policy-section border border-border-color dark:border-white/8 rounded-xl overflow-hidden bg-gray-50 dark:bg-white/[0.03] scroll-mt-6"
                 >
                   <button
                     onClick={() => toggleSection(sec.id)}
@@ -219,18 +219,18 @@ const TermsandConditions = () => {
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon size={15} className="text-violet-500 dark:text-violet-400 shrink-0" />
-                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                      <span className="text-sm font-semibold text-text-primary dark:text-gray-100">
                         {sec.title}
                       </span>
                     </div>
                     <LuChevronDown
                       size={15}
-                      className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                      className={`text-gray-400 transition-transform duration-200 ${isOpen ?"rotate-180" :""}`}
                     />
                   </button>
 
                   {isOpen && (
-                    <div className="px-5 pb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400 border-t border-gray-100 dark:border-white/5 pt-3">
+                    <div className="px-5 pb-4 text-sm leading-relaxed text-text-secondary  border-t border-gray-100  pt-3">
                       {getSectionContent(sec.id)}
                     </div>
                   )}
@@ -241,8 +241,8 @@ const TermsandConditions = () => {
 
           {/* Contact footer */}
           <div className="mt-10 p-6 rounded-xl border border-violet-500/20 bg-violet-500/5 text-center">
-            <p className="text-sm font-semibold text-gray-800 dark:text-white mb-1">Have questions?</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-sm font-semibold text-text-primary  mb-1">Have questions?</p>
+            <p className="text-xs text-text-muted mb-4">
               Reach out to us about these Terms at any time.
             </p>
             <a
@@ -253,7 +253,7 @@ const TermsandConditions = () => {
             </a>
           </div>
 
-          <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">
+          <p className="mt-6 text-center text-xs text-gray-400 dark:text-text-secondary">
             © {new Date().getFullYear()} PrepPilot AI. All rights reserved.
           </p>
         </main>

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import moment from "moment";
+import React, { useEffect, useState, useContext, useRef } from"react";
+import { useNavigate, Link } from"react-router-dom";
+import moment from"moment";
 import {
   TrendingUp,
   FileText,
@@ -10,32 +10,33 @@ import {
   Video,
   ArrowRight,
   CheckCircle,
-} from "lucide-react";
-import toast from "react-hot-toast";
-import AchievementBadge from "../../components/AchievementBadge";
-import { UserContext } from "../../context/userContext";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import { CARD_BG } from "../../utils/data";
+} from"lucide-react";
+import toast from"react-hot-toast";
+import AchievementBadge from"../../components/AchievementBadge";
+import { UserContext } from"../../context/userContext";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
+import { CARD_BG } from"../../utils/data";
+import ThemeToggle from "../../components/ThemeToggle";
 
-import SummaryCard from "../../components/Cards/SummaryCard";
+import SummaryCard from"../../components/Cards/SummaryCard";
 
 // Helper components for the dashboard
 const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass }) => (
   <div
-    className={`relative overflow-hidden rounded-2xl p-6 ${gradientClass} border border-white/10 dark:border-white/5 shadow-sm`}
+    className={`relative overflow-hidden rounded-2xl p-6 ${gradientClass} border border-white/10  shadow-sm`}
   >
     <div className="flex justify-between items-start mb-4">
       <div>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+        <p className="text-sm font-medium text-text-muted mb-1">
           {title}
         </p>
-        <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h3 className="text-3xl font-bold text-text-primary">
           {value}
         </h3>
       </div>
       <div className="w-14 h-14 rounded-full bg-gradient-to-br from-white/40 to-white/20 dark:from-white/15 dark:to-white/5 border border-white/30 dark:border-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-black/10 dark:shadow-black/30">
-        <Icon size={28} className="text-gray-700 dark:text-white/80" />
+        <Icon size={28} className="text-text-secondary/80" />
       </div>
     </div>
   </div>
@@ -44,21 +45,21 @@ const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass }) => (
 const SheetProgressCard = ({ progress, navigate }) => {
   // Try to derive a clean name from sheetId (e.g., neetcode-150 -> Neetcode 150)
   const formatSheetName = (id) => {
-    if (!id) return "Unknown Sheet";
+    if (!id) return"Unknown Sheet";
     return id
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+      .join("");
   };
 
   return (
     <div
-      className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-5 hover:border-violet-300 dark:hover:border-violet-500/50 transition-colors cursor-pointer group flex flex-col justify-between"
+      className="bg-card border border-border-color rounded-2xl p-5 hover:border-violet-300 dark:hover:border-violet-500/50 transition-colors cursor-pointer group flex flex-col justify-between"
       onClick={() => navigate(`/sheet/${progress.sheetId}`)}
     >
       <div>
         <div className="flex justify-between items-start mb-4">
-          <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+          <h4 className="font-bold text-text-primary group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
             {formatSheetName(progress.sheetId)}
           </h4>
           <span className="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 rounded-lg">
@@ -76,7 +77,7 @@ const SheetProgressCard = ({ progress, navigate }) => {
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm">
-        <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+        <span className="text-text-muted flex items-center gap-1.5">
           <BookOpen size={14} /> Active Practice
         </span>
         <ArrowRight
@@ -102,10 +103,10 @@ const ResumeCard = ({ resume, navigate }) => (
           <FileText size={20} />
         </div>
         <div>
-          <h4 className="font-bold text-gray-900 dark:text-white line-clamp-1">
-            {resume.title || "My Resume"}
+          <h4 className="font-bold text-text-primary line-clamp-1">
+            {resume.title ||"My Resume"}
           </h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             Updated {moment(resume.updatedAt).fromNow()}
           </p>
         </div>
@@ -134,40 +135,40 @@ const ProgressTrackerDashboard = () => {
 
   const achievements = [
   {
-    title: "First Interview",
-    description: "Create your first mock interview session",
+    title:"First Interview",
+    description:"Create your first mock interview session",
     unlocked: sessions.length >= 1,
   },
   {
-    title: "Interview Pro",
-    description: "Complete 5 interview sessions",
+    title:"Interview Pro",
+    description:"Complete 5 interview sessions",
     unlocked: sessions.length >= 5,
   },
   {
-    title: "Interview Master",
-    description: "Complete 10 interview sessions",
+    title:"Interview Master",
+    description:"Complete 10 interview sessions",
     unlocked: sessions.length >= 10,
   },
   {
-    title: "Resume Builder",
-    description: "Create your first resume",
+    title:"Resume Builder",
+    description:"Create your first resume",
     unlocked: resumes.length >= 1,
   },
   {
-    title: "Resume Expert",
-    description: "Create 3 resumes",
+    title:"Resume Expert",
+    description:"Create 3 resumes",
     unlocked: resumes.length >= 3,
   },
   {
-    title: "DSA Beginner",
-    description: "Reach 50% progress in any sheet",
+    title:"DSA Beginner",
+    description:"Reach 50% progress in any sheet",
     unlocked: sheetProgress.some(
       (sheet) => sheet.percentage >= 50
     ),
   },
   {
-    title: "DSA Master",
-    description: "Reach 100% progress in any sheet",
+    title:"DSA Master",
+    description:"Reach 100% progress in any sheet",
     unlocked: sheetProgress.some(
       (sheet) => sheet.percentage >= 100
     ),
@@ -254,15 +255,15 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-text-primary pb-20 transition-colors duration-300">
       {/* Header Section */}
-      <div className="bg-white dark:bg-white/5 border-b border-gray-200 dark:border-white/10 pt-8 pb-10 px-6 md:px-12 backdrop-blur-md">
+      <div className="bg-card border-b border-border-color pt-8 pb-10 px-6 md:px-12 backdrop-blur-md">
         <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-text-primary tracking-tight mb-2">
               Progress Tracker
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-2xl leading-relaxed">
+            <p className="text-text-muted text-sm md:text-base max-w-2xl leading-relaxed">
               Your centralized hub for interview preparation. Monitor DSA
               progress, manage mock interviews, and organize your generated
               resumes.
@@ -270,9 +271,10 @@ useEffect(() => {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            <ThemeToggle />
             <button
               onClick={() => navigate("/coding-sheets")}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/20 transition-all flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-white/10 border border-border-color hover:bg-gray-50 dark:hover:bg-white/20 transition-all flex items-center gap-2"
             >
               <BookOpen size={18} />
               Explore Sheets
@@ -316,8 +318,8 @@ useEffect(() => {
             title="App Readiness"
             value={
               sessions.length > 2 && sheetProgress.length > 0
-                ? "High"
-                : "Learning"
+                ?"High"
+                :"Learning"
             }
             icon={Activity}
             colorClass="bg-fuchsia-500"
@@ -329,12 +331,12 @@ useEffect(() => {
         <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold"> 🏆 Achievements </h2>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-text-muted">
             {
             achievements.filter(
           (badge) => badge.unlocked
         ).length
-        }{" "}
+        }{""}
         / {achievements.length} unlocked
         </span>
         </div>
@@ -374,15 +376,15 @@ useEffect(() => {
                   <SummaryCard
                     key={data._id}
                     colors={CARD_BG[index % CARD_BG.length]}
-                    role={data.role || ""}
-                    topicsToFocus={data.topicsToFocus || ""}
-                    experience={data.experience || "-"}
-                    questions={data.questions?.length || "-"}
-                    description={data.description || ""}
+                    role={data.role ||""}
+                    topicsToFocus={data.topicsToFocus ||""}
+                    experience={data.experience ||"-"}
+                    questions={data.questions?.length ||"-"}
+                    description={data.description ||""}
                     lastupdated={
                       data.updatedAt
                         ? moment(data.updatedAt).format("Do MMM YYYY")
-                        : ""
+                        :""
                     }
                     onSelect={() => navigate(`/interview-prep/${data._id}`)}
                     onDelete={() => {}} // Handle delete in full view if needed, or pass prop
@@ -390,14 +392,14 @@ useEffect(() => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 text-center">
+              <div className="bg-card border border-border-color rounded-2xl p-8 text-center">
                 <div className="w-16 h-16 bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Video size={28} />
                 </div>
                 <h3 className="font-bold text-lg mb-2">
                   No Mock Interviews yet
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-sm mx-auto">
+                <p className="text-text-muted text-sm mb-6 max-w-sm mx-auto">
                   Practice your behavioral and technical speaking skills with
                   our AI interviewer.
                 </p>
@@ -411,7 +413,7 @@ useEffect(() => {
             )}
 
             {/* SAVED RESUMES SECTION */}
-            <div className="pt-6 mt-8 border-t border-gray-200 dark:border-white/10">
+            <div className="pt-6 mt-8 border-t border-border-color">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <FileText className="text-blue-500" size={24} />
@@ -436,11 +438,11 @@ useEffect(() => {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center shadow-sm">
+                <div className="bg-card border border-border-color rounded-2xl p-6 text-center shadow-sm">
                   <div className="inline-block p-4 bg-gray-50 dark:bg-gray-800 rounded-full mb-3">
                     <FileText size={24} className="text-gray-400" />
                   </div>
-                  <p className="text-gray-500 font-medium text-sm mb-4">
+                  <p className="text-text-muted font-medium text-sm mb-4">
                     You haven't built any resumes yet.
                   </p>
                   <button
@@ -472,12 +474,12 @@ useEffect(() => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 text-center">
+              <div className="bg-card border border-border-color rounded-2xl p-8 text-center">
                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
                   <BookOpen size={28} />
                 </div>
                 <h3 className="font-bold text-lg mb-2">No Active Sheets</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+                <p className="text-text-muted text-sm mb-6">
                   Follow a DSA Master Sheet to start tracking your coding
                   progress.
                 </p>

@@ -1,12 +1,12 @@
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import Input from "../../components/Inputs/Input";
-import Button from "../../components/Button/Button";
-import { validateEmail } from "../../utils/helper";
-import { API_PATHS } from "../../utils/apiPaths";
-import { UserContext } from "../../context/userContext";
-import axiosInstance from "../../utils/axiosinstance";
-import { LuArrowRight } from "react-icons/lu";
+import React, { useState, useContext } from"react";
+import { useNavigate } from"react-router-dom";
+import Input from"../../components/Inputs/Input";
+import Button from"../../components/Button/Button";
+import { validateEmail } from"../../utils/helper";
+import { API_PATHS } from"../../utils/apiPaths";
+import { UserContext } from"../../context/userContext";
+import axiosInstance from"../../utils/axiosinstance";
+import { LuArrowRight } from"react-icons/lu";
 
 const Login = ({ setCurrentPage, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
@@ -128,7 +128,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
             <button
               type="button"
               onClick={() => {
-                setCurrentPage("forgot-password"); // or "forgotPassword" depending on your page name
+                setCurrentPage("forgot-password"); // or"forgotPassword" depending on your page name
                 setError(null);
               }}
               className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
@@ -162,7 +162,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
 
           <div className="mt-8 pt-6 border-t border-white/10">
             <p className="text-sm text-gray-400 text-center">
-              Don't have an account?{" "}
+              Don't have an account?{""}
               <button
                 type="button"
                 className="font-semibold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer ml-1"

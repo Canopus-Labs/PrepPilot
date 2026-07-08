@@ -9,10 +9,10 @@ export const getPasswordStrength = (password) => {
 
   const score = Object.values(checks).filter(Boolean).length;
 
-  let strength = "Weak";
+  let strength ="Weak";
 
-  if (score >= 4) strength = "Medium";
-  if (score === 5) strength = "Strong";
+  if (score >= 4) strength ="Medium";
+  if (score === 5) strength ="Strong";
 
   return {
     checks,

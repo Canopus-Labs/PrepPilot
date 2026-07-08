@@ -1,35 +1,35 @@
-import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
-import React, { useContext, useState, useEffect } from "react";
-import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
-import { useNavigate, Link } from "react-router-dom";
+import ProfileInfoCard from"./components/Cards/ProfileinfoCard";
+import React, { useContext, useState, useEffect } from"react";
+import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from"./utils/data";
+import { useNavigate, Link } from"react-router-dom";
 import {
   LuSparkles,
   LuChevronRight,
   LuArrowRight,
   LuArrowUp,
   LuUsers,
-} from "react-icons/lu";
-import { VscGitMerge } from "react-icons/vsc";
-import Modal from "./components/Loader/Modal";
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import ForgotPassword from "./pages/Auth/ForgotPAssword";
-import { UserContext } from "./context/userContext";
-import { motion, AnimatePresence } from "framer-motion";
-import ServicesMarquee from "./components/ServicesMarquee";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
-import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
+} from"react-icons/lu";
+import { VscGitMerge } from"react-icons/vsc";
+import Modal from"./components/Loader/Modal";
+import Login from"./pages/Auth/Login";
+import SignUp from"./pages/Auth/SignUp";
+import ForgotPassword from"./pages/Auth/ForgotPAssword";
+import { UserContext } from"./context/userContext";
+import { motion, AnimatePresence } from"framer-motion";
+import ServicesMarquee from"./components/ServicesMarquee";
+import { Star, ChevronLeft, ChevronRight } from"lucide-react"; // Import icons for testimonials
+import TermsandConditions from"./pages/Terms/TermsandConditions";   // ← Add this
 
 
 /* ─────────────────────────────────────────────
    Reusable animated section wrapper
 ───────────────────────────────────────────── */
-const FadeIn = ({ children, delay = 0, className = "" }) => (
+const FadeIn = ({ children, delay = 0, className ="" }) => (
   <motion.div
     initial={{ opacity: 0, y: 32 }}
     whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-60px" }}
-    transition={{ duration: 0.55, delay, ease: "easeOut" }}
+    viewport={{ once: true, margin:"-60px" }}
+    transition={{ duration: 0.55, delay, ease:"easeOut" }}
     className={className}
   >
     {children}
@@ -48,14 +48,14 @@ const HowStep = ({ step, active, onClick, index }) => (
     whileHover={{ x: 4 }}
     className={`w-full text-left p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden group ${
       active
-        ? "border-violet-500/70 bg-gradient-to-br from-violet-500/15 to-violet-900/20 shadow-lg shadow-violet-500/20"
-        : "border-white/10 bg-white/5 hover:border-violet-400/40 hover:bg-white/10"
+        ?"border-violet-500/70 bg-gradient-to-br from-violet-500/15 to-violet-900/20 shadow-lg shadow-violet-500/20"
+        :"border-white/10 bg-white/5 hover:border-violet-400/40 hover:bg-white/10"
     }`}
   >
     {/* Animated background gradient on hover */}
     <div
       className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ${
-        !active ? "bg-gradient-to-r from-violet-500/10 to-transparent" : ""
+        !active ?"bg-gradient-to-r from-violet-500/10 to-transparent" :""
       }`}
     />
 
@@ -64,14 +64,14 @@ const HowStep = ({ step, active, onClick, index }) => (
         animate={{
           scale: active ? 1.15 : 1,
           boxShadow: active
-            ? "0 0 20px rgba(139,92,246,0.6)"
-            : "0 0 0px rgba(139,92,246,0.0)",
+            ?"0 0 20px rgba(139,92,246,0.6)"
+            :"0 0 0px rgba(139,92,246,0.0)",
         }}
         transition={{ duration: 0.3 }}
         className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
           active
-            ? "bg-gradient-to-br from-violet-500 to-violet-700 text-white"
-            : "bg-white/10 text-gray-400 group-hover:bg-violet-500/20 group-hover:text-violet-300"
+            ?"bg-gradient-to-br from-violet-500 to-violet-700 text-white"
+            :"bg-white/10 text-gray-400 group-hover:bg-violet-500/20 group-hover:text-violet-300"
         }`}
       >
         {step.id}
@@ -79,7 +79,7 @@ const HowStep = ({ step, active, onClick, index }) => (
       <div className="flex-1">
         <span
           className={`font-bold text-sm sm:text-base transition-colors block ${
-            active ? "text-white" : "text-gray-300 group-hover:text-white"
+            active ?"text-white" :"text-gray-300 group-hover:text-white"
           }`}
         >
           {step.title}
@@ -93,8 +93,8 @@ const HowStep = ({ step, active, onClick, index }) => (
         transition={{ duration: 0.3 }}
         className={`ml-auto flex-shrink-0 ${
           active
-            ? "text-violet-400"
-            : "text-gray-500 group-hover:text-violet-300"
+            ?"text-violet-400"
+            :"text-text-muted group-hover:text-violet-300"
         }`}
       >
         <LuChevronRight />
@@ -106,9 +106,9 @@ const HowStep = ({ step, active, onClick, index }) => (
         <motion.div
           key="content"
           initial={{ opacity: 0, height: 0, marginTop: 0 }}
-          animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+          animate={{ opacity: 1, height:"auto", marginTop: 16 }}
           exit={{ opacity: 0, height: 0, marginTop: 0 }}
-          transition={{ duration: 0.32, ease: "easeOut" }}
+          transition={{ duration: 0.32, ease:"easeOut" }}
           className="overflow-hidden relative z-10"
         >
           <p className="text-sm text-gray-300 pl-6 leading-relaxed">
@@ -126,66 +126,66 @@ const HowStep = ({ step, active, onClick, index }) => (
 const TESTIMONIALS = [
   {
     id: 1,
-    name: "Sarah Chen",
-    role: "Software Engineer, Google",
+    name:"Sarah Chen",
+    role:"Software Engineer, Google",
     rating: 5,
-    review: "PrepPilot AI was a game-changer for my Google interviews. The AI-generated questions were spot on, and the detailed explanations helped me understand complex topics deeply. Highly recommend!",
-    tags: ["DSA", "System Design", "Google"],
-    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+    review:"PrepPilot AI was a game-changer for my Google interviews. The AI-generated questions were spot on, and the detailed explanations helped me understand complex topics deeply. Highly recommend!",
+    tags: ["DSA","System Design","Google"],
+    avatar:"https://randomuser.me/api/portraits/women/1.jpg",
   },
   {
     id: 2,
-    name: "David Lee",
-    role: "Frontend Developer, Meta",
+    name:"David Lee",
+    role:"Frontend Developer, Meta",
     rating: 5,
-    review: "The UI design questions and React deep-dives were incredibly helpful for my Meta interview. The platform's ability to simulate real interview scenarios is unmatched.",
-    tags: ["Frontend", "React", "Meta"],
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+    review:"The UI design questions and React deep-dives were incredibly helpful for my Meta interview. The platform's ability to simulate real interview scenarios is unmatched.",
+    tags: ["Frontend","React","Meta"],
+    avatar:"https://randomuser.me/api/portraits/men/2.jpg",
   },
   {
     id: 3,
-    name: "Priya Sharma",
-    role: "SDE-2, Amazon",
+    name:"Priya Sharma",
+    role:"SDE-2, Amazon",
     rating: 4,
-    review: "Amazon's LP questions are tricky, but PrepPilot's behavioral prep helped me structure my STAR stories perfectly. Landed the offer!",
-    tags: ["Behavioral", "Leadership Principles", "Amazon"],
-    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
+    review:"Amazon's LP questions are tricky, but PrepPilot's behavioral prep helped me structure my STAR stories perfectly. Landed the offer!",
+    tags: ["Behavioral","Leadership Principles","Amazon"],
+    avatar:"https://randomuser.me/api/portraits/women/3.jpg",
   },
   {
     id: 4,
-    name: "Michael Brown",
-    role: "Backend Engineer, Microsoft",
+    name:"Michael Brown",
+    role:"Backend Engineer, Microsoft",
     rating: 5,
-    review: "The OOP design questions and system design challenges were excellent. PrepPilot helped me refine my approach and articulate my solutions clearly.",
-    tags: ["OOP Design", "System Design", "Microsoft"],
-    avatar: "https://randomuser.me/api/portraits/men/4.jpg",
+    review:"The OOP design questions and system design challenges were excellent. PrepPilot helped me refine my approach and articulate my solutions clearly.",
+    tags: ["OOP Design","System Design","Microsoft"],
+    avatar:"https://randomuser.me/api/portraits/men/4.jpg",
   },
   {
     id: 5,
-    name: "Jessica Wong",
-    role: "Junior Developer",
+    name:"Jessica Wong",
+    role:"Junior Developer",
     rating: 4,
-    review: "As a fresher, I found the 'Easy' and 'Medium' DSA sheets invaluable. PrepPilot made learning fun and boosted my confidence for my first job.",
-    tags: ["DSA", "Entry Level", "Fresher"],
-    avatar: "https://randomuser.me/api/portraits/women/5.jpg",
+    review:"As a fresher, I found the 'Easy' and 'Medium' DSA sheets invaluable. PrepPilot made learning fun and boosted my confidence for my first job.",
+    tags: ["DSA","Entry Level","Fresher"],
+    avatar:"https://randomuser.me/api/portraits/women/5.jpg",
   },
   {
     id: 6,
-    name: "Omar Khan",
-    role: "DevOps Engineer",
+    name:"Omar Khan",
+    role:"DevOps Engineer",
     rating: 5,
-    review: "The project ideas section gave me inspiration for my portfolio, and the compiler helped me practice coding challenges efficiently. Great tool!",
-    tags: ["DevOps", "Projects", "Coding"],
-    avatar: "https://randomuser.me/api/portraits/men/6.jpg",
+    review:"The project ideas section gave me inspiration for my portfolio, and the compiler helped me practice coding challenges efficiently. Great tool!",
+    tags: ["DevOps","Projects","Coding"],
+    avatar:"https://randomuser.me/api/portraits/men/6.jpg",
   },
   {
     id: 7,
-    name: "Emily White",
-    role: "Data Scientist",
+    name:"Emily White",
+    role:"Data Scientist",
     rating: 4,
-    review: "Even for data science roles, the system design and problem-solving sections were beneficial. The AI explanations are a lifesaver!",
-    tags: ["Problem Solving", "AI", "Data Science"],
-    avatar: "https://randomuser.me/api/portraits/women/7.jpg",
+    review:"Even for data science roles, the system design and problem-solving sections were beneficial. The AI explanations are a lifesaver!",
+    tags: ["Problem Solving","AI","Data Science"],
+    avatar:"https://randomuser.me/api/portraits/women/7.jpg",
   },
 ];
 
@@ -198,7 +198,7 @@ const StarRating = ({ count }) => (
       <Star
         key={n}
         size={14}
-        className={n <= count ? "text-amber-400 fill-amber-400" : "text-gray-600"}
+        className={n <= count ?"text-amber-400 fill-amber-400" :"text-text-secondary"}
       />
     ))}
   </div>
@@ -306,11 +306,11 @@ const LandingPage = () => {
   };
 
   const navRoutes = [
-    { label: "AI-Assistance", route: "/ai-helper" },
-    { label: "Cognitive Skills", route: "/practice" },
-    { label: "Role Prep", route: "/role-prep" },
-    { label: "DSA Sheets", route: "/coding-sheets" },
-    { label: "Assessment", route: "/assessment" },
+    { label:"AI-Assistance", route:"/ai-helper" },
+    { label:"Cognitive Skills", route:"/practice" },
+    { label:"Role Prep", route:"/role-prep" },
+    { label:"DSA Sheets", route:"/coding-sheets" },
+    { label:"Assessment", route:"/assessment" },
   ];
 
   const handleNav = (route) => {
@@ -336,7 +336,7 @@ const LandingPage = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior:"smooth",
     });
   };
 
@@ -355,18 +355,18 @@ const LandingPage = () => {
         ───────────────────────────────── */}
         <header
           className="fixed top-0 z-50 w-full pt-6 px-4 sm:px-8 lg:px-12"
-          style={{ background: "transparent" }}
+          style={{ background:"transparent" }}
         >
           {/* Floating pill – true glassmorphism: ~40% opacity + strong blur */}
           <div
             className="max-w-[1200px] mx-auto flex items-center justify-between gap-6 px-5 sm:px-7 rounded-full"
             style={{
-              height: "64px",
-              background: "rgba(0,0,0,0.40)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              boxShadow: "0 2px 24px 0 rgba(0,0,0,0.30)",
+              height:"64px",
+              background:"rgba(0,0,0,0.40)",
+              backdropFilter:"blur(14px)",
+              WebkitBackdropFilter:"blur(14px)",
+              border:"1px solid rgba(255,255,255,0.10)",
+              boxShadow:"0 2px 24px 0 rgba(0,0,0,0.30)",
             }}
           >
             {/* Logo – with PrepPilot-Logo.png */}
@@ -401,13 +401,13 @@ const LandingPage = () => {
                 <ProfileInfoCard />
               ) : (
                 <>
-                  {/* Login – outlined dark button (like opensox "Contribute") */}
+                  {/* Login – outlined dark button (like opensox"Contribute") */}
                   <button
                     onClick={() => setOpenAuthModal(true)}
                     className="hidden sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
                     style={{
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.12)",
+                      background:"rgba(255,255,255,0.06)",
+                      border:"1px solid rgba(255,255,255,0.12)",
                     }}
                   >
                     <VscGitMerge className="text-base" />
@@ -418,17 +418,14 @@ const LandingPage = () => {
                     onClick={handleCTA}
                     className="flex items-center gap-2 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-all duration-150"
                     style={{
-                      background:
-                        "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                      boxShadow: "0 0 16px 2px rgba(124,58,237,0.45)",
+                      background:"linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                      boxShadow:"0 0 16px 2px rgba(124,58,237,0.45)",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.boxShadow =
-                        "0 0 24px 4px rgba(124,58,237,0.65)")
+                      (e.currentTarget.style.boxShadow ="0 0 24px 4px rgba(124,58,237,0.65)")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.boxShadow =
-                        "0 0 16px 2px rgba(124,58,237,0.45)")
+                      (e.currentTarget.style.boxShadow ="0 0 16px 2px rgba(124,58,237,0.45)")
                     }
                   >
                     <span className="font-mono text-violet-200 text-xs">
@@ -456,10 +453,10 @@ const LandingPage = () => {
 
           <FadeIn delay={0.08}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
-              Crack Every Interview with{" "}
+              Crack Every Interview with{""}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-blue-400">
                 AI‑Powered
-              </span>{" "}
+              </span>{""}
               Learning
             </h1>
           </FadeIn>
@@ -489,7 +486,7 @@ const LandingPage = () => {
                 Try AI Assistance
               </button>
             </div>
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-text-muted">
               No signup required for AI Assistance ✦ Free to explore
             </p>
           </FadeIn>
@@ -527,7 +524,7 @@ const LandingPage = () => {
           <div className="max-w-6xl mx-auto px-4 mb-8">
             <FadeIn className="text-center">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-                Supercharge Your{" "}
+                Supercharge Your{""}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                   Interview Journey
                 </span>
@@ -543,23 +540,23 @@ const LandingPage = () => {
               <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
                 <div className="flex-1 p-8 flex flex-col gap-3.5 border-b border-white/6">
                   {[
-                    { label: "Frontend Engineer Track",  sub: "React · TypeScript · Performance" },
-                    { label: "System Design Deep Dive",  sub: "HLD · LLD · Scalability"          },
-                    { label: "DSA Mastery Sprint",       sub: "Arrays · Graphs · DP"              },
-                    { label: "Behavioral Interview Prep", sub: "STAR · Leadership · Culture"      },
+                    { label:"Frontend Engineer Track",  sub:"React · TypeScript · Performance" },
+                    { label:"System Design Deep Dive",  sub:"HLD · LLD · Scalability"          },
+                    { label:"DSA Mastery Sprint",       sub:"Arrays · Graphs · DP"              },
+                    { label:"Behavioral Interview Prep", sub:"STAR · Leadership · Culture"      },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.03] border border-white/6">
                       <div className="w-1.5 h-10 rounded-full bg-violet-500/60 flex-shrink-0" />
                       <div>
                         <p className="text-white text-sm font-medium leading-tight">{item.label}</p>
-                        <p className="text-gray-500 text-xs mt-1">{item.sub}</p>
+                        <p className="text-text-muted text-xs mt-1">{item.sub}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="px-8 py-6">
                   <h3 className="text-white font-semibold text-lg mb-1.5">Personalized Recommendations</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     Curated prep tracks tailored to your target role and experience level.
                   </p>
                 </div>
@@ -595,14 +592,14 @@ const LandingPage = () => {
                     </div>
                   </div>
                   <div className="h-8 flex items-center gap-2 px-1">
-                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay:"0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay:"150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay:"300ms" }} />
                   </div>
                 </div>
                 <div className="px-8 py-6">
                   <h3 className="text-white font-semibold text-lg mb-1.5">Seamless AI Assistance</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     Ask anything and get instant explanations, hints, and concept breakdowns.
                   </p>
                 </div>
@@ -614,12 +611,12 @@ const LandingPage = () => {
               <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
                 <div className="flex-1 p-8 flex flex-col gap-4 border-b border-white/6">
                   {[
-                    { label: "Difficulty", tags: ["Easy", "Medium", "Hard", "Expert"] },
-                    { label: "Role Type",  tags: ["Frontend", "Backend", "Full Stack", "DevOps"] },
-                    { label: "Tech Stack", tags: ["React", "Node.js", "Python", "TypeScript"] },
+                    { label:"Difficulty", tags: ["Easy","Medium","Hard","Expert"] },
+                    { label:"Role Type",  tags: ["Frontend","Backend","Full Stack","DevOps"] },
+                    { label:"Tech Stack", tags: ["React","Node.js","Python","TypeScript"] },
                   ].map((group) => (
                     <div key={group.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/6">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                      <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">
                         {group.label}
                       </p>
                       <div className="flex flex-wrap gap-2">
@@ -634,7 +631,7 @@ const LandingPage = () => {
                 </div>
                 <div className="px-8 py-6">
                   <h3 className="text-white font-semibold text-lg mb-1.5">Precision Filters</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     Zero in on questions by difficulty, role type, and your tech stack.
                   </p>
                 </div>
@@ -658,7 +655,7 @@ const LandingPage = () => {
                 How it Works
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-                Simple Steps to{" "}
+                Simple Steps to{""}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                   Interview Ready
                 </span>
@@ -703,7 +700,7 @@ const LandingPage = () => {
                           transition={{
                             duration: 4,
                             repeat: Infinity,
-                            ease: "easeInOut",
+                            ease:"easeInOut",
                           }}
                           className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-600/15 to-blue-600/8 blur-2xl"
                         />
@@ -712,11 +709,9 @@ const LandingPage = () => {
                         <div
                           className="relative rounded-3xl border overflow-hidden backdrop-blur-sm"
                           style={{
-                            background:
-                              "linear-gradient(135deg, rgba(20,15,40,0.95) 0%, rgba(30,20,60,0.85) 100%)",
-                            border: "1px solid rgba(139,92,246,0.3)",
-                            boxShadow:
-                              "0 20px 60px -20px rgba(139,92,246,0.18)",
+                            background:"linear-gradient(135deg, rgba(20,15,40,0.95) 0%, rgba(30,20,60,0.85) 100%)",
+                            border:"1px solid rgba(139,92,246,0.3)",
+                            boxShadow:"0 20px 60px -20px rgba(139,92,246,0.18)",
                           }}
                         >
                           {/* Content */}
@@ -726,11 +721,9 @@ const LandingPage = () => {
                               <div
                                 className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl font-black relative z-10"
                                 style={{
-                                  background:
-                                    "linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0.1) 100%)",
-                                  border: "2px solid rgba(139,92,246,0.5)",
-                                  boxShadow:
-                                    "0 0 30px rgba(139,92,246,0.4), inset 0 0 30px rgba(139,92,246,0.1)",
+                                  background:"linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0.1) 100%)",
+                                  border:"2px solid rgba(139,92,246,0.5)",
+                                  boxShadow:"0 0 30px rgba(139,92,246,0.4), inset 0 0 30px rgba(139,92,246,0.1)",
                                 }}
                               >
                                 <span className="text-violet-400">
@@ -767,11 +760,11 @@ const LandingPage = () => {
                               <div
                                 className="relative h-1.5 rounded-full overflow-hidden"
                                 style={{
-                                  background: "rgba(255,255,255,0.1)",
+                                  background:"rgba(255,255,255,0.1)",
                                 }}
                               >
                                 <motion.div
-                                  initial={{ width: "0%" }}
+                                  initial={{ width:"0%" }}
                                   animate={{
                                     width: `${
                                       (activeStep / HOW_IT_WORKS_STEPS.length) *
@@ -780,7 +773,7 @@ const LandingPage = () => {
                                   }}
                                   transition={{
                                     duration: 0.4,
-                                    ease: "easeOut",
+                                    ease:"easeOut",
                                   }}
                                   className="h-full bg-gradient-to-r from-violet-500 to-blue-500 rounded-full shadow-lg shadow-violet-500/50"
                                 />
@@ -792,14 +785,13 @@ const LandingPage = () => {
                               onClick={handleCTA}
                               whileHover={{
                                 scale: 1.05,
-                                boxShadow: "0 0 30px rgba(139,92,246,0.6)",
+                                boxShadow:"0 0 30px rgba(139,92,246,0.6)",
                               }}
                               whileTap={{ scale: 0.95 }}
                               className="flex items-center gap-2 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all mt-2"
                               style={{
-                                background:
-                                  "linear-gradient(135deg, rgba(139,92,246,0.6) 0%, rgba(79,70,229,0.6) 100%)",
-                                border: "1px solid rgba(139,92,246,0.5)",
+                                background:"linear-gradient(135deg, rgba(139,92,246,0.6) 0%, rgba(79,70,229,0.6) 100%)",
+                                border:"1px solid rgba(139,92,246,0.5)",
                               }}
                             >
                               <span className="font-mono text-xs text-violet-200">
@@ -829,7 +821,7 @@ const LandingPage = () => {
                 What Our Users Say
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-                Trusted by{" "}
+                Trusted by{""}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                   Thousands of Developers
                 </span>
@@ -883,7 +875,7 @@ const LandingPage = () => {
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
                       className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        currentIndex === idx ? "w-6 bg-violet-500 shadow-lg shadow-violet-500/50" : "w-2.5 bg-white/20 hover:bg-white/40"
+                        currentIndex === idx ?"w-6 bg-violet-500 shadow-lg shadow-violet-500/50" :"w-2.5 bg-white/20 hover:bg-white/40"
                       }`}
                       aria-label={`Go to slide ${idx + 1}`}
                     />
@@ -911,7 +903,7 @@ const LandingPage = () => {
           </div>
           <FadeIn className="relative text-center max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 leading-tight">
-              Ready to Ace Your{" "}
+              Ready to Ace Your{""}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
                 Next Interview?
               </span>
@@ -993,7 +985,7 @@ const LandingPage = () => {
     </div>
 
     {/* Bottom Bar Container */}
-    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
       <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
       <div className="flex space-x-6">
         <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
@@ -1042,8 +1034,7 @@ const LandingPage = () => {
 
             {/* Button */}
             <div
-              className="
-          relative
+              className="relative
           w-10
           h-10
           rounded-xl
@@ -1053,13 +1044,10 @@ const LandingPage = () => {
           text-white
           border
           border-white/10
-          backdrop-blur-xl
-        "
+          backdrop-blur-xl"
               style={{
-                background:
-                  "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                boxShadow:
-                  "0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
+                background:"linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                boxShadow:"0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
               }}
             >
               <LuArrowUp className="text-xl" />
@@ -1080,7 +1068,7 @@ const LandingPage = () => {
         hideHeader
       >
         <div>
-          <div className={currentPage === "login" ? "block" : "hidden"}>
+          <div className={currentPage ==="login" ?"block" :"hidden"}>
             <Login
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
@@ -1096,11 +1084,11 @@ const LandingPage = () => {
             />
           </div>
 
-          <div className={currentPage === "signup" ? "block" : "hidden"}>
+          <div className={currentPage ==="signup" ?"block" :"hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
           </div>
 
-          <div className={currentPage === "forgot-password" ? "block" : "hidden"}>
+          <div className={currentPage ==="forgot-password" ?"block" :"hidden"}>
             <ForgotPassword setCurrentPage={setCurrentPage} />
           </div>
         </div>
