@@ -28,7 +28,7 @@
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
     "node-cache": "^5.1.2",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^9.0.3",
     "pdf-parse": "^2.4.5",
     "resend": "^6.12.4"
   },
