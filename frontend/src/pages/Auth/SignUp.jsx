@@ -69,9 +69,9 @@ const SignUp = ({ setCurrentPage }) => {
       });
       
       if (response.data.success) {
-        const { accessToken } = response.data;
-        if (accessToken) {
-          sessionStorage.setItem("token", accessToken);
+        const authToken = response.data.token || response.data.accessToken;
+        if (authToken) {
+          sessionStorage.setItem("token", authToken);
           updateUser(response.data);
           navigate("/dashboard");
         }

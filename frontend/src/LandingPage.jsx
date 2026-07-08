@@ -1,8 +1,7 @@
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
 import React, { useContext, useState, useEffect } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
-import { useNavigate } from "react-router-dom";
-import { Link, something } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   LuSparkles,
   LuChevronRight,
@@ -14,6 +13,7 @@ import { VscGitMerge } from "react-icons/vsc";
 import Modal from "./components/Loader/Modal";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
@@ -1075,6 +1075,7 @@ const LandingPage = () => {
         onClose={() => {
           setOpenAuthModal(false);
           setPendingRoute(null);
+          setCurrentPage("login");
         }}
         hideHeader
       >
@@ -1084,7 +1085,7 @@ const LandingPage = () => {
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
-          
+                setCurrentPage("login");
                 if (pendingRoute) {
                   navigate(pendingRoute);
                   setPendingRoute(null);
@@ -1094,9 +1095,13 @@ const LandingPage = () => {
               }}
             />
           </div>
-          
+
           <div className={currentPage === "signup" ? "block" : "hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
+          </div>
+
+          <div className={currentPage === "forgot-password" ? "block" : "hidden"}>
+            <ForgotPassword setCurrentPage={setCurrentPage} />
           </div>
         </div>
       </Modal>

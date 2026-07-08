@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
+const cookieParser = require("cookie-parser");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -90,6 +91,7 @@ connectDB()
 
 // middleware
 app.use(express.json());
+app.use(cookieParser());
 
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);

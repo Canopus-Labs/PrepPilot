@@ -1,8 +1,5 @@
 const express = require("express");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { validateAiPrompt } = require("../middlewares/validateAiPrompt");
-const sanitizeAiPrompt = require("../middlewares/sanitizeAiPrompt");
-
 const NodeCache = require("node-cache");
 
 const questionCache = new NodeCache({
@@ -56,7 +53,7 @@ async function generateWithRetry(model, prompt) {
 }
 
 // GET /api/questions?topic=Probability
-router.get("/", validateAiPrompt, sanitizeAiPrompt, async (req, res) => {
+router.get("/", async (req, res) => {
   const { topic } = req.query;
   if (typeof topic !== "string" || topic.trim() === "") {
     return res.status(400).json({ error: "Topic is required" });

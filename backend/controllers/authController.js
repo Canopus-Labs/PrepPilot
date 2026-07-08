@@ -9,6 +9,13 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
 const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+const getRefreshCookieOptions = () => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+    path: "/api/auth",
+});
 
 /**
  * Generate an access token for the authenticated user.
@@ -90,12 +97,12 @@ const registerUser = async (req, res) => {
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-
+        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
             message: "Account created successfully. You can now log in.",
             accessToken,
-            refreshToken,
+            
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -140,7 +147,7 @@ const loginUser = async (req, res) => {
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-
+        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         res.json({
             success: true,
             _id: user._id,
@@ -148,7 +155,7 @@ const loginUser = async (req, res) => {
             email: user.email,
             profileImageUrl: user.profileImageUrl,
             accessToken,
-            refreshToken,
+
         });
     } catch (error) {
         console.log(error)
@@ -158,10 +165,10 @@ const loginUser = async (req, res) => {
 
 const refreshToken = async (req, res) => {
     try {
-        const { refreshToken: incomingRefreshToken } = req.body;
+        const incomingRefreshToken = req.cookies?.refreshToken;
 
         if (!incomingRefreshToken) {
-            return res.status(400).json({ success: false, message: "Refresh token is required." });
+            return res.status(401).json({ success: false, message: "Refresh token is missing." });
         }
 
         let decoded;
@@ -202,11 +209,12 @@ const refreshToken = async (req, res) => {
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
 
+        res.cookie("refreshToken", rotatedRefreshToken, getRefreshCookieOptions());
         res.json({
             success: true,
             message: "Token refreshed successfully.",
             accessToken,
-            refreshToken: rotatedRefreshToken,
+        
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
@@ -215,7 +223,7 @@ const refreshToken = async (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
-        const { refreshToken: incomingRefreshToken } = req.body;
+        const incomingRefreshToken = req.cookies?.refreshToken;
 
         if (!incomingRefreshToken) {
             return res.status(400).json({ success: false, message: "Refresh token is required." });
@@ -247,6 +255,7 @@ const logoutUser = async (req, res) => {
         user.refreshTokenExpiresAt = null;
         await user.save();
 
+        res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "User logged out successfully." });
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
