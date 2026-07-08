@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import SpinnerLoader from "../../components/Loader/SpinnerLoader";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import { Target, Briefcase, Code2, FileText, Sparkles } from "lucide-react";
+import React, { useState } from"react";
+import { useNavigate } from"react-router-dom";
+import SpinnerLoader from"../../components/Loader/SpinnerLoader";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
+import { Target, Briefcase, Code2, FileText, Sparkles } from"lucide-react";
 
 const CreateSessionForm = () => {
   const [formData, setFormData] = useState({
-    role: "",
-    experience: "",
-    topicsToFocus: "",
-    description: "",
+    role:"",
+    experience:"",
+    topicsToFocus:"",
+    description:"",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -71,32 +71,32 @@ const CreateSessionForm = () => {
 
   const inputConfig = [
     {
-      id: "role",
+      id:"role",
       icon: Target,
-      label: "Target Role",
-      placeholder: "e.g., Frontend Developer, UI/UX Designer",
-      type: "text"
+      label:"Target Role",
+      placeholder:"e.g., Frontend Developer, UI/UX Designer",
+      type:"text"
     },
     {
-      id: "experience",
+      id:"experience",
       icon: Briefcase,
-      label: "Years of Experience",
-      placeholder: "e.g., 1, 3, 5",
-      type: "number"
+      label:"Years of Experience",
+      placeholder:"e.g., 1, 3, 5",
+      type:"number"
     },
     {
-      id: "topicsToFocus",
+      id:"topicsToFocus",
       icon: Code2,
-      label: "Topics to Focus On",
-      placeholder: "React, Node.js, System Design",
-      type: "text"
+      label:"Topics to Focus On",
+      placeholder:"React, Node.js, System Design",
+      type:"text"
     },
     {
-      id: "description",
+      id:"description",
       icon: FileText,
-      label: "Session Goals (Optional)",
-      placeholder: "Any specific areas you want the AI to challenge you on...",
-      type: "textarea"
+      label:"Session Goals (Optional)",
+      placeholder:"Any specific areas you want the AI to challenge you on...",
+      type:"textarea"
     }
   ];
 
@@ -104,10 +104,10 @@ const CreateSessionForm = () => {
     <div className="w-full flex justify-center min-w-0">
       <div className="w-full flex flex-col justify-center min-w-0">
         <div className="mb-6">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+          <h3 className="text-xl md:text-2xl font-bold text-text-primary tracking-tight leading-tight">
             New Interview Journey
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 font-medium">
+          <p className="text-sm text-text-muted mt-1.5 font-medium">
             Configure your AI interviewer to perfectly match your target role.
           </p>
         </div>
@@ -118,21 +118,21 @@ const CreateSessionForm = () => {
             
             return (
               <div key={field.id} className="relative group">
-                <label className="text-[13px] font-bold text-gray-700 dark:text-gray-300 block mb-1.5 ml-1 transition-colors">
+                <label className="text-[13px] font-bold text-gray-700  block mb-1.5 ml-1 transition-colors">
                   {field.label} {field.id !== 'description' && <span className="text-rose-500">*</span>}
                 </label>
                 <div className="relative flex items-center w-full min-w-0">
-                  <div className="absolute left-3 text-gray-400 dark:text-gray-500 group-focus-within:text-violet-500 transition-colors pointer-events-none">
+                  <div className="absolute left-3 text-text-muted group-focus-within:text-violet-500 transition-colors pointer-events-none">
                     <Icon size={18} />
                   </div>
                   
-                  {field.type === "textarea" ? (
+                  {field.type ==="textarea" ? (
                     <textarea
                       value={formData[field.id]}
                       onChange={({ target }) => handleChange(field.id, target.value)}
                       placeholder={field.placeholder}
                       rows={3}
-                      className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm resize-none scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10"
+                      className="w-full min-w-0 bg-surface border border-border-color rounded-xl py-3 pl-10 pr-4 text-[14px] text-text-primary placeholder:text-gray-400 dark:placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm resize-none scrollbar-thin scrollbar-thumb-border-color"
                     />
                   ) : (
                     <input
@@ -140,7 +140,7 @@ const CreateSessionForm = () => {
                       value={formData[field.id]}
                       onChange={({ target }) => handleChange(field.id, target.value)}
                       placeholder={field.placeholder}
-                      className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm"
+                      className="w-full min-w-0 bg-surface border border-border-color rounded-xl py-3 pl-10 pr-4 text-[14px] text-text-primary placeholder:text-gray-400 dark:placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm"
                     />
                   )}
                 </div>
@@ -161,14 +161,14 @@ const CreateSessionForm = () => {
               disabled={isLoading}
               className={`w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg text-[14px] sm:text-[15px] font-bold text-white transition-colors ${
                 isLoading
-                  ? "bg-violet-400 dark:bg-violet-600/50 cursor-wait"
-                  : "bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600"
+                  ?"bg-violet-400 dark:bg-violet-600/50 cursor-wait"
+                  :"bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600"
               }`}
             >
               {isLoading && <SpinnerLoader />}
-              <span>{isLoading ? "Generating Interview..." : "Create Session"}</span>
+              <span>{isLoading ?"Generating Interview..." :"Create Session"}</span>
             </button>
-            <p className="text-center text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 mt-4 font-medium uppercase tracking-wider">
+            <p className="text-center text-[10px] sm:text-xs text-text-muted mt-4 font-medium uppercase tracking-wider">
               Powered by advanced AI modeling
             </p>
           </div>

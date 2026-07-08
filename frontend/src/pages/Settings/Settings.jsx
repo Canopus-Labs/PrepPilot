@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
-import { useTheme } from "../../context/themeContext";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import uploadImage from "../../utils/uploadimage";
-import toast from "react-hot-toast";
-import { getPasswordStrength } from "../../utils/passwordStrength";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import React, { useState, useEffect, useContext, useRef } from"react";
+import { useNavigate } from"react-router-dom";
+import { UserContext } from"../../context/userContext";
+import { useTheme } from"../../context/themeContext";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
+import uploadImage from"../../utils/uploadimage";
+import toast from"react-hot-toast";
+import { getPasswordStrength } from"../../utils/passwordStrength";
+import ReactMarkdown from"react-markdown";
+import remarkGfm from"remark-gfm";
 import {
   User,
   FileText,
@@ -43,7 +43,7 @@ import {
   ChevronRight,
   Sun,
   Moon,
-} from "lucide-react";
+} from"lucide-react";
 const Settings = () => {
   const navigate = useNavigate();
   const { user, clearUser, updateUser } = useContext(UserContext);
@@ -77,7 +77,7 @@ const Settings = () => {
   const [linkedin, setLinkedin] = useState("");
   const [twitter, setTwitter] = useState("");
   const [portfolio, setPortfolio] = useState("");
-  // Editor Tab: "write" or "preview"
+  // Editor Tab:"write" or"preview"
   const [editorMode, setEditorMode] = useState("write");
   const textareaRef = useRef(null);
   // Form Fields State - Platform
@@ -103,25 +103,25 @@ const Settings = () => {
   // Populate user data
   useEffect(() => {
     if (user) {
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
-      setEmail(user.email || "");
-      setBio(user.bio || "");
-      setCountry(user.country || "");
-      setSchool(user.educationDetails?.school || "");
-      setDegree(user.educationDetails?.degree || "");
-      setBranch(user.educationDetails?.branch || "");
-      setGraduationYear(user.educationDetails?.graduationYear || "");
-      setAboutMeText(user.profileDetails?.aboutMe || "");
-      setEducationText(user.profileDetails?.education || "");
-      setAchievementsText(user.profileDetails?.achievements || "");
-      setWorkExperienceText(user.profileDetails?.workExperience || "");
-      setGithub(user.profileDetails?.socials?.github || "");
-      setLinkedin(user.profileDetails?.socials?.linkedin || "");
-      setTwitter(user.profileDetails?.socials?.twitter || "");
-      setPortfolio(user.profileDetails?.socials?.portfolio || "");
-      setVisibilityOption(user.visibility || "Public");
-      setPrepPilotIdInput(user.prepPilotId || "");
+      setFirstName(user.firstName ||"");
+      setLastName(user.lastName ||"");
+      setEmail(user.email ||"");
+      setBio(user.bio ||"");
+      setCountry(user.country ||"");
+      setSchool(user.educationDetails?.school ||"");
+      setDegree(user.educationDetails?.degree ||"");
+      setBranch(user.educationDetails?.branch ||"");
+      setGraduationYear(user.educationDetails?.graduationYear ||"");
+      setAboutMeText(user.profileDetails?.aboutMe ||"");
+      setEducationText(user.profileDetails?.education ||"");
+      setAchievementsText(user.profileDetails?.achievements ||"");
+      setWorkExperienceText(user.profileDetails?.workExperience ||"");
+      setGithub(user.profileDetails?.socials?.github ||"");
+      setLinkedin(user.profileDetails?.socials?.linkedin ||"");
+      setTwitter(user.profileDetails?.socials?.twitter ||"");
+      setPortfolio(user.profileDetails?.socials?.portfolio ||"");
+      setVisibilityOption(user.visibility ||"Public");
+      setPrepPilotIdInput(user.prepPilotId ||"");
       setNotificationsEnabled(
         user.platformPreferences?.notificationsEnabled !== false,
       );
@@ -151,7 +151,7 @@ const Settings = () => {
       }
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to upload profile image",
+        err.response?.data?.message ||"Failed to upload profile image",
         { id: loadingToast },
       );
     } finally {
@@ -159,8 +159,7 @@ const Settings = () => {
     }
   };
   const handleRemovePhoto = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to remove your profile picture?",
+    const confirmed = window.confirm("Are you sure you want to remove your profile picture?",
     );
 
     if (!confirmed) return;
@@ -175,7 +174,7 @@ const Settings = () => {
       toast.success("Profile picture removed successfully");
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to remove profile picture",
+        err.response?.data?.message ||"Failed to remove profile picture",
       );
     }
   };
@@ -204,37 +203,37 @@ const Settings = () => {
       updateUser(response.data);
       toast.success("Basic info updated successfully!", { id: saveToast });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update profile", {
+      toast.error(err.response?.data?.message ||"Failed to update profile", {
         id: saveToast,
       });
     }
   };
   // Handle Markdown Insertion
-  const insertMarkdown = (syntax, placeholder = "text") => {
+  const insertMarkdown = (syntax, placeholder ="text") => {
     const textarea = textareaRef.current;
     if (!textarea) return;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const text = textarea.value;
     const selectedText = text.substring(start, end) || placeholder;
-    let replacement = "";
-    if (syntax === "bold") replacement = `**${selectedText}**`;
-    else if (syntax === "italic") replacement = `*${selectedText}*`;
-    else if (syntax === "underline") replacement = `<u>${selectedText}</u>`;
-    else if (syntax === "code") replacement = `\`${selectedText}\``;
-    else if (syntax === "quote") replacement = `> ${selectedText}`;
-    else if (syntax === "list") replacement = `\n- ${selectedText}`;
-    else if (syntax === "list-ordered") replacement = `\n1. ${selectedText}`;
-    else if (syntax === "link") replacement = `[${selectedText}](url)`;
-    else if (syntax === "image") replacement = `![${selectedText}](img-url)`;
+    let replacement ="";
+    if (syntax ==="bold") replacement = `**${selectedText}**`;
+    else if (syntax ==="italic") replacement = `*${selectedText}*`;
+    else if (syntax ==="underline") replacement = `<u>${selectedText}</u>`;
+    else if (syntax ==="code") replacement = `\`${selectedText}\``;
+    else if (syntax ==="quote") replacement = `> ${selectedText}`;
+    else if (syntax ==="list") replacement = `\n- ${selectedText}`;
+    else if (syntax ==="list-ordered") replacement = `\n1. ${selectedText}`;
+    else if (syntax ==="link") replacement = `[${selectedText}](url)`;
+    else if (syntax ==="image") replacement = `![${selectedText}](img-url)`;
     const newValue =
       text.substring(0, start) + replacement + text.substring(end);
-    if (profileDetailsActiveTab === "about-me") setAboutMeText(newValue);
-    else if (profileDetailsActiveTab === "education")
+    if (profileDetailsActiveTab ==="about-me") setAboutMeText(newValue);
+    else if (profileDetailsActiveTab ==="education")
       setEducationText(newValue);
-    else if (profileDetailsActiveTab === "achievements")
+    else if (profileDetailsActiveTab ==="achievements")
       setAchievementsText(newValue);
-    else if (profileDetailsActiveTab === "work-experience")
+    else if (profileDetailsActiveTab ==="work-experience")
       setWorkExperienceText(newValue);
     setTimeout(() => {
       textarea.focus();
@@ -245,19 +244,19 @@ const Settings = () => {
     }, 0);
   };
   const getProfileTabTextValue = () => {
-    if (profileDetailsActiveTab === "about-me") return aboutMeText;
-    if (profileDetailsActiveTab === "education") return educationText;
-    if (profileDetailsActiveTab === "achievements") return achievementsText;
-    if (profileDetailsActiveTab === "work-experience")
+    if (profileDetailsActiveTab ==="about-me") return aboutMeText;
+    if (profileDetailsActiveTab ==="education") return educationText;
+    if (profileDetailsActiveTab ==="achievements") return achievementsText;
+    if (profileDetailsActiveTab ==="work-experience")
       return workExperienceText;
-    return "";
+    return"";
   };
   const setProfileTabTextValue = (val) => {
-    if (profileDetailsActiveTab === "about-me") setAboutMeText(val);
-    else if (profileDetailsActiveTab === "education") setEducationText(val);
-    else if (profileDetailsActiveTab === "achievements")
+    if (profileDetailsActiveTab ==="about-me") setAboutMeText(val);
+    else if (profileDetailsActiveTab ==="education") setEducationText(val);
+    else if (profileDetailsActiveTab ==="achievements")
       setAchievementsText(val);
-    else if (profileDetailsActiveTab === "work-experience")
+    else if (profileDetailsActiveTab ==="work-experience")
       setWorkExperienceText(val);
   };
   // Update Profile Details Tab Content
@@ -265,7 +264,7 @@ const Settings = () => {
     const saveToast = toast.loading("Updating profile details...");
     try {
       let payload = {};
-      if (profileDetailsActiveTab === "socials") {
+      if (profileDetailsActiveTab ==="socials") {
         payload = {
           profileDetails: {
             socials: { github, linkedin, twitter, portfolio },
@@ -289,7 +288,7 @@ const Settings = () => {
       toast.success("Profile details updated successfully!", { id: saveToast });
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to update profile details",
+        err.response?.data?.message ||"Failed to update profile details",
         { id: saveToast },
       );
     }
@@ -306,7 +305,7 @@ const Settings = () => {
       toast.success(`Profile visibility set to ${option}!`, { id: saveToast });
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to change visibility",
+        err.response?.data?.message ||"Failed to change visibility",
         { id: saveToast },
       );
     }
@@ -324,7 +323,7 @@ const Settings = () => {
       updateUser(response.data);
       toast.success("Platform preferences saved!", { id: saveToast });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save preferences", {
+      toast.error(err.response?.data?.message ||"Failed to save preferences", {
         id: saveToast,
       });
     }
@@ -345,7 +344,7 @@ const Settings = () => {
       toast.success("PrepPilot ID updated!", { id: saveToast });
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to update PrepPilot ID",
+        err.response?.data?.message ||"Failed to update PrepPilot ID",
         { id: saveToast },
       );
     }
@@ -376,7 +375,7 @@ const Settings = () => {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update password", {
+      toast.error(err.response?.data?.message ||"Failed to update password", {
         id: saveToast,
       });
     }
@@ -396,7 +395,7 @@ const Settings = () => {
         clearUser();
       }, 100);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete account", {
+      toast.error(err.response?.data?.message ||"Failed to delete account", {
         id: deleteToast,
       });
     } finally {
@@ -418,9 +417,9 @@ const Settings = () => {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row h-full min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-slate-200 transition-colors duration-300">
+    <div className="flex flex-col lg:flex-row h-full min-h-screen bg-background dark:bg-[#0b1120] text-text-primary  transition-colors duration-300">
       {/* Settings Navigation Sidebar */}
-      <div className="hidden lg:flex w-64 border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex-col p-4">
+      <div className="hidden lg:flex w-64 border-r border-border-color/60  bg-card flex-col p-4">
         {/* Back Link */}
         <button
           onClick={() => navigate("/dashboard")}
@@ -434,9 +433,9 @@ const Settings = () => {
           <button
             onClick={() => setActiveSection("basic-info")}
             className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm ${
-              activeSection === "basic-info"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
+              activeSection ==="basic-info"
+                ?"bg-slate-100  text-text-primary  font-semibold shadow-sm"
+                :"text-text-secondary hover:bg-background dark:hover:bg-slate-800/50 hover:text-text-primary dark:hover:text-white"
             }`}
           >
             <User size={18} />
@@ -445,9 +444,9 @@ const Settings = () => {
           <button
             onClick={() => setActiveSection("profile-details")}
             className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm ${
-              activeSection === "profile-details"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
+              activeSection ==="profile-details"
+                ?"bg-slate-100  text-text-primary  font-semibold shadow-sm"
+                :"text-text-secondary hover:bg-background dark:hover:bg-slate-800/50 hover:text-text-primary dark:hover:text-white"
             }`}
           >
             <FileText size={18} />
@@ -456,9 +455,9 @@ const Settings = () => {
           <button
             onClick={() => setActiveSection("platform")}
             className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm${
-              activeSection === "platform"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
+              activeSection ==="platform"
+                ?"bg-slate-100  text-text-primary  font-semibold shadow-sm"
+                :"text-text-secondary hover:bg-background dark:hover:bg-slate-800/50 hover:text-text-primary dark:hover:text-white"
             }`}
           >
             <Sliders size={18} />
@@ -467,9 +466,9 @@ const Settings = () => {
           <button
             onClick={() => setActiveSection("visibility")}
             className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm${
-              activeSection === "visibility"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
+              activeSection ==="visibility"
+                ?"bg-slate-100  text-text-primary  font-semibold shadow-sm"
+                :"text-text-secondary hover:bg-background dark:hover:bg-slate-800/50 hover:text-text-primary dark:hover:text-white"
             }`}
           >
             <Lock size={18} />
@@ -478,9 +477,9 @@ const Settings = () => {
           <button
             onClick={() => setActiveSection("accounts")}
             className={`flex items-center gap-2 px-3 py-3 rounded-lg text-sm ${
-              activeSection === "accounts"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
+              activeSection ==="accounts"
+                ?"bg-slate-100  text-text-primary  font-semibold shadow-sm"
+                :"text-text-secondary hover:bg-background dark:hover:bg-slate-800/50 hover:text-text-primary dark:hover:text-white"
             }`}
           >
             <Shield size={18} />
@@ -493,28 +492,28 @@ const Settings = () => {
         <nav className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
             {
-              id: "basic-info",
-              label: "Basic Info",
+              id:"basic-info",
+              label:"Basic Info",
               icon: <User size={18} />,
             },
             {
-              id: "profile-details",
-              label: "Profile Details",
+              id:"profile-details",
+              label:"Profile Details",
               icon: <FileText size={18} />,
             },
             {
-              id: "platform",
-              label: "Platform",
+              id:"platform",
+              label:"Platform",
               icon: <Sliders size={18} />,
             },
             {
-              id: "visibility",
-              label: "Visibility",
+              id:"visibility",
+              label:"Visibility",
               icon: <Lock size={18} />,
             },
             {
-              id: "accounts",
-              label: "Accounts",
+              id:"accounts",
+              label:"Accounts",
               icon: <Shield size={18} />,
             },
           ].map((item) => (
@@ -529,11 +528,11 @@ const Settings = () => {
 
           ${
             activeSection === item.id
-              ? "bg-slate-800 text-white border border-slate-700"
-              : "bg-slate-900/40 text-slate-400 border border-slate-800 hover:bg-slate-800/60 hover:text-white"
+              ?"bg-slate-800 text-white border border-slate-700"
+              :"bg-slate-900/40 text-text-muted border border-slate-800 hover:bg-slate-800/60 hover:text-white"
           }
 
-          ${item.id === "accounts" ? "md:col-span-2" : ""}
+          ${item.id ==="accounts" ?"md:col-span-2" :""}
         `}
             >
               {item.icon}
@@ -545,22 +544,22 @@ const Settings = () => {
       {/* Main Settings Content Area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 max-w-5xl w-full">
         {/* ================= BASIC INFO SECTION ================= */}
-        {activeSection === "basic-info" && (
+        {activeSection ==="basic-info" && (
           <div className="space-y-8 animate-fadeIn">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-text-primary">
                 Basic Info
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-text-secondary dark:text-text-muted mt-1">
                 You can manage your details here.
               </p>
             </div>
             <form
               onSubmit={handleSaveBasicInfo}
-              className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6"
+              className="bg-card rounded-xl p-6 border border-border-color/60  shadow-sm space-y-6"
             >
               <div>
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-6">
+                <h3 className="text-lg font-bold text-slate-950  mb-6">
                   Basic Details
                 </h3>
 
@@ -574,12 +573,12 @@ const Settings = () => {
                         className="w-24 h-24 rounded-full object-cover border-2 border-blue-500/20 group-hover:opacity-85 transition-opacity"
                       />
                     ) : (
-                      <div className="w-24 h-24 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 font-extrabold text-3xl border border-slate-200 dark:border-slate-700">
-                        {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                      <div className="w-24 h-24 rounded-full flex items-center justify-center bg-slate-100  text-text-muted font-extrabold text-3xl border border-border-color dark:border-slate-700">
+                        {user?.name?.charAt(0)?.toUpperCase() ||"U"}
                       </div>
                     )}
                     {showPhotoMenu && (
-                      <div className="absolute top-full left-0 mt-2 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="absolute top-full left-0 mt-2 w-44 bg-card border border-border-color dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
                         <button
                           type="button"
                           onClick={() => {
@@ -626,10 +625,10 @@ const Settings = () => {
                     className="hidden"
                   />
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-800 dark:text-white">
+                    <h4 className="text-sm font-semibold text-text-primary">
                       Profile Photo
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-text-secondary dark:text-text-muted mt-1">
                       Accepts PNG, JPG, or WEBP up to 5MB.
                     </p>
                   </div>
@@ -637,60 +636,60 @@ const Settings = () => {
                 {/* Form fields */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       First Name
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       Last Name
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                     />
                   </div>
                 </div>
                 <div className="mb-5">
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                     Email Address
                   </label>
                   <input
                     type="email"
-                    className="w-full bg-slate-100 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-lg py-2.5 px-4 text-sm text-slate-400 dark:text-slate-500 cursor-not-allowed focus:outline-none"
+                    className="w-full bg-slate-100 /40 border border-border-color/80  rounded-lg py-2.5 px-4 text-sm text-text-muted dark:text-text-secondary cursor-not-allowed focus:outline-none"
                     value={email}
                     disabled
                   />
                 </div>
                 <div className="mb-5">
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider">
                       Bio (Max 200 Characters)
                     </label>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-text-muted">
                       {bio.length}/200
                     </span>
                   </div>
                   <textarea
                     maxLength={200}
                     rows={3}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all resize-none"
+                    className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all resize-none"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Tell us a little bit about yourself..."
                   />
                 </div>
                 <div className="mb-5">
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                     Country
                   </label>
                   <input
@@ -698,21 +697,21 @@ const Settings = () => {
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     placeholder="Enter Country"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white"
+                    className="w-full bg-background dark:bg-slate-900 border border-border-color  rounded-lg py-2.5 px-4 text-sm text-text-primary"
                   />
                 </div>
               </div>
-              <div className="border-t border-slate-200/60 dark:border-slate-800 pt-6">
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-6">
+              <div className="border-t border-border-color/60  pt-6">
+                <h3 className="text-lg font-bold text-slate-950  mb-6">
                   Educational Details
                 </h3>
                 <div className="mb-5">
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                     School / College / University
                   </label>
                   <input
                     type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                    className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                     value={school}
                     onChange={(e) => setSchool(e.target.value)}
                     placeholder="Enter school name"
@@ -720,31 +719,31 @@ const Settings = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       Degree
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={degree}
                       onChange={(e) => setDegree(e.target.value)}
                       placeholder="Degree"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       Branch
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={branch}
                       onChange={(e) => setBranch(e.target.value)}
                       placeholder="Branch"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       Year of Graduation
                     </label>
                     <input
@@ -754,7 +753,7 @@ const Settings = () => {
                       value={graduationYear}
                       onChange={(e) => setGraduationYear(e.target.value)}
                       placeholder="2028"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                     />
                   </div>
                 </div>
@@ -772,28 +771,28 @@ const Settings = () => {
           </div>
         )}
         {/* ================= PROFILE DETAILS SECTION ================= */}
-        {activeSection === "profile-details" && (
+        {activeSection ==="profile-details" && (
           <div className="space-y-8 animate-fadeIn">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              <h1 className="text-2xl font-bold text-text-primary  font-display">
                 Profile Details
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-text-secondary dark:text-text-muted mt-1">
                 Manage details about your experiences and achievements.
               </p>
             </div>
             {/* Sub-tabs header */}
-            <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6">
+            <div className="flex border-b border-border-color  gap-6">
               {[
-                { id: "about-me", label: "About Me", icon: User },
-                { id: "education", label: "Education", icon: GraduationCap },
-                { id: "achievements", label: "Achievements", icon: Award },
+                { id:"about-me", label:"About Me", icon: User },
+                { id:"education", label:"Education", icon: GraduationCap },
+                { id:"achievements", label:"Achievements", icon: Award },
                 {
-                  id: "work-experience",
-                  label: "Work Experience",
+                  id:"work-experience",
+                  label:"Work Experience",
                   icon: Briefcase,
                 },
-                { id: "socials", label: "Socials", icon: Share2 },
+                { id:"socials", label:"Socials", icon: Share2 },
               ].map((tab) => {
                 const TabIcon = tab.icon;
                 const isActive = profileDetailsActiveTab === tab.id;
@@ -806,8 +805,8 @@ const Settings = () => {
                     }}
                     className={`flex items-center gap-2 pb-3 text-sm font-semibold transition-all relative cursor-pointer ${
                       isActive
-                        ? "text-orange-500 dark:text-orange-400 border-b-2 border-orange-500 dark:border-orange-400"
-                        : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        ?"text-orange-500 dark:text-orange-400 border-b-2 border-orange-500 dark:border-orange-400"
+                        :"text-text-muted hover:text-slate-600 dark:hover:text-slate-300"
                     }`}
                   >
                     <TabIcon size={16} />
@@ -817,22 +816,18 @@ const Settings = () => {
               })}
             </div>
             {/* Tab content area */}
-            {profileDetailsActiveTab !== "socials" ? (
-              <div className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6">
+            {profileDetailsActiveTab !=="socials" ? (
+              <div className="bg-card rounded-xl p-6 border border-border-color/60  shadow-sm space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-950 dark:text-white capitalize">
-                      {profileDetailsActiveTab.replace("-", " ")}
+                    <h3 className="text-lg font-bold text-slate-950  capitalize">
+                      {profileDetailsActiveTab.replace("-","")}
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      {profileDetailsActiveTab === "about-me" &&
-                        "Add a brief introduction about yourself to showcase your personality and interests."}
-                      {profileDetailsActiveTab === "education" &&
-                        "Summarize your educational achievements and qualifications."}
-                      {profileDetailsActiveTab === "achievements" &&
-                        "List your major competitions, highlights, and accolades."}
-                      {profileDetailsActiveTab === "work-experience" &&
-                        "Detail your past work, internships, or volunteering experience."}
+                    <p className="text-xs text-text-secondary dark:text-text-muted mt-1">
+                      {profileDetailsActiveTab ==="about-me" &&"Add a brief introduction about yourself to showcase your personality and interests."}
+                      {profileDetailsActiveTab ==="education" &&"Summarize your educational achievements and qualifications."}
+                      {profileDetailsActiveTab ==="achievements" &&"List your major competitions, highlights, and accolades."}
+                      {profileDetailsActiveTab ==="work-experience" &&"Detail your past work, internships, or volunteering experience."}
                     </p>
                   </div>
                   <button
@@ -843,16 +838,16 @@ const Settings = () => {
                   </button>
                 </div>
                 {/* Editor Area */}
-                <div className="border border-slate-200/80 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col">
+                <div className="border border-border-color/80  rounded-lg overflow-hidden flex flex-col">
                   {/* Write/Preview header */}
-                  <div className="flex bg-slate-50 dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 justify-between items-center px-4 py-2 text-xs">
+                  <div className="flex bg-background dark:bg-slate-900 border-b border-border-color/80  justify-between items-center px-4 py-2 text-xs">
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditorMode("write")}
                         className={`font-semibold py-1 px-3 rounded-md cursor-pointer ${
-                          editorMode === "write"
-                            ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-violet-400 shadow-xs"
-                            : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                          editorMode ==="write"
+                            ?"bg-card text-blue-600 dark:text-violet-400 shadow-xs"
+                            :"text-text-muted hover:text-slate-600 dark:hover:text-slate-300"
                         }`}
                       >
                         Write
@@ -860,9 +855,9 @@ const Settings = () => {
                       <button
                         onClick={() => setEditorMode("preview")}
                         className={`font-semibold py-1 px-3 rounded-md cursor-pointer ${
-                          editorMode === "preview"
-                            ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-violet-400 shadow-xs"
-                            : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                          editorMode ==="preview"
+                            ?"bg-card text-blue-600 dark:text-violet-400 shadow-xs"
+                            :"text-text-muted hover:text-slate-600 dark:hover:text-slate-300"
                         }`}
                       >
                         Preview
@@ -870,11 +865,11 @@ const Settings = () => {
                     </div>
                   </div>
                   {/* Formatting Toolbar - only in write mode */}
-                  {editorMode === "write" && (
-                    <div className="flex flex-wrap gap-1 items-center px-3 py-1.5 bg-slate-50/50 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-800 text-slate-500 dark:text-slate-400">
+                  {editorMode ==="write" && (
+                    <div className="flex flex-wrap gap-1 items-center px-3 py-1.5 bg-background/50 dark:bg-slate-900/40 border-b border-border-color/60  text-text-secondary dark:text-text-muted">
                       <button
                         type="button"
-                        onClick={() => insertMarkdown("bold", "bold text")}
+                        onClick={() => insertMarkdown("bold","bold text")}
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Bold"
                       >
@@ -882,7 +877,7 @@ const Settings = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => insertMarkdown("italic", "italic text")}
+                        onClick={() => insertMarkdown("italic","italic text")}
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Italic"
                       >
@@ -891,7 +886,7 @@ const Settings = () => {
                       <button
                         type="button"
                         onClick={() =>
-                          insertMarkdown("underline", "underlined text")
+                          insertMarkdown("underline","underlined text")
                         }
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Underline"
@@ -901,7 +896,7 @@ const Settings = () => {
                       <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                       <button
                         type="button"
-                        onClick={() => insertMarkdown("list", "list item")}
+                        onClick={() => insertMarkdown("list","list item")}
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Bulleted List"
                       >
@@ -910,7 +905,7 @@ const Settings = () => {
                       <button
                         type="button"
                         onClick={() =>
-                          insertMarkdown("list-ordered", "list item")
+                          insertMarkdown("list-ordered","list item")
                         }
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Numbered List"
@@ -919,7 +914,7 @@ const Settings = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => insertMarkdown("quote", "quote block")}
+                        onClick={() => insertMarkdown("quote","quote block")}
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Blockquote"
                       >
@@ -928,7 +923,7 @@ const Settings = () => {
                       <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                       <button
                         type="button"
-                        onClick={() => insertMarkdown("code", "code block")}
+                        onClick={() => insertMarkdown("code","code block")}
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Code"
                       >
@@ -937,7 +932,7 @@ const Settings = () => {
                       <button
                         type="button"
                         onClick={() =>
-                          insertMarkdown("image", "Image description")
+                          insertMarkdown("image","Image description")
                         }
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Image"
@@ -946,7 +941,7 @@ const Settings = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => insertMarkdown("link", "Link text")}
+                        onClick={() => insertMarkdown("link","Link text")}
                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
                         title="Link"
                       >
@@ -955,22 +950,22 @@ const Settings = () => {
                     </div>
                   )}
                   {/* Text area or Markdown view */}
-                  {editorMode === "write" ? (
+                  {editorMode ==="write" ? (
                     <textarea
                       ref={textareaRef}
-                      className="w-full bg-white dark:bg-slate-900 border-0 p-4 text-sm text-slate-800 dark:text-slate-200 focus:outline-none min-h-[300px] resize-y"
+                      className="w-full bg-white dark:bg-slate-900 border-0 p-4 text-sm text-text-primary  focus:outline-none min-h-[300px] resize-y"
                       value={getProfileTabTextValue()}
                       onChange={(e) => setProfileTabTextValue(e.target.value)}
-                      placeholder={`Write your ${profileDetailsActiveTab.replace("-", " ")} section in Markdown format...`}
+                      placeholder={`Write your ${profileDetailsActiveTab.replace("-","")} section in Markdown format...`}
                     />
                   ) : (
-                    <div className="p-6 min-h-[300px] max-h-[500px] overflow-y-auto bg-slate-50/20 dark:bg-slate-900/10 prose dark:prose-invert prose-sm max-w-none">
+                    <div className="p-6 min-h-[300px] max-h-[500px] overflow-y-auto bg-background/20 dark:bg-slate-900/10 prose dark:prose-invert prose-sm max-w-none">
                       {getProfileTabTextValue() ? (
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {getProfileTabTextValue()}
                         </ReactMarkdown>
                       ) : (
-                        <p className="text-slate-400 italic">
+                        <p className="text-text-muted italic">
                           No content to preview yet. Use the Write tab to add
                           content.
                         </p>
@@ -981,13 +976,13 @@ const Settings = () => {
               </div>
             ) : (
               /* Socials Content */
-              <div className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6">
+              <div className="bg-card rounded-xl p-6 border border-border-color/60  shadow-sm space-y-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-950 dark:text-white">
+                    <h3 className="text-lg font-bold text-slate-950">
                       Social Media Links
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-text-secondary dark:text-text-muted mt-1">
                       Connect your online profiles here.
                     </p>
                   </div>
@@ -1000,49 +995,49 @@ const Settings = () => {
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       GitHub Profile
                     </label>
                     <input
                       type="url"
                       placeholder="https://github.com/username"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={github}
                       onChange={(e) => setGithub(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       LinkedIn Profile
                     </label>
                     <input
                       type="url"
                       placeholder="https://linkedin.com/in/username"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={linkedin}
                       onChange={(e) => setLinkedin(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       Twitter / X Profile
                     </label>
                     <input
                       type="url"
                       placeholder="https://x.com/username"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={twitter}
                       onChange={(e) => setTwitter(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-text-secondary dark:text-text-muted uppercase tracking-wider mb-2">
                       Portfolio Website
                     </label>
                     <input
                       type="url"
                       placeholder="https://yourportfolio.com"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={portfolio}
                       onChange={(e) => setPortfolio(e.target.value)}
                     />
@@ -1053,31 +1048,31 @@ const Settings = () => {
           </div>
         )}
         {/* ================= PLATFORM SETTINGS SECTION ================= */}
-        {activeSection === "platform" && (
+        {activeSection ==="platform" && (
           <div className="space-y-8 animate-fadeIn">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              <h1 className="text-2xl font-bold text-text-primary  font-display">
                 Platform
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-text-secondary dark:text-text-muted mt-1">
                 Manage system configurations and notifications.
               </p>
             </div>
-            <div className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6">
+            <div className="bg-card rounded-xl p-6 border border-border-color/60  shadow-sm space-y-6">
               {/* Theme Settings */}
               <div>
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-4">
+                <h3 className="text-lg font-bold text-slate-950  mb-4">
                   Appearance Theme
                 </h3>
                 <div className="flex gap-4">
                   <button
                     onClick={() => {
-                      if (theme === "dark") toggleTheme();
+                      if (theme ==="dark") toggleTheme();
                     }}
                     className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border text-sm font-semibold cursor-pointer transition-all ${
-                      theme === "light"
-                        ? "border-blue-500 bg-blue-50/30 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 shadow-sm"
-                        : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      theme ==="light"
+                        ?"border-blue-500 bg-blue-50/30 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 shadow-sm"
+                        :"border-border-color  text-slate-600 dark:text-text-muted hover:bg-background dark:hover:bg-slate-800/50"
                     }`}
                   >
                     <Sun size={18} />
@@ -1085,12 +1080,12 @@ const Settings = () => {
                   </button>
                   <button
                     onClick={() => {
-                      if (theme === "light") toggleTheme();
+                      if (theme ==="light") toggleTheme();
                     }}
                     className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border text-sm font-semibold cursor-pointer transition-all ${
-                      theme === "dark"
-                        ? "border-violet-500 bg-violet-950/20 text-violet-400 shadow-sm"
-                        : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      theme ==="dark"
+                        ?"border-violet-500 bg-violet-950/20 text-violet-400 shadow-sm"
+                        :"border-border-color  text-slate-600 dark:text-text-muted hover:bg-background dark:hover:bg-slate-800/50"
                     }`}
                   >
                     <Moon size={18} />
@@ -1099,17 +1094,17 @@ const Settings = () => {
                 </div>
               </div>
               {/* Notification Toggles */}
-              <div className="border-t border-slate-200/60 dark:border-slate-800 pt-6">
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-4">
+              <div className="border-t border-border-color/60  pt-6">
+                <h3 className="text-lg font-bold text-slate-950  mb-4">
                   Notification Preferences
                 </h3>
 
-                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-background dark:bg-slate-900/60 border border-border-color/60  rounded-xl">
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    <h4 className="text-sm font-semibold text-text-primary">
                       Email Notifications
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-text-secondary dark:text-text-muted mt-1">
                       Receive product updates, progress digests, and alert logs.
                     </p>
                   </div>
@@ -1122,20 +1117,20 @@ const Settings = () => {
                     }
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                       notificationsEnabled
-                        ? "bg-blue-600 dark:bg-violet-600"
-                        : "bg-slate-200 dark:bg-slate-800"
+                        ?"bg-blue-600 dark:bg-violet-600"
+                        :"bg-slate-200"
                     }`}
                   >
                     <span
                       className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                        notificationsEnabled ? "translate-x-5" : "translate-x-0"
+                        notificationsEnabled ?"translate-x-5" :"translate-x-0"
                       }`}
                     />
                   </button>
                 </div>
               </div>
               {/* Action Buttons */}
-              <div className="flex justify-end pt-4 border-t border-slate-200/60 dark:border-slate-800">
+              <div className="flex justify-end pt-4 border-t border-border-color/60">
                 <button
                   onClick={handleSavePlatformSettings}
                   className="bg-blue-600 hover:bg-blue-700 dark:bg-violet-600 dark:hover:bg-violet-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-sm hover:shadow transition-all text-sm cursor-pointer"
@@ -1147,25 +1142,25 @@ const Settings = () => {
           </div>
         )}
         {/* ================= VISIBILITY SECTION ================= */}
-        {activeSection === "visibility" && (
+        {activeSection ==="visibility" && (
           <div className="space-y-8 animate-fadeIn">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              <h1 className="text-2xl font-bold text-text-primary  font-display">
                 Visibility
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-text-secondary dark:text-text-muted mt-1">
                 You can manage your stats visibility here.
               </p>
             </div>
             <div className="flex flex-col gap-4">
               {[
                 {
-                  id: "Public",
-                  desc: "Allow other users and guests to view your practice statistics, completed sheets, and developer profile.",
+                  id:"Public",
+                  desc:"Allow other users and guests to view your practice statistics, completed sheets, and developer profile.",
                 },
                 {
-                  id: "Private",
-                  desc: "Hide your profile from search results, and ensure your progress logs are only visible to you.",
+                  id:"Private",
+                  desc:"Hide your profile from search results, and ensure your progress logs are only visible to you.",
                 },
               ].map((option) => {
                 const isSelected = visibilityOption === option.id;
@@ -1175,16 +1170,16 @@ const Settings = () => {
                     onClick={() => handleVisibilityChange(option.id)}
                     className={`w-full flex items-start text-left p-4 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? "border-blue-500 bg-blue-50/10 dark:border-violet-500 dark:bg-violet-950/10"
-                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                        ?"border-blue-500 bg-blue-50/10 dark:border-violet-500 dark:bg-violet-950/10"
+                        :"border-border-color  bg-card hover:bg-background dark:hover:bg-slate-800/50"
                     }`}
                   >
                     <div className="flex items-center h-5 mr-4 mt-0.5">
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                           isSelected
-                            ? "border-blue-500 dark:border-violet-500"
-                            : "border-slate-300 dark:border-slate-700"
+                            ?"border-blue-500 dark:border-violet-500"
+                            :"border-slate-300 dark:border-slate-700"
                         }`}
                       >
                         {isSelected && (
@@ -1193,10 +1188,10 @@ const Settings = () => {
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-950 dark:text-white">
+                      <h4 className="text-sm font-semibold text-slate-950">
                         {option.id}
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                      <p className="text-xs text-text-secondary dark:text-text-muted mt-1.5 leading-relaxed">
                         {option.desc}
                       </p>
                     </div>
@@ -1207,34 +1202,34 @@ const Settings = () => {
           </div>
         )}
         {/* ================= ACCOUNTS SECTION ================= */}
-        {activeSection === "accounts" && (
+        {activeSection ==="accounts" && (
           <div className="space-y-8 animate-fadeIn">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              <h1 className="text-2xl font-bold text-text-primary  font-display">
                 Accounts
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-text-secondary dark:text-text-muted mt-1">
                 You can manage your accounts here.
               </p>
             </div>
             {/* Account Information Block */}
-            <div className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6">
+            <div className="bg-card rounded-xl p-6 border border-border-color/60  shadow-sm space-y-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-6">
+                <h3 className="text-lg font-bold text-slate-950  mb-6">
                   Account Information
                 </h3>
 
                 {/* ID input/editing */}
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4">
+                <div className="flex items-center justify-between border-b border-slate-100 /80 pb-4 mb-4">
                   <div className="flex-1 mr-4">
-                    <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 block mb-1">
+                    <span className="text-sm font-semibold text-text-secondary dark:text-text-muted block mb-1">
                       PrepPilot ID:
                     </span>
                     {isEditingPrepPilotId ? (
                       <div className="flex items-center gap-2 mt-1">
                         <input
                           type="text"
-                          className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-1 px-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all w-full max-w-[250px]"
+                          className="bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-1 px-3 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all w-full max-w-[250px]"
                           value={prepPilotIdInput}
                           onChange={(e) => setPrepPilotIdInput(e.target.value)}
                         />
@@ -1247,7 +1242,7 @@ const Settings = () => {
                         </button>
                         <button
                           onClick={() => {
-                            setPrepPilotIdInput(user?.prepPilotId || "");
+                            setPrepPilotIdInput(user?.prepPilotId ||"");
                             setIsEditingPrepPilotId(false);
                           }}
                           className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-md transition-colors"
@@ -1257,9 +1252,9 @@ const Settings = () => {
                         </button>
                       </div>
                     ) : (
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">
+                      <span className="text-sm font-bold text-text-primary">
                         {user?.prepPilotId || (
-                          <span className="text-slate-400 italic">
+                          <span className="text-text-muted italic">
                             None set
                           </span>
                         )}
@@ -1277,7 +1272,7 @@ const Settings = () => {
                 </div>
                 {/* Email (Readonly info) */}
                 <div className="flex items-start flex-col">
-                  <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 block mb-1">
+                  <span className="text-sm font-semibold text-text-secondary dark:text-text-muted block mb-1">
                     Email:
                   </span>
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -1286,8 +1281,8 @@ const Settings = () => {
                 </div>
               </div>
               {/* Password update section */}
-              <div className="border-t border-slate-200/60 dark:border-slate-800 pt-6">
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-6">
+              <div className="border-t border-border-color/60  pt-6">
+                <h3 className="text-lg font-bold text-slate-950  mb-6">
                   Update Password
                 </h3>
 
@@ -1297,13 +1292,13 @@ const Settings = () => {
                 >
                   {/* Old Password */}
                   <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                    <label className="text-sm font-semibold text-slate-600 dark:text-text-muted">
                       Original Password:
                     </label>
                     <div className="relative md:col-span-2 flex items-center">
                       <input
-                        type={showOldPassword ? "text" : "password"}
-                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2 px-4 pr-10 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                        type={showOldPassword ?"text" :"password"}
+                        className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2 px-4 pr-10 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                         placeholder="Old Password"
                         value={oldPassword}
                         onChange={(e) => setOldPassword(e.target.value)}
@@ -1312,7 +1307,7 @@ const Settings = () => {
                       <button
                         type="button"
                         onClick={() => setShowOldPassword(!showOldPassword)}
-                        className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="absolute right-3 text-text-muted hover:text-slate-600 dark:hover:text-slate-200"
                       >
                         {showOldPassword ? (
                           <EyeOff size={16} />
@@ -1324,13 +1319,13 @@ const Settings = () => {
                   </div>
                   {/* New Password */}
                   <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                    <label className="text-sm font-semibold text-slate-600 dark:text-text-muted">
                       New Password:
                     </label>
                     <div className="relative md:col-span-2 flex items-center">
                       <input
-                        type={showNewPassword ? "text" : "password"}
-                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2 px-4 pr-10 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                        type={showNewPassword ?"text" :"password"}
+                        className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2 px-4 pr-10 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                         placeholder="New Password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
@@ -1339,7 +1334,7 @@ const Settings = () => {
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="absolute right-3 text-text-muted hover:text-slate-600 dark:hover:text-slate-200"
                       >
                         {showNewPassword ? (
                           <EyeOff size={16} />
@@ -1359,11 +1354,11 @@ const Settings = () => {
                       <div className="h-2 rounded bg-slate-200 overflow-hidden">
                         <div
                           className={`h-full transition-all ${
-                            passwordInfo.strength === "Weak"
-                              ? "bg-red-500 w-1/3"
-                              : passwordInfo.strength === "Medium"
-                                ? "bg-yellow-500 w-2/3"
-                                : "bg-green-500 w-full"
+                            passwordInfo.strength ==="Weak"
+                              ?"bg-red-500 w-1/3"
+                              : passwordInfo.strength ==="Medium"
+                                ?"bg-yellow-500 w-2/3"
+                                :"bg-green-500 w-full"
                           }`}
                         />
                       </div>
@@ -1401,13 +1396,13 @@ const Settings = () => {
 
                   {/* Confirm Password */}
                   <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                    <label className="text-sm font-semibold text-slate-600 dark:text-text-muted">
                       Confirm Password:
                     </label>
                     <div className="relative md:col-span-2 flex items-center">
                       <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2 px-4 pr-10 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
+                        type={showConfirmPassword ?"text" :"password"}
+                        className="w-full bg-background dark:bg-slate-900 border border-border-color  focus:border-blue-500 rounded-lg py-2 px-4 pr-10 text-sm text-text-primary  focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -1418,7 +1413,7 @@ const Settings = () => {
                         onClick={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
-                        className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="absolute right-3 text-text-muted hover:text-slate-600 dark:hover:text-slate-200"
                       >
                         {showConfirmPassword ? (
                           <EyeOff size={16} />
@@ -1439,13 +1434,13 @@ const Settings = () => {
                 </form>
               </div>
               {/* Delete Account */}
-              <div className="border-t border-slate-200/60 dark:border-slate-800 pt-6">
+              <div className="border-t border-border-color/60  pt-6">
                 <div className="flex flex-col lg:flex-row md:items-center justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-bold text-red-600 mb-1">
                       Delete Account
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    <p className="text-xs text-text-secondary dark:text-text-muted leading-relaxed">
                       Once you delete your account, there is no going back.
                       Please be certain.
                     </p>
@@ -1469,7 +1464,7 @@ const Settings = () => {
           <div className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full">
             <h3 className="text-lg font-bold mb-4">Delete Account</h3>
 
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-sm text-slate-600 dark:text-text-muted mb-4">
               Are you sure you want to delete your account? This action is
               permanent and cannot be undone. All your session data, progress
               tracker, and profile configurations will be deleted forever.
@@ -1485,7 +1480,7 @@ const Settings = () => {
                 value={deleteConfirmationText}
                 onChange={(e) => setDeleteConfirmationText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 text-sm"
+                className="w-full bg-background dark:bg-slate-900 border border-border-color  rounded-lg py-2 px-3 text-sm"
               />
             </div>
 
@@ -1495,18 +1490,18 @@ const Settings = () => {
                   setShowDeleteConfirm(false);
                   setDeleteConfirmationText("");
                 }}
-                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-4 py-2 rounded-lg"
+                className="bg-slate-100 hover:bg-slate-200  dark:hover:bg-slate-700 px-4 py-2 rounded-lg"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteConfirmationText !== "DELETE"}
+                disabled={deleteConfirmationText !=="DELETE"}
                 className={`px-4 py-2 rounded-lg text-white ${
-                  deleteConfirmationText === "DELETE"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-red-300 cursor-not-allowed"
+                  deleteConfirmationText ==="DELETE"
+                    ?"bg-red-600 hover:bg-red-700"
+                    :"bg-red-300 cursor-not-allowed"
                 }`}
               >
                 Permanently Delete
@@ -1514,7 +1509,7 @@ const Settings = () => {
             </div>
           </div>
         </div>
-      )}{" "}
+      )}{""}
     </div>
   );
 };

@@ -1,6 +1,6 @@
-import React from "react";
-import { Trash } from "lucide-react";
-import { getInitials } from "../../utils/helper";
+import React from"react";
+import { Trash } from"lucide-react";
+import { getInitials } from"../../utils/helper";
 
 const SummaryCard = ({
   colors,
@@ -55,7 +55,7 @@ const SummaryCard = ({
       {/* Info Tags */}
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="text-[11px] font-medium text-gray-200 bg-white/10 px-2 py-0.5 rounded-full">
-          Experience: {experience} {experience === 1 ? "Year" : "Years"}
+          Experience: {experience} {experience === 1 ?"Year" :"Years"}
         </span>
         <span className="text-[11px] font-medium text-gray-200 bg-white/10 px-2 py-0.5 rounded-full">
           {questions} Q&A

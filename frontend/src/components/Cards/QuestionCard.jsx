@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import toast from "react-hot-toast";
+import React, { useState } from"react";
+import toast from"react-hot-toast";
 import {
   LuChevronDown,
   LuPin,
   LuPinOff,
   LuSparkles,
   LuCopy,
-} from "react-icons/lu";
+} from"react-icons/lu";
 import AIResponsePreview from '../../pages/InterviewPrep/components/AIResponsePreview';
 
 const QuestionCard = ({
@@ -32,14 +32,14 @@ const QuestionCard = ({
   };
 
   return (
-    <div className="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md dark:shadow-none hover:border-violet-300 dark:hover:border-violet-500/50 rounded-2xl p-5 md:p-6 mb-5 transition-all duration-300 backdrop-blur-sm">
+    <div className="group bg-card border border-border-color shadow-sm hover:shadow-md dark:shadow-none hover:border-violet-300 dark:hover:border-violet-500/50 rounded-2xl p-5 md:p-6 mb-5 transition-all duration-300 backdrop-blur-sm">
       {/* Question header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="flex items-start gap-4 cursor-pointer flex-1" onClick={toggleExpand}>
           <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white font-bold shadow-sm group-hover:scale-105 transition-transform duration-300">
             Q
           </div>
-          <h3 className="text-base md:text-lg text-gray-900 dark:text-white font-semibold leading-snug mt-1 flex-1">
+          <h3 className="text-base md:text-lg text-text-primary font-semibold leading-snug mt-1 flex-1">
             {question}
           </h3>
         </div>
@@ -49,19 +49,19 @@ const QuestionCard = ({
             <button
               className={`p-2 rounded-xl transition-colors duration-200 flex items-center justify-center ${
                 isPinned 
-                  ? "bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-500/30 shadow-sm" 
-                  : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10 dark:hover:text-violet-300 border border-transparent"
+                  ?"bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-500/30 shadow-sm" 
+                  :"bg-surface text-text-muted hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10 dark:hover:text-violet-300 border border-transparent"
               }`}
               onClick={onTogglePin}
-              title={isPinned ? "Unpin Question" : "Pin Question"}
+              title={isPinned ?"Unpin Question" :"Pin Question"}
             >
               {isPinned ? <LuPinOff size={18} /> : <LuPin size={18} />}
             </button>
           )}
 
             <button
-              className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500             dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10             dark:hover:text-violet-300 transition-all"
-              onClick={() => copyToClipboard(question, "Question")}
+              className="p-2 rounded-xl bg-surface text-text-muted hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10             dark:hover:text-violet-300 transition-all"
+              onClick={() => copyToClipboard(question,"Question")}
               title="Copy Question"
             >
               <LuCopy size={18} />
@@ -81,12 +81,12 @@ const QuestionCard = ({
           )}
 
           <button 
-            className="p-2 ml-1 text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all" 
+            className="p-2 ml-1 text-text-muted hover:text-violet-600 dark:hover:text-violet-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all" 
             onClick={toggleExpand}
           >
             <LuChevronDown
               size={22}
-              className={`transform transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
+              className={`transform transition-transform duration-300 ${isExpanded ?"rotate-180" :""}`}
             />
           </button>
         </div>
@@ -94,19 +94,19 @@ const QuestionCard = ({
 
       {/* Answer section */}
       {isExpanded && answer && (
-        <div className="mt-6 pt-5 border-t border-gray-100 dark:border-white/10">
+        <div className="mt-6 pt-5 border-t border-border-color">
       
           <div className="flex justify-end mb-4">
             <button
               className="flex items-center gap-2 text-sm font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 hover:bg-violet-100 dark:hover:bg-violet-500/20 border border-violet-100 dark:border-violet-500/20 px-4 py-2 rounded-xl transition-all duration-300"
-              onClick={() => copyToClipboard(answer, "Answer")}
+              onClick={() => copyToClipboard(answer,"Answer")}
             >
               <LuCopy size={16} />
               <span>Copy Answer</span>
             </button>
           </div>
       
-          <div className="text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+          <div className="text-gray-700  leading-relaxed font-medium">
             <AIResponsePreview content={answer} />
           </div>
       

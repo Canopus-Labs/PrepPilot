@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { BASE_URL } from "../../utils/apiPaths";
+import React, { useState } from"react";
+import { BASE_URL } from"../../utils/apiPaths";
 import {
   Lightbulb,
   Layers,
@@ -17,82 +17,82 @@ import {
   Star,
   Zap,
   X,
-} from "lucide-react";
+} from"lucide-react";
 
 // ─────────────────────────────────────────────────────────
 // Config
 // ─────────────────────────────────────────────────────────
 const DOMAINS = [
   {
-    id: "frontend",
-    label: "Frontend",
+    id:"frontend",
+    label:"Frontend",
     icon: Globe,
-    color: "from-blue-500 to-cyan-500",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
-    text: "text-blue-400",
+    color:"from-blue-500 to-cyan-500",
+    bg:"bg-blue-500/10",
+    border:"border-blue-500/30",
+    text:"text-blue-400",
   },
   {
-    id: "backend",
-    label: "Backend",
+    id:"backend",
+    label:"Backend",
     icon: Server,
-    color: "from-emerald-500 to-teal-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    text: "text-emerald-400",
+    color:"from-emerald-500 to-teal-500",
+    bg:"bg-emerald-500/10",
+    border:"border-emerald-500/30",
+    text:"text-emerald-400",
   },
   {
-    id: "fullstack",
-    label: "Full Stack",
+    id:"fullstack",
+    label:"Full Stack",
     icon: Layers,
-    color: "from-violet-500 to-purple-500",
-    bg: "bg-violet-500/10",
-    border: "border-violet-500/30",
-    text: "text-violet-400",
+    color:"from-violet-500 to-purple-500",
+    bg:"bg-violet-500/10",
+    border:"border-violet-500/30",
+    text:"text-violet-400",
   },
   {
-    id: "ai",
-    label: "AI / ML",
+    id:"ai",
+    label:"AI / ML",
     icon: Cpu,
-    color: "from-fuchsia-500 to-pink-500",
-    bg: "bg-fuchsia-500/10",
-    border: "border-fuchsia-500/30",
-    text: "text-fuchsia-400",
+    color:"from-fuchsia-500 to-pink-500",
+    bg:"bg-fuchsia-500/10",
+    border:"border-fuchsia-500/30",
+    text:"text-fuchsia-400",
   },
   {
-    id: "java",
-    label: "Java",
+    id:"java",
+    label:"Java",
     icon: Coffee,
-    color: "from-orange-500 to-amber-500",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/30",
-    text: "text-orange-400",
+    color:"from-orange-500 to-amber-500",
+    bg:"bg-orange-500/10",
+    border:"border-orange-500/30",
+    text:"text-orange-400",
   },
   {
-    id: "devops",
-    label: "DevOps / Cloud",
+    id:"devops",
+    label:"DevOps / Cloud",
     icon: Rocket,
-    color: "from-rose-500 to-red-500",
-    bg: "bg-rose-500/10",
-    border: "border-rose-500/30",
-    text: "text-rose-400",
+    color:"from-rose-500 to-red-500",
+    bg:"bg-rose-500/10",
+    border:"border-rose-500/30",
+    text:"text-rose-400",
   },
 ];
 
 const LEVELS = [
   {
-    id: "Beginner",
-    desc: "Build confidence with guided, simple projects",
+    id:"Beginner",
+    desc:"Build confidence with guided, simple projects",
     star: 1,
   },
   {
-    id: "Intermediate",
-    desc: "Apply core concepts with moderate complexity",
+    id:"Intermediate",
+    desc:"Apply core concepts with moderate complexity",
     star: 2,
   },
   {
-    id: "Advanced",
-    desc: "Production-grade, portfolio-worthy challenges",
+    id:"Advanced",
+    desc:"Production-grade, portfolio-worthy challenges",
     star: 3,
   },
 ];
@@ -112,24 +112,17 @@ For DevOps / Cloud, prefer things like: Kubernetes deployment assistant, Infrast
 For Java, prefer things like: Banking transaction simulator, Distributed inventory system.
 
 For each project, provide:
-- "title": Project Title
-- "description": Short Description
-- "techStack": Array of technologies
-- "features": Array of key features
-- "learningOutcomes": Array of learning outcomes
-- "difficulty": "${level}"
-- "resumeValue": String explaining resume value
+-"title": Project Title
+-"description": Short Description
+-"techStack": Array of technologies
+-"features": Array of key features
+-"learningOutcomes": Array of learning outcomes
+-"difficulty":"${level}"
+-"resumeValue": String explaining resume value
 
 Return ONLY a valid JSON array of objects with the exact keys:
 [
-  {
-    "title": "...",
-    "description": "...",
-    "techStack": ["..."],
-    "features": ["..."],
-    "learningOutcomes": ["..."],
-    "difficulty": "...",
-    "resumeValue": "..."
+  {"title":"...","description":"...","techStack": ["..."],"features": ["..."],"learningOutcomes": ["..."],"difficulty":"...","resumeValue":"..."
   }
 ]
 `;
@@ -138,7 +131,7 @@ Return ONLY a valid JSON array of objects with the exact keys:
 function tryParseJSON(text) {
   try {
     // strip markdown code fences if the model added them
-    const cleaned = text.replace(/```json|```/gi, "").trim();
+    const cleaned = text.replace(/```json|```/gi,"").trim();
     const match = cleaned.match(/\[[\s\S]*\]/);
     if (match) return JSON.parse(match[0]);
     return JSON.parse(cleaned);
@@ -157,7 +150,7 @@ const StarRating = ({ count }) => (
         key={n}
         size={13}
         className={
-          n <= count ? "text-amber-400 fill-amber-400" : "text-gray-700"
+          n <= count ?"text-amber-400 fill-amber-400" :"text-gray-700"
         }
       />
     ))}
@@ -168,13 +161,13 @@ const IdeaCard = ({ idea, domain, index }) => {
   const domainCfg = DOMAINS.find(
     (d) => d.id.toLowerCase() === (idea.domain || domain).toLowerCase(),
   );
-  const gradientClass = domainCfg?.color || "from-violet-500 to-fuchsia-500";
-  const bgClass = domainCfg?.bg || "bg-violet-500/10";
-  const borderClass = domainCfg?.border || "border-violet-500/30";
-  const textClass = domainCfg?.text || "text-violet-400";
+  const gradientClass = domainCfg?.color ||"from-violet-500 to-fuchsia-500";
+  const bgClass = domainCfg?.bg ||"bg-violet-500/10";
+  const borderClass = domainCfg?.border ||"border-violet-500/30";
+  const textClass = domainCfg?.text ||"text-violet-400";
 
   return (
-    <div className="flex flex-col bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden transition-all duration-200 hover:border-gray-300 dark:hover:border-white/20 h-full">
+    <div className="flex flex-col bg-card border border-border-color rounded-lg overflow-hidden transition-all duration-200 hover:border-border-color dark:hover:border-white/20 h-full">
       {/* Color accent bar */}
       <div className={`h-1 w-full bg-gradient-to-r ${gradientClass}`} />
 
@@ -188,10 +181,10 @@ const IdeaCard = ({ idea, domain, index }) => {
               {index + 1}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-snug">
+              <h3 className="text-base font-bold text-text-primary leading-snug">
                 {idea.title}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm text-text-secondary  mt-1">
                 {idea.description || idea.tagline}
               </p>
             </div>
@@ -201,7 +194,7 @@ const IdeaCard = ({ idea, domain, index }) => {
             <StarRating
               count={LEVELS.find((l) => l.id === idea.difficulty)?.star || 1}
             />
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-xs font-medium text-text-muted">
               {idea.difficulty}
             </span>
           </div>
@@ -212,10 +205,10 @@ const IdeaCard = ({ idea, domain, index }) => {
           <div className="flex items-center gap-2">
             <Layers
               size={14}
-              className="text-gray-600 dark:text-gray-400"
+              className="text-text-secondary"
               strokeWidth={1.5}
             />
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
               Tech Stack
             </span>
           </div>
@@ -236,10 +229,10 @@ const IdeaCard = ({ idea, domain, index }) => {
           <div className="flex items-center gap-2">
             <Zap
               size={14}
-              className="text-gray-600 dark:text-gray-400"
+              className="text-text-secondary"
               strokeWidth={1.5}
             />
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
               Features
             </span>
           </div>
@@ -247,11 +240,11 @@ const IdeaCard = ({ idea, domain, index }) => {
             {(idea.features || []).slice(0, 2).map((f, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
+                className="flex items-start gap-2 text-gray-700"
               >
                 <ChevronRight
                   size={14}
-                  className="text-gray-400 dark:text-gray-600 shrink-0 mt-0.5"
+                  className="text-gray-400 dark:text-text-secondary shrink-0 mt-0.5"
                   strokeWidth={1.5}
                 />
                 <span className="text-sm">{f}</span>
@@ -265,10 +258,10 @@ const IdeaCard = ({ idea, domain, index }) => {
           <div className="flex items-center gap-2">
             <BookOpen
               size={14}
-              className="text-gray-600 dark:text-gray-400"
+              className="text-text-secondary"
               strokeWidth={1.5}
             />
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
               Learning Outcomes
             </span>
           </div>
@@ -276,11 +269,11 @@ const IdeaCard = ({ idea, domain, index }) => {
             {(idea.learningOutcomes || []).slice(0, 2).map((l, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
+                className="flex items-start gap-2 text-gray-700"
               >
                 <ChevronRight
                   size={14}
-                  className="text-gray-400 dark:text-gray-600 shrink-0 mt-0.5"
+                  className="text-gray-400 dark:text-text-secondary shrink-0 mt-0.5"
                   strokeWidth={1.5}
                 />
                 <span className="text-sm">{l}</span>
@@ -294,15 +287,14 @@ const IdeaCard = ({ idea, domain, index }) => {
           <div className="flex items-center gap-2">
             <Star
               size={14}
-              className="text-gray-600 dark:text-gray-400"
+              className="text-text-secondary"
               strokeWidth={1.5}
             />
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
               Resume Value
             </span>
           </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-            "{idea.resumeValue || "Great addition to your portfolio."}"
+          <p className="text-sm text-gray-700  italic">"{idea.resumeValue ||"Great addition to your portfolio."}"
           </p>
         </div>
 
@@ -352,11 +344,11 @@ const ProjectIdeas = () => {
       console.log("Prompt:", prompt);
 
       const res = await fetch(`${BASE_URL}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method:"POST",
+        headers: {"Content-Type":"application/json" },
         body: JSON.stringify({ 
           prompt,
-          systemInstruction: "You are an API that ONLY returns valid JSON arrays. Do not include any conversational text, greetings, or formatting outside the JSON array."
+          systemInstruction:"You are an API that ONLY returns valid JSON arrays. Do not include any conversational text, greetings, or formatting outside the JSON array."
         }),
       });
 
@@ -365,7 +357,7 @@ const ProjectIdeas = () => {
       if (!res.ok) throw new Error(`Server error ${res.status}`);
 
       const data = await res.json();
-      const fullText = data.text || "";
+      const fullText = data.text ||"";
 
       const parsed = tryParseJSON(fullText);
       console.log("Parsed Response:", parsed);
@@ -381,7 +373,7 @@ const ProjectIdeas = () => {
       }
     } catch (err) {
       console.error("Project Ideas Generator Error:", err);
-      setError(err.message || "Unknown error");
+      setError(err.message ||"Unknown error");
     } finally {
       setLoading(false);
     }
@@ -394,19 +386,19 @@ const ProjectIdeas = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a] text-gray-900 dark:text-white px-4 sm:px-6 lg:px-8 py-8 md:py-12 transition-colors duration-300">
+    <div className="min-h-screen bg-surface text-text-primary px-4 sm:px-6 lg:px-8 py-8 md:py-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* ── Header Section ── */}
-        <div className="space-y-4 border-b border-gray-200 dark:border-white/10 pb-8">
+        <div className="space-y-4 border-b border-border-color pb-8">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-lg bg-violet-500/15 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20 flex items-center justify-center shrink-0">
               <Lightbulb size={24} strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-text-primary">
                 Project Ideas Generator
               </h1>
-              <p className="text-base text-gray-600 dark:text-gray-400 mt-2 max-w-2xl">
+              <p className="text-base text-text-secondary  mt-2 max-w-2xl">
                 Generate customized project ideas based on your domain and skill
                 level. Explore features, tech stacks, and GitHub references.
               </p>
@@ -425,7 +417,7 @@ const ProjectIdeas = () => {
                   className="text-violet-600 dark:text-violet-400"
                   strokeWidth={1.5}
                 />
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-bold text-text-primary">
                   Choose Your Domain
                 </h2>
               </div>
@@ -440,16 +432,16 @@ const ProjectIdeas = () => {
                       className={`flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200 ${
                         active
                           ? `border-violet-500 bg-violet-50 dark:bg-violet-500/10`
-                          : "border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-gray-300 dark:hover:border-white/20"
+                          :"border-border-color bg-card hover:border-border-color dark:hover:border-white/20"
                       }`}
                     >
                       <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${active ? "bg-violet-600 dark:bg-violet-600" : `bg-gradient-to-br ${d.color}`}`}
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${active ?"bg-violet-600 dark:bg-violet-600" : `bg-gradient-to-br ${d.color}`}`}
                       >
                         <Icon size={20} strokeWidth={1.5} />
                       </div>
                       <span
-                        className={`text-sm font-semibold text-center leading-tight ${active ? "text-violet-600 dark:text-violet-400" : "text-gray-700 dark:text-gray-300"}`}
+                        className={`text-sm font-semibold text-center leading-tight ${active ?"text-violet-600 dark:text-violet-400" :"text-gray-700"}`}
                       >
                         {d.label}
                       </span>
@@ -467,7 +459,7 @@ const ProjectIdeas = () => {
                   className="text-violet-600 dark:text-violet-400"
                   strokeWidth={1.5}
                 />
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-bold text-text-primary">
                   Select Your Level
                 </h2>
               </div>
@@ -480,19 +472,19 @@ const ProjectIdeas = () => {
                       onClick={() => setSelectedLevel(lv.id)}
                       className={`flex flex-col gap-3 p-5 rounded-lg border-2 text-left transition-all duration-200 ${
                         active
-                          ? "border-violet-500 bg-violet-50 dark:bg-violet-500/10"
-                          : "border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-gray-300 dark:hover:border-white/20"
+                          ?"border-violet-500 bg-violet-50 dark:bg-violet-500/10"
+                          :"border-border-color bg-card hover:border-border-color dark:hover:border-white/20"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span
-                          className={`text-sm font-bold uppercase tracking-widest ${active ? "text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400"}`}
+                          className={`text-sm font-bold uppercase tracking-widest ${active ?"text-violet-600 dark:text-violet-400" :"text-text-secondary"}`}
                         >
                           {lv.id}
                         </span>
                         <StarRating count={lv.star} />
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      <p className="text-sm text-text-secondary  leading-relaxed">
                         {lv.desc}
                       </p>
                     </button>
@@ -508,25 +500,25 @@ const ProjectIdeas = () => {
                 disabled={!canGenerate}
                 className={`flex items-center gap-2.5 px-8 py-3 rounded-lg text-base font-semibold transition-all ${
                   canGenerate
-                    ? "bg-violet-600 dark:bg-violet-600 hover:bg-violet-700 dark:hover:bg-violet-700 text-white"
-                    : "bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-600 cursor-not-allowed"
+                    ?"bg-violet-600 dark:bg-violet-600 hover:bg-violet-700 dark:hover:bg-violet-700 text-white"
+                    :"bg-gray-200 dark:bg-gray-800 text-text-muted dark:text-text-secondary cursor-not-allowed"
                 }`}
               >
                 <Sparkles size={18} strokeWidth={1.5} />
-                {loading ? "Generating Ideas…" : "Generate Project Ideas"}
+                {loading ?"Generating Ideas…" :"Generate Project Ideas"}
               </button>
             </div>
           </div>
         ) : (
           <>
             {/* Results Header */}
-            <div className="flex items-center justify-between gap-4 pb-6 border-b border-gray-200 dark:border-white/10">
+            <div className="flex items-center justify-between gap-4 pb-6 border-b border-border-color">
               <div className="flex flex-wrap items-center gap-2">
                 {(() => {
                   const d = DOMAINS.find((x) => x.id === selectedDomain);
                   const Icon = d?.icon;
                   return (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10">
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 dark:bg-white/10 text-gray-700  border border-border-color">
                       {Icon && <Icon size={16} strokeWidth={1.5} />} {d?.label}
                     </span>
                   );
@@ -542,7 +534,7 @@ const ProjectIdeas = () => {
               </div>
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30 transition-all"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-text-secondary  hover:text-text-primary border border-border-color dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30 transition-all"
               >
                 <RefreshCw size={16} strokeWidth={1.5} /> New Search
               </button>
@@ -561,7 +553,7 @@ const ProjectIdeas = () => {
             </div>
 
             {/* Action Bar */}
-            <div className="flex justify-center gap-3 pt-6 border-t border-gray-200 dark:border-white/10">
+            <div className="flex justify-center gap-3 pt-6 border-t border-border-color">
               <button
                 onClick={handleGenerate}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-all"
@@ -570,7 +562,7 @@ const ProjectIdeas = () => {
               </button>
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-gray-300 dark:border-white/20 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-semibold transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-border-color dark:border-white/20 text-gray-700  hover:text-text-primary text-sm font-semibold transition-all"
               >
                 <X size={16} strokeWidth={1.5} /> Clear All
               </button>
@@ -584,7 +576,7 @@ const ProjectIdeas = () => {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden animate-pulse"
+                className="bg-card border border-border-color rounded-lg overflow-hidden animate-pulse"
               >
                 <div className="h-1 bg-gray-300 dark:bg-white/10" />
                 <div className="p-6 space-y-4">

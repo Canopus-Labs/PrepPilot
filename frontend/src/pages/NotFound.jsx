@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link } from"react-router-dom";
+import { motion } from"framer-motion";
 
 const NotFound = () => {
   return (
@@ -16,7 +16,7 @@ const NotFound = () => {
           Page Not Found
         </h2>
 
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
+        <p className="text-text-secondary  mb-8">
           The page you are looking for doesn't exist or has been moved.
         </p>
 

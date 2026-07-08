@@ -1,25 +1,21 @@
-import React, { useState } from "react";
-import { Play } from "lucide-react"; // icon for Run button
-import DashboardLayout from "./Layouts/DashboardLayout";
+import React, { useState } from"react";
+import { Play } from"lucide-react"; // icon for Run button
+import DashboardLayout from"./Layouts/DashboardLayout";
 
 const RAPIDAPI_KEY = import.meta.env.VITE_REACT_APP_RAPIDAPI_KEY;
 
 const Compiler = () => {
   const [language, setLanguage] = useState("62"); // Default Java
-  const codeTemplates = {
-    "54": `#include <iostream>
+  const codeTemplates = {"54": `#include <iostream>
 using namespace std;
 int main() {
-    cout << "Hello World" << endl;
+    cout <<"Hello World" << endl;
     return 0;
-}`,
-    "62": `public class Main {
+}`,"62": `public class Main {
   public static void main(String[] args) {
     System.out.println("Hello World");
   }
-}`,
-    "71": `print("Hello World")`,
-    "63": `console.log("Hello World");`
+}`,"71": `print("Hello World")`,"63": `console.log("Hello World");`
   };
     const [code, setCode] = useState(codeTemplates[language]); // Keep only one instance
 
@@ -35,19 +31,15 @@ int main() {
     setOutput("Running...");
 
     try {
-      const response = await fetch(
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
+      const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
         {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "X-RapidAPI-Key": RAPIDAPI_KEY,
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          method:"POST",
+          headers: {"content-type":"application/json","X-RapidAPI-Key": RAPIDAPI_KEY,"X-RapidAPI-Host":"judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
             language_id: parseInt(language),
             source_code: code,
-            stdin: "",
+            stdin:"",
           }),
         }
       );
@@ -56,12 +48,11 @@ int main() {
       const finalOutput =
         result.stdout ||
         result.stderr ||
-        result.compile_output ||
-        "No output returned.";
+        result.compile_output ||"No output returned.";
 
       setOutput(finalOutput);
     } catch (error) {
-      setOutput("❌ Error running code: " + error.message);
+      setOutput("❌ Error running code:" + error.message);
     }
   };
 

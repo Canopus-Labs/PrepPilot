@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import React, { useState } from"react";
+import { FaRegEye, FaRegEyeSlash } from"react-icons/fa6";
 
 const Input = ({ value, onChange, label, placeholder, type, autoFocus = false, }) => {
   const [showPassword, setShowpassword] = useState(false);
@@ -15,28 +15,28 @@ const Input = ({ value, onChange, label, placeholder, type, autoFocus = false, }
       <div className="relative flex items-center w-full min-w-0 group">
         <input
           type={
-            type === "password" ? (showPassword ? "text" : "password") : type
+            type ==="password" ? (showPassword ?"text" :"password") : type
           }
           // Set autoComplete based on input type
           autoComplete={
           label?.toLowerCase().includes("email")
-          ? "email"
-          : type === "password"
-          ? "current-password"
-          : "off"
+          ?"email"
+          : type ==="password"
+          ?"current-password"
+          :"off"
           }
 
           placeholder={placeholder}
-          className="w-full min-w-0 bg-white border border-violet-300 hover:border-violet-400 focus:border-violet-500 rounded-lg py-2.5 px-4 pr-10 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+          className="w-full min-w-0 bg-white border border-violet-300 hover:border-violet-400 focus:border-violet-500 rounded-lg py-2.5 px-4 pr-10 text-sm text-text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
           value={value}
           onChange={(e) => onChange(e)}
           autoFocus={autoFocus}
         />
-        {type === "password" && (
+        {type ==="password" && (
           <button
   type="button"
   onClick={toggleShowPassword}
-  aria-label={showPassword ? "Hide password" : "Show password"}
+  aria-label={showPassword ?"Hide password" :"Show password"}
   aria-pressed={showPassword}
   className="absolute right-3 text-gray-400 hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 rounded"
 >

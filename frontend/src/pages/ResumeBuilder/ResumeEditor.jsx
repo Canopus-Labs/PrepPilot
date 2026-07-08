@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Split from "react-split";
-import Editor from "@monaco-editor/react";
-import { ArrowLeft, Download, Play, RefreshCw, FileText, Save } from "lucide-react";
-import toast from "react-hot-toast";
+import React, { useState, useEffect, useRef } from"react";
+import { useParams, useNavigate } from"react-router-dom";
+import Split from"react-split";
+import Editor from"@monaco-editor/react";
+import { ArrowLeft, Download, Play, RefreshCw, FileText, Save } from"lucide-react";
+import toast from"react-hot-toast";
 
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
 
 // Default LaTeX code blocks for our samples
-const TEMPLATE_CODE = {
-  "jakes-resume": `\\documentclass[letterpaper,11pt]{article}
+const TEMPLATE_CODE = {"jakes-resume": `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{latexsym}
 \\usepackage[empty]{fullpage}
 \\usepackage{titlesec}
@@ -74,16 +73,13 @@ const TEMPLATE_CODE = {
         \\item Developed a full-stack web application using Flask, React, PostgreSQL and Docker to analyze GitHub data
     \\end{itemize}
 
-\\end{document}`,
-  "deedy-cv": `\\documentclass[a4paper]{article}
+\\end{document}`,"deedy-cv": `\\documentclass[a4paper]{article}
 \\begin{document}
 \\Huge\\textbf{Deedy CV placeholder}
-\\end{document}`,
-  "harvard-pro": `\\documentclass[a4paper]{article}
+\\end{document}`,"harvard-pro": `\\documentclass[a4paper]{article}
 \\begin{document}
 \\Huge\\textbf{Harvard Pro placeholder}
-\\end{document}`,
-  "blank": `\\documentclass[a4paper]{article}
+\\end{document}`,"blank": `\\documentclass[a4paper]{article}
 \\begin{document}
 
 Hello World!
@@ -136,14 +132,14 @@ const ResumeEditor = () => {
     } catch (err) {
       console.error(err);
       
-      let errorMessage = "Failed to compile LaTeX. Please check your syntax.";
+      let errorMessage ="Failed to compile LaTeX. Please check your syntax.";
       if (err.response?.data && err.response.data.type !== 'application/pdf') {
          try {
              // Because responseType is 'blob', we must read the error blob as text
              const text = await err.response.data.text();
              const json = JSON.parse(text);
              if (json.message) {
-                 errorMessage = json.message + (json.log ? "\n\nLog Details:\n" + json.log : "");
+                 errorMessage = json.message + (json.log ?"\n\nLog Details:\n" + json.log :"");
              }
          } catch(e) {}
       }
@@ -166,7 +162,7 @@ const ResumeEditor = () => {
     setIsSaving(true);
     try {
       await axiosInstance.post(API_PATHS.RESUME.SAVE, {
-        title: id === "jakes-resume" ? "Jake's Resume" : id === "deedy-cv" ? "Deedy CV" : "Document",
+        title: id ==="jakes-resume" ?"Jake's Resume" : id ==="deedy-cv" ?"Deedy CV" :"Document",
         latexCode: code
       });
       toast.success("Resume saved successfully!");
@@ -179,24 +175,24 @@ const ResumeEditor = () => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-white dark:bg-[#0b1120] text-gray-900 dark:text-white transition-colors duration-300 overflow-hidden">
+    <div className="h-screen w-full flex flex-col bg-background text-text-primary transition-colors duration-300 overflow-hidden">
       
       {/* Editor Top Navbar (Overleaf style) */}
-      <div className="h-14 flex items-center justify-between px-4 bg-gray-50 dark:bg-[#151c2f] border-b border-gray-200 dark:border-white/5 shrink-0">
+      <div className="h-14 flex items-center justify-between px-4 bg-gray-50 dark:bg-[#151c2f] border-b border-border-color  shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/resume-builder')}
-            className="p-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 rounded-md transition"
+            className="p-1.5 text-text-muted hover:text-text-primary hover:bg-gray-200 dark:hover:bg-white/10 rounded-md transition"
             title="Back to Templates"
           >
             <ArrowLeft size={18} />
           </button>
           
-          <div className="flex items-center gap-2 border-l border-gray-300 dark:border-white/10 pl-4">
+          <div className="flex items-center gap-2 border-l border-border-color  pl-4">
             <FileText size={18} className="text-violet-500" />
             <span className="font-semibold text-sm">main.tex</span>
             <span className="text-xs text-gray-400 ml-2 font-medium bg-gray-200 dark:bg-white/5 px-2 py-0.5 rounded-sm">
-              {id === "jakes-resume" ? "Jake's Resume" : id === "deedy-cv" ? "Deedy CV" : "Document"}
+              {id ==="jakes-resume" ?"Jake's Resume" : id ==="deedy-cv" ?"Deedy CV" :"Document"}
             </span>
           </div>
         </div>
@@ -207,8 +203,8 @@ const ResumeEditor = () => {
             disabled={isCompiling}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-sm font-bold text-white shadow-sm transition-all ${
               isCompiling 
-                ? "bg-emerald-500/50 cursor-wait shadow-none" 
-                : "bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-emerald-500/20"
+                ?"bg-emerald-500/50 cursor-wait shadow-none" 
+                :"bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-emerald-500/20"
             }`}
           >
             {isCompiling ? (
@@ -222,7 +218,7 @@ const ResumeEditor = () => {
           <button
             onClick={downloadPdf}
             disabled={!pdfUrl || isCompiling}
-            className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-semibold bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-semibold bg-gray-200 dark:bg-white/10 text-gray-700  hover:bg-gray-300 dark:hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition"
             title="Download PDF"
           >
             <Download size={14} />
@@ -233,8 +229,8 @@ const ResumeEditor = () => {
             disabled={!code || isCompiling || isSaving}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-all ${
               isSaving
-                ? "bg-violet-500/50 cursor-wait shadow-none text-white"
-                : "bg-violet-600 hover:bg-violet-700 active:scale-95 shadow-violet-500/20 text-white leading-tight"
+                ?"bg-violet-500/50 cursor-wait shadow-none text-white"
+                :"bg-violet-600 hover:bg-violet-700 active:scale-95 shadow-violet-500/20 text-white leading-tight"
             }`}
           >
             {isSaving ? (
@@ -265,7 +261,7 @@ const ResumeEditor = () => {
         >
           {/* Code Editor Pane (Left) */}
           <div className="h-full flex flex-col bg-white dark:bg-[#1e1e1e] relative">
-             <div className="h-8 bg-gray-100 dark:bg-[#252526] border-b border-gray-200 dark:border-black/50 flex items-center px-3 text-[11px] font-medium text-gray-500 uppercase tracking-wide shrink-0">
+             <div className="h-8 bg-gray-100 dark:bg-[#252526] border-b border-border-color dark:border-black/50 flex items-center px-3 text-[11px] font-medium text-text-muted uppercase tracking-wide shrink-0">
                Source Code
              </div>
              <div className="flex-1 relative">
@@ -278,10 +274,10 @@ const ResumeEditor = () => {
                   options={{
                     minimap: { enabled: false },
                     fontSize: 14,
-                    wordWrap: "on",
+                    wordWrap:"on",
                     scrollBeyondLastLine: false,
                     smoothScrolling: true,
-                    cursorBlinking: "smooth",
+                    cursorBlinking:"smooth",
                   }}
                 />
              </div>
@@ -289,7 +285,7 @@ const ResumeEditor = () => {
 
           {/* PDF Preview Pane (Right) */}
           <div className="h-full flex flex-col bg-gray-100 dark:bg-[#2d2d2d] relative">
-             <div className="h-8 bg-gray-200 dark:bg-[#252526] border-b border-gray-300 dark:border-black/50 flex items-center px-3 text-[11px] font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide shrink-0">
+             <div className="h-8 bg-gray-200 dark:bg-[#252526] border-b border-border-color dark:border-black/50 flex items-center px-3 text-[11px] font-medium text-text-secondary  uppercase tracking-wide shrink-0">
                Preview
              </div>
              <div className="flex-1 relative overflow-auto p-4 md:p-8 flex justify-center bg-[#525659] dark:bg-[#1a1a1a]">
@@ -305,15 +301,15 @@ const ResumeEditor = () => {
                    title="PDF Preview"
                  />
                ) : (
-                 <div className="m-auto text-gray-400 dark:text-gray-500 flex flex-col items-center gap-3">
+                 <div className="m-auto text-text-muted flex flex-col items-center gap-3">
                    {isCompiling ? (
                       <>
-                        <RefreshCw size={32} className="animate-spin text-gray-300 dark:text-gray-600" />
+                        <RefreshCw size={32} className="animate-spin text-gray-300 dark:text-text-secondary" />
                         <span className="font-medium tracking-wide">Compiling LaTeX document...</span>
                       </>
                    ) : (
                       <>
-                        <FileText size={32} className="text-gray-300 dark:text-gray-600" />
+                        <FileText size={32} className="text-gray-300 dark:text-text-secondary" />
                         <span className="font-medium tracking-wide">No PDF generated yet</span>
                       </>
                    )}

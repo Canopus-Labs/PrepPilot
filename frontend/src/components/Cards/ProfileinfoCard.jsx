@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
+import React, { useContext } from"react";
+import { useNavigate } from"react-router-dom";
+import { UserContext } from"../../context/userContext";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
 
 const ProfileinfoCard = () => {
   const { user, clearUser } = useContext(UserContext);
@@ -28,23 +28,23 @@ const ProfileinfoCard = () => {
         <img
           src={user.profileImageUrl}
           alt="Profile"
-          className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm transition-colors duration-300"
+          className="w-10 h-10 rounded-full border border-border-color dark:border-gray-600 shadow-sm transition-colors duration-300"
         />
       ) : (
         <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white 
                         bg-gradient-to-r from-indigo-500 to-purple-500">
-          {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+          {user.name ? user.name.charAt(0).toUpperCase() :"U"}
         </div>
       )}
 
       {/* User Info */}
       <div className="ml-3">
-        <div className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
-          {user.name || user.email || ""}
+        <div className="text-sm font-medium text-text-primary transition-colors duration-300">
+          {user.name || user.email ||""}
         </div>
         <button
           onClick={handleLogout}
-          className="text-sm text-gray-700 dark:text-white font-medium hover:underline transition-colors duration-300"
+          className="text-sm text-text-secondary font-medium hover:underline transition-colors duration-300"
         >
           Logout
         </button>

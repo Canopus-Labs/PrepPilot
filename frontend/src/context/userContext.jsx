@@ -1,7 +1,7 @@
-import React, { createContext, useState, useEffect } from "react";
-import axiosInstance from "../utils/axiosinstance";
-import { API_PATHS } from "../utils/apiPaths";
-import toast from "react-hot-toast";
+import React, { createContext, useState, useEffect } from"react";
+import axiosInstance from"../utils/axiosinstance";
+import { API_PATHS } from"../utils/apiPaths";
+import toast from"react-hot-toast";
 
 
 export const UserContext = createContext();

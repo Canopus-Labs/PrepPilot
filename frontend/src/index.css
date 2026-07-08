@@ -3,30 +3,55 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-background: var(--color-background-var);
+  --color-surface: var(--color-surface-var);
+  --color-card: var(--color-card-var);
+  --color-sidebar: var(--color-sidebar-var);
+  --color-border-color: var(--color-border-var);
+  
+  --color-text-primary: var(--color-text-primary-var);
+  --color-text-secondary: var(--color-text-secondary-var);
+  --color-text-muted: var(--color-text-muted-var);
+  
+  /* Retain existing specific names to prevent breakage */
+  --color-primary: rgb(139, 139, 226);
+  --color-accent-teal: #e99a4b;
+  --color-accent-yellow: #ffd700;
+  --color-text-dark: var(--color-text-primary-var);
+  --color-text-light: #ffffff;
+}
+
 :root {
   --font-display: "Urbanist", sans-serif;
-  --color-primary: rgb(139, 139, 226);
-  --color-secondary: #f0f4f8; /* Light Gray */
-  --color-accent-teal: #e99a4b;
-  --color-accent-yellow: #ffd700; /* Bright Yellow */
-  --color-text-dark: #333333; /* Dark Gray */
-  --color-text-light: #ffffff; /* White */
-  --color-background: #ffffff;
-  --color-surface: #f0f4f8;
-  --color-border: #e5e7eb;
+  
+  --color-background-var: #f8f9fb;
+  --color-surface-var: #ffffff;
+  --color-card-var: #ffffff;
+  --color-sidebar-var: #ffffff;
+  --color-border-var: #e5e7eb;
+  
+  --color-text-primary-var: #111827;
+  --color-text-secondary-var: #475569;
+  --color-text-muted-var: #94a3b8;
 }
 
 html.dark {
+  --color-background-var: #0B1120;
+  --color-surface-var: #111827;
+  --color-card-var: #1E293B;
+  --color-sidebar-var: #0F172A;
+  --color-border-var: #334155;
+  
+  --color-text-primary-var: #F8FAFC;
+  --color-text-secondary-var: #CBD5E1;
+  --color-text-muted-var: #94A3B8;
+  
   --color-primary: rgb(147, 147, 255);
-  --color-secondary: #1f2937;
   --color-accent-teal: #f5a962;
   --color-accent-yellow: #fcd34d;
-  --color-text-dark: #f9fafb;
-  --color-text-light: #111827;
-  --color-background: #111827;
-  --color-surface: #1f2937;
-  --color-border: #374151;
 }
+
 @layer base {
   html {
     font-family: var(--font-display);
@@ -34,8 +59,8 @@ html.dark {
     scrollbar-color: #5b21b6 #0f172a;
   }
   body {
-    background-color: var(--color-background);
-    color: var(--color-text-dark);
+    background-color: var(--color-background-var);
+    color: var(--color-text-primary-var);
     overflow-x: hidden;
     transition:
       background-color 0.3s ease,

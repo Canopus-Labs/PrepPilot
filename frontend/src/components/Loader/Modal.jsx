@@ -1,23 +1,23 @@
-import React, { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { modalVariants, backdropVariants } from "../../utils/animations";
+import React, { useEffect } from"react";
+import { motion, AnimatePresence } from"framer-motion";
+import { modalVariants, backdropVariants } from"../../utils/animations";
 
 const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key ==="Escape") onClose();
     };
 
     if (isOpen) {
       document.addEventListener("keydown", handleEsc);
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow ="hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow ="";
     }
 
     return () => {
       document.removeEventListener("keydown", handleEsc);
-      document.body.style.overflow = "";
+      document.body.style.overflow ="";
     };
   }, [isOpen, onClose]);
 
@@ -33,7 +33,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
           onClick={onClose}
         >
           <motion.div
-            className="relative flex flex-col bg-[#111827] border border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]"
+            className="relative flex flex-col bg-sidebar border border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]"
             variants={modalVariants}
             initial="initial"
             animate="animate"

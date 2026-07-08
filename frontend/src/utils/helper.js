@@ -4,9 +4,9 @@ export const validateEmail = (email) => {
 };
 
 export const getInitials=(title)=>{
-    if(!title) return "";
+    if(!title) return"";
 
-    const words = title.split(" ");
+    const words = title.split("");
     let initials="";
     for(let i=0; i<Math.min(words.length,2);i++){
         initials += words[i][0];

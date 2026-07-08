@@ -1,39 +1,39 @@
-import { useParams } from "react-router-dom";
-import gfg from "../assets/gfg.svg";
-import leetcode from "../assets/leetcode.svg";
-import youtube from "../assets/youtube.svg";
-import React, { useState, useEffect, useCallback, memo } from "react";
+import { useParams } from"react-router-dom";
+import gfg from"../assets/gfg.svg";
+import leetcode from"../assets/leetcode.svg";
+import youtube from"../assets/youtube.svg";
+import React, { useState, useEffect, useCallback, memo } from"react";
 
-import { BASE_URL } from "../utils/apiPaths";
-import axiosInstance from "../utils/axiosinstance";
-import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
+import { BASE_URL } from"../utils/apiPaths";
+import axiosInstance from"../utils/axiosinstance";
+import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from"lucide-react";
 
 // Optimized row component to prevent 150+ re-renders on a single click
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
-  let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
-  const diffStr = (sub.difficulty || "").toLowerCase();
-  if (diffStr === 'easy') diffColor = "bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-800/20";
-  if (diffStr === 'medium') diffColor = "bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-800/20";
-  if (diffStr === 'hard') diffColor = "bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-800/20";
+  let diffColor ="bg-gray-100 text-gray-700 dark:bg-gray-800";
+  const diffStr = (sub.difficulty ||"").toLowerCase();
+  if (diffStr === 'easy') diffColor ="bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-800/20";
+  if (diffStr === 'medium') diffColor ="bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-800/20";
+  if (diffStr === 'hard') diffColor ="bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-800/20";
 
   return (
-    <div className="group flex flex-col sm:flex-row sm:items-center px-5 py-3.5 border-b border-gray-100 dark:border-white/5 last:border-0 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200 gap-4 sm:gap-6">
+    <div className="group flex flex-col sm:flex-row sm:items-center px-5 py-3.5 border-b border-gray-100  last:border-0 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200 gap-4 sm:gap-6">
       <div className="flex items-start sm:items-center gap-3.5 flex-1">
         <button
           onClick={() => onToggle(sectionIdx, topicIdx, subIdx)}
           disabled={!followed}
           className={`flex-shrink-0 focus:outline-none transition-transform hover:scale-110 ${!followed ? 'opacity-40 cursor-not-allowed cursor-pointer' : 'cursor-pointer'}`}
-          title={followed ? "Toggle Completion" : "Follow sheet to track progress"}
+          title={followed ?"Toggle Completion" :"Follow sheet to track progress"}
         >
           {completed ? (
             <CheckCircle2 size={20} className="text-green-500 dark:text-green-400 drop-shadow-sm" />
           ) : (
-            <Circle size={20} className="text-gray-300 dark:text-gray-500 hover:text-violet-400 transition-colors" />
+            <Circle size={20} className="text-gray-300 dark:text-text-muted hover:text-violet-400 transition-colors" />
           )}
         </button>
         
         <span className={`text-sm font-medium transition-all duration-200 ${
-          completed ? "text-gray-400 dark:text-gray-500 line-through decoration-gray-300 dark:decoration-gray-600 origin-left" : "text-gray-800 dark:text-gray-200 group-hover:text-violet-600 dark:group-hover:text-violet-400"
+          completed ?"text-text-muted line-through decoration-gray-300 dark:decoration-gray-600 origin-left" :"text-text-primary group-hover:text-violet-600 dark:group-hover:text-violet-400"
         }`}>
           {sub.title}
         </span>
@@ -41,17 +41,17 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
       <div className="flex items-center gap-4 sm:ml-auto pl-8 sm:pl-0 sm:shrink-0">
         <div className="flex items-center gap-2.5">
-          {["gfg", "leetcode", "youtube"].map((platform) =>
+          {["gfg","leetcode","youtube"].map((platform) =>
             sub.links?.[platform] ? (
               <a
                 key={platform}
                 href={followed ? sub.links[platform] : undefined}
-                target={followed ? "_blank" : undefined}
+                target={followed ?"_blank" : undefined}
                 rel="noreferrer"
                 className={`p-1.5 rounded-md transition-all ${
                   followed 
-                    ? "hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" 
-                    : "opacity-30 cursor-not-allowed grayscale"
+                    ?"hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" 
+                    :"opacity-30 cursor-not-allowed grayscale"
                 }`}
                 onClick={(e) => {
                   if (!followed) {
@@ -61,16 +61,16 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
               >
                 <img
                   src={
-                    platform === "gfg"
+                    platform ==="gfg"
                       ? gfg
-                      : platform === "leetcode"
+                      : platform ==="leetcode"
                       ? leetcode
                       : youtube
                   }
                   alt={platform}
                   className={`w-4 h-4 object-contain ${
-                    platform === "youtube" ? "opacity-90" : "scale-110 opacity-70"
-                  } ${followed && "group-hover:opacity-100"}`}
+                    platform ==="youtube" ?"opacity-90" :"scale-110 opacity-70"
+                  } ${followed &&"group-hover:opacity-100"}`}
                 />
               </a>
             ) : null
@@ -186,14 +186,14 @@ function SheetDetail() {
   if (loading)
     return (
       <>
-        <p className="p-4 text-gray-900 dark:text-white bg-[var(--color-background)] dark:bg-[#0f172a] min-h-screen transition-colors duration-300">Loading...</p>
+        <p className="p-4 text-text-primary bg-[var(--color-background)] dark:bg-[#0f172a] min-h-screen transition-colors duration-300">Loading...</p>
       </>
     );
 
   if (!sheet)
     return (
       <>
-        <p className="p-4 text-gray-900 dark:text-white bg-[var(--color-background)] dark:bg-[#0f172a] min-h-screen transition-colors duration-300">
+        <p className="p-4 text-text-primary bg-[var(--color-background)] dark:bg-[#0f172a] min-h-screen transition-colors duration-300">
           Sheet not found
         </p>
       </>
@@ -203,27 +203,27 @@ function SheetDetail() {
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white px-5 md:px-12 lg:px-24 py-8 transition-colors duration-300">
+      <div className="min-h-screen bg-background text-text-primary px-5 md:px-12 lg:px-24 py-8 transition-colors duration-300">
         
         {/* Modern Hero Section */}
-        <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-8 shadow-sm border border-gray-200 dark:border-white/10 relative overflow-hidden">
+        <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-8 shadow-sm border border-border-color relative overflow-hidden">
           {/* Subtle Background Glow */}
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"></div>
           
           <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="max-w-3xl">
-              <h1 className="text-2xl md:text-3xl font-bold mb-3 text-gray-900 dark:text-white tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-bold mb-3 text-text-primary tracking-tight">
                 {sheet.title}
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base mb-6 leading-relaxed">
+              <p className="text-text-secondary text-sm md:text-base mb-6 leading-relaxed">
                 {sheet.description}
               </p>
 
               <div className="flex flex-wrap items-center gap-3 mb-6 lg:mb-0">
-                <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-white/5">
+                <div className="flex items-center gap-1.5 bg-surface text-gray-700  px-3 py-1.5 rounded-lg text-xs font-medium border border-border-color">
                   <BookOpen size={14} className="text-violet-500" /> {sheet.questions} Questions
                 </div>
-                <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-white/5">
+                <div className="flex items-center gap-1.5 bg-surface text-gray-700  px-3 py-1.5 rounded-lg text-xs font-medium border border-border-color">
                   <Users size={14} className="text-blue-500" /> {sheet.followers} Followers
                 </div>
                 <div className="flex items-center gap-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 px-3 py-1.5 rounded-lg text-xs font-bold border border-violet-200 dark:border-violet-800/30">
@@ -237,11 +237,11 @@ function SheetDetail() {
                 onClick={handleFollow}
                 className={`w-full md:w-auto px-6 py-2 rounded-full text-xs font-bold tracking-wide transition-all shadow-sm border ${
                   followed
-                    ? "bg-transparent border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                    : "bg-violet-600 text-white border-violet-600 hover:bg-violet-700 hover:shadow-violet-500/20"
+                    ?"bg-transparent border-border-color text-text-muted dark:border-gray-700  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                    :"bg-violet-600 text-white border-violet-600 hover:bg-violet-700 hover:shadow-violet-500/20"
                 }`}
               >
-                {followed ? "UNFOLLOW" : "FOLLOW SHEET"}
+                {followed ?"UNFOLLOW" :"FOLLOW SHEET"}
               </button>
 
               {!followed && (
@@ -254,9 +254,9 @@ function SheetDetail() {
           </div>
 
           {/* Top Level Progress Bar */}
-          <div className="mt-6 pt-5 border-t border-gray-200 dark:border-white/10">
+          <div className="mt-6 pt-5 border-t border-border-color">
             <div className="flex justify-between items-end mb-2">
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Overall Progress</span>
+              <span className="text-xs font-medium text-text-secondary">Overall Progress</span>
               <span className="text-sm font-bold text-violet-600 dark:text-violet-400">{progressPercent}%</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-800 h-2 rounded-full overflow-hidden shadow-inner flex">
@@ -272,18 +272,18 @@ function SheetDetail() {
         <div className="flex flex-col gap-8">
           {sheet.sections?.map((section, sectionIdx) => (
             <div key={sectionIdx} className="w-full">
-              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-4 flex flex-wrap items-center gap-3">
+              <h2 className="text-lg md:text-xl font-bold text-text-primary mb-4 flex flex-wrap items-center gap-3">
                 <span className="bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 px-2.5 py-1 rounded-lg text-xs font-bold border border-violet-200 dark:border-violet-800/30">
                   Step {sectionIdx + 1}
                 </span>
                 {section.title}
               </h2>
               
-              <div className="bg-white dark:bg-transparent rounded-xl shadow-sm border border-gray-200 dark:border-white/10 overflow-hidden backdrop-blur-sm">
+              <div className="bg-white dark:bg-transparent rounded-xl shadow-sm border border-border-color overflow-hidden backdrop-blur-sm">
                 {section.topics.map((topic, topicIdx) => (
-                  <div key={topicIdx} className="w-full border-b border-gray-200 dark:border-white/10 last:border-0 border-t-0">
-                    <div className="bg-gray-50 dark:bg-white/5 px-5 py-3 border-b border-gray-200 dark:border-white/10">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm">
+                  <div key={topicIdx} className="w-full border-b border-border-color last:border-0 border-t-0">
+                    <div className="bg-gray-50 dark:bg-white/5 px-5 py-3 border-b border-border-color">
+                      <h3 className="font-semibold text-text-primary text-sm">
                         {topicIdx + 1}. {topic.title}
                       </h3>
                     </div>

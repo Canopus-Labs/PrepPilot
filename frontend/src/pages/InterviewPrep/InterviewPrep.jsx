@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import moment from "moment";
-import { AnimatePresence, motion } from "framer-motion";
-import { LuCircleAlert, LuListCollapse } from "react-icons/lu";
-import SpinnerLoader from "../../components/Loader/SpinnerLoader";
-import { toast } from "react-hot-toast";
-import DashboardLayout from "../../components/Layouts/DashboardLayout";
-import RoleInfoHeader from "./components/RoleInfoHeader";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import QuestionCard from "../../components/Cards/QuestionCard";
-import AIResponsePreview from "./components/AIResponsePreview";
-import SkeletonLoader from "../../components/Loader/SkeletonLoader";
-import Drawer from "../../components/Drawer";
+import React, { useEffect, useState } from"react";
+import { useParams } from"react-router-dom";
+import moment from"moment";
+import { AnimatePresence, motion } from"framer-motion";
+import { LuCircleAlert, LuListCollapse } from"react-icons/lu";
+import SpinnerLoader from"../../components/Loader/SpinnerLoader";
+import { toast } from"react-hot-toast";
+import DashboardLayout from"../../components/Layouts/DashboardLayout";
+import RoleInfoHeader from"./components/RoleInfoHeader";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
+import QuestionCard from"../../components/Cards/QuestionCard";
+import AIResponsePreview from"./components/AIResponsePreview";
+import SkeletonLoader from"../../components/Loader/SkeletonLoader";
+import Drawer from"../../components/Drawer";
 
 const InterviewPrep = () => {
   const { sessionId } = useParams();
@@ -102,8 +102,7 @@ const InterviewPrep = () => {
       }
     } catch (error) {
       setErrorMsg(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again"
+        error.response?.data?.message ||"Something went wrong. Please try again"
       );
     } finally {
       setIsUpdateLoader(false);
@@ -117,20 +116,20 @@ const InterviewPrep = () => {
   return (
     <DashboardLayout>
       <RoleInfoHeader
-        role={sessionData?.role || ""}
-        topicsToFocus={sessionData?.topicsToFocus || ""}
-        experience={sessionData?.experience || "-"}
-        questions={sessionData?.questions?.length || "-"}
-        description={sessionData?.description || ""}
+        role={sessionData?.role ||""}
+        topicsToFocus={sessionData?.topicsToFocus ||""}
+        experience={sessionData?.experience ||"-"}
+        questions={sessionData?.questions?.length ||"-"}
+        description={sessionData?.description ||""}
         lastUpdated={
           sessionData?.updatedAt
             ? moment(sessionData.updatedAt).format("Do MMM YYYY")
-            : ""
+            :""
         }
       />
 
       <div className="container mx-auto pt-6 pb-10 px-4 sm:px-6 md:px-10">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-text-primary">
           Interview Q & A
         </h2>
 

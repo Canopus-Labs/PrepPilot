@@ -1,14 +1,14 @@
-import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Input from "../../components/Inputs/Input";
-import Button from "../../components/Button/Button";
-import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector";
-import { validateEmail } from "../../utils/helper";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import { UserContext } from "../../context/userContext";
-import uploadImage from "../../utils/uploadimage";
-import { LuArrowRight } from "react-icons/lu";
+import React, { useContext, useState } from"react";
+import { useNavigate } from"react-router-dom";
+import Input from"../../components/Inputs/Input";
+import Button from"../../components/Button/Button";
+import ProfilePhotoSelector from"../../components/Inputs/ProfilePhotoSelector";
+import { validateEmail } from"../../utils/helper";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
+import { UserContext } from"../../context/userContext";
+import uploadImage from"../../utils/uploadimage";
+import { LuArrowRight } from"react-icons/lu";
 
 const SignUp = ({ setCurrentPage }) => {
   const [profilePic, setProfilePic] = useState(null);
@@ -36,11 +36,11 @@ const SignUp = ({ setCurrentPage }) => {
 
   const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
   const passwordStrength =
-    strengthScore <= 2 ? "Weak" : strengthScore <= 4 ? "Medium" : "Strong";
+    strengthScore <= 2 ?"Weak" : strengthScore <= 4 ?"Medium" :"Strong";
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    let profileImageUrl = "";
+    let profileImageUrl ="";
 
     if (!fullName) { setError("Please enter your full name"); return; }
     if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
@@ -56,7 +56,7 @@ const SignUp = ({ setCurrentPage }) => {
     try {
       if (profilePic) {
         const imgUploadRes = await uploadImage(profilePic);
-        profileImageUrl = imgUploadRes.imageUrl || "";
+        profileImageUrl = imgUploadRes.imageUrl ||"";
       }
 
       const payload = {
@@ -100,7 +100,7 @@ const SignUp = ({ setCurrentPage }) => {
         });
       }, 1000);
     } catch (error) {
-      setResendError(error.response?.data?.message || "Failed to resend. Please try again.");
+      setResendError(error.response?.data?.message ||"Failed to resend. Please try again.");
     } finally {
       setResendLoading(false);
     }
@@ -134,7 +134,7 @@ const SignUp = ({ setCurrentPage }) => {
             onClick={handleResend}
             className="w-full text-sm text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend email (${resendCooldown}s)` : "Resend verification email"}
+            {resendLoading ?"Sending..." : resendCooldown > 0 ? `Resend email (${resendCooldown}s)` :"Resend verification email"}
           </button>
 
           {resendError && (
@@ -145,7 +145,7 @@ const SignUp = ({ setCurrentPage }) => {
 
           <div className="pt-4 border-t border-white/10">
             <p className="text-sm text-gray-400 text-center">
-              Already verified?{" "}
+              Already verified?{""}
               <button
                 type="button"
                 className="font-semibold text-transparent bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text hover:opacity-80 transition-opacity cursor-pointer"
@@ -179,7 +179,7 @@ const SignUp = ({ setCurrentPage }) => {
                    setEmail(value);
 
              if (
-                 error === "Please enter a valid email address" &&
+                 error ==="Please enter a valid email address" &&
                  validateEmail(value)
                 ) {
               setError("");
@@ -209,18 +209,18 @@ const SignUp = ({ setCurrentPage }) => {
                     className={`h-1 flex-1 rounded-full transition-all duration-300 ${
                       seg <= strengthScore
                         ? strengthScore <= 2
-                          ? "bg-red-500"
+                          ?"bg-red-500"
                           : strengthScore <= 4
-                          ? "bg-yellow-400"
-                          : "bg-emerald-400"
-                        : "bg-white/10"
+                          ?"bg-yellow-400"
+                          :"bg-emerald-400"
+                        :"bg-white/10"
                     }`}
                   />
                 ))}
               </div>
 
               <p className={`text-xs font-medium ${
-                strengthScore <= 2 ? "text-red-400" : strengthScore <= 4 ? "text-yellow-400" : "text-emerald-400"
+                strengthScore <= 2 ?"text-red-400" : strengthScore <= 4 ?"text-yellow-400" :"text-emerald-400"
               }`}>
                 {passwordStrength} password
               </p>
@@ -228,21 +228,21 @@ const SignUp = ({ setCurrentPage }) => {
               {/* Requirement chips */}
               <div className="flex flex-wrap gap-2">
                 {[
-                  { key: "length", label: "8+ chars" },
-                  { key: "uppercase", label: "Uppercase" },
-                  { key: "lowercase", label: "Lowercase" },
-                  { key: "number", label: "Number" },
-                  { key: "special", label: "Special" },
+                  { key:"length", label:"8+ chars" },
+                  { key:"uppercase", label:"Uppercase" },
+                  { key:"lowercase", label:"Lowercase" },
+                  { key:"number", label:"Number" },
+                  { key:"special", label:"Special" },
                 ].map(({ key, label }) => (
                   <span
                     key={key}
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
                       passwordChecks[key]
-                        ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
-                        : "bg-white/5 text-gray-500 ring-1 ring-white/10"
+                        ?"bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
+                        :"bg-white/5 text-text-muted ring-1 ring-white/10"
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ? "bg-emerald-400" : "bg-gray-600"}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ?"bg-emerald-400" :"bg-gray-600"}`} />
                     {label}
                   </span>
                 ))}
@@ -268,7 +268,7 @@ const SignUp = ({ setCurrentPage }) => {
 
           <div className="mt-6 pt-4 border-t border-white/10">
             <p className="text-sm text-gray-400 text-center">
-              Already have an account?{" "}
+              Already have an account?{""}
               <button
                 type="button"
                 className="font-semibold text-transparent bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text hover:opacity-80 transition-opacity cursor-pointer"

@@ -1,5 +1,5 @@
-import React from "react";
-import { AlertTriangle } from "lucide-react";
+import React from"react";
+import { AlertTriangle } from"lucide-react";
 
 const DeleteAlertContent = ({ content, onDelete, onCancel }) => {
   return (
@@ -9,11 +9,11 @@ const DeleteAlertContent = ({ content, onDelete, onCancel }) => {
           <AlertTriangle className="text-red-600" size={28} />
         </div>
 
-        <p className="text-base font-medium text-gray-800 dark:text-white">
+        <p className="text-base font-medium text-text-primary">
           {content}
         </p>
 
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-sm text-text-muted mt-2">
           This action cannot be undone. The interview session and all associated
           data will be permanently removed.
         </p>
@@ -22,7 +22,7 @@ const DeleteAlertContent = ({ content, onDelete, onCancel }) => {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="px-4 py-2 rounded-lg border border-border-color dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
             Cancel
           </button>

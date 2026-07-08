@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link } from"react-router-dom";
+import { useState, useEffect } from"react";
 
-import { FiTrendingUp, FiBookOpen } from "react-icons/fi";
-import { FiHelpCircle, FiUsers } from "react-icons/fi";
-import { BASE_URL } from "../utils/apiPaths";
+import { FiTrendingUp, FiBookOpen } from"react-icons/fi";
+import { FiHelpCircle, FiUsers } from"react-icons/fi";
+import { BASE_URL } from"../utils/apiPaths";
 
 function SheetList({ type }) {
   const [sheetList, setSheetList] = useState([]);
@@ -72,17 +72,17 @@ function SheetList({ type }) {
   if (loading)
     return (
       <>
-        <p className="p-4 text-gray-900 dark:text-white">Loading sheets...</p>
+        <p className="p-4 text-text-primary">Loading sheets...</p>
       </>
     );
   if (!Array.isArray(sheetList)) return <p>No sheets available.</p>;
 
   let filteredSheet = [];
-  if (type === "popular") {
+  if (type ==="popular") {
     filteredSheet = [...sheetList]
       .sort((a, b) => b.followers - a.followers)
       .slice(0, 10);
-  } else if (type === "all") {
+  } else if (type ==="all") {
     filteredSheet = [...sheetList];
   } else {
     filteredSheet = sheetList.filter((sheet) => sheet.category === type);
@@ -92,17 +92,17 @@ function SheetList({ type }) {
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white px-6 py-8 transition-colors duration-300">
+      <div className="min-h-screen bg-background text-text-primary px-6 py-8 transition-colors duration-300">
         <p className="text-2xl font-bold mb-8 flex items-center gap-2 transition-colors duration-300">
-          {type === "popular" ? (
+          {type ==="popular" ? (
             <>
               <FiTrendingUp className="text-yellow-500 dark:text-yellow-400" size={28} /> Popular Sheets
             </>
-          ) : type === "all" ? (
+          ) : type ==="all" ? (
             <>
               <FiBookOpen className="text-blue-600 dark:text-blue-400" size={28} /> All Sheets
             </>
-          ) : type && typeof type === "string" ? (
+          ) : type && typeof type ==="string" ? (
             <>
               <FiBookOpen className="text-purple-600 dark:text-purple-400" size={28} /> {`${type.toUpperCase()} Sheets`}
             </>
@@ -130,21 +130,21 @@ function SheetList({ type }) {
                     <FiBookOpen size={20} className="group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <div>
-                    <h3 className="text-[17px] font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-300 leading-tight">
+                    <h3 className="text-[17px] font-bold text-text-primary group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-300 leading-tight">
                       {sheet.title}
                     </h3>
                   </div>
                 </div>
 
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-3.5 line-clamp-2 leading-snug flex-grow">
+                <p className="text-text-muted text-sm mb-3.5 line-clamp-2 leading-snug flex-grow">
                   {sheet.description}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 mb-3.5">
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md text-xs font-medium border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 text-text-secondary px-2 py-1 rounded-md text-xs font-medium border border-gray-100 dark:border-gray-700">
                     <FiHelpCircle className="text-violet-500" size={13} /> {sheet.questions}
                   </div>
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md text-xs font-medium border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 text-text-secondary px-2 py-1 rounded-md text-xs font-medium border border-gray-100 dark:border-gray-700">
                     <FiUsers className="text-blue-500" size={13} /> {sheet.followers}
                   </div>
                 </div>
@@ -158,14 +158,14 @@ function SheetList({ type }) {
                 </div>
 
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                    {progress}% <span className="text-gray-400 dark:text-gray-500 font-medium text-[10px] tracking-wider uppercase">Completed</span>
+                  <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
+                    {progress}% <span className="text-text-muted font-medium text-[10px] tracking-wider uppercase">Completed</span>
                   </span>
                   
                   <button
                     className={`py-1 px-4 rounded-full text-[11px] font-bold tracking-wider transition-all border ${
                       isFollowed
-                        ? 'bg-transparent border-gray-200 text-gray-400 dark:border-gray-700 dark:text-gray-500 cursor-not-allowed'
+                        ? 'bg-transparent border-border-color text-gray-400 dark:border-gray-700 dark:text-text-muted cursor-not-allowed'
                         : 'bg-transparent border-violet-500 text-violet-600 hover:bg-violet-600 hover:text-white dark:border-violet-400 dark:text-violet-400 dark:hover:bg-violet-600 dark:hover:text-white dark:hover:border-violet-600'
                     }`}
                     disabled={isFollowed}
@@ -182,9 +182,9 @@ function SheetList({ type }) {
           <div className="text-center mt-8">
             <button
               onClick={() => setShowAll(!showAll)}
-              className="px-5 py-2 text-sm font-semibold bg-purple-100 dark:bg-white/10 text-purple-700 dark:text-white rounded-lg hover:bg-purple-200 dark:hover:bg-white/20 transition"
+              className="px-5 py-2 text-sm font-semibold bg-purple-100 dark:bg-white/10 text-purple-700  rounded-lg hover:bg-purple-200 dark:hover:bg-white/20 transition"
             >
-              {showAll ? "Show Less" : "Show More"}
+              {showAll ?"Show Less" :"Show More"}
             </button>
           </div>
         )}

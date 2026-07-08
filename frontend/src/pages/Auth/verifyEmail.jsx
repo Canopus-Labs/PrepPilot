@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import axiosInstance from "../../utils/axiosinstance";
-import { API_PATHS } from "../../utils/apiPaths";
+import React, { useEffect, useState, useRef } from"react";
+import { useSearchParams, useNavigate } from"react-router-dom";
+import axiosInstance from"../../utils/axiosinstance";
+import { API_PATHS } from"../../utils/apiPaths";
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
@@ -36,8 +36,7 @@ const VerifyEmail = () => {
             } catch (error) {
                 setStatus("error");
                 setMessage(
-                    error.response?.data?.message ||
-                    "Something went wrong. Please try again."
+                    error.response?.data?.message ||"Something went wrong. Please try again."
                 );
             }
         };
@@ -60,7 +59,7 @@ const VerifyEmail = () => {
                 </div>
 
                 {/* Verifying state */}
-                {status === "verifying" && (
+                {status ==="verifying" && (
                     <>
                         <div className="w-12 h-12 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin mx-auto mb-4" />
                         <h2 className="text-xl font-bold text-white mb-2">Verifying your email</h2>
@@ -69,7 +68,7 @@ const VerifyEmail = () => {
                 )}
 
                 {/* Success state */}
-                {status === "success" && (
+                {status ==="success" && (
                     <>
                         <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-4">
                             <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,12 +77,12 @@ const VerifyEmail = () => {
                         </div>
                         <h2 className="text-xl font-bold text-white mb-2">Email verified!</h2>
                         <p className="text-gray-400 text-sm mb-4">{message}</p>
-                        <p className="text-gray-500 text-xs">Redirecting you to Home Page in 3 seconds...</p>
+                        <p className="text-text-muted text-xs">Redirecting you to Home Page in 3 seconds...</p>
                     </>
                 )}
 
                 {/* Error state */}
-                {status === "error" && (
+                {status ==="error" && (
                     <>
                         <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
                             <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
