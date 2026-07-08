@@ -16,6 +16,7 @@
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",

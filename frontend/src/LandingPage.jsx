@@ -14,6 +14,7 @@ import { VscGitMerge } from "react-icons/vsc";
 import Modal from "./components/Loader/Modal";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
 import {
   motion,
@@ -1541,6 +1542,7 @@ const LandingPage = () => {
         onClose={() => {
           setOpenAuthModal(false);
           setPendingRoute(null);
+          setCurrentPage("login");
         }}
         hideHeader
       >
@@ -1563,6 +1565,10 @@ const LandingPage = () => {
 
           <div className={currentPage === "signup" ? "block" : "hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
+          </div>
+
+          <div className={currentPage === "forgot-password" ? "block" : "hidden"}>
+            <ForgotPassword setCurrentPage={setCurrentPage} />
           </div>
         </div>
       </Modal>

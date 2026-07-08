@@ -33,7 +33,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
           onClick={onClose}
         >
           <motion.div
-            className="relative flex flex-col bg-white dark:bg-[#151c2f] border border-gray-100 dark:border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]"
+            className="relative flex flex-col bg-[#111827] border border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]"
             variants={modalVariants}
             initial="initial"
             animate="animate"
@@ -41,8 +41,8 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
             onClick={(e) => e.stopPropagation()}
           >
             {!hideHeader && (
-              <div className="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-white/10 pb-3">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                <h3 className="text-xl font-bold text-white">{title}</h3>
               </div>
             )}
 
@@ -50,7 +50,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
               type="button"
               aria-label="Close authentication modal"
               title="Close"
-              className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full w-11 h-11 flex items-center justify-center absolute top-4 right-4 transition-all duration-200 z-50"
+              className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full w-11 h-11 flex items-center justify-center absolute top-4 right-4 transition-all duration-200 z-50"
               onClick={onClose}
             >
               ✕
