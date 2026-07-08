@@ -8,7 +8,7 @@ const {
 const Session = require("../models/Session");
 const Question = require("../models/Question");
 
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const { aiQueue } = require("../config/queue");
 
 /**
  * Generate interview questions and answers using the Gemini AI service.
@@ -67,73 +67,22 @@ const generateInterviewQuestions = async (req, res) => {
       seenQuestions,
     });
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
+    const job = await aiQueue.add("generate-questions", {
+      role,
+      experience,
+      topicsToFocus,
+      numberOfQuestions,
+      seenQuestions,
+    });
 
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-
-    if (!result) throw lastErr || new Error("All Gemini models failed");
-
-    const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
-
-    try {
-      const data = JSON.parse(cleanedText);
-
-      // Validate Gemini response structure
-      const questionsSchema = Joi.array().items(
-        Joi.object({
-          question: Joi.string().required(),
-          answer: Joi.string().required(),
-        })
-      );
-      const { error: validationError } = questionsSchema.validate(
-        Array.isArray(data) ? data : data.question
-      );
-      if (validationError) {
-        return res.status(500).json({ message: "Invalid AI response format", details: validationError.message });
-      }
-
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
-    } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
-    }
+    res.status(202).json({
+      message: "Generate questions job accepted",
+      jobId: job.id,
+    });
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini Queue API Error:", error);
     res.status(500).json({
-      message: "Failed to generate questions",
+      message: "Failed to enqueue generate-questions job",
       error: error.message,
     });
   }
@@ -165,65 +114,18 @@ const generateConceptExplanation = async (req, res) => {
       return res.status(400).json({ message: "Missing question" });
     }
 
-    const prompt = conceptExplainPrompt(question);
+    const job = await aiQueue.add("generate-explanation", {
+      question,
+    });
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-    if (!result) throw lastErr || new Error("All Gemini models failed");
-
-    const rawText = await result.response.text();
-    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
-    let cleanedText = rawText
-      .replace(/^\s*```json\s*/i, "")
-      .replace(/^\s*```\s*/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
-
-    try {
-      const data = JSON.parse(cleanedText);
-
-      // Validate Gemini response structure
-      const explanationSchema = Joi.object({
-        title: Joi.string().required(),
-        explanation: Joi.string().required(),
-      });
-      const { error: validationError } = explanationSchema.validate(data);
-      if (validationError) {
-        return res.status(500).json({ message: "Invalid AI response format", details: validationError.message });
-      }
-
-      res.status(200).json({ model: usedModel, ...data });
-    } catch (err) {
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
-    }
+    res.status(202).json({
+      message: "Generate explanation job accepted",
+      jobId: job.id,
+    });
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini Queue API Error:", error);
     res.status(500).json({
-      message: "Failed to generate explanation",
+      message: "Failed to enqueue generate-explanation job",
       error: error.message,
     });
   }
@@ -237,56 +139,19 @@ const generateInterviewTips = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const prompt = interviewTipsPrompt({ role, experience });
+    const job = await aiQueue.add("generate-tips", {
+      role,
+      experience,
+    });
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-
-    if (!result) throw lastErr || new Error("All Gemini models failed");
-
-    const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
-
-    try {
-      const data = JSON.parse(cleanedText);
-      res.status(200).json({ model: usedModel, ...data });
-    } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
-    }
+    res.status(202).json({
+      message: "Generate tips job accepted",
+      jobId: job.id,
+    });
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini Queue API Error:", error);
     res.status(500).json({
-      message: "Failed to generate interview tips",
+      message: "Failed to enqueue generate-tips job",
       error: error.message,
     });
   }

@@ -19,6 +19,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
+require("./workers/aiWorker"); // Initialize the background worker
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
 // Remove ES Module import for cors. Use CommonJS require below.
@@ -128,6 +129,8 @@ app.use(
   protect,
   generateInterviewTips,
 );
+
+app.use("/api/jobs", jobRoutes);
 
 app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
