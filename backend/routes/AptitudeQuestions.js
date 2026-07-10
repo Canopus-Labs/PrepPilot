@@ -96,11 +96,21 @@ async function generateQuestions(cacheKey, prompt) {
   }
 
   const rawText = await result.response.text();
-  let cleanedText = rawText
-    .replace(/^\s*```json\s*/i, "")
-    .replace(/^\s*```\s*/i, "")
-    .replace(/(\s*```\s*)+$/i, "")
-    .trim();
+
+  let cleanedText = rawText.trim();
+
+  if (cleanedText.startsWith("```json")) {
+    cleanedText = cleanedText.slice(7).trimStart();
+  }
+
+  if (cleanedText.startsWith("```")) {
+    cleanedText = cleanedText.slice(3).trimStart();
+  }
+
+  while (cleanedText.endsWith("```")) {
+    cleanedText = cleanedText.slice(0, -3).trimEnd();
+  }
+
   let questions;
   try {
     questions = JSON.parse(cleanedText);
