@@ -8,7 +8,7 @@ const {
 const Session = require("../models/Session");
 const Question = require("../models/Question");
 
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const { aiQueue } = require("../config/queue");
 
 /**
  * Generate interview questions and answers using the Gemini AI service.
@@ -111,23 +111,22 @@ const generateInterviewQuestions = async (req, res) => {
       if (!parsed.success) {
         return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
       }
+    const job = await aiQueue.add("generate-questions", {
+      role,
+      experience,
+      topicsToFocus,
+      numberOfQuestions,
+      seenQuestions,
+    });
 
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
-    } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
-    }
+    res.status(202).json({
+      message: "Generate questions job accepted",
+      jobId: job.id,
+    });
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini Queue API Error:", error);
     res.status(500).json({
-      message: "Failed to generate questions",
+      message: "Failed to enqueue generate-questions job",
       error: error.message,
     });
   }
@@ -203,18 +202,18 @@ const generateConceptExplanation = async (req, res) => {
       if (!parsed.success) {
         return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
       }
+    const job = await aiQueue.add("generate-explanation", {
+      question,
+    });
 
-      res.status(200).json({ model: usedModel, ...data });
-    } catch (err) {
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
-    }
+    res.status(202).json({
+      message: "Generate explanation job accepted",
+      jobId: job.id,
+    });
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini Queue API Error:", error);
     res.status(500).json({
-      message: "Failed to generate explanation",
+      message: "Failed to enqueue generate-explanation job",
       error: error.message,
     });
   }
@@ -259,21 +258,23 @@ const generateInterviewTips = async (req, res) => {
       .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
       .replace(/(\s*```\s*)+$/i, "")
       .trim();
-
-    try {
-      const data = JSON.parse(cleanedText);
-      res.status(200).json({ model: usedModel, ...data });
-    } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
+    if (!role || !experience) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
+
+    const job = await aiQueue.add("generate-tips", {
+      role,
+      experience,
+    });
+
+    res.status(202).json({
+      message: "Generate tips job accepted",
+      jobId: job.id,
+    });
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini Queue API Error:", error);
     res.status(500).json({
-      message: "Failed to generate interview tips",
+      message: "Failed to enqueue generate-tips job",
       error: error.message,
     });
   }
