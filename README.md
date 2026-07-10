@@ -214,15 +214,26 @@ docker-compose up --build
 ```
 PrepPilot/
 │
-├── 📂 backend/                        # Express.js REST API Server
+├── 📂 backend/                       # Express.js REST API Server
 │   ├── 📂 config/                    # Database & environment configuration
 │   ├── 📂 controllers/               # Business logic & request handlers
 │   │   ├── aiController.js           # AI/Gemini API integration
 │   │   ├── authController.js         # Authentication logic
+|   |   ├── achievementController.js  # Achievement logic
+|   |   ├── jobController.js          # Job Adzuna Logic
 │   │   ├── questionController.js     # Question management
 │   │   ├── resumeController.js       # Resume operations
 │   │   ├── sessionController.js      # Session management
 │   │   └── userSheetProgressController.js # Progress tracking
+|   |
+│   ├── 📂 Input_Validators/                 # Extract the logic for Input validations
+│   │   ├── ValidateAchievement.js           # Validate and check input for Achievement Controller
+│   │   ├── ValidateAi.js                    # Validate and check input for Ai/Gemini Controller
+│   │   ├── ValidateAuth.js                  # Validate and check input for Authentication Controller
+│   │   ├── ValidateQuestions.js             # Validate and check input for Question Management Controller
+│   │   ├── ValidateResume.js                # Validate and check input for Resume Controller
+│   │   ├── ValidateSession.js               # Validate and check input for Session Controller Controller
+│   │   └── ValidateUserSheetProgess.js      # Validate and check input for UserSheetProgress Controller
 │   │
 │   ├── 📂 middlewares/               # Express middlewares
 │   │   ├── authMiddleware.js         # JWT verification

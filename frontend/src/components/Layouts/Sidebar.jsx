@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
 import {
   LayoutDashboard,
   Bot,
@@ -31,9 +33,21 @@ import {
 } from "lucide-react";
 
 const Sidebar = () => {
-  const { user } = useContext(UserContext);
+  const { user, clearUser } = useContext(UserContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const handleLogout = async () => {
+  try {
+    await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
+  } catch (error) {
+    console.error("Logout request failed:", error);
+  } finally {
+    localStorage.clear();
+    sessionStorage.clear();
+    clearUser();
+    navigate("/");
+  }
+};
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
@@ -399,10 +413,7 @@ const Sidebar = () => {
             
             {user && (
               <button
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.reload();
-                }}
+                onClick={handleLogout}
                 className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
                 title="Logout"
               >

@@ -33,6 +33,11 @@ const CreateSessionForm = () => {
       setError("Please fill all the required fields.");
       return;
     }
+    
+    const topicsArray = topicsToFocus.split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
 
     setError("");
     setIsLoading(true);
@@ -42,7 +47,7 @@ const CreateSessionForm = () => {
         API_PATHS.AI.GENERATE_QUESTIONS, {
           role,
           experience,
-          topicsToFocus,
+          topicsToFocus: topicsArray,
           numberOfQuestions: 10,
         }
       );
@@ -51,7 +56,7 @@ const CreateSessionForm = () => {
 
       const response = await axiosInstance.post(API_PATHS.SESSION.CREATE, {
         ...formData,
-        topicsToFocus: formData.topicsToFocus,
+        topicsToFocus: topicsArray,
         question: generatedQuestions,
       });
 

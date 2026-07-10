@@ -59,12 +59,14 @@ const SignUp = ({ setCurrentPage }) => {
         profileImageUrl = imgUploadRes.imageUrl || "";
       }
 
-      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+      const payload = {
         name: fullName,
         email,
         password,
-        profileImageUrl: profileImageUrl || "",
-      });
+      };
+      if (profileImageUrl) payload.profileImageUrl = profileImageUrl;
+
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, payload);
       
       if (response.data.success) {
         const authToken = response.data.token || response.data.accessToken;

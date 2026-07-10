@@ -65,6 +65,7 @@ const JobsForYou = () => {
   const [country, setCountry] = useState("in");
   const [loading, setLoading] = useState(true);
   const [customRole, setCustomRole] = useState("");
+  const [searchError, setSearchError] = useState("");
 
   const fetchJobs = async (selectedCountry, overrideRole = "") => {
     setLoading(true);
@@ -93,6 +94,11 @@ const JobsForYou = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    if (!customRole.trim()) {
+      setSearchError("Please enter a role");
+      return;
+    }
+    setSearchError("");
     fetchJobs(country, customRole);
   };
 
@@ -118,12 +124,15 @@ const JobsForYou = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-col items-end gap-1 shrink-0">
             <form onSubmit={handleSearch} className="flex items-center gap-2">
               <input
                 type="text"
                 value={customRole}
-                onChange={(e) => setCustomRole(e.target.value)}
+                onChange={(e) => {
+                  setCustomRole(e.target.value);
+                  if (searchError) setSearchError("");
+                }}
                 placeholder="Override role…"
                 className="px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 w-40"
               />
@@ -138,12 +147,16 @@ const JobsForYou = () => {
               </select>
               <button
                 type="submit"
-                className="p-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 transition-all"
+                disabled={!customRole.trim()}
+                className="p-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Refresh"
               >
                 <RefreshCw size={16} />
               </button>
             </form>
+            {searchError && (
+              <span className="text-red-500 text-xs font-medium mr-auto pl-1">{searchError}</span>
+            )}
           </div>
         </div>
       </div>

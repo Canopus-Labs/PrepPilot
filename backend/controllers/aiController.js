@@ -107,7 +107,7 @@ const generateInterviewQuestions = async (req, res) => {
           answer: z.string(),
         })
       );
-      const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.question);
+      const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
       if (!parsed.success) {
         return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
       }

@@ -2,6 +2,7 @@ import React, { useState, useRef, useContext } from "react";
 import { UserContext } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
+import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
   const { user } = useContext(UserContext);
@@ -210,10 +211,12 @@ export default function AIHelper() {
                           <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }}></span>
                           <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }}></span>
                         </div>
-                      ) : (
-                        <div className={`text-[15px] leading-relaxed whitespace-pre-wrap ${isUser ? "font-medium" : "prose prose-sm dark:prose-invert max-w-none break-words"}`}>
+                      ) : isUser ? (
+                        <div className="text-[15px] leading-relaxed whitespace-pre-wrap font-medium">
                           {m.text}
                         </div>
+                      ) : (
+                        <AIResponsePreview content={m.text} />
                       )}
                     </div>
                   </div>
