@@ -14,14 +14,6 @@ exports.getAchievements = async (req, res) => {
 exports.saveAchievements = async (req, res) => {
     const { unlockedAchievements } = req.body;
 
-    // Must be a non-empty array
-    if (!Array.isArray(unlockedAchievements)) {
-        return res.status(400).json({
-            success: false,
-            error: 'unlockedAchievements must be an array',
-        });
-    }
-
     // Reject any ID not in the server-side allowlist
     const unknown = unlockedAchievements.filter((id) => !VALID_ACHIEVEMENTS.has(id));
     if (unknown.length > 0) {

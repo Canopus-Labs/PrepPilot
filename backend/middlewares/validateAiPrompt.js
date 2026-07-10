@@ -1,26 +1,19 @@
+const { z } = require("zod");
 const aiPromptSchema = require("../validation/aiPromptSchema");
 
 const validateAiPrompt = (req, res, next) => {
-  const { error } = aiPromptSchema.validate(req.body);
-
-  if (error) {
-    let friendlyMessage = "Invalid prompt.";
-    const detail = error.details[0];
-    
-    if (detail.type === "any.invalid") {
-      friendlyMessage = "Your prompt contains blocked patterns. Please rephrase.";
-    } else if (detail.type === "string.min") {
-      friendlyMessage = "Your message is too short. Please enter at least 3 characters.";
-    } else if (detail.type === "string.max") {
-      friendlyMessage = "Your message is too long. Please keep it under 500 characters.";
-    } else if (detail.type === "any.required") {
-      friendlyMessage = "A prompt message is required.";
+  try {
+    aiPromptSchema.parse(req.body);
+    next();
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const first = err.issues[0];
+      // Surface a friendly message for the most common cases
+      let friendlyMessage = first?.message || "Invalid prompt.";
+      return res.status(400).json({ error: friendlyMessage });
     }
-
-    return res.status(400).json({ error: friendlyMessage });
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  next();
 };
 
-module.exports = {validateAiPrompt};
+module.exports = { validateAiPrompt };

@@ -17,6 +17,25 @@ const OSSBlog = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredArticles, setFilteredArticles] = useState([]);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const scrollRef = React.useRef(null);
+  useEffect(() => {
+  const el = scrollRef.current;
+
+  const handleScroll = () => {
+    setShowScrollTop(el.scrollTop > 100);
+  };
+
+  el.addEventListener("scroll", handleScroll);
+  return () => el.removeEventListener("scroll", handleScroll);
+}, []);
+const scrollToTop = () => {
+  scrollRef.current.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+ 
 
   useEffect(() => {
     fetchArticles();
@@ -86,7 +105,29 @@ const OSSBlog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a]">
+    <div ref={scrollRef}  className="h-screen overflow-y-auto bg-gray-50 dark:bg-[#0f172a]">
+       {showScrollTop && (
+      <button
+        onClick={scrollToTop}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          zIndex: 99999,
+          padding: "12px 12px",
+          borderRadius: "50%",
+          backgroundColor: "#7c3aed",
+          color: "white",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "20px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          width:'50px'
+        }}
+      >
+        ↑
+      </button>
+    )}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div

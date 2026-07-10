@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const { z } = require("zod");
 
 const blockedPatterns = [
   /ignore previous instructions/i,
@@ -21,34 +21,24 @@ const blockedPatterns = [
   /do anything now/i,
 ];
 
+const safeString = z.string().refine(
+  (val) => !blockedPatterns.some((p) => p.test(val)),
+  { message: "Your prompt contains blocked patterns. Please rephrase." }
+);
 
-// custom validator
-const safePrompt = (value, helpers) => {
-  for (const pattern of blockedPatterns) {
-    if (pattern.test(value)) {
-      return helpers.error("any.invalid");
-    }
-  }
-  return value;
-};
-
-const aiPromptSchema = Joi.object({
-  prompt: Joi.string()
-    .min(1)
-    .max(5000)
-    .required()
-    .custom(safePrompt, "Prompt Injection Protection"),
-  systemInstruction: Joi.string().optional(),
-  history: Joi.array().items(
-    Joi.object({
-      role: Joi.string().valid("user", "model").required(),
-      text: Joi.string().allow("").required()
-    })
-  ).optional(),
-
-  role: Joi.string().min(2).max(50).optional().custom(safePrompt, "Role Injection Protection"),
-
-  topic: Joi.string().min(2).max(100).optional().custom(safePrompt, "Topic Injection Protection"),
+const aiPromptSchema = z.object({
+  prompt: safeString.min(1, "Prompt is required").max(5000, "Prompt must be under 5000 characters"),
+  systemInstruction: z.string().optional(),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "model"]),
+        text: z.string(),
+      })
+    )
+    .optional(),
+  role: safeString.min(2).max(50).optional(),
+  topic: safeString.min(2).max(100).optional(),
 });
 
 module.exports = aiPromptSchema;

@@ -20,6 +20,7 @@ import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
 import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
 import AIHelper from "./components/AIHepler";
 import PracticePage from "./pages/InterviewPrep/components/PracticePage";
+import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
 import { useContext } from "react";
 import { UserContext } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
@@ -170,6 +171,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <PracticePage />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/cognitive-games"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <CognitiveGamesPage />
                         </PageTransition>
                       </ProtectedRoute>
                     }

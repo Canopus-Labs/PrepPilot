@@ -23,9 +23,7 @@ const Session = require("../models/Session");
 const addQuestionToSession = async (req, res) => {
   try {
     const { sessionId, questions } = req.body;
-    if (!sessionId || !questions || !Array.isArray(questions)) {
-      return res.status(400).json({ success: false, message: "Invalid or missing input data provided" });
-    }
+  
     const session = await Session.findById(sessionId);
 
     if (!session) {
@@ -67,11 +65,6 @@ const addQuestionToSession = async (req, res) => {
 const togglePinQuestion = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
-    if (!question) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Question not found" });
-    }
 
     const session = await Session.findById(question.session);
     if (!session) {

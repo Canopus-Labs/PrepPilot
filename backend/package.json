@@ -16,6 +16,7 @@
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "bullmq": "^5.79.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -30,7 +31,8 @@
     "node-cache": "^5.1.2",
     "nodemailer": "^9.0.3",
     "pdf-parse": "^2.4.5",
-    "resend": "^6.12.4"
+    "resend": "^6.12.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
