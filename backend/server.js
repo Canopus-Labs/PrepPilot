@@ -142,7 +142,12 @@ app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
 
 //Serve uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Disposition", "inline");
+  },
+}));
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
