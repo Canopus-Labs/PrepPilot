@@ -1,5 +1,6 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
+const mongoose = require("mongoose");
 
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
@@ -25,51 +26,54 @@ const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
  * @example
  * 201 {"success": true, "session": {"_id":"...","role":"Backend Engineer",...}}
  */
+
 exports.createSession = async (req, res) => {
-  try {
-  const {role , experience , topicsToFocus , description , question }= req.body;
-    const userId = req.user._id || req.user.id;
+    const mongoSession = await mongoose.startSession();
 
-    // Count existing sessions for this user
-    const sessionCount = await Session.countDocuments({
-      user: userId,
-    });
+    try {
+        await mongoSession.withTransaction(async () => {
+            const userId = req.user._id;
 
-    // Check session limit
-    if (sessionCount >= MAX_SESSIONS) {
-      return res.status(403).json({
-        success: false,
-        message: `Session limit reached. You already have ${sessionCount} sessions. Please delete old sessions before creating new ones.`,
-        currentCount: sessionCount,
-        maxLimit: MAX_SESSIONS,
-      });
-    }
+            const sessionCount = await Session.countDocuments({
+                user: userId,
+            }).session(mongoSession);
 
-  const session = await Session.create({
-    user : userId,
-    role,
-    experience,
-    topicsToFocus,
-    description
-  });
-    const questionDocs = await Promise.all(
-        (question || []).map(async (q)=>{
-            const questionDoc = await Question.create({
-                session:session._id,
-                question:q.question,
-                answer:q.answer,
+            if (sessionCount >= MAX_SESSIONS) {
+                throw new Error("SESSION_LIMIT_REACHED");
+            }
+
+            const createdSession = await Session.create(
+                [
+                    {
+                        user: userId,
+                        ...req.body,
+                    },
+                ],
+                {
+                    session: mongoSession,
+                }
+            );
+
+            res.status(201).json({
+                success: true,
+                session: createdSession[0],
             });
-            return questionDoc._id;
-        })
-    );
+        });
+    } catch (err) {
+        if (err.message === "SESSION_LIMIT_REACHED") {
+            return res.status(400).json({
+                success: false,
+                error: `Maximum of ${MAX_SESSIONS} sessions reached.`,
+            });
+        }
 
-    session.questions=questionDocs;
-    await session.save();
-    res.status(201).json({success:true, session});
-  } catch (error) {
-    console.error("CreateSession error:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
+        return res.status(500).json({
+            success: false,
+            error: err.message,
+        });
+    } finally {
+        await mongoSession.endSession();
+    }
 };
 
 /**
@@ -124,6 +128,11 @@ exports.getSessionById = async (req, res) => {
         .status(404)
         .json({success:false , message:"Session not found"});
     }
+    if (session.user.toString() !== req.user._id.toString()) {
+        return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized access to this session" });
+    }
     res.status(200).json({ success:true , session })
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error" });
@@ -143,30 +152,51 @@ exports.getSessionById = async (req, res) => {
  * @example
  * 200 {"message":"Session delete sucessfully"}
  */
+
 exports.deleteSession = async (req, res) => {
+    const transaction = await mongoose.startSession();
     try {
-    const session = await Session.findById(req.params.id);
+        await transaction.withTransaction(async () => {
+            const { id } = req.params;
+            const userId = req.user._id;
 
-    if(!session){
-        return res.status(404).json({message:"Session not found"});
-        
+            const session = await Session.findOne({
+                _id: id,
+                user: userId,
+            }).session(transaction);
+
+            if (!session) {
+                throw new Error("SESSION_NOT_FOUND");
+            }
+
+            await Question.deleteMany(
+                { session: session._id },
+                { session: transaction }
+            );
+
+            await Session.deleteOne(
+                { _id: session._id },
+                { session: transaction }
+            );
+        });
+
+        return res.json({
+            success: true,
+            message: "Session deleted successfully.",
+        });
+    } catch (err) {
+        if (err.message === "SESSION_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                error: "Session not found.",
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            error: err.message,
+        });
+    } finally {
+        await transaction.endSession();
     }
-    
-    const userId = req.user._id || req.user.id;
-
-    // Check if logged-in user owns this session
-    if(session.user.toString() !== userId.toString()){
-        return res.status(401)
-        .json({message:"Not authorized to delete this session"})
-    }
-    // First , delete all question linked to this session
-    await Question.deleteMany({session : session._id});
-
-    // then delete the session 
-    await session.deleteOne();
-
-    res.status(200).json({message:"Session delete sucessfully"});
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
 };

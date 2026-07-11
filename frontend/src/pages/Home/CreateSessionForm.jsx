@@ -33,6 +33,15 @@ const CreateSessionForm = () => {
       setError("Please fill all the required fields.");
       return;
     }
+    if (Number(experience) < 0) {
+  setError("Years of experience cannot be negative.");
+  return;
+}
+    
+    const topicsArray = topicsToFocus.split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
 
     setError("");
     setIsLoading(true);
@@ -42,7 +51,7 @@ const CreateSessionForm = () => {
         API_PATHS.AI.GENERATE_QUESTIONS, {
           role,
           experience,
-          topicsToFocus,
+          topicsToFocus: topicsArray,
           numberOfQuestions: 10,
         }
       );
@@ -51,7 +60,7 @@ const CreateSessionForm = () => {
 
       const response = await axiosInstance.post(API_PATHS.SESSION.CREATE, {
         ...formData,
-        topicsToFocus: formData.topicsToFocus,
+        topicsToFocus: topicsArray,
         question: generatedQuestions,
       });
 
@@ -137,6 +146,7 @@ const CreateSessionForm = () => {
                   ) : (
                     <input
                       type={field.type}
+                      min={field.type === "number" ? 0 : undefined}
                       value={formData[field.id]}
                       onChange={({ target }) => handleChange(field.id, target.value)}
                       placeholder={field.placeholder}

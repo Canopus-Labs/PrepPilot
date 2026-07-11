@@ -202,8 +202,12 @@ const Resume = require("../models/Resume");
  */
 const saveResume = async (req, res) => {
     try {
-        
+        const { title, latexCode, resumeId } = req.body;
         const userId = req.user._id || req.user.id;
+
+        if (!title || !latexCode) {
+            return res.status(400).json({ success: false, message: "Title and LaTeX code are required." });
+        }
 
         let resume;
         if (resumeId) {
@@ -212,6 +216,9 @@ const saveResume = async (req, res) => {
                 { title, latexCode },
                 { new: true }
             );
+            if (!resume) {
+                return res.status(404).json({ success: false, message: "Resume not found." });
+            }
         } else {
             resume = await Resume.create({
                 user: userId,

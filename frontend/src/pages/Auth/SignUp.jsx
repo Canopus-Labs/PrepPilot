@@ -59,17 +59,19 @@ const SignUp = ({ setCurrentPage }) => {
         profileImageUrl = imgUploadRes.imageUrl || "";
       }
 
-      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+      const payload = {
         name: fullName,
         email,
         password,
-        profileImageUrl: profileImageUrl || "",
-      });
+      };
+      if (profileImageUrl) payload.profileImageUrl = profileImageUrl;
+
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, payload);
       
       if (response.data.success) {
-        const { accessToken } = response.data;
-        if (accessToken) {
-          sessionStorage.setItem("token", accessToken);
+        const authToken = response.data.token || response.data.accessToken;
+        if (authToken) {
+          sessionStorage.setItem("token", authToken);
           updateUser(response.data);
           navigate("/dashboard");
         }
@@ -171,11 +173,21 @@ const SignUp = ({ setCurrentPage }) => {
           />
 
           <Input
-            value={email}
-            onChange={({ target }) => setEmail(target.value)}
-            label="Email Address"
-            placeholder="your@email.com"
-            type="text"
+             value={email}
+             onChange={({ target }) => {
+             const value = target.value;
+                   setEmail(value);
+
+             if (
+                 error === "Please enter a valid email address" &&
+                 validateEmail(value)
+                ) {
+              setError("");
+             }
+             }}
+               label="Email Address"
+               placeholder="your@email.com"
+               type="email"
           />
 
           <Input

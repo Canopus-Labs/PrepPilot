@@ -13,7 +13,7 @@ const registerUserZod = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/, "Password must contain at least one special character"),
-  profileImageUrl: z.string().url("Enter a valid URL").trim().optional(),
+  profileImageUrl: z.string().url("Enter a valid URL").trim().optional().or(z.literal("")),
 });
 
 const loginUserZod = z.object({

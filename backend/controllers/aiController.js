@@ -107,7 +107,7 @@ const generateInterviewQuestions = async (req, res) => {
           answer: z.string(),
         })
       );
-      const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.question);
+      const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
       if (!parsed.success) {
         return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
       }
@@ -220,6 +220,26 @@ const generateConceptExplanation = async (req, res) => {
   }
 };
 
+/**
+ * Generate interview preparation tips using the Gemini AI service.
+ * @route POST /api/ai/generate-tips
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required request fields are missing or Gemini fails.
+ * @example
+ * POST /api/ai/generate-tips
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "role": "Frontend Engineer",
+ *   "experience": "2 years"
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "tips": ["Focus on React hooks.", "Practice system design basics.", ...]
+ * }
+ */
 const generateInterviewTips = async (req, res) => {
   try {
     const { role, experience } = req.body;
@@ -262,6 +282,16 @@ const generateInterviewTips = async (req, res) => {
 
     try {
       const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const tipsSchema = z.object({
+        tips: z.array(z.string()),
+      });
+      const parsed = tipsSchema.safeParse(data);
+      if (!parsed.success) {
+        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+      }
+
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
       console.error("Gemini returned invalid JSON:", cleanedText);

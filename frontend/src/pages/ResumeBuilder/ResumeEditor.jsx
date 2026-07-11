@@ -99,6 +99,7 @@ const ResumeEditor = () => {
   const [isCompiling, setIsCompiling] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [completion, setCompletion] = useState(0);
 
   // Initial Compile
   useEffect(() => {
@@ -109,6 +110,21 @@ const ResumeEditor = () => {
   const handleEditorChange = (value) => {
     setCode(value);
   };
+  useEffect(() => {
+  const sections = [
+    "\\section{Education}",
+    "\\section{Experience}",
+    "\\section{Projects}",
+    "\\section{Skills}",
+    "\\section{Achievements}",
+  ];
+
+  const completed = sections.filter(section =>
+    code.includes(section)
+  ).length;
+
+  setCompletion(Math.round((completed / sections.length) * 100));
+}, [code]);
 
   const compileLatex = async () => {
     if (!code.trim()) return;
@@ -184,6 +200,7 @@ const ResumeEditor = () => {
       {/* Editor Top Navbar (Overleaf style) */}
       <div className="h-14 flex items-center justify-between px-4 bg-gray-50 dark:bg-[#151c2f] border-b border-gray-200 dark:border-white/5 shrink-0">
         <div className="flex items-center gap-4">
+          
           <button 
             onClick={() => navigate('/resume-builder')}
             className="p-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 rounded-md transition"
@@ -200,7 +217,18 @@ const ResumeEditor = () => {
             </span>
           </div>
         </div>
+<div className="ml-4 flex flex-col">
+  <span className="text-xs text-gray-500">
+    Resume Completion: {completion}%
+  </span>
 
+  <div className="w-40 h-2 bg-gray-200 rounded-full mt-1">
+    <div
+      className="h-2 bg-violet-600 rounded-full transition-all"
+      style={{ width: `${completion}%` }}
+    />
+  </div>
+</div>
         <div className="flex items-center gap-3">
           <button
             onClick={compileLatex}
