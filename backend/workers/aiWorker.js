@@ -193,6 +193,61 @@ const processChat = async (data) => {
   return { text: cleanedText, model: usedModel };
 };
 
+const processResumeAnalysis = async (data) => {
+  const { targetRole, fileBuffer } = data;
+  
+  const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
+Analyze the attached PDF resume against the target role: "${targetRole}".
+
+Return the analysis STRICTLY as a JSON object with the following exact keys and structure:
+{
+  "resumeScore": (number between 0 and 100),
+  "roleMatch": (number between 0 and 100),
+  "missingSkills": [array of short strings, max 5],
+  "missingProjects": [array of short strings, max 3],
+  "atsCompatibility": {
+    "status": "Good" | "Average" | "Poor",
+    "remarks": "short sentence explaining ATS parsing issues visually observed"
+  },
+  "suggestions": [array of short actionable sentences, max 5]
+}
+
+DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw JSON object.`;
+
+  let lastErr = null;
+  let result = null;
+  
+  for (const m of candidateModels) {
+    try {
+      const model = ai.getGenerativeModel({ model: m });
+      result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            data: fileBuffer,
+            mimeType: "application/pdf"
+          }
+        }
+      ]);
+      break;
+    } catch (e) {
+      lastErr = e;
+      continue;
+    }
+  }
+
+  if (!result) throw lastErr || new Error("All Gemini models failed to process PDF");
+  
+  let aiResponse = result.response.text();
+  aiResponse = aiResponse
+    .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+    .replace(/(\s*```\s*)+$/i, "")
+    .trim();
+
+  const parsedData = JSON.parse(aiResponse);
+  return parsedData;
+};
+
 const aiWorker = new Worker(
   "ai-jobs",
   async (job) => {
@@ -206,6 +261,8 @@ const aiWorker = new Worker(
         return await processTips(job.data);
       } else if (job.name === "chat") {
         return await processChat(job.data);
+      } else if (job.name === "analyze-resume") {
+        return await processResumeAnalysis(job.data);
       }
       throw new Error(`Unknown job type: ${job.name}`);
     } catch (error) {

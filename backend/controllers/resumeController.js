@@ -96,6 +96,8 @@ const compileResume = async (req, res) => {
  *   "suggestions": ["Add a summary section."]
  * }
  */
+const { aiQueue } = require("../config/queue");
+
 const analyzeResume = async (req, res) => {
     try {
         if (!req.file) {
@@ -103,83 +105,20 @@ const analyzeResume = async (req, res) => {
         }
 
         const targetRole = req.body.targetRole || "General Professional";
-
-        // 1. Setup Gemini
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
-
-        // 2. Prompt Engineering
-        const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
-Analyze the attached PDF resume against the target role: "${targetRole}".
-
-Return the analysis STRICTLY as a JSON object with the following exact keys and structure:
-{
-  "resumeScore": (number between 0 and 100),
-  "roleMatch": (number between 0 and 100),
-  "missingSkills": [array of short strings, max 5],
-  "missingProjects": [array of short strings, max 3],
-  "atsCompatibility": {
-    "status": "Good" | "Average" | "Poor",
-    "remarks": "short sentence explaining ATS parsing issues visually observed"
-  },
-  "suggestions": [array of short actionable sentences, max 5]
-}
-
-DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw JSON object.`;
-
-        // 3. Fallback Engine (Mirroring aiController robustness)
-        const candidateModels = [
-            process.env.GEMINI_MODEL,
-            "models/gemini-2.5-flash",
-            "models/gemini-flash-latest",
-            "models/gemini-2.0-flash",
-            "gemini-1.5-flash"
-        ].filter(Boolean);
-
-        let lastErr = null;
-        let result = null;
-
-        for (const m of candidateModels) {
-            try {
-                const model = genAI.getGenerativeModel({ model: m });
-                result = await model.generateContent([
-                    prompt,
-                    {
-                        inlineData: {
-                            data: req.file.buffer.toString("base64"),
-                            mimeType: "application/pdf"
-                        }
-                    }
-                ]);
-                break; // Stop on first success
-            } catch (e) {
-                lastErr = e;
-                continue;
-            }
-        }
-
-        if (!result) throw lastErr || new Error("All Gemini models failed to process PDF");
         
-        let aiResponse = result.response.text();
-        
-        // Robustly clean: remove all leading/trailing code block markers
-        aiResponse = aiResponse
-          .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-          .replace(/(\s*```\s*)+$/i, "")
-          .trim();
+        const job = await aiQueue.add("analyze-resume", {
+            targetRole,
+            fileBuffer: req.file.buffer.toString("base64")
+        });
 
-        let jsonResult;
-        try {
-            jsonResult = JSON.parse(aiResponse);
-        } catch (e) {
-            console.error("Failed to parse Gemini JSON:", aiResponse);
-            return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
-        }
-
-        res.status(200).json(jsonResult);
+        res.status(202).json({
+            message: "Resume analysis job accepted",
+            jobId: job.id,
+        });
 
     } catch (error) {
-        console.error("Resume Analysis Error:", error);
-        res.status(500).json({ message: "Failed to analyze resume", error: error.message });
+        console.error("Resume Analysis Queue Error:", error);
+        res.status(500).json({ message: "Failed to enqueue resume analysis", error: error.message });
     }
 }
 
