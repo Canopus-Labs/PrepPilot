@@ -33,7 +33,7 @@ const { generateWithFallback } = require("../utils/geminiHelper");
  *   ]
  * }
  */
-const generateInterviewQuestions = async (req, res) => {
+const generateInterviewQuestions = async (req, res, next) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
 
@@ -93,19 +93,11 @@ const generateInterviewQuestions = async (req, res) => {
         res.status(200).json({ model: usedModel, ...data });
       }
     } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
+        next(err);
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({
-      message: "Failed to generate questions",
-      error: error.message,
-    });
-  }
+        next(error);
+    }
 };
 
 /**
@@ -127,7 +119,7 @@ const generateInterviewQuestions = async (req, res) => {
  *   "explanation": "..."
  * }
  */
-const generateConceptExplanation = async (req, res) => {
+const generateConceptExplanation = async (req, res, next) => {
   try {
     const { question } = req.body;
 
@@ -161,18 +153,11 @@ const generateConceptExplanation = async (req, res) => {
 
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
+        next(err);
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({
-      message: "Failed to generate explanation",
-      error: error.message,
-    });
-  }
+        next(error);
+    }
 };
 
 /**
@@ -195,7 +180,7 @@ const generateConceptExplanation = async (req, res) => {
  *   "tips": ["Focus on React hooks.", "Practice system design basics.", ...]
  * }
  */
-const generateInterviewTips = async (req, res) => {
+const generateInterviewTips = async (req, res, next) => {
   try {
     const { role, experience } = req.body;
 
@@ -226,19 +211,11 @@ const generateInterviewTips = async (req, res) => {
 
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
-        message: "Gemini returned invalid JSON",
-        raw: rawText,
-      });
+        next(err);
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({
-      message: "Failed to generate interview tips",
-      error: error.message,
-    });
-  }
+        next(error);
+    }
 };
 
 module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips };

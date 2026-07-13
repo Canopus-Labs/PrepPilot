@@ -151,6 +151,10 @@ app.get("/api/test", (req, res) => {
 
 // Remove duplicate CORS middleware (already set above)
 
+const errorHandler = require("./middlewares/errorHandler");
+// Must be registered AFTER all routes
+app.use(errorHandler);
+
 // Daily job cache refresh — warm on boot, then every 24 hours.
 // Only runs when Adzuna is configured; otherwise refreshJobCache() no-ops.
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {

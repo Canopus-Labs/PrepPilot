@@ -4,7 +4,7 @@ const UserSheetProgress = require("../models/UserSheetProgress");
  * Get all sheet progress entries for the authenticated user.
  * @route GET /api/user/sheet-progress
  */
-exports.getAllProgress = async (req, res) => {
+exports.getAllProgress = async (req, res, next) => {
   const userId = req.user._id;
 
   try {
@@ -15,18 +15,15 @@ exports.getAllProgress = async (req, res) => {
       progressList,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message,
-    });
-  }
+        next(err);
+    }
 };
 
 /**
  * Save or update user progress for a sheet.
  * @route POST /api/user/sheet-progress
  */
-exports.saveProgress = async (req, res) => {
+exports.saveProgress = async (req, res, next) => {
   const {
     sheetId,
     followed,
@@ -75,38 +72,15 @@ exports.saveProgress = async (req, res) => {
       progress,
     });
   } catch (err) {
-    // Rare duplicate-key race during concurrent upserts.
-    if (err.code === 11000) {
-      try {
-        const progress = await UserSheetProgress.findOne({
-          userId,
-          sheetId: validatedSheetId,
-        });
-
-        return res.json({
-          success: true,
-          progress,
-        });
-      } catch (retryErr) {
-        return res.status(500).json({
-          success: false,
-          error: retryErr.message,
-        });
-      }
+        next(err);
     }
-
-    return res.status(500).json({
-      success: false,
-      error: err.message,
-    });
-  }
 };
 
 /**
  * Get progress for a specific sheet for the authenticated user.
  * @route GET /api/user/sheet-progress/:sheetId
  */
-exports.getProgress = async (req, res) => {
+exports.getProgress = async (req, res, next) => {
   const { sheetId } = req.params;
   const userId = req.user._id;
 
@@ -135,9 +109,6 @@ exports.getProgress = async (req, res) => {
       progress,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message,
-    });
-  }
+        next(err);
+    }
 };
