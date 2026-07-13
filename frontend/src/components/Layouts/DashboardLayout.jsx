@@ -9,6 +9,7 @@ const DashboardLayout = ({ children }) => {
       <Navbar />
       {user && <div className="w-full">{children}</div>}
     </div>
+    
   );
 };
 
