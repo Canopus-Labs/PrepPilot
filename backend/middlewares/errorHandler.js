@@ -13,7 +13,7 @@ const errorHandler = (err, req, res, next) => {
     ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
   };
 
-  console.error(`[Error] ${req.method} ${req.url} →`, err.message);
+  console.error('[Error] %s %s → %s', req.method, req.url, err.message);
   res.status(statusCode).json(response);
 };
 
