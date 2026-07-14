@@ -6,6 +6,9 @@ const questionCache = new NodeCache({
   stdTTL: 3600,
 });
 
+// Tracks in-flight question generation requests to coalesce concurrent cache misses.
+const pendingQuestionRequests = new Map();
+
 const router = express.Router();
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const MAX_RETRIES = 3;
@@ -52,6 +55,77 @@ async function generateWithRetry(model, prompt) {
   throw lastError;
 }
 
+async function generateQuestions(cacheKey, prompt) {
+  // Use working Gemini models with fallback
+  const candidateModels = [
+    process.env.GEMINI_MODEL,
+    "models/gemini-2.5-flash",
+    "models/gemini-flash-latest",
+    "models/gemini-2.0-flash",
+  ].filter(Boolean);
+  let lastErr = null;
+  let result = null;
+
+  for (const m of candidateModels) {
+    try {
+      console.log(`[Aptitude] Trying model: ${m}`);
+      const model = ai.getGenerativeModel({ model: m });
+      result = await generateWithRetry(
+        model,
+        prompt
+      );
+      console.log(`[Aptitude] Successfully used model: ${m}`);
+      break;
+    } catch (e) {
+      console.error(
+        `[Aptitude] Model ${m} exhausted retries:`,
+        e.message
+      );
+      lastErr = e;
+      continue;
+    }
+  }
+
+  if (!result) {
+    const err = lastErr ?? new Error("All Gemini models failed");
+    err.error = "Failed to generate questions. Gemini API Key is missing or invalid.";
+    throw err;
+  }
+
+  const rawText = await result.response.text();
+
+  let cleanedText = rawText.trim();
+
+  if (cleanedText.startsWith("```json")) {
+    cleanedText = cleanedText.slice(7).trimStart();
+  }
+
+  if (cleanedText.startsWith("```")) {
+    cleanedText = cleanedText.slice(3).trimStart();
+  }
+
+  while (cleanedText.endsWith("```")) {
+    cleanedText = cleanedText.slice(0, -3).trimEnd();
+  }
+
+  let questions;
+  try {
+    questions = JSON.parse(cleanedText);
+  } catch (err) {
+    console.error("Gemini raw response:", rawText);
+    console.error("Parse error:", err);
+    err.error = "Failed to parse Gemini response";
+    err.raw = rawText;
+    throw err;
+  }
+  questionCache.set(
+    cacheKey,
+    questions
+  );
+
+  return questions;
+}
+
 // GET /api/questions?topic=Probability
 router.get("/", async (req, res) => {
   const { topic } = req.query;
@@ -61,108 +135,74 @@ router.get("/", async (req, res) => {
   const normalizedTopic = topic.trim().toLowerCase();
   const cacheKey = `questions:${normalizedTopic}`;
 
-const cachedQuestions =
-  questionCache.get(cacheKey);
+  const cachedQuestions =
+    questionCache.get(cacheKey);
 
-if (cachedQuestions) {
+  if (cachedQuestions) {
+    console.log(
+      `[Cache HIT] Topic: ${topic}`
+    );
+
+    return res.json(cachedQuestions);
+  }
+
   console.log(
-    `[Cache HIT] Topic: ${topic}`
+    `[Cache MISS] Topic: ${topic}`
   );
 
-  return res.json(cachedQuestions);
-}
-
-console.log(
-  `[Cache MISS] Topic: ${topic}`
-);
-
-  const prompt = `
-    Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
-    Each question should have 4 options and indicate the correct answer in JSON format like:
-    [
-      {
-        "question": "...",
-        "options": ["A", "B", "C", "D"],
-        "answer": "A"
-      },
-      ...
-    ]
-    Only return valid JSON, no extra text.
-  `;
-
   try {
-    // Use working Gemini models with fallback
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
+    // Reuse an ongoing generation request to prevent duplicate Gemini API calls.
+    if (pendingQuestionRequests.has(cacheKey)) {
+      console.log(`[Coalesced] Topic: ${topic}`);
 
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`[Aptitude] Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-
-        result = await generateWithRetry(
-          model,
-          prompt
-        );
-        usedModel = m;
-        console.log(`[Aptitude] Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(
-          `[Aptitude] Model ${m} exhausted retries:`,
-          e.message
-        );
-        lastErr = e;
-        continue;
-      }
+      const inFlightRequest = pendingQuestionRequests.get(cacheKey);
+      let coalescedQuestions = await inFlightRequest;
+      return res.json(coalescedQuestions);
     }
 
-    if (!result) {
-      return res.status(500).json({
-        error: "Failed to generate questions. Gemini API Key is missing or invalid.",
-        details: lastErr ? lastErr.message : "All Gemini models failed"
-      });
+    const prompt = `
+      Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
+      Each question should have 4 options and indicate the correct answer in JSON format like:
+      [
+        {
+          "question": "...",
+          "options": ["A", "B", "C", "D"],
+          "answer": "A"
+        },
+        ...
+      ]
+      Only return valid JSON, no extra text.
+    `;
+
+    const questionRequest = generateQuestions(cacheKey, prompt);
+    pendingQuestionRequests.set(cacheKey, questionRequest);
+
+    const questions = await questionRequest;
+    res.json(questions);
+
+  } catch (err) {
+    console.error("Gemini API error:", err);
+
+    const response = {
+      error: "Failed to generate questions",
+    }
+    
+    if (err.error) {
+      response.error = err.error;
+    }
+    
+    if (err.raw) {
+      response.raw = err.raw;
     }
 
-    const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^\s*```json\s*/i, "")
-      .replace(/^\s*```\s*/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
-    let questions;
-    try {
-      questions = JSON.parse(cleanedText);
-    } catch (err) {
-      console.error("Gemini raw response:", rawText);
-      console.error("Parse error:", err);
-      return res
-        .status(500)
-        .json({
-          error: "Failed to parse Gemini response",
-          details: err.message,
-          raw: rawText,
-        });
-    }
-    questionCache.set(
-  cacheKey,
-  questions
-);
+    response.details = err.message;
 
-res.json(questions);
-  } catch (error) {
-    console.error("Gemini API error:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to generate questions", details: error.message });
+    res.status(500).json(response);
+
+  } finally {
+    // Always clear the registry entry so future cache misses can trigger a new generation.
+    pendingQuestionRequests.delete(cacheKey);
   }
 });
+
 module.exports = router;

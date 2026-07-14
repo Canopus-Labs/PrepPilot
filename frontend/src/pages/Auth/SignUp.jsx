@@ -42,7 +42,9 @@ const SignUp = ({ setCurrentPage }) => {
     e.preventDefault();
     let profileImageUrl = "";
 
-    if (!fullName) { setError("Please enter your full name"); return; }
+    
+    if (!fullName.trim()) {setError("Please enter your full name");return;}
+    if (!/^[A-Za-z]+(?:\s+[A-Za-z]+)*$/.test(fullName.trim())) {setError("Full name can only contain letters and spaces");return;}
     if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
     if (!password || password.length < 8) { setError("Password must be at least 8 characters long."); return; }
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }

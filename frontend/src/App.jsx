@@ -10,7 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import InteractiveCursor from './components/InteractiveCursor';
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import VerifyEmail from "./pages/Auth/verifyEmail";
@@ -58,6 +58,7 @@ const App = () => {
       <UserProvider>
         <ErrorBoundary>
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
+          <InteractiveCursor />
           <Router>
             <AnimatePresence mode="wait">
               <Routes>
