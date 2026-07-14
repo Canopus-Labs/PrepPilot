@@ -47,17 +47,20 @@ const QuestionCard = ({
         <div className="flex items-center justify-start sm:ml-auto gap-3 shrink-0">
           {onTogglePin && (
             <button
-              className={`p-2 rounded-xl transition-colors duration-200 flex items-center justify-center ${
-                isPinned 
-                  ? "bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-500/30 shadow-sm" 
-                  : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10 dark:hover:text-violet-300 border border-transparent"
-              }`}
-              onClick={onTogglePin}
-              title={isPinned ? "Unpin Question" : "Pin Question"}
+            className={`px-3 py-2 rounded-xl transition-colors duration-200 flex items-center gap-2 ${
+              isPinned
+              ? "bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-500/30 shadow-sm"
+              : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10 dark:hover:text-violet-300 border border-transparent"
+            }`}
+            onClick={onTogglePin}
+            title={isPinned ? "Remove from Revision" : "Mark for Revision"}
             >
               {isPinned ? <LuPinOff size={18} /> : <LuPin size={18} />}
-            </button>
-          )}
+              <span className="text-sm font-medium">
+                {isPinned ? "Revision" : "Need Revision"}
+                </span>
+                </button>
+              )}
 
             <button
               className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500             dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10             dark:hover:text-violet-300 transition-all"

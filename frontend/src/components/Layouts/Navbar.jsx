@@ -5,7 +5,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
-
+import ThemeToggle from "../ThemeToggle";
 
 const Navbar = () => {
   const SERVICES = [
@@ -250,43 +250,54 @@ const Navbar = () => {
               </div>
 
               <ul className="flex flex-col gap-1.5">
-                {SERVICES.map((service) => {
-                  const isActive = location.pathname === service.path;
-                  const baseClasses =
-                    "block w-full text-left px-5 py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all";
-                  const activeClasses =
-                    "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300 border border-violet-100 dark:border-violet-500/20";
-                  const idleClasses =
-                    "text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-white/5 dark:hover:text-white border border-transparent";
+  {SERVICES.map((service) => {
+    const isActive = location.pathname === service.path;
+    const baseClasses =
+      "group relative block w-full text-left px-5 py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all overflow-hidden";
+    const activeClasses =
+      "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300 border border-violet-100 dark:border-violet-500/20";
+    const idleClasses =
+      "text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-white/5 dark:hover:text-white border border-transparent";
 
-                  if (service.title === "DSA Master Sheets") {
-                    return (
-                      <li key={service.id}>
-                        <Link
-                          to={service.path}
-                          className={`${baseClasses} ${isActive ? activeClasses : idleClasses}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {service.title}
-                        </Link>
-                      </li>
-                    );
-                  }
-                  return (
-                    <li key={service.id}>
-                      <button
-                        className={`${baseClasses} ${isActive ? activeClasses : idleClasses}`}
-                        onClick={() => {
-                          handleServiceClick(service);
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        {service.title}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+    const underline = (
+  <span
+    className={`pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0.5 h-[2px] rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 transition-all duration-300 ease-out ${
+      isActive ? "w-4" : "w-0 group-hover:w-4"
+    }`}
+  />
+);
+  
+
+    if (service.title === "DSA Master Sheets") {
+      return (
+        <li key={service.id}>
+          <Link
+            to={service.path}
+            className={`${baseClasses} ${isActive ? activeClasses : idleClasses}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {service.title}
+            {underline}
+          </Link>
+        </li>
+      );
+    }
+    return (
+      <li key={service.id}>
+        <button
+          className={`${baseClasses} ${isActive ? activeClasses : idleClasses}`}
+          onClick={() => {
+            handleServiceClick(service);
+            setMobileMenuOpen(false);
+          }}
+        >
+          {service.title}
+          {underline}
+        </button>
+      </li>
+    );
+  })}
+</ul>
 
               <div className="mt-auto pt-6 pb-2">
                 <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/10 dark:to-fuchsia-900/10 p-4 rounded-xl border border-violet-100/50 dark:border-white/5">

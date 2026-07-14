@@ -124,6 +124,11 @@ exports.getSessionById = async (req, res) => {
         .status(404)
         .json({success:false , message:"Session not found"});
     }
+    if (session.user.toString() !== req.user._id.toString()) {
+        return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized access to this session" });
+    }
     res.status(200).json({ success:true , session })
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error" });
