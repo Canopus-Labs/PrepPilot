@@ -39,7 +39,7 @@ const generateRefreshToken = (userId) => {
  * Register a new user account.
  * @route POST /api/auth/register
  */
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
         
@@ -109,8 +109,7 @@ const registerUser = async (req, res) => {
             profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
-        console.error("Register error:", error.message);
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
@@ -118,7 +117,7 @@ const registerUser = async (req, res) => {
  * Authenticate a user and return a JWT token.
  * @route POST /api/auth/login
  */
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -158,12 +157,11 @@ const loginUser = async (req, res) => {
 
         });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ success: false, message: "Internal server error occurred", error });
+        next(error);
     }
 };
 
-const refreshToken = async (req, res) => {
+const refreshToken = async (req, res, next) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -217,11 +215,11 @@ const refreshToken = async (req, res) => {
         
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
-const logoutUser = async (req, res) => {
+const logoutUser = async (req, res, next) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -258,7 +256,7 @@ const logoutUser = async (req, res) => {
         res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "User logged out successfully." });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
@@ -266,7 +264,7 @@ const logoutUser = async (req, res) => {
  * Verify a user's email address via the token link sent to their inbox.
  * @route GET /api/auth/verify-email
  */
-const verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res, next) => {
     try {
         const { token } = req.query;
 
@@ -295,7 +293,7 @@ const verifyEmail = async (req, res) => {
 
         res.json({ success: true, message: "Email verified successfully. You can now log in." });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
@@ -303,7 +301,7 @@ const verifyEmail = async (req, res) => {
  * Resend verification email to an unverified user.
  * @route POST /api/auth/resend-verification
  */
-const resendVerificationEmail = async (req, res) => {
+const resendVerificationEmail = async (req, res, next) => {
     try {
         const { email } = req.body;
 
@@ -333,7 +331,7 @@ const resendVerificationEmail = async (req, res) => {
 
         res.json({ success: true, message: "Verification email resent. Please check your inbox." });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
@@ -341,15 +339,15 @@ const resendVerificationEmail = async (req, res) => {
  * Get the profile of the currently authenticated user.
  * @route GET /api/auth/profile
  */
-const getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res, next) => {
     try {
         const user = req.user;
         if(!user){
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
         res.json(user);
-    }catch(error){
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -357,7 +355,7 @@ const getUserProfile = async (req, res) => {
  * Update the user profile settings.
  * @route PUT /api/auth/profile
  */
-const updateUserProfile = async (req, res) => {
+const updateUserProfile = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const {
@@ -444,7 +442,7 @@ const updateUserProfile = async (req, res) => {
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
@@ -452,7 +450,7 @@ const updateUserProfile = async (req, res) => {
  * Update user password.
  * @route PUT /api/auth/change-password
  */
-const changePassword = async (req, res) => {
+const changePassword = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const { originalPassword, newPassword } = req.body;
@@ -483,7 +481,7 @@ const changePassword = async (req, res) => {
 
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 
@@ -491,7 +489,7 @@ const changePassword = async (req, res) => {
  * Permanently delete user account.
  * @route DELETE /api/auth/delete-account
  */
-const deleteUserAccount = async (req, res) => {
+const deleteUserAccount = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const user = await User.findById(userId);
@@ -502,7 +500,7 @@ const deleteUserAccount = async (req, res) => {
         await User.findByIdAndDelete(userId);
         res.json({ success: true, message: "Account deleted successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
     }
 };
 

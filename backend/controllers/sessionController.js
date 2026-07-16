@@ -27,7 +27,7 @@ const MAX_EXPERIENCE = 50;
  * 201 {"success": true, "session": {"_id":"...","role":"Backend Engineer",...}}
  */
 
-exports.createSession = async (req, res) => {
+exports.createSession = async (req, res, next) => {
     const mongoSession = await mongoose.startSession();
 
     try {
@@ -74,17 +74,7 @@ exports.createSession = async (req, res) => {
             });
         });
     } catch (err) {
-        if (err.message === "SESSION_LIMIT_REACHED") {
-            return res.status(400).json({
-                success: false,
-                error: `Maximum of ${MAX_SESSIONS} sessions reached.`,
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            error: err.message,
-        });
+        next(err);
     } finally {
         await mongoSession.endSession();
     }
@@ -103,7 +93,7 @@ exports.createSession = async (req, res) => {
  * @example
  * 200 [{"_id":"...","role":"...","questions":[...]}]
  */
-exports.getMySessions = async (req, res) => {
+exports.getMySessions = async (req, res, next) => {
     try {
       const userId = req.user._id;
       const session = await Session.find({ user: userId })
@@ -111,8 +101,7 @@ exports.getMySessions = async (req, res) => {
         .populate("questions");
       res.status(200).json(session);
     } catch (error) {
-      console.error("Error in getMySessions:", error);
-      res.status(500).json({ success: false, message: "Server Error" });
+        next(error);
     }
 };
 
@@ -129,7 +118,7 @@ exports.getMySessions = async (req, res) => {
  * @example
  * 200 {"success": true, "session": {"_id":"...","questions":[...]}}
  */
-exports.getSessionById = async (req, res) => {
+exports.getSessionById = async (req, res, next) => {
     try {
   const session = await Session.findById(req.params.id)
   .populate({
@@ -149,8 +138,8 @@ exports.getSessionById = async (req, res) => {
     }
     res.status(200).json({ success:true , session })
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
+        next(error);
+    }
 };
 
 /**
@@ -167,7 +156,7 @@ exports.getSessionById = async (req, res) => {
  * 200 {"message":"Session delete sucessfully"}
  */
 
-exports.deleteSession = async (req, res) => {
+exports.deleteSession = async (req, res, next) => {
     const transaction = await mongoose.startSession();
     try {
         await transaction.withTransaction(async () => {
@@ -199,17 +188,7 @@ exports.deleteSession = async (req, res) => {
             message: "Session deleted successfully.",
         });
     } catch (err) {
-        if (err.message === "SESSION_NOT_FOUND") {
-            return res.status(404).json({
-                success: false,
-                error: "Session not found.",
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            error: err.message,
-        });
+        next(err);
     } finally {
         await transaction.endSession();
     }
