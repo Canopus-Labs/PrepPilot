@@ -88,25 +88,19 @@ const registerUser = async (req, res, next) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // skip email verification until SMTP is configured
+            isEmailVerified: false, // require email verification
         });
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
-
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
+        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
         await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
+
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl);
+
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            profileImageUrl: user.profileImageUrl,
+            message: "Account created. Please check your email to verify your account.",
         });
     } catch (error) {
         next(error);
