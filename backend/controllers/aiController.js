@@ -84,20 +84,32 @@ const generateInterviewQuestions = async (req, res, next) => {
       );
       const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
+      return res.status(200).json({ model: usedModel, question: parsed.data });
     } catch (err) {
         next(err);
     }
   } catch (error) {
         next(error);
     }
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      return res.status(500).json({
+        message: "Gemini returned invalid JSON",
+        raw: rawText,
+      });
+    }
+  } catch (error) {
+    console.error("Gemini API Error (generate-questions):", error);
+    return res.status(500).json({
+      message: "Failed to generate interview questions",
+      error: error.message,
+    });
+  }
 };
 
 /**
@@ -131,7 +143,6 @@ const generateConceptExplanation = async (req, res, next) => {
     );
 
     const rawText = await result.response.text();
-    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
     let cleanedText = rawText
       .replace(/^\s*```json\s*/i, "")
       .replace(/^\s*```\s*/i, "")
@@ -148,16 +159,32 @@ const generateConceptExplanation = async (req, res, next) => {
       });
       const parsed = explanationSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      res.status(200).json({ model: usedModel, ...data });
+      return res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
         next(err);
     }
   } catch (error) {
         next(error);
     }
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      return res.status(500).json({
+        message: "Gemini returned invalid JSON",
+        raw: rawText,
+      });
+    }
+  } catch (error) {
+    console.error("Gemini API Error (generate-explanation):", error);
+    return res.status(500).json({
+      message: "Failed to generate concept explanation",
+      error: error.message,
+    });
+  }
 };
 
 /**
@@ -184,6 +211,10 @@ const generateInterviewTips = async (req, res, next) => {
   try {
     const { role, experience } = req.body;
 
+    if (!role || !experience) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const prompt = interviewTipsPrompt({ role, experience });
 
     const { result, usedModel } = await generateWithFallback(
@@ -206,16 +237,32 @@ const generateInterviewTips = async (req, res, next) => {
       });
       const parsed = tipsSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      res.status(200).json({ model: usedModel, ...data });
+      return res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
         next(err);
     }
   } catch (error) {
         next(error);
     }
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      return res.status(500).json({
+        message: "Gemini returned invalid JSON",
+        raw: rawText,
+      });
+    }
+  } catch (error) {
+    console.error("Gemini API Error (generate-tips):", error);
+    return res.status(500).json({
+      message: "Failed to generate interview tips",
+      error: error.message,
+    });
+  }
 };
 
 module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips };

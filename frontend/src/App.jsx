@@ -10,7 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import InteractiveCursor from './components/InteractiveCursor';
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import VerifyEmail from "./pages/Auth/verifyEmail";
@@ -39,6 +39,7 @@ import JobsForYou from "./pages/Jobs/JobsForYou";
 import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) return null;
@@ -58,6 +59,7 @@ const App = () => {
       <UserProvider>
         <ErrorBoundary>
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
+          <InteractiveCursor />
           <Router>
             <AnimatePresence mode="wait">
               <Routes>
@@ -347,6 +349,16 @@ const App = () => {
                     }
                   />
                 </Route>
+                <Route
+  path="/privacy-policy"
+  element={
+    <ErrorBoundary>
+      <PageTransition>
+        <PrivacyPolicy />
+      </PageTransition>
+    </ErrorBoundary>
+  }
+/>
                 <Route
                  path="*"
                  element={

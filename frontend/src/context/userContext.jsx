@@ -2,6 +2,11 @@ import React, { createContext, useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
+import {
+    isMockAuthEnabled,
+    getMockUser,
+    clearMockUser,
+} from "../utils/mockAuth";
 
 
 export const UserContext = createContext();
@@ -13,6 +18,15 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) return;
+
+        if (isMockAuthEnabled()) {
+            const mockUser = getMockUser();
+            if (mockUser) {
+                setUser(mockUser);
+            }
+            setLoading(false);
+            return;
+        }
 
         const accessToken =
   localStorage.getItem("token") ||
@@ -45,17 +59,14 @@ export const UserProvider = ({ children }) => {
 
     const updateUser = (userData) => {
         setUser(userData);
-        const authToken = userData.token || userData.accessToken;
-        if (authToken) {
-            localStorage.setItem("token", authToken);
-        }
         setLoading(false);
     };
     const clearUser = () => {
         setUser(null);
         setSheetProgress([]);
         localStorage.removeItem("token");
-sessionStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        clearMockUser();
     };
     // Optionally, add a function to refresh sheet progress
     const refreshSheetProgress = async () => {

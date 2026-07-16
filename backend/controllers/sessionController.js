@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
-
+const MAX_EXPERIENCE = 50;
 
 /**
  * Create a new practice session and associated questions.
@@ -33,7 +33,21 @@ exports.createSession = async (req, res, next) => {
     try {
         await mongoSession.withTransaction(async () => {
             const userId = req.user._id;
+            const experience = Number(req.body.experience);
+ 
+            if (isNaN(experience)) {
+              return res.status(400).json({
+                    success: false,
+                    message: "Years of experience must be a valid number.",
+           });
+         }
 
+          if (experience < 0 || experience > MAX_EXPERIENCE) {
+             return res.status(400).json({
+                   success: false,
+                   message: `Years of experience must be between 0 and ${MAX_EXPERIENCE}.`,
+             });
+            }
             const sessionCount = await Session.countDocuments({
                 user: userId,
             }).session(mongoSession);

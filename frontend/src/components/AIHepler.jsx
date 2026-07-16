@@ -1,11 +1,14 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect} from "react";
 import { UserContext } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
 import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
+import { useParams } from "react-router-dom";
 
 export default function AIHelper() {
+  const { id } = useParams();
   const { user } = useContext(UserContext);
+  console.log("\nCurrent Logged In User is:\n", user);
   const [messages, setMessages] = useState([
     { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
   ]);
@@ -13,7 +16,34 @@ export default function AIHelper() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const endRef = useRef(null);
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      if (!user?._id) return; 
+      try {
+        const res = await fetch(`${BASE_URL}/api/history/${user._id}`); 
+        if (!res.ok) throw new Error("Failed to fetch history");
+        
+        const data = await res.json();
+        console.log("FETCHED DATA FROM DB:", data);
+        if (data && data.messages && data.messages.length > 0) {
+          const formattedMessages = data.messages.map((msg, index) => ({
+            id: Date.now() + index,
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            text: msg.text
+          }));
 
+          setMessages([
+            { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
+            ...formattedMessages
+          ]);
+        }
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
+    };
+
+    fetchChatHistory();
+  }, [user?._id]);
   function scrollToBottom() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }
@@ -23,7 +53,8 @@ export default function AIHelper() {
     setTimeout(scrollToBottom, 50);
   }
 
-  async function callApi(prompt, history, onProgress) {
+  async function callApi(prompt, history, onProgress, userId) {
+    console.log("\nBackend received userId:\n", userId);
     console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
     console.log("REQUEST URL:", `${BASE_URL}/api/generate`);
     
@@ -32,7 +63,7 @@ export default function AIHelper() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, history }),
+        body: JSON.stringify({ prompt,history,userId}),
       }
     );
 
@@ -103,7 +134,7 @@ export default function AIHelper() {
         text: m.text
       }));
 
-      const full = await callApi(prompt, historyForBackend, onProgress);
+      const full = await callApi(prompt, historyForBackend, onProgress,user?._id);
 
       let displayText = lastText || full || "(no response)";
       if (
@@ -153,13 +184,10 @@ export default function AIHelper() {
 
   return (
     <div className="h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300 overflow-hidden">
-      {/* Removed local Navbar */}
       
       <div className="flex-1 flex flex-col w-full relative z-10 overflow-hidden">
         
-        {/* Sleek Header */}
         <header className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-white/5 bg-white/50 dark:bg-transparent backdrop-blur-md transition-colors duration-300">
-          {/* Left: hero text */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-sm">
               <Sparkles size={18} className="text-white" />
@@ -170,7 +198,6 @@ export default function AIHelper() {
             </div>
           </div>
 
-          {/* Right: clear button */}
           <button
             onClick={clearChat}
             className="flex items-center gap-1.5 text-[13px] px-3 py-1.5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-500/10 dark:hover:text-red-400 dark:hover:border-red-500/20 text-gray-600 dark:text-gray-400 font-medium transition-all duration-200"
@@ -181,7 +208,6 @@ export default function AIHelper() {
           </button>
         </header>
 
-        {/* Messages */}
         <main className="flex-1 overflow-y-auto scroll-smooth px-4 py-6 md:px-0">
           <div className="space-y-6 max-w-3xl mx-auto pb-2">
             {messages.map((m) => {
@@ -190,7 +216,6 @@ export default function AIHelper() {
                 <div key={m.id} className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
                   <div className={`flex gap-3 max-w-[85%] md:max-w-[80%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                     
-                    {/* Avatar */}
                     <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1 outline outline-2 outline-offset-2 ${
                       isUser 
                         ? "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 outline-white dark:outline-[#0b1120]" 
@@ -199,7 +224,6 @@ export default function AIHelper() {
                       {isUser ? <UserIcon size={16} strokeWidth={2.5} /> : <Bot size={18} strokeWidth={2} />}
                     </div>
                     
-                    {/* Bubble */}
                     <div className={`relative px-4 py-3 shadow-sm ${
                       isUser 
                         ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-2xl rounded-tr-sm" 
@@ -227,7 +251,6 @@ export default function AIHelper() {
           </div>
         </main>
 
-        {/* Input Area */}
         <div className="shrink-0 p-4 md:px-6 md:pb-8 bg-gradient-to-t from-white via-white to-transparent dark:from-[#0b1120] dark:via-[#0b1120] dark:to-transparent pt-10">
           <form
             onSubmit={handleSend}
@@ -246,7 +269,9 @@ export default function AIHelper() {
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className={`flex-shrink-0 w-[42px] h-[42px] rounded-full flex items-center justify-center transition-all duration-200 mb-[4px] mr-[4px] ${
+                aria-label="Send message"
+                title="Send message"
+                className={`flex-shrink-0 w-[42px] h-[42px] rounded-full flex items-center justify-center transition-all duration-200 mb-[4px] mr-[4px] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                   input.trim() && !loading
                     ? "bg-violet-600 hover:bg-violet-700 text-white shadow-md hover:shadow-lg hover:scale-105"
                     : "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-not-allowed"

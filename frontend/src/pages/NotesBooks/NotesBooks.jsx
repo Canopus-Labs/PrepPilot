@@ -17,6 +17,7 @@ const NotesBooks = () => {
   const [error, setError] = useState(null);
   const [warnings, setWarnings] = useState([]);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   const fetchBooks = async () => {
     try {
@@ -41,14 +42,23 @@ const NotesBooks = () => {
     fetchBooks();
   }, []);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [query]);
+
   const filteredCategories = useMemo(() => {
     const normalize = (value) =>
       (value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const term = normalize(query.trim());
+    const term = normalize(debouncedQuery.trim());
     if (!term) return categories;
 
     return categories.filter((cat) => normalize(cat.title).includes(term));
-  }, [categories, query]);
+  }, [categories, debouncedQuery]);
 
   return (
     <div className="min-h-full bg-[var(--color-background)] text-[var(--color-text-dark)]">
