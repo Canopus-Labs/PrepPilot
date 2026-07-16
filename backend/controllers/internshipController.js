@@ -3,13 +3,54 @@ const JobCache = require("../models/JobCache");
 
 const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID;
 const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
-const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in";
+const DEFAULT_ADZUNA_COUNTRY = "in";
+const ADZUNA_API_BASE_URL = "https://api.adzuna.com/v1/api/jobs";
+const ADZUNA_COUNTRY_PATHS = Object.freeze({
+  au: "/au/search",
+  at: "/at/search",
+  be: "/be/search",
+  br: "/br/search",
+  ca: "/ca/search",
+  ch: "/ch/search",
+  de: "/de/search",
+  es: "/es/search",
+  fr: "/fr/search",
+  gb: "/gb/search",
+  in: "/in/search",
+  it: "/it/search",
+  nl: "/nl/search",
+  nz: "/nz/search",
+  pl: "/pl/search",
+  ru: "/ru/search",
+  sg: "/sg/search",
+  us: "/us/search",
+  za: "/za/search",
+});
+const ALLOWED_ADZUNA_COUNTRIES = new Set(Object.keys(ADZUNA_COUNTRY_PATHS));
+const ALLOWED_PAGE_VALUES = new Set(Array.from({ length: 1000 }, (_, index) => index + 1));
 const CACHE_TTL_MS   = 24 * 60 * 60 * 1000;
 
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
 
+const normalizeCountry = (country) => {
+  const normalizedCountry = String(country || DEFAULT_ADZUNA_COUNTRY).trim().toLowerCase();
+  return ALLOWED_ADZUNA_COUNTRIES.has(normalizedCountry)
+    ? normalizedCountry
+    : DEFAULT_ADZUNA_COUNTRY;
+};
+
+const normalizePage = (page) => {
+  const normalizedPage = Number.parseInt(page, 10);
+  return ALLOWED_PAGE_VALUES.has(normalizedPage) ? normalizedPage : 1;
+};
+
+const ADZUNA_COUNTRY = normalizeCountry(process.env.ADZUNA_COUNTRY || DEFAULT_ADZUNA_COUNTRY);
+
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY, page = 1, resultsPerPage = 10) {
-  const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/${page}`;
+  const safeCountry = normalizeCountry(country);
+  const safePage = normalizePage(page);
+  const countryPath = ADZUNA_COUNTRY_PATHS[safeCountry] || ADZUNA_COUNTRY_PATHS[DEFAULT_ADZUNA_COUNTRY];
+  const url = `${ADZUNA_API_BASE_URL}${countryPath}/${safePage}`;
   const { data } = await axios.get(url, {
     params: {
       app_id:   ADZUNA_APP_ID,
@@ -32,9 +73,11 @@ async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY, page = 1, results
       created:       j.created,
     })),
     count: data.count || 0,
-    page: data.page || page,
+    page: data.page || safePage,
   };
 }
+
+exports.fetchFromAdzuna = fetchFromAdzuna;
 
 exports.getInternships = async (req, res) => {
   try {
@@ -49,11 +92,11 @@ exports.getInternships = async (req, res) => {
     }
 
     const role = req.query.keyword || req.query.role || "intern";
-    const country = req.query.country || ADZUNA_COUNTRY;
-    const page = Number(req.query.page || 1);
+    const country = normalizeCountry(req.query.country || ADZUNA_COUNTRY);
+    const page = normalizePage(req.query.page || 1);
     const perPage = Number(req.query.per_page || 10);
 
-    const cacheKey = `intern|${role.toLowerCase()}|${country}|${page}|${perPage}`;
+    const cacheKey = `intern|${String(role).toLowerCase()}|${country}|${page}|${perPage}`;
 
     const cached = await JobCache.findOne({ cacheKey });
     if (cached && Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS) {
