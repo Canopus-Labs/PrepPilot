@@ -4,25 +4,28 @@ const { compileResume, analyzeResume, saveResume, getMyResumes } = require('../c
 const { protect } = require('../middlewares/authMiddleware');
 const { upload, uploadResume } = require('../middlewares/uploadMiddleware');
 const { aiLimiter } = require('../middlewares/rateLimiter');
+const { validateCompileResume, validateAnalyzeResume, validateSaveResume } = require('../Input_validators/ValidateResume');
 
+
+router.use(protect);
 // @route   POST /api/resume/compile
 // @desc    Compile LaTeX code to PDF
 // @access  Private — requires auth; aiLimiter caps external texlive.net calls to 20/hr per IP
-router.post('/compile', protect, aiLimiter, compileResume);
+router.post('/compile', aiLimiter,validateCompileResume, compileResume);
 
 // @route   POST /api/resume/analyze
 // @desc    Analyze resume using Gemini API
 // @access  Private — requires auth; aiLimiter caps Gemini API calls to 20/hr per IP
-router.post('/analyze', protect, aiLimiter, uploadResume.single("resume"), analyzeResume);
+router.post('/analyze', aiLimiter, uploadResume.single("resume"), validateAnalyzeResume, analyzeResume);
 
 // @route   POST /api/resume/save
 // @desc    Save or update a resume
 // @access  Private
-router.post('/save', protect, saveResume);
+router.post('/save', validateSaveResume, saveResume);
 
 // @route   GET /api/resume/my-resumes
 // @desc    Get all saved resumes for logged-in user
 // @access  Private
-router.get('/my-resumes', protect, getMyResumes);
+router.get('/my-resumes', getMyResumes);
 
 module.exports = router;

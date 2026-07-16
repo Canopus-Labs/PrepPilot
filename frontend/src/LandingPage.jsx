@@ -1,8 +1,7 @@
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
 import React, { useContext, useState, useEffect } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 import {
   LuSparkles,
   LuChevronRight,
@@ -14,9 +13,12 @@ import { VscGitMerge } from "react-icons/vsc";
 import Modal from "./components/Loader/Modal";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
+import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
 
 
 /* ─────────────────────────────────────────────
@@ -119,6 +121,116 @@ const HowStep = ({ step, active, onClick, index }) => (
 );
 
 /* ─────────────────────────────────────────────
+   Testimonial Data
+───────────────────────────────────────────── */
+const TESTIMONIALS = [
+  {
+    id: 1,
+    name: "Sarah Chen",
+    role: "Software Engineer, Google",
+    rating: 5,
+    review: "PrepPilot AI was a game-changer for my Google interviews. The AI-generated questions were spot on, and the detailed explanations helped me understand complex topics deeply. Highly recommend!",
+    tags: ["DSA", "System Design", "Google"],
+    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+  },
+  {
+    id: 2,
+    name: "David Lee",
+    role: "Frontend Developer, Meta",
+    rating: 5,
+    review: "The UI design questions and React deep-dives were incredibly helpful for my Meta interview. The platform's ability to simulate real interview scenarios is unmatched.",
+    tags: ["Frontend", "React", "Meta"],
+    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+  },
+  {
+    id: 3,
+    name: "Priya Sharma",
+    role: "SDE-2, Amazon",
+    rating: 4,
+    review: "Amazon's LP questions are tricky, but PrepPilot's behavioral prep helped me structure my STAR stories perfectly. Landed the offer!",
+    tags: ["Behavioral", "Leadership Principles", "Amazon"],
+    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
+  },
+  {
+    id: 4,
+    name: "Michael Brown",
+    role: "Backend Engineer, Microsoft",
+    rating: 5,
+    review: "The OOP design questions and system design challenges were excellent. PrepPilot helped me refine my approach and articulate my solutions clearly.",
+    tags: ["OOP Design", "System Design", "Microsoft"],
+    avatar: "https://randomuser.me/api/portraits/men/4.jpg",
+  },
+  {
+    id: 5,
+    name: "Jessica Wong",
+    role: "Junior Developer",
+    rating: 4,
+    review: "As a fresher, I found the 'Easy' and 'Medium' DSA sheets invaluable. PrepPilot made learning fun and boosted my confidence for my first job.",
+    tags: ["DSA", "Entry Level", "Fresher"],
+    avatar: "https://randomuser.me/api/portraits/women/5.jpg",
+  },
+  {
+    id: 6,
+    name: "Omar Khan",
+    role: "DevOps Engineer",
+    rating: 5,
+    review: "The project ideas section gave me inspiration for my portfolio, and the compiler helped me practice coding challenges efficiently. Great tool!",
+    tags: ["DevOps", "Projects", "Coding"],
+    avatar: "https://randomuser.me/api/portraits/men/6.jpg",
+  },
+  {
+    id: 7,
+    name: "Emily White",
+    role: "Data Scientist",
+    rating: 4,
+    review: "Even for data science roles, the system design and problem-solving sections were beneficial. The AI explanations are a lifesaver!",
+    tags: ["Problem Solving", "AI", "Data Science"],
+    avatar: "https://randomuser.me/api/portraits/women/7.jpg",
+  },
+];
+
+/* ─────────────────────────────────────────────
+   Star Rating Component
+───────────────────────────────────────────── */
+const StarRating = ({ count }) => (
+  <div className="flex items-center gap-0.5">
+    {[1, 2, 3, 4, 5].map((n) => (
+      <Star
+        key={n}
+        size={14}
+        className={n <= count ? "text-amber-400 fill-amber-400" : "text-gray-600"}
+      />
+    ))}
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   Testimonial Card Component
+───────────────────────────────────────────── */
+const TestimonialCard = ({ testimonial }) => (
+  <div className="w-full h-full p-6 bg-white/5 border border-white/10 rounded-2xl shadow-lg flex flex-col gap-4">
+    <div className="flex items-center justify-between">
+      <StarRating count={testimonial.rating} />
+      <div className="flex flex-wrap gap-1">
+        {testimonial.tags.map((tag) => (
+          <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400">
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+    <p className="text-sm text-gray-300 leading-relaxed flex-1">"{testimonial.review}"</p>
+    <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/5">
+      <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 rounded-full object-cover border-2 border-violet-500/50" />
+      <div>
+        <p className="text-sm font-semibold text-white">{testimonial.name}</p>
+        <p className="text-xs text-gray-400">{testimonial.role}</p>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─────────────────────────────────────────────
    Main Component
 ───────────────────────────────────────────── */
 const LandingPage = () => {
@@ -130,6 +242,60 @@ const LandingPage = () => {
   const [pendingRoute, setPendingRoute] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const [visibleCards, setVisibleCards] = useState(3);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCards(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCards(2);
+      } else {
+        setVisibleCards(3);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const maxIndex = Math.max(0, TESTIMONIALS.length - visibleCards);
+    if (currentIndex > maxIndex) {
+      setCurrentIndex(maxIndex);
+    }
+  }, [visibleCards, currentIndex]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = prevIndex + 1;
+        const maxIndex = TESTIMONIALS.length - visibleCards;
+        return nextIndex > maxIndex ? 0 : nextIndex;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [visibleCards, isPaused]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - 1;
+      const maxIndex = TESTIMONIALS.length - visibleCards;
+      return nextIndex < 0 ? maxIndex : nextIndex;
+    });
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      const maxIndex = TESTIMONIALS.length - visibleCards;
+      return nextIndex > maxIndex ? 0 : nextIndex;
+    });
+  };
 
   const handleCTA = () => {
     if (!user) {
@@ -238,7 +404,15 @@ const LandingPage = () => {
                   {/* Login – outlined dark button (like opensox "Contribute") */}
                   <button
                     onClick={() => setOpenAuthModal(true)}
-                    className="hidden sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
+                    className="hidden cursor-pointer sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 0 24px 4px rgba(124,58,237,0.65)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 0 16px 2px rgba(124,58,237,0.45)")
+                    }
                     style={{
                       background: "rgba(255,255,255,0.06)",
                       border: "1px solid rgba(255,255,255,0.12)",
@@ -250,7 +424,7 @@ const LandingPage = () => {
                   {/* Get Started – solid violet pill */}
                   <button
                     onClick={handleCTA}
-                    className="flex items-center gap-2 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-all duration-150"
+                    className="flex items-center gap-2 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-all duration-150 cursor-pointer"
                     style={{
                       background:
                         "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
@@ -369,271 +543,112 @@ const LandingPage = () => {
             </FadeIn>
           </div>
 
-          {/* 3 equal columns - Full Width */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+          {/* 3 equal columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 items-stretch">
+
             {/* ── CARD 1: Personalized Recommendations ── */}
-            <FadeIn delay={0.05}>
-              <div
-                className="bento-card flex flex-col rounded-3xl overflow-hidden"
-                style={{
-                  background: "rgba(15,15,20,0.90)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "700px",
-                }}
-              >
-                {/* Card interior – stacked list items */}
-                <div className="flex-1 p-10 flex flex-col gap-4">
+            <FadeIn delay={0.05} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 flex flex-col gap-3.5 border-b border-white/6">
                   {[
-                    {
-                      icon: "🎯",
-                      label: "Frontend Engineer Track",
-                      sub: "React · TypeScript · Performance",
-                    },
-                    {
-                      icon: "🧠",
-                      label: "System Design Deep Dive",
-                      sub: "HLD · LLD · Scalability",
-                    },
-                    {
-                      icon: "⚡",
-                      label: "DSA Mastery Sprint",
-                      sub: "Arrays · Graphs · DP",
-                    },
-                    {
-                      icon: "📊",
-                      label: "Behavioral Interview Prep",
-                      sub: "STAR · Leadership · Culture",
-                    },
+                    { label: "Frontend Engineer Track",  sub: "React · TypeScript · Performance" },
+                    { label: "System Design Deep Dive",  sub: "HLD · LLD · Scalability"          },
+                    { label: "DSA Mastery Sprint",       sub: "Arrays · Graphs · DP"              },
+                    { label: "Behavioral Interview Prep", sub: "STAR · Leadership · Culture"      },
                   ].map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-4 px-5 py-4 rounded-xl"
-                      style={{
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                      }}
-                    >
-                      <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
-                        style={{ background: "rgba(139,92,246,0.15)" }}
-                      >
-                        {item.icon}
-                      </div>
+                    <div key={i} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.03] border border-white/6">
+                      <div className="w-1.5 h-10 rounded-full bg-violet-500/60 flex-shrink-0" />
                       <div>
-                        <p className="text-white text-base font-semibold leading-tight">
-                          {item.label}
-                        </p>
-                        <p className="text-gray-500 text-sm mt-1">{item.sub}</p>
+                        <p className="text-white text-sm font-medium leading-tight">{item.label}</p>
+                        <p className="text-gray-500 text-xs mt-1">{item.sub}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-                {/* Card footer – title + subtitle */}
-                <div className="px-10 pb-10 pt-4">
-                  <h3 className="text-white font-bold text-2xl mb-2">
-                    Personalized Recommendations
-                  </h3>
-                  <p className="text-gray-400 text-base">
-                    Get curated prep tracks tailored to your target role and
-                    experience level.
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Personalized Recommendations</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Curated prep tracks tailored to your target role and experience level.
                   </p>
                 </div>
               </div>
             </FadeIn>
 
-            {/* ── CARD 2: AI-Powered Search (orbit hub) ── */}
-            <FadeIn delay={0.12}>
-              <div
-                className="bento-card flex flex-col rounded-3xl overflow-hidden"
-                style={{
-                  background: "rgba(15,15,20,0.90)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "723px",
-                }}
-              >
-                {/* Orbit visual */}
-                <div className="flex-1 flex items-center justify-center relative p-8">
-                  {/* Orbit rings */}
-                  <div
-                    className="absolute w-56 h-56 rounded-full"
-                    style={{ border: "1px solid rgba(139,92,246,0.15)" }}
-                  />
-                  <div
-                    className="absolute w-80 h-80 rounded-full"
-                    style={{ border: "1px solid rgba(139,92,246,0.10)" }}
-                  />
-                  <div
-                    className="absolute w-96 h-96 rounded-full"
-                    style={{ border: "1px solid rgba(139,92,246,0.06)" }}
-                  />
+            {/* ── CARD 2: AI Assistance ── */}
+            <FadeIn delay={0.12} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 border-b border-white/6 flex flex-col gap-4">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-7 h-7 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="bg-white/[0.05] border border-white/8 rounded-xl rounded-tl-none px-4 py-3 text-sm text-gray-300 max-w-[85%]">
+                      Explain time complexity of quicksort in the worst case.
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start flex-row-reverse">
+                    <div className="w-7 h-7 rounded-full bg-violet-600/30 border border-violet-500/30 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-violet-400" />
+                    </div>
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl rounded-tr-none px-4 py-3 text-sm text-gray-200 max-w-[85%]">
+                      In the worst case — a sorted array with the last element as pivot — quicksort degrades to <span className="text-violet-300 font-mono">O(n²)</span>. Using randomized pivots avoids this.
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-7 h-7 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="bg-white/[0.05] border border-white/8 rounded-xl rounded-tl-none px-4 py-3 text-sm text-gray-300 max-w-[85%]">
+                      Can you give me a follow-up question on this?
+                    </div>
+                  </div>
+                  <div className="h-8 flex items-center gap-2 px-1">
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Seamless AI Assistance</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Ask anything and get instant explanations, hints, and concept breakdowns.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
 
-                  {/* Orbiting tool icons */}
+            {/* ── CARD 3: Precision Filters ── */}
+            <FadeIn delay={0.2} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 flex flex-col gap-4 border-b border-white/6">
                   {[
-                    {
-                      emoji: "💬",
-                      top: "8%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                    },
-                    {
-                      emoji: "📝",
-                      top: "50%",
-                      right: "6%",
-                      transform: "translateY(-50%)",
-                    },
-                    { emoji: "🔍", bottom: "10%", left: "20%", transform: "" },
-                    { emoji: "📊", top: "20%", left: "8%", transform: "" },
-                  ].map((orb, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                      style={{
-                        top: orb.top,
-                        left: orb.left,
-                        right: orb.right,
-                        bottom: orb.bottom,
-                        transform: orb.transform,
-                        background: "rgba(30,30,40,0.95)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        boxShadow: "0 0 12px rgba(139,92,246,0.2)",
-                      }}
-                    >
-                      {orb.emoji}
+                    { label: "Difficulty", tags: ["Easy", "Medium", "Hard", "Expert"] },
+                    { label: "Role Type",  tags: ["Frontend", "Backend", "Full Stack", "DevOps"] },
+                    { label: "Tech Stack", tags: ["React", "Node.js", "Python", "TypeScript"] },
+                  ].map((group) => (
+                    <div key={group.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/6">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                        {group.label}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {group.tags.map((tag) => (
+                          <span key={tag} className="text-sm px-3 py-1.5 rounded-lg border border-white/10 text-gray-300 bg-white/[0.04]">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   ))}
-
-                  {/* Center hub */}
-                  <div className="relative z-10 flex items-center justify-center">
-                    <div
-                      className="px-6 py-4 rounded-2xl text-white font-bold text-lg"
-                      style={{
-                        background: "rgba(20,20,28,0.98)",
-                        border: "1px solid rgba(139,92,246,0.4)",
-                        boxShadow: "0 0 32px rgba(139,92,246,0.25)",
-                      }}
-                    >
-                      PrepPilot AI
-                    </div>
-                  </div>
                 </div>
-                {/* Card footer */}
-                <div className="px-10 pb-10 pt-4">
-                  <h3 className="text-white font-bold text-2xl mb-2">
-                    Seamless AI Assistance
-                  </h3>
-                  <p className="text-gray-400 text-base">
-                    Ask anything — get instant explanations, hints, and
-                    deep-dive concept breakdowns.
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Precision Filters</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Zero in on questions by difficulty, role type, and your tech stack.
                   </p>
                 </div>
               </div>
             </FadeIn>
 
-            {/* ── CARD 3: Precision Filters (tag chips) ── */}
-            <FadeIn delay={0.2}>
-              <div
-                className="bento-card flex flex-col rounded-3xl overflow-hidden"
-                style={{
-                  background: "rgba(15,15,20,0.90)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  minHeight: "723px",
-                }}
-              >
-                {/* Filter chips interior */}
-                <div className="flex-1 p-8 flex flex-col gap-4">
-                  {/* Difficulty group */}
-                  <div
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
-                  >
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                      🎚 Difficulty
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {["Easy", "Medium", "Hard", "Expert"].map((tag, i) => {
-                        const colors = [
-                          "text-green-400 border-green-500/30 bg-green-500/10",
-                          "text-yellow-400 border-yellow-500/30 bg-yellow-500/10",
-                          "text-orange-400 border-orange-500/30 bg-orange-500/10",
-                          "text-red-400 border-red-500/30 bg-red-500/10",
-                        ];
-                        return (
-                          <span
-                            key={tag}
-                            className={`text-sm font-semibold px-4 py-2 rounded-full border ${colors[i]}`}
-                          >
-                            {tag}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Role type group */}
-                  <div
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
-                  >
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                      💼 Role Type
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {["Frontend", "Backend", "Full Stack", "DevOps"].map(
-                        (tag) => (
-                          <span
-                            key={tag}
-                            className="text-sm font-semibold px-4 py-2 rounded-full border text-violet-300 border-violet-500/30 bg-violet-500/10"
-                          >
-                            {tag}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Tech stack group */}
-                  <div
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
-                  >
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                      🔧 Tech Stack
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {["React", "Node.js", "Python", "TypeScript"].map(
-                        (tag) => (
-                          <span
-                            key={tag}
-                            className="text-sm font-semibold px-4 py-2 rounded-full border text-blue-300 border-blue-500/30 bg-blue-500/10"
-                          >
-                            {tag}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {/* Card footer */}
-                <div className="px-10 pb-10 pt-4">
-                  <h3 className="text-white font-bold text-2xl mb-2">
-                    Precision Filters
-                  </h3>
-                  <p className="text-gray-400 text-base">
-                    Zero in on questions by difficulty, role type, and your tech
-                    stack.
-                  </p>
-                </div>
-              </div>
-            </FadeIn>
           </div>
         </section>
 
@@ -813,6 +828,89 @@ const LandingPage = () => {
         </section>
 
         {/* ─────────────────────────────────
+            TESTIMONIALS – auto-scrolling carousel
+        ───────────────────────────────── */}
+        <section className="py-24 px-4 border-t border-white/6 relative overflow-hidden">
+          <div className="max-w-6xl mx-auto relative z-10">
+            <FadeIn className="text-center mb-16">
+              <span className="text-xs font-semibold tracking-widest text-violet-400 uppercase mb-3 block">
+                What Our Users Say
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+                Trusted by{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
+                  Thousands of Developers
+                </span>
+              </h2>
+            </FadeIn>
+
+            {/* Testimonials Scroller */}
+            <div 
+              className="relative overflow-hidden py-8"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              {/* Fading overlays */}
+              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
+
+              {/* Slider Track Wrapper */}
+              <div className="overflow-hidden">
+                <div 
+                  className="flex transition-transform duration-500 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`
+                  }}
+                >
+                  {TESTIMONIALS.map((testimonial) => (
+                    <div 
+                      key={testimonial.id}
+                      className="flex-none p-3"
+                      style={{ width: `${100 / visibleCards}%` }}
+                    >
+                      <TestimonialCard testimonial={testimonial} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Navigation Arrows and Dot Indicators */}
+              <div className="flex justify-between items-center mt-8 px-4">
+                <button
+                  onClick={handlePrev}
+                  className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-violet-500/50 text-white transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  aria-label="Previous testimonial"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                {/* Dots indicators */}
+                <div className="flex space-x-2">
+                  {Array.from({ length: TESTIMONIALS.length - visibleCards + 1 }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        currentIndex === idx ? "w-6 bg-violet-500 shadow-lg shadow-violet-500/50" : "w-2.5 bg-white/20 hover:bg-white/40"
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNext}
+                  className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-violet-500/50 text-white transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  aria-label="Next testimonial"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────
             CTA FOOTER BANNER
         ───────────────────────────────── */}
         <section className="py-28 px-4 relative overflow-hidden border-t border-white/6">
@@ -882,9 +980,9 @@ const LandingPage = () => {
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Resources</h3>
         <ul className="space-y-2.5 text-sm">
-          <li><a href="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</a></li>
+          <li><Link to="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</Link></li>
           <li><a href="/notes-books" className="hover:text-white transition-colors duration-200">Books Library</a></li>
-          <li><a href="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</a></li>
+          <li><Link to="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</Link></li>
           <li><a href="/interview-experiences" className="hover:text-white transition-colors duration-200">Experiences</a></li>
         </ul>
       </div>
@@ -907,7 +1005,7 @@ const LandingPage = () => {
       <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
       <div className="flex space-x-6">
         <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-        <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
+        <a href="/terms-and-conditions" className="hover:text-gray-300 transition-colors">Terms of Service</a>
       </div>
     </div>
 
@@ -985,6 +1083,7 @@ const LandingPage = () => {
         onClose={() => {
           setOpenAuthModal(false);
           setPendingRoute(null);
+          setCurrentPage("login");
         }}
         hideHeader
       >
@@ -994,7 +1093,7 @@ const LandingPage = () => {
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
-          
+                setCurrentPage("login");
                 if (pendingRoute) {
                   navigate(pendingRoute);
                   setPendingRoute(null);
@@ -1004,9 +1103,13 @@ const LandingPage = () => {
               }}
             />
           </div>
-          
+
           <div className={currentPage === "signup" ? "block" : "hidden"}>
             <SignUp setCurrentPage={setCurrentPage} />
+          </div>
+
+          <div className={currentPage === "forgot-password" ? "block" : "hidden"}>
+            <ForgotPassword setCurrentPage={setCurrentPage} />
           </div>
         </div>
       </Modal>

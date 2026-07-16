@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema(
     {
@@ -6,6 +7,8 @@ const UserSchema = new mongoose.Schema(
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
         profileImageUrl: { type: String, default: null },
+        refreshTokenHash: { type: String, default: null },
+        refreshTokenExpiresAt: { type: Date, default: null },
         
         // Basic Info
         firstName: { type: String, default: "" },
@@ -56,5 +59,22 @@ const UserSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+// Hash password automatically on save, and when there is no update in password then the password remains same and saves precious computation of hasing password
+
+UserSchema.pre('save', async function() {
+  if (!this.isModified('password')) {
+    return;
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+UserSchema.methods.isValidPassword = async function(candidatePassword) {
+  // Compare candidate password with the stored hash
+  return await bcrypt.compare(candidatePassword, this.password);
+};   
+   
 
 module.exports = mongoose.model("User", UserSchema);

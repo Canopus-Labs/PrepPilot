@@ -49,5 +49,22 @@ Task:
 Important: Do NOT add any extra text outside the JSON format. Only return valid JSON.
 
 `)
+const interviewTipsPrompt = ({ role, experience }) => (`
+You are an AI trained to give practical interview preparation advice.
 
-module.exports = { questionAnswerPrompt, conceptExplainPrompt };
+Task:
+- Generate 5 to 7 actionable interview tips for the following candidate:
+- Role: ${role}
+- Candidate Experience: ${experience} years
+- Tips should cover things like what to focus on, common mistakes to avoid, and how to structure answers for this specific role.
+- Keep each tip short, practical, and beginner-friendly (1-2 sentences max per tip).
+
+- Return the result as a valid JSON object in the following format:
+{
+    "tips": ["Tip one here.", "Tip two here.", ...]
+}
+
+Important: Do NOT add any extra text outside the JSON format. Only return valid JSON.
+`)
+
+module.exports = { questionAnswerPrompt, conceptExplainPrompt,interviewTipsPrompt };

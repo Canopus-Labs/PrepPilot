@@ -44,12 +44,13 @@ export const UserProvider = ({ children }) => {
     }, []);
 
     const updateUser = (userData) => {
-    setUser(userData);
-    if (userData.token) {
-        localStorage.setItem("token", userData.token);
-    }
-    setLoading(false);
-};
+        setUser(userData);
+        const authToken = userData.token || userData.accessToken;
+        if (authToken) {
+            localStorage.setItem("token", authToken);
+        }
+        setLoading(false);
+    };
     const clearUser = () => {
         setUser(null);
         setSheetProgress([]);

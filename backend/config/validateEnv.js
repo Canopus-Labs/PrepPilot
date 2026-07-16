@@ -4,6 +4,10 @@ const requiredEnvVars = Object.freeze([
   "GEMINI_API_KEY",
 ]);
 
+// Optional integrations — the server boots fine without these, but the
+// dependent feature is disabled until they are provided.
+// ADZUNA_APP_ID / ADZUNA_API_KEY → "Jobs for You" (see controllers/jobController.js)
+
 const validateEnv = () => {
   const missingVars = [];
 

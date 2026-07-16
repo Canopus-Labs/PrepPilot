@@ -3,11 +3,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
 import {
   LayoutDashboard,
   Bot,
   BrainCircuit,
   Briefcase,
+  BriefcaseBusiness,
   Code2,
   Target,
   Settings,
@@ -25,12 +28,26 @@ import {
   BookOpen,
   BookMarked,
   CalendarDays,
+  ScrollText,
+  Grid3x3,
 } from "lucide-react";
 
 const Sidebar = () => {
-  const { user } = useContext(UserContext);
+  const { user, clearUser } = useContext(UserContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const handleLogout = async () => {
+  try {
+    await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
+  } catch (error) {
+    console.error("Logout request failed:", error);
+  } finally {
+    localStorage.clear();
+    sessionStorage.clear();
+    clearUser();
+    navigate("/");
+  }
+};
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
@@ -57,6 +74,19 @@ const Sidebar = () => {
           title: "Cognitive Builder",
           path: "/aptitude",
           icon: BrainCircuit,
+        },
+      ],
+    },
+    {
+      id: "cognitive-skills",
+      title: "Cognitive Skills",
+      isHeader: true,
+      items: [
+        {
+          id: "cognitive-games",
+          title: "Cognitive Games",
+          path: "/cognitive-games",
+          icon: Grid3x3,
         },
       ],
     },
@@ -95,6 +125,19 @@ const Sidebar = () => {
           title: "Interview Experiences",
           path: "/interview-experiences",
           icon: MessageSquare,
+        },
+      ],
+    },
+    {
+      id: "jobs",
+      title: "Jobs",
+      isHeader: true,
+      items: [
+        {
+          id: "jobs-for-you",
+          title: "Jobs for You",
+          path: "/jobs",
+          icon: BriefcaseBusiness,
         },
       ],
     },
@@ -184,7 +227,7 @@ const Sidebar = () => {
   ];
 
   const handleServiceClick = (item) => {
-    if (item.title === "Cognitive Builder" && !user) {
+    if ((item.title === "Cognitive Builder" || item.title === "Cognitive Games") && !user) {
       setShowLoginModal(true);
     } else {
       navigate(item.path);
@@ -314,6 +357,20 @@ const Sidebar = () => {
           <Settings size={18} />
           Settings
         </button>
+        <button
+          onClick={() => {
+            navigate("/terms-and-conditions");
+            setMobileMenuOpen(false);
+          }}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            location.pathname.startsWith("/terms-and-conditions")
+              ? "bg-violet-600/10 text-violet-400 font-semibold"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <ScrollText size={18} />
+          Policy
+        </button>
         <button 
           onClick={() => navigate("/support")}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
@@ -356,10 +413,7 @@ const Sidebar = () => {
             
             {user && (
               <button
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.reload();
-                }}
+                onClick={handleLogout}
                 className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
                 title="Logout"
               >
@@ -409,7 +463,7 @@ const Sidebar = () => {
       <Modal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        title="Login"
+        hideHeader
       >
         <Login setCurrentPage={() => {}} />
       </Modal>

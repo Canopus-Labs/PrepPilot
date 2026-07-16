@@ -1,3 +1,5 @@
+const UserSheetProgress = require('../models/UserSheetProgress');
+
 /**
  * Get all sheet progress entries for the authenticated user.
  * @route GET /api/user/sheet-progress
@@ -20,7 +22,6 @@ exports.getAllProgress = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-const UserSheetProgress = require('../models/UserSheetProgress');
 
 /**
  * Save or update user progress for a sheet.

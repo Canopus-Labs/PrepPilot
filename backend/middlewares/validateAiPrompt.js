@@ -1,16 +1,19 @@
+const { z } = require("zod");
 const aiPromptSchema = require("../validation/aiPromptSchema");
 
 const validateAiPrompt = (req, res, next) => {
-  const { error } = aiPromptSchema.validate(req.body);
-
-  if (error) {
-    return res.status(400).json({
-      message: "Invalid or unsafe AI prompt",
-      details: error.details.map(d => d.message),
-    });
+  try {
+    aiPromptSchema.parse(req.body);
+    next();
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const first = err.issues[0];
+      // Surface a friendly message for the most common cases
+      let friendlyMessage = first?.message || "Invalid prompt.";
+      return res.status(400).json({ error: friendlyMessage });
+    }
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  next();
 };
 
-module.exports = {validateAiPrompt};
+module.exports = { validateAiPrompt };

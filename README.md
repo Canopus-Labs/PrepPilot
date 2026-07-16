@@ -21,6 +21,25 @@
 
 ---
 
+## Table of Contents
+
+- [🚀 About PrepPilot](#-about-preppilot)
+- [✨ Key Features](#-key-features)
+- [🛠️ Technology Stack](#%EF%B8%8F-technology-stack)
+- [⚡ Quick Start Guide](#-quick-start-guide)
+- [📁 Project Structure](#-project-structure)
+- [🤝 Contributing Guidelines](#-contributing-guidelines)
+- [� Troubleshooting & FAQs](#-troubleshooting--faqs)
+- [📖 API Documentation](#-api-documentation)
+- [🚀 Deployment Guide](#-deployment-guide)
+- [📄 License](#-license)
+- [🙌 Acknowledgments & Credits](#-acknowledgments--credits)
+- [🎯 Roadmap](#-roadmap)
+- [🙌 Thanks to Our Amazing Contributors](#-thanks-to-our-amazing-contributors)
+- [💬 Community & Support](#-community--support)
+
+---
+
 ## 🚀 About PrepPilot
 
 PrepPilot is a comprehensive full-stack web application designed to transform your interview preparation journey. Leveraging cutting-edge AI technology and an intuitive interface, PrepPilot generates role-specific interview questions, provides detailed explanations, and helps you track your progress in real-time.
@@ -41,7 +60,7 @@ Whether you're preparing for your dream job or sharpening your technical skills,
 | 💡 **Project Ideas**                  | Explore curated project ideas to enhance your portfolio                       |
 | 🔗 **Open Source Resources**          | Contribute and learn from open-source projects                                |
 | 📊 **Progress Dashboard**             | Track your preparation metrics and identify weak areas                        |
-| 🔐 **Secure Authentication**          | JWT-based authentication with encrypted passwords                             |
+| 🔐 **Secure Authentication**          | Two-token authentication with short-lived access tokens, rotating refresh tokens, and secure logout support |
 | 📱 **Fully Responsive**               | Seamless experience across desktop, tablet, and mobile devices                |
 | 🎨 **Modern Dark Mode**               | Beautiful UI with theme toggle for comfortable viewing                        |
 | ⚡ **Real-time Feedback**             | Instant AI-powered explanations and answer evaluations                        |
@@ -67,6 +86,7 @@ React 18 (Hooks & Functional Components)
 Node.js + Express.js
 ├── MongoDB + Mongoose (Data persistence)
 ├── JWT & Bcryptjs (Security & authentication)
+├── Access/Refresh token rotation for secure session handling
 ├── Google Gemini API (AI intelligence)
 ├── Multer (File uploads)
 ├── PDF-Parse (Document processing)
@@ -106,7 +126,7 @@ Before getting started, ensure you have the following installed:
 #### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/PrepPilot.git
+git clone https://github.com/Canopus-Labs/PrepPilot.git
 cd PrepPilot
 ```
 
@@ -122,6 +142,7 @@ npm install
 ```bash
 cd ../frontend
 npm install
+echo "VITE_BACKEND_URL=http://localhost:8000/api" > .env
 ```
 
 #### 4️⃣ Environment Configuration
@@ -134,6 +155,10 @@ MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/preppilot
 
 # JWT Secret (generate a strong random string)
 JWT_SECRET=your_super_secret_jwt_key_here_generate_a_strong_one
+
+# Auth token behavior is handled by the backend using:
+# - short-lived access tokens (15 minutes)
+# - rotating refresh tokens (7 days)
 
 # Google Gemini API
 GEMINI_API_KEY=your_gemini_api_key_from_ai_studio
@@ -189,15 +214,26 @@ docker-compose up --build
 ```
 PrepPilot/
 │
-├── 📂 backend/                        # Express.js REST API Server
+├── 📂 backend/                       # Express.js REST API Server
 │   ├── 📂 config/                    # Database & environment configuration
 │   ├── 📂 controllers/               # Business logic & request handlers
 │   │   ├── aiController.js           # AI/Gemini API integration
 │   │   ├── authController.js         # Authentication logic
+|   |   ├── achievementController.js  # Achievement logic
+|   |   ├── jobController.js          # Job Adzuna Logic
 │   │   ├── questionController.js     # Question management
 │   │   ├── resumeController.js       # Resume operations
 │   │   ├── sessionController.js      # Session management
 │   │   └── userSheetProgressController.js # Progress tracking
+|   |
+│   ├── 📂 Input_Validators/                 # Extract the logic for Input validations
+│   │   ├── ValidateAchievement.js           # Validate and check input for Achievement Controller
+│   │   ├── ValidateAi.js                    # Validate and check input for Ai/Gemini Controller
+│   │   ├── ValidateAuth.js                  # Validate and check input for Authentication Controller
+│   │   ├── ValidateQuestions.js             # Validate and check input for Question Management Controller
+│   │   ├── ValidateResume.js                # Validate and check input for Resume Controller
+│   │   ├── ValidateSession.js               # Validate and check input for Session Controller Controller
+│   │   └── ValidateUserSheetProgess.js      # Validate and check input for UserSheetProgress Controller
 │   │
 │   ├── 📂 middlewares/               # Express middlewares
 │   │   ├── authMiddleware.js         # JWT verification
@@ -512,11 +548,9 @@ POST   /api/ai/evaluate         - Evaluate user answer
 ### Question Endpoints
 
 ```
-GET    /api/questions           - Get all questions
-GET    /api/questions/:id       - Get single question
-POST   /api/questions           - Create question (admin)
-PUT    /api/questions/:id       - Update question (admin)
-DELETE /api/questions/:id       - Delete question (admin)
+POST   /api/question/add        - Add questions to a session
+POST   /api/question/:id/pin    - Pin or unpin a question
+POST   /api/question/:id/note   - Update note for a question
 ```
 
 ### Resume Endpoints

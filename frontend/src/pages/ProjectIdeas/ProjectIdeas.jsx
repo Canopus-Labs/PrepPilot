@@ -16,6 +16,7 @@ import {
   BookOpen,
   Star,
   Zap,
+  X,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────
@@ -99,13 +100,39 @@ const LEVELS = [
 // ─────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────
-function buildRequestBody(domainLabel, level) {
-  // Backend schema: prompt(max 500), role(max 50), topic(max 100) — all required
-  return {
-    role: `${level} ${domainLabel} developer`,
-    topic: `${domainLabel} project ideas for ${level} level`,
-    prompt: `List 3 ${level} ${domainLabel} project ideas as JSON array. Each: {title, tagline, techStack:[], features:[], githubSearch, difficulty, domain}. Return only valid JSON array.`,
-  };
+function buildPrompt(domainLabel, level) {
+  return `Generate 3 to 5 unique project ideas for a ${level} level ${domainLabel} developer.
+Avoid generic ideas like Todo App, Calculator, or Weather App.
+
+For Frontend, prefer things like: Real-time collaborative whiteboard, Design system builder, Accessibility auditing dashboard.
+For Backend, prefer things like: Distributed job scheduler, Event-driven notification platform.
+For Full Stack, prefer things like: AI-powered hiring platform, Skill exchange marketplace.
+For AI / ML, prefer things like: Resume scoring engine, Interview performance analyzer.
+For DevOps / Cloud, prefer things like: Kubernetes deployment assistant, Infrastructure monitoring platform.
+For Java, prefer things like: Banking transaction simulator, Distributed inventory system.
+
+For each project, provide:
+- "title": Project Title
+- "description": Short Description
+- "techStack": Array of technologies
+- "features": Array of key features
+- "learningOutcomes": Array of learning outcomes
+- "difficulty": "${level}"
+- "resumeValue": String explaining resume value
+
+Return ONLY a valid JSON array of objects with the exact keys:
+[
+  {
+    "title": "...",
+    "description": "...",
+    "techStack": ["..."],
+    "features": ["..."],
+    "learningOutcomes": ["..."],
+    "difficulty": "...",
+    "resumeValue": "..."
+  }
+]
+`;
 }
 
 function tryParseJSON(text) {
@@ -165,7 +192,7 @@ const IdeaCard = ({ idea, domain, index }) => {
                 {idea.title}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {idea.tagline}
+                {idea.description || idea.tagline}
               </p>
             </div>
           </div>
@@ -205,7 +232,7 @@ const IdeaCard = ({ idea, domain, index }) => {
         </div>
 
         {/* Features */}
-        <div className="space-y-2 flex-1">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Zap
               size={14}
@@ -217,7 +244,7 @@ const IdeaCard = ({ idea, domain, index }) => {
             </span>
           </div>
           <ul className="space-y-1.5 text-sm">
-            {(idea.features || []).slice(0, 3).map((f, i) => (
+            {(idea.features || []).slice(0, 2).map((f, i) => (
               <li
                 key={i}
                 className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
@@ -231,6 +258,52 @@ const IdeaCard = ({ idea, domain, index }) => {
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Learning Outcomes */}
+        <div className="space-y-2 flex-1">
+          <div className="flex items-center gap-2">
+            <BookOpen
+              size={14}
+              className="text-gray-600 dark:text-gray-400"
+              strokeWidth={1.5}
+            />
+            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+              Learning Outcomes
+            </span>
+          </div>
+          <ul className="space-y-1.5 text-sm">
+            {(idea.learningOutcomes || []).slice(0, 2).map((l, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
+              >
+                <ChevronRight
+                  size={14}
+                  className="text-gray-400 dark:text-gray-600 shrink-0 mt-0.5"
+                  strokeWidth={1.5}
+                />
+                <span className="text-sm">{l}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Resume Value */}
+        <div className="space-y-2 mb-2">
+          <div className="flex items-center gap-2">
+            <Star
+              size={14}
+              className="text-gray-600 dark:text-gray-400"
+              strokeWidth={1.5}
+            />
+            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+              Resume Value
+            </span>
+          </div>
+          <p className="text-sm text-gray-700 dark:text-gray-300 italic">
+            "{idea.resumeValue || "Great addition to your portfolio."}"
+          </p>
         </div>
 
         {/* GitHub Link */}
@@ -275,39 +348,40 @@ const ProjectIdeas = () => {
         selectedLevel,
       );
 
+      console.log("BASE_URL:", BASE_URL);
+      console.log("Prompt:", prompt);
+
       const res = await fetch(`${BASE_URL}/api/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ 
+          prompt,
+          systemInstruction: "You are an API that ONLY returns valid JSON arrays. Do not include any conversational text, greetings, or formatting outside the JSON array."
+        }),
       });
+
+      console.log("Response Status:", res.status);
 
       if (!res.ok) throw new Error(`Server error ${res.status}`);
 
-      // collect the full streamed response
-      let fullText = "";
-      if (res.body && typeof res.body.getReader === "function") {
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-        while (!done) {
-          const { value, done: d } = await reader.read();
-          done = d;
-          if (value) fullText += decoder.decode(value, { stream: !done });
-        }
-      } else {
-        const data = await res.json();
-        fullText = data.text || "";
-      }
+      const data = await res.json();
+      const fullText = data.text || "";
 
       const parsed = tryParseJSON(fullText);
-      if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-        setIdeas(parsed);
-        setGenerated(true);
+      console.log("Parsed Response:", parsed);
+      if (parsed && Array.isArray(parsed)) {
+        if (parsed.length > 0) {
+          setIdeas(parsed);
+          setGenerated(true);
+        } else {
+          setError("The AI could not generate any ideas. Please try different options.");
+        }
       } else {
         setError("The AI returned an unexpected format. Please try again.");
       }
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+      console.error("Project Ideas Generator Error:", err);
+      setError(err.message || "Unknown error");
     } finally {
       setLoading(false);
     }

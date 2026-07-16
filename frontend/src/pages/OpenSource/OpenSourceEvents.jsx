@@ -159,7 +159,25 @@ const OpenSourceEvents = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState("all");
   const [modeFilter, setModeFilter] = useState("all");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const scrollRef = useRef(null);
+ useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
 
+    const handleScroll = () => {
+      setShowScrollTop(el.scrollTop > 200);
+    };
+
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+  const scrollToTop = () => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  
+ 
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
@@ -261,7 +279,33 @@ const OpenSourceEvents = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a]">
+    <div  ref={scrollRef}  className=" bg-gray-50 dark:bg-[#0f172a]"
+       style={{
+        height: "100vh",       
+        overflowY: "auto",      
+      }}>
+      {showScrollTop && (
+      <button
+        onClick={scrollToTop}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          zIndex: 99999999999,
+          padding: "12px 12px",
+          borderRadius: "50%",
+          backgroundColor: "#7c3aed",
+          color: "white",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "20px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          width:'50px'
+        }}
+      >
+        ↑
+      </button>
+    )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: -16 }}

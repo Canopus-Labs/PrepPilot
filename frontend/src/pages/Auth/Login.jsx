@@ -20,21 +20,31 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!validateEmail(email)) { setError("Please enter a valid email address."); return; }
-    if (!password) { setError("Please enter your password"); return; }
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password");
+      return;
+    }
 
     setError("");
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, { email, password });
-      const { token } = response.data;
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+      const { token, accessToken } = response.data;
+      const authToken = token || accessToken;
 
-      if (token) {
+      if (authToken) {
         if (rememberMe) {
-          localStorage.setItem("token", token);
+          localStorage.setItem("token", authToken);
         } else {
-          sessionStorage.setItem("token", token);
+          sessionStorage.setItem("token", authToken);
         }
         updateUser(response.data);
         if (onLoginSuccess) {
@@ -55,6 +65,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="w-full">
       {/* Header */}
       <div className="mb-8">
@@ -97,32 +108,120 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
     className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
   >
             <p className="text-red-400 text-sm font-medium">{error}</p>
+=======
+    <div className="w-full relative">
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="mb-8 text-center sm:text-left">
+          <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
+            <img
+              src="/PrepPilot-Logo.png"
+              alt="PrepPilot Logo"
+              className="w-8 h-8 object-contain"
+            />
+            <span className="font-semibold text-gray-200">PrepPilot</span>
+>>>>>>> c9ec96de0ec9608236389ef076844f92c9da2018
           </div>
-        )}
-
-        <Button
-          type="submit"
-          loading={loading}
-          loadingText="Signing in..."
-          icon={<LuArrowRight className="group-hover:translate-x-1 transition-transform" />}
-          className="mt-6"
-        >
-          Sign In
-        </Button>
-
-        <div className="mt-6 pt-4 border-t border-white/10">
-          <p className="text-sm text-gray-400 text-center">
-            Don't have an account?{" "}
-            <button
-              type="button"
-              className="font-semibold text-transparent bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text hover:opacity-80 transition-opacity cursor-pointer"
-              onClick={() => { setCurrentPage("signup"); setError(null); }}
-            >
-              Create account
-            </button>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 tracking-tight">
+            Welcome Back
+          </h2>
+          <p className="text-sm text-gray-400">
+            Sign in to continue your interview preparation journey
           </p>
         </div>
-      </form>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="w-full">
+            <Input
+              value={email}
+              onChange={({ target }) => setEmail(target.value)}
+              label="Email Address"
+              placeholder="your@email.com"
+              type="text"
+              autoFocus
+            />
+          </div>
+
+          <div className="w-full">
+            <Input
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+              label="Password"
+              placeholder="Min 8 characters"
+              type="password"
+            />
+          </div>
+
+          {/* Remember Me + Forgot Password */}
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center gap-2">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="cursor-pointer w-4 h-4 rounded border-gray-600 bg-white"
+              />
+              <label
+                htmlFor="rememberMe"
+                className="text-sm text-gray-400 cursor-pointer hover:text-gray-300 transition-colors"
+              >
+                Remember Me
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage("forgot-password"); // or "forgotPassword" depending on your page name
+                setError(null);
+              }}
+              className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+            >
+              Forgot Password?
+            </button>
+          </div>
+
+          {error && (
+            <div
+              id="login-error"
+              role="alert"
+              aria-live="polite"
+              className="p-3 mt-4 bg-red-500/10 border border-red-500/30 rounded-lg"
+            >
+              <p className="text-red-400 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            loading={loading}
+            loadingText="Signing in..."
+            icon={
+              <LuArrowRight className="group-hover:translate-x-1 transition-transform" />
+            }
+            className="mt-6 w-full flex justify-center py-2.5 text-sm font-semibold shadow-lg shadow-violet-500/20 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white rounded-lg transition-all"
+          >
+            Sign In
+          </Button>
+
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <p className="text-sm text-gray-400 text-center">
+              Don't have an account?{" "}
+              <button
+                type="button"
+                className="font-semibold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer ml-1"
+                onClick={() => {
+                  setCurrentPage("signup");
+                  setError(null);
+                }}
+              >
+                Create account
+              </button>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Sheet = require('../models/Sheet');
+const { protect } = require('../middlewares/authMiddleware');
 
 // POST /api/sheets/upload
 // Body: { filename: "file.json", data: {...sheet data...} }
-router.post('/upload', async (req, res) => {
+router.post('/upload', protect, async (req, res) => {
   console.log('Received upload:', req.body.filename);
   const { filename, data } = req.body;
 

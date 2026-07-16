@@ -25,17 +25,35 @@ const SignUp = ({ setCurrentPage }) => {
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
+<<<<<<< HEAD
+=======
+  // Computed inside the component so they react to `password` state
+  const passwordChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password),
+  };
+
+  const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
+  const passwordStrength =
+    strengthScore <= 2 ? "Weak" : strengthScore <= 4 ? "Medium" : "Strong";
+
+>>>>>>> c9ec96de0ec9608236389ef076844f92c9da2018
   const handleSignup = async (e) => {
     e.preventDefault();
     let profileImageUrl = "";
 
-    if (!fullName) { setError("Please enter your full name"); return; }
+    
+    if (!fullName.trim()) {setError("Please enter your full name");return;}
+    if (!/^[A-Za-z]+(?:\s+[A-Za-z]+)*$/.test(fullName.trim())) {setError("Full name can only contain letters and spaces");return;}
     if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
     if (!password || password.length < 8) { setError("Password must be at least 8 characters long."); return; }
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }
     if (!/[a-z]/.test(password)) { setError("Password must contain at least one lowercase letter."); return; }
     if (!/[0-9]/.test(password)) { setError("Password must contain at least one number."); return; }
-    if (!/[@$!%*?&]/.test(password)) { setError("Password must contain at least one special character (@$!%*?&)."); return; }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password)) { setError("Password must contain at least one special character (e.g. !@#$%^&*)."); return; }
 
     setError("");
     setLoading(true);
@@ -46,17 +64,19 @@ const SignUp = ({ setCurrentPage }) => {
         profileImageUrl = imgUploadRes.imageUrl || "";
       }
 
-      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+      const payload = {
         name: fullName,
         email,
         password,
-        profileImageUrl: profileImageUrl || "",
-      });
+      };
+      if (profileImageUrl) payload.profileImageUrl = profileImageUrl;
 
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, payload);
+      
       if (response.data.success) {
-        const { token } = response.data;
-        if (token) {
-          sessionStorage.setItem("token", token);
+        const authToken = response.data.token || response.data.accessToken;
+        if (authToken) {
+          sessionStorage.setItem("token", authToken);
           updateUser(response.data);
           navigate("/dashboard");
         }
@@ -161,11 +181,21 @@ const SignUp = ({ setCurrentPage }) => {
           />
 
           <Input
-            value={email}
-            onChange={({ target }) => setEmail(target.value)}
-            label="Email Address"
-            placeholder="your@email.com"
-            type="text"
+             value={email}
+             onChange={({ target }) => {
+             const value = target.value;
+                   setEmail(value);
+
+             if (
+                 error === "Please enter a valid email address" &&
+                 validateEmail(value)
+                ) {
+              setError("");
+             }
+             }}
+               label="Email Address"
+               placeholder="your@email.com"
+               type="email"
           />
 
           <Input

@@ -5,7 +5,7 @@
             "title": "GFG Must‑Know DSA Sheet",
             "description": "Top questions from GeeksforGeeks to ace coding interviews.",
             "followers": 4587,
-            "questions": 250,
+            "questions": 275,
             "category": "popular",
             "sections": [
                 {
@@ -69,6 +69,56 @@
                     ]
                 },
                 {
+  "title": "Hashing",
+  "topics": [
+    {
+      "title": "HashMap & HashSet Problems",
+      "subtopics": [
+        {
+          "title": "Two Sum",
+          "difficulty": "easy"
+        },
+        {
+          "title": "Contains Duplicate",
+          "difficulty": "easy"
+        },
+        {
+          "title": "Valid Anagram",
+          "difficulty": "easy"
+        },
+        {
+          "title": "Group Anagrams",
+          "difficulty": "medium"
+        },
+        {
+          "title": "Top K Frequent Elements",
+          "difficulty": "medium"
+        },
+        {
+          "title": "Longest Consecutive Sequence",
+          "difficulty": "medium"
+        },
+        {
+          "title": "Subarray Sum Equals K",
+          "difficulty": "medium"
+        },
+        {
+          "title": "Find All Duplicates in an Array",
+          "difficulty": "medium"
+        },
+        {
+          "title": "Intersection of Two Arrays",
+          "difficulty": "easy"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "hard"
+        }
+      ]
+    }
+  ]
+},
+                {
                     "title": "Binary Search",
                     "topics": [
                         {
@@ -98,6 +148,185 @@
                         }
                     ]
                 },
+                {
+  "title": "Recursion",
+  "topics": [
+    {
+      "title": "Recursion Essentials",
+      "subtopics": [
+        {
+          "title": "Print 1 to N using Recursion",
+          "difficulty": "easy",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/print-1-to-n-without-using-loops/",
+            "leetcode": "",
+            "youtube": "https://www.youtube.com/watch?v=yVdKa8dnKiE"
+          }
+        },
+        {
+          "title": "Power Function (x^n)",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/write-a-c-program-to-calculate-powxn/",
+            "leetcode": "https://leetcode.com/problems/powx-n/",
+            "youtube": "https://www.youtube.com/watch?v=l0YC3876qxg"
+          }
+        },
+        {
+          "title": "Josephus Problem",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/josephus-problem/",
+            "leetcode": "",
+            "youtube": "https://www.youtube.com/watch?v=uCsD3ZGzMgE"
+          }
+        },
+        {
+          "title": "Tower of Hanoi",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/c-program-for-tower-of-hanoi/",
+            "leetcode": "",
+            "youtube": "https://www.youtube.com/watch?v=YstLjLCGmgg"
+          }
+        },
+        {
+          "title": "K-th Symbol in Grammar",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/find-k-th-bit-binary-string-created-repeated-invert-append-operations/",
+            "leetcode": "https://leetcode.com/problems/k-th-symbol-in-grammar/",
+            "youtube": "https://www.youtube.com/watch?v=qGnNGWhLLKU"
+          }
+        }
+      ]
+    }
+  ]
+},
+{
+  "title": "Stack",
+  "topics": [
+    {
+      "title": "Stack Interview Problems",
+      "subtopics": [
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "easy",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/check-for-balanced-parentheses-in-an-expression/",
+            "leetcode": "https://leetcode.com/problems/valid-parentheses/",
+            "youtube": "https://www.youtube.com/watch?v=WTzjTskDFMg"
+          }
+        },
+        {
+          "title": "Min Stack",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/design-a-stack-that-supports-getmin-in-o1-time-and-o1-extra-space/",
+            "leetcode": "https://leetcode.com/problems/min-stack/",
+            "youtube": "https://www.youtube.com/watch?v=qkLl7nAwDPo"
+          }
+        },
+        {
+          "title": "Next Greater Element",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/next-greater-element/",
+            "leetcode": "https://leetcode.com/problems/next-greater-element-i/",
+            "youtube": "https://www.youtube.com/watch?v=Du881K7Jtk8"
+          }
+        },
+        {
+          "title": "Largest Rectangle in Histogram",
+          "difficulty": "hard",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/largest-rectangular-area-in-a-histogram-using-stack/",
+            "leetcode": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+            "youtube": "https://www.youtube.com/watch?v=zx5Sw9130L0"
+          }
+        },
+        {
+          "title": "Daily Temperatures",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "",
+            "leetcode": "https://leetcode.com/problems/daily-temperatures/",
+            "youtube": "https://www.youtube.com/watch?v=cTBiBSnjO3c"
+          }
+        }
+      ]
+    }
+  ]
+},{
+  "title": "Queue",
+  "topics": [
+    {
+      "title": "Queue Interview Problems",
+      "subtopics": [
+        {
+          "title": "Implement Queue using Stacks",
+          "difficulty": "easy",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/queue-using-stacks/",
+            "leetcode": "https://leetcode.com/problems/implement-queue-using-stacks/",
+            "youtube": "https://www.youtube.com/watch?v=3Et9MrMc02A"
+          }
+        },
+        {
+          "title": "Circular Queue",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/introduction-to-circular-queue/",
+            "leetcode": "https://leetcode.com/problems/design-circular-queue/",
+            "youtube": "https://www.youtube.com/watch?v=okr-XE8yTO8"
+          }
+        },
+        {
+          "title": "First Negative Integer in Every Window",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/first-negative-integer-every-window-size-k/",
+            "leetcode": "",
+            "youtube": "https://www.youtube.com/watch?v=XwGmNrj8R4g"
+          }
+        },
+        {
+          "title": "Sliding Window Maximum",
+          "difficulty": "hard",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/sliding-window-maximum-maximum-of-all-subarrays-of-size-k/",
+            "leetcode": "https://leetcode.com/problems/sliding-window-maximum/",
+            "youtube": "https://www.youtube.com/watch?v=DfljaUwZsOk"
+          }
+        },
+        {
+          "title": "Rotting Oranges",
+          "difficulty": "medium",
+          "status": "not-started",
+          "links": {
+            "gfg": "https://www.geeksforgeeks.org/minimum-time-required-so-that-all-oranges-become-rotten/",
+            "leetcode": "https://leetcode.com/problems/rotting-oranges/",
+            "youtube": "https://www.youtube.com/watch?v=y704fEOx0s0"
+          }
+        }
+      ]
+    }
+  ]
+},
                 {
                     "title": "Backtracking",
                     "topics": [
