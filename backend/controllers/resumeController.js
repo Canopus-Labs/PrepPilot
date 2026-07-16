@@ -1,6 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { generateWithFallback } = require('../utils/geminiHelper');
 
 /**
  * Compile LaTeX resume code to a PDF document.
@@ -101,9 +101,6 @@ const analyzeResume = async (req, res) => {
 
         const targetRole = req.body.targetRole || "General Professional";
 
-        // 1. Setup Gemini
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
-
         // 2. Prompt Engineering
         const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
 Analyze the attached PDF resume against the target role: "${targetRole}".
@@ -124,37 +121,18 @@ Return the analysis STRICTLY as a JSON object with the following exact keys and 
 DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw JSON object.`;
 
         // 3. Fallback Engine (Mirroring aiController robustness)
-        const candidateModels = [
-            process.env.GEMINI_MODEL,
-            "models/gemini-2.5-flash",
-            "models/gemini-flash-latest",
-            "models/gemini-2.0-flash",
-            "gemini-1.5-flash"
-        ].filter(Boolean);
-
-        let lastErr = null;
-        let result = null;
-
-        for (const m of candidateModels) {
-            try {
-                const model = genAI.getGenerativeModel({ model: m });
-                result = await model.generateContent([
-                    prompt,
-                    {
-                        inlineData: {
-                            data: req.file.buffer.toString("base64"),
-                            mimeType: "application/pdf"
-                        }
+        const { result } = await generateWithFallback(
+            process.env.GEMINI_API_KEY.trim(),
+            [
+                prompt,
+                {
+                    inlineData: {
+                        data: req.file.buffer.toString("base64"),
+                        mimeType: "application/pdf"
                     }
-                ]);
-                break; // Stop on first success
-            } catch (e) {
-                lastErr = e;
-                continue;
-            }
-        }
-
-        if (!result) throw lastErr || new Error("All Gemini models failed to process PDF");
+                }
+            ]
+        );
         
         let aiResponse = result.response.text();
         
@@ -203,7 +181,7 @@ const Resume = require("../models/Resume");
 const saveResume = async (req, res) => {
     try {
         const { title, latexCode, resumeId } = req.body;
-        const userId = req.user._id || req.user.id;
+        const userId = req.user._id;
 
         if (!title || !latexCode) {
             return res.status(400).json({ success: false, message: "Title and LaTeX code are required." });
@@ -249,7 +227,7 @@ const saveResume = async (req, res) => {
  */
 const getMyResumes = async (req, res) => {
     try {
-        const userId = req.user._id || req.user.id;
+        const userId = req.user._id;
         const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
         res.status(200).json({ success: true, resumes });
     } catch (error) {

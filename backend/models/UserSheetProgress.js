@@ -8,4 +8,6 @@ const UserSheetProgressSchema = new mongoose.Schema({
   percentage: { type: Number, default: 0 },
 }, { timestamps: true });
 
+UserSheetProgressSchema.index({ userId: 1, sheetId: 1 }, { unique: true });
+
 module.exports = mongoose.model('UserSheetProgress', UserSheetProgressSchema);

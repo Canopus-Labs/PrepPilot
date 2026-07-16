@@ -385,6 +385,7 @@ html.dark {
   }
 }
 
+<<<<<<< HEAD
 /* ==========================================================================
    ✨ MODERN PREMIUM APPLICATION UI & EFFECTS UPGRADES
    ========================================================================== */
@@ -492,4 +493,23 @@ button:active, a:active, .topic-card:active {
     transform: none !important;
     box-shadow: none !important;
   }
+=======
+/* Infinite Testimonials */
+
+@keyframes marquee {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee.paused {
+  animation-play-state: paused;
+>>>>>>> 95844e8d83e22f68446df2598244f272dc1468ed
 }

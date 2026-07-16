@@ -5,6 +5,8 @@ import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { Target, Briefcase, Code2, FileText, Sparkles } from "lucide-react";
 
+const MAX_EXPERIENCE = 50;
+
 const CreateSessionForm = () => {
   const [formData, setFormData] = useState({
     role: "",
@@ -19,11 +21,15 @@ const CreateSessionForm = () => {
   const navigate = useNavigate();
 
   const handleChange = (key, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [key]: value,
-    }));
-  };
+  setFormData((prevData) => ({
+    ...prevData,
+    [key]: value,
+  }));
+
+  if (error) {
+    setError("");
+  }
+   };
 
   const handleCreateSession = async (e) => {
     e.preventDefault();
@@ -33,6 +39,17 @@ const CreateSessionForm = () => {
       setError("Please fill all the required fields.");
       return;
     }
+   const experienceValue = Number(experience);
+
+if (experienceValue < 0) {
+    setError("Years of experience cannot be negative.");
+    return;
+}
+
+if (experienceValue > MAX_EXPERIENCE) {
+    setError(`Years of experience cannot exceed ${MAX_EXPERIENCE}.`);
+    return;
+}
     
     const topicsArray = topicsToFocus.split(",")
     .map((t) => t.trim())
@@ -142,6 +159,8 @@ const CreateSessionForm = () => {
                   ) : (
                     <input
                       type={field.type}
+                      min={field.type === "number" ? 0 : undefined}
+                      max={field.type === "number" ? MAX_EXPERIENCE : undefined}
                       value={formData[field.id]}
                       onChange={({ target }) => handleChange(field.id, target.value)}
                       placeholder={field.placeholder}

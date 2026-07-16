@@ -1,13 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
-const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
 const NodeCache = require('node-cache');
 const AIChat = require('../models/AIChat');
-const { aiQueue } = require('../config/queue');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
@@ -27,11 +25,11 @@ const offTopicCache = new NodeCache({ stdTTL: 3600 });
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt,history =[], systemInstruction,userId} = req.body || {};
+  const { prompt, history = [], systemInstruction, userId } = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
   }
-  
+
   const isContextual = isContextualResponse(prompt, history);
 
   if (!isContextual && !isPrepPilotDomain(prompt)) {
@@ -48,23 +46,54 @@ async function generateHandler(req, res) {
       textResponse = "I'm unable to assist with unrelated topics. Please ask a question related to interviews, coding, aptitude, resumes, or career growth.";
     }
 
-    return res.json({ 
-      text: textResponse, 
-      model: "local-classifier" 
+    return res.json({
+      text: textResponse,
+      model: "local-classifier"
     });
   }
+
   if (!process.env.GEMINI_API_KEY) {
     return res
       .status(500)
       .json({ error: "GEMINI_API_KEY not configured on server" });
   }
+
   try {
-    // Add job to the queue
-    const job = await aiQueue.add("chat", {
+    const start = Date.now();
+    const systemInstructionText = systemInstruction || `You are PrepPilot AI Mentor.
+1. Allow friendly greetings and casual onboarding conversation.
+2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
+3. Politely redirect unrelated conversations.
+4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`;
+
+    // Format history for Gemini API
+    let formattedHistory = history.map(msg => ({
+      role: msg.role === "model" ? "model" : "user",
+      parts: [{ text: msg.text }]
+    }));
+
+    // Gemini requires the first message in history to be from the user
+    if (formattedHistory.length > 0 && formattedHistory[0].role !== "user") {
+      formattedHistory.unshift({ role: "user", parts: [{ text: "Hi" }] });
+    }
+
+    const { result, usedModel } = await generateChatWithFallback(
+      process.env.GEMINI_API_KEY,
       prompt,
-      history,
-      systemInstruction
-    });
+      formattedHistory,
+      { systemInstruction: systemInstructionText }
+    );
+
+    const rawText = await result.response.text();
+    console.log("Incoming Prompt:", prompt);
+    console.log("Model Used:", usedModel);
+    console.log("Raw Gemini Response:", rawText);
+
+    let cleanedText = rawText
+      .replace(/^[\s`]*json\s*/i, "")
+      .replace(/^\s*```/i, "")
+      .replace(/```$/i, "")
+      .trim();
 
     console.log(
       "[AI] promptLen=%d model=%s ms=%d",
@@ -72,6 +101,7 @@ async function generateHandler(req, res) {
       usedModel,
       Date.now() - start,
     );
+
     if (userId) {
       try {
         await AIChat.findOneAndUpdate(
@@ -93,17 +123,13 @@ async function generateHandler(req, res) {
         console.error("[AI] Failed to save messages to database:", err);
       }
     }
+
     return res.json({ text: cleanedText, model: usedModel });
-    // Return the jobId immediately
-    return res.status(202).json({
-      message: "Chat generation job accepted",
-      jobId: job.id
-    });
   } catch (error) {
-    console.error("[AI] Enqueuing chat job failed:", error.message);
+    console.error("[AI] Chat generation failed:", error.message);
     return res
       .status(500)
-      .json({ error: "Failed to enqueue chat job", detail: error.message });
+      .json({ error: "Failed to generate response", detail: error.message });
   }
 }
 
@@ -127,6 +153,7 @@ router.post('/ai/generate', aiLimiter, sanitizeAiPrompt, generateHandler);
  */
 router.get("/models", async (req, res) => {
   try {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const models = await genAI.listModels();
     const modelNames = models.map((m) => m.name.replace("models/", ""));
@@ -139,6 +166,7 @@ router.get("/models", async (req, res) => {
     res.status(500).json({ error: "Failed to list models", detail: e.message });
   }
 });
+
 router.get('/history/:userId', async (req, res) => {
   try {
     const chat = await AIChat.findOne({ user: req.params.userId });
@@ -148,4 +176,5 @@ router.get('/history/:userId', async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch history" });
   }
 });
+
 module.exports = router;

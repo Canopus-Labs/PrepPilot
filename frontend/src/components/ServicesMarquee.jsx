@@ -1,20 +1,19 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 
-export default function ServicesMarquee() {
-  const SERVICES = [
-    { id: 1, title: "Role-Based Preparation", description: "Curated questions tailored to your job role." },
-    { id: 2, title: "Aptitude Practice", description: "Sharpen logic, quants, and verbal skills." },
-    { id: 3, title: "Coding Sheets", description: "Master DSA with structured problem sets." },
-    { id: 4, title: "Assessment Modules", description: "Test ready with mock exams and quizzes." },
-    { id: 5, title: "AI Assistance", description: "Instant explanations, hints, and insights." },
-  ];
+const SERVICES = [
+  { title: "Role-Based Preparation", description: "Curated questions tailored to your job role" },
+  { title: "Aptitude Practice",      description: "Sharpen logic, quants, and verbal skills" },
+  { title: "Coding Sheets",          description: "Master DSA with structured problem sets" },
+  { title: "Assessment Modules",     description: "Test ready with mock exams and quizzes" },
+  { title: "AI Assistance",          description: "Instant explanations, hints, and insights" },
+  { title: "Resume Builder",         description: "ATS-optimised resumes in minutes" },
+  { title: "Mock Interviews",        description: "Simulate real interview pressure with AI" },
+];
 
-  // Slower marquee speed (mobile slower than before, desktop smoother)
-  const getDuration = () => (window.innerWidth < 640 ? 15 : 40);
-  const [duration, setDuration] = useState(
-    typeof window !== "undefined" ? getDuration() : 40
-  );
+export default function ServicesMarquee() {
+  const getDuration = () => (typeof window !== "undefined" && window.innerWidth < 640 ? 18 : 45);
+  const [duration, setDuration] = useState(getDuration);
 
   useEffect(() => {
     const handleResize = () => setDuration(getDuration());
@@ -22,32 +21,29 @@ export default function ServicesMarquee() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const items = [...SERVICES, ...SERVICES, ...SERVICES];
+
   return (
-    <div className="w-full overflow-hidden pb-6 sm:pb-10 relative">
+    <div className="w-full overflow-hidden py-6 relative">
+      {/* Left fade */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-gray-950 to-transparent z-10" />
+      {/* Right fade */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-gray-950 to-transparent z-10" />
+
       <motion.div
-        className="flex gap-3 sm:gap-6 whitespace-nowrap"
-        animate={{ x: ["0%", "-100%"] }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "loop",
-          duration,
-          ease: "linear",
-        }}
+        className="flex gap-4 w-max"
+        animate={{ x: ["0%", "-33.333%"] }}
+        transition={{ repeat: Infinity, repeatType: "loop", duration, ease: "linear" }}
       >
-        {/* Duplicate services 3 times for seamless scroll on mobile */}
-        {[...SERVICES, ...SERVICES, ...SERVICES].map((service, idx) => (
+        {items.map((service, idx) => (
           <div
             key={idx}
-            className="min-w-[150px] sm:min-w-[220px] md:min-w-[250px] 
-                       p-3 sm:p-6 rounded-xl border border-white/20 shadow-lg
-                       bg-white/10 backdrop-blur-md hover:bg-white/20 
-                       transition-all duration-300 flex-shrink-0"
-            style={{ maxWidth: "100%" }}
+            className="flex-shrink-0 w-[220px] sm:w-[240px] px-5 py-4 rounded-xl border border-white/8 bg-white/[0.03]"
           >
-            <h3 className="text-base sm:text-lg font-semibold text-white drop-shadow mb-1 sm:mb-2">
+            <p className="text-sm font-semibold text-white mb-1 truncate">
               {service.title}
-            </h3>
-            <p className="text-gray-100 text-xs sm:text-[12px]">
+            </p>
+            <p className="text-xs text-gray-500 leading-relaxed">
               {service.description}
             </p>
           </div>
