@@ -199,6 +199,34 @@ Errors:
 
 Permanently deletes the authenticated user's account. This action is irreversible.
 
+---
+
+## Internships
+
+### Get Internship Listings
+- `GET /api/internships`
+- Private (Bearer token required)
+
+Query parameters:
+- `keyword` (optional) — search keywords, defaults to `intern`
+- `country` (optional) — country code (e.g. `in`, `us`), defaults to server `ADZUNA_COUNTRY`
+- `page` (optional) — page number (1-based), defaults to `1`
+- `per_page` (optional) — results per page, defaults to `10`
+
+Response `200`:
+```json
+{
+  "internships": [ { "id":"...", "title":"...", "company":"...", "location":"...", "salary_min":null, "salary_max":null, "description":"...", "employment_type":"...", "redirect_url":"...", "created":"..." } ],
+  "role": "intern",
+  "page": 1,
+  "total": 123,
+  "source": "api"
+}
+```
+
+Errors:
+- `500` server error if Adzuna request fails
+
 Headers:
 ```
 Authorization: Bearer <JWT_TOKEN>

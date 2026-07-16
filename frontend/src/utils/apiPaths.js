@@ -45,4 +45,7 @@ export const API_PATHS = {
     JOBS: {
         GET: "/api/jobs",  // GET /api/jobs?role=...&country=...
     },
+    INTERNSHIPS: {
+        GET: "/api/internships", // GET /api/internships?keyword=...&country=...&page=1
+    },
 };

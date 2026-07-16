@@ -36,6 +36,7 @@ import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
 import JobsForYou from "./pages/Jobs/JobsForYou";
+import Internships from "./pages/Internships/Internships";
 import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
@@ -333,6 +334,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <JobsForYou />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/internships"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Internships />
                         </PageTransition>
                       </ProtectedRoute>
                     }

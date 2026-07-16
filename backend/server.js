@@ -20,6 +20,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
+const internshipRoutes = require("./routes/internshipRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
 // Remove ES Module import for cors. Use CommonJS require below.
@@ -140,6 +141,7 @@ app.use(
 
 app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
+app.use("/api/internships", generalLimiter, internshipRoutes);
 
 //Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
