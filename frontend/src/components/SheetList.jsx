@@ -17,7 +17,6 @@ function SheetList({ type }) {
     fetch(`${BASE_URL}/api/sheets`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched sheets:", data.sheets);
         setSheetList(data.sheets);
         setLoading(false);
       })
@@ -58,9 +57,7 @@ function SheetList({ type }) {
                 progress = total > 0 ? Math.floor((completedCount / total) * 100) : 0;
               }
             }
-          } catch (e) {
-            console.error("Failed to parse progress", e);
-          }
+          } catch (e) {}
           newProgresses[sheet.id] = { progress, isFollowed };
         });
         setSheetProgresses(newProgresses);

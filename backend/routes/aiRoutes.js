@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const express = require("express");
 const router = express.Router();
 const { generateChatWithFallback } = require('../utils/geminiHelper');
@@ -85,9 +86,9 @@ async function generateHandler(req, res) {
     );
 
     const rawText = await result.response.text();
-    console.log("Incoming Prompt:", prompt);
-    console.log("Model Used:", usedModel);
-    console.log("Raw Gemini Response:", rawText);
+    logger.info("Incoming Prompt:", prompt);
+    logger.info("Model Used:", usedModel);
+    logger.info("Raw Gemini Response:", rawText);
 
     let cleanedText = rawText
       .replace(/^[\s`]*json\s*/i, "")
@@ -95,7 +96,7 @@ async function generateHandler(req, res) {
       .replace(/```$/i, "")
       .trim();
 
-    console.log(
+    logger.info(
       "[AI] promptLen=%d model=%s ms=%d",
       prompt.length,
       usedModel,
@@ -118,15 +119,15 @@ async function generateHandler(req, res) {
           },
           { upsert: true, new: true }
         );
-        console.log(`[AI] Successfully saved messages for user: ${userId}`);
+        logger.info(`[AI] Successfully saved messages for user: ${userId}`);
       } catch (err) {
-        console.error("[AI] Failed to save messages to database:", err);
+        logger.error("[AI] Failed to save messages to database:", err);
       }
     }
 
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
-    console.error("[AI] Chat generation failed:", error.message);
+    logger.error("[AI] Chat generation failed:", error.message);
     return res
       .status(500)
       .json({ error: "Failed to generate response", detail: error.message });
@@ -172,7 +173,7 @@ router.get('/history/:userId', async (req, res) => {
     const chat = await AIChat.findOne({ user: req.params.userId });
     return res.json(chat || { messages: [] });
   } catch (error) {
-    console.error("[AI] Fetch history error:", error);
+    logger.error("[AI] Fetch history error:", error);
     return res.status(500).json({ error: "Failed to fetch history" });
   }
 });

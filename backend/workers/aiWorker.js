@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { Worker } = require("bullmq");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Joi = require("joi");
@@ -196,7 +197,7 @@ const processChat = async (data) => {
 const aiWorker = new Worker(
   "ai-jobs",
   async (job) => {
-    console.log(`Processing job ${job.id} of type ${job.name}`);
+    logger.info(`Processing job ${job.id} of type ${job.name}`);
     try {
       if (job.name === "generate-questions") {
         return await processQuestions(job.data);
@@ -209,7 +210,7 @@ const aiWorker = new Worker(
       }
       throw new Error(`Unknown job type: ${job.name}`);
     } catch (error) {
-      console.error(`Error processing job ${job.id}:`, error);
+      logger.error(`Error processing job ${job.id}:`, error);
       throw error;
     }
   },
@@ -217,11 +218,11 @@ const aiWorker = new Worker(
 );
 
 aiWorker.on("completed", (job) => {
-  console.log(`Job ${job.id} has completed!`);
+  logger.info(`Job ${job.id} has completed!`);
 });
 
 aiWorker.on("failed", (job, err) => {
-  console.log(`Job ${job.id} has failed with ${err.message}`);
+  logger.info(`Job ${job.id} has failed with ${err.message}`);
 });
 
 module.exports = aiWorker;

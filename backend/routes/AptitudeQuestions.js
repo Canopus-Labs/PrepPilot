@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const express = require("express");
 const { generateWithFallback } = require("../utils/geminiHelper");
 const NodeCache = require("node-cache");
@@ -44,7 +45,7 @@ async function generateQuestions(cacheKey, topic) {
     INITIAL_DELAY
   );
 
-  console.log(`[Aptitude] Successfully used model: ${usedModel}`);
+  logger.info(`[Aptitude] Successfully used model: ${usedModel}`);
 
   const rawText = await result.response.text();
 
@@ -66,8 +67,8 @@ async function generateQuestions(cacheKey, topic) {
   try {
     questions = JSON.parse(cleanedText);
   } catch (err) {
-    console.error("Gemini raw response:", rawText);
-    console.error("Parse error:", err);
+    logger.error("Gemini raw response:", rawText);
+    logger.error("Parse error:", err);
     err.error = "Failed to parse Gemini response";
     err.raw = rawText;
     throw err;
@@ -90,16 +91,16 @@ router.get("/", async (req, res) => {
   const cachedQuestions = questionCache.get(cacheKey);
 
   if (cachedQuestions) {
-    console.log(`[Cache HIT] Topic: ${topic}`);
+    logger.info(`[Cache HIT] Topic: ${topic}`);
     return res.json(cachedQuestions);
   }
 
-  console.log(`[Cache MISS] Topic: ${topic}`);
+  logger.info(`[Cache MISS] Topic: ${topic}`);
 
   try {
     // Reuse an ongoing generation request to prevent duplicate Gemini API calls.
     if (pendingQuestionRequests.has(cacheKey)) {
-      console.log(`[Coalesced] Topic: ${topic}`);
+      logger.info(`[Coalesced] Topic: ${topic}`);
       const inFlightRequest = pendingQuestionRequests.get(cacheKey);
       const coalescedQuestions = await inFlightRequest;
       return res.json(coalescedQuestions);
@@ -112,7 +113,7 @@ router.get("/", async (req, res) => {
     return res.json(questions);
 
   } catch (err) {
-    console.error("Gemini API error:", err);
+    logger.error("Gemini API error:", err);
 
     const response = {
       error: "Failed to generate questions",

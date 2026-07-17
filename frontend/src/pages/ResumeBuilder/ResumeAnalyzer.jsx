@@ -59,7 +59,6 @@ const ResumeAnalyzer = () => {
 
       setResult(response.data);
     } catch (err) {
-      console.error(err);
       setError(err.response?.data?.message || "Failed to analyze resume. Please try again.");
     } finally {
       setIsAnalyzing(false);
@@ -124,7 +123,6 @@ const ResumeAnalyzer = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] px-5 py-10 md:px-12 transition-colors duration-300">
-      
       <div className="max-w-5xl mx-auto space-y-10">
         
         {/* Header */}
@@ -249,8 +247,7 @@ const ResumeAnalyzer = () => {
           </div>
         ) : (
           /* Results Dashboard */
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-8">
-            
+          (<div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-8">
             {/* Top Stat Bar */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
@@ -294,7 +291,6 @@ const ResumeAnalyzer = () => {
                 </div>
               </div>
             </div>
-
             {/* Details Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                
@@ -363,8 +359,7 @@ const ResumeAnalyzer = () => {
                </div>
                
             </div>
-
-          </div>
+          </div>)
         )}
 
       </div>

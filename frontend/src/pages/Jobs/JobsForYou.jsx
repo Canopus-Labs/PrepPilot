@@ -77,7 +77,6 @@ const JobsForYou = () => {
       setRole(res.data.role || "");
     } catch (err) {
       toast.error("Failed to load job listings. Please try again.");
-      console.error(err);
     } finally {
       setLoading(false);
     }

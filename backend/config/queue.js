@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { Queue } = require("bullmq");
 const Redis = require("ioredis");
 
@@ -9,7 +10,7 @@ const redisOptions = {
 const redisConnection = new Redis(process.env.REDIS_URL || "redis://localhost:6379", redisOptions);
 
 redisConnection.on("error", (err) => {
-  console.error("Redis connection error:", err);
+  logger.error("Redis connection error:", err);
 });
 
 // Initialize the queue

@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const express = require("express");
 const router = express.Router();
 
@@ -117,7 +118,7 @@ router.get("/", async (_req, res) => {
             })),
           };
         } catch (err) {
-          console.error(`[books] Failed to read dir ${dir.name}:`, err.message);
+          logger.error(`[books] Failed to read dir ${dir.name}:`, err.message);
           warnings.push(`Skipped ${dir.name}: ${err.message}`);
           return null;
         }
@@ -133,7 +134,7 @@ router.get("/", async (_req, res) => {
 
     res.json({ categories: filtered, warnings });
   } catch (err) {
-    console.error("[books] Failed to load books from GitHub", err);
+    logger.error("[books] Failed to load books from GitHub", err);
     res.status(500).json({ message: "Failed to load books from GitHub." });
   }
 });

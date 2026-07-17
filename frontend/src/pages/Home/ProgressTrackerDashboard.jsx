@@ -200,9 +200,7 @@ useEffect(() => {
                     unlockedAchievements: [...alreadyUnlocked],
                 });
             }
-        } catch (err) {
-            console.error("Failed to sync achievements:", err);
-        }
+        } catch (err) {}
     };
 
     fetchAndUpdateAchievements();
@@ -235,7 +233,6 @@ useEffect(() => {
 
         setSheetProgress(activeProgress);
       } catch (error) {
-        console.error("Dashboard data error:", error);
         toast.error("Failed to load some dashboard widgets.");
       } finally {
         setLoading(false);

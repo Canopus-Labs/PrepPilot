@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { z } = require("zod");
 const {
   conceptExplainPrompt,
@@ -97,14 +98,14 @@ const generateInterviewQuestions = async (req, res, next) => {
   } catch (error) {
         next(error);
     }
-      console.error("Gemini returned invalid JSON:", cleanedText);
+      logger.error("Gemini returned invalid JSON:", cleanedText);
       return res.status(500).json({
         message: "Gemini returned invalid JSON",
         raw: rawText,
       });
     }
   } catch (error) {
-    console.error("Gemini API Error (generate-questions):", error);
+    logger.error("Gemini API Error (generate-questions):", error);
     return res.status(500).json({
       message: "Failed to generate interview questions",
       error: error.message,
@@ -172,14 +173,14 @@ const generateConceptExplanation = async (req, res, next) => {
   } catch (error) {
         next(error);
     }
-      console.error("Gemini returned invalid JSON:", cleanedText);
+      logger.error("Gemini returned invalid JSON:", cleanedText);
       return res.status(500).json({
         message: "Gemini returned invalid JSON",
         raw: rawText,
       });
     }
   } catch (error) {
-    console.error("Gemini API Error (generate-explanation):", error);
+    logger.error("Gemini API Error (generate-explanation):", error);
     return res.status(500).json({
       message: "Failed to generate concept explanation",
       error: error.message,
@@ -250,14 +251,14 @@ const generateInterviewTips = async (req, res, next) => {
   } catch (error) {
         next(error);
     }
-      console.error("Gemini returned invalid JSON:", cleanedText);
+      logger.error("Gemini returned invalid JSON:", cleanedText);
       return res.status(500).json({
         message: "Gemini returned invalid JSON",
         raw: rawText,
       });
     }
   } catch (error) {
-    console.error("Gemini API Error (generate-tips):", error);
+    logger.error("Gemini API Error (generate-tips):", error);
     return res.status(500).json({
       message: "Failed to generate interview tips",
       error: error.message,

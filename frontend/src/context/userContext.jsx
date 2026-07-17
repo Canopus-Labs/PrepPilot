@@ -50,7 +50,6 @@ export const UserProvider = ({ children }) => {
         const progressRes = await axiosInstance.get("/api/user/sheet-progress");
         setSheetProgress(progressRes.data.progressList || []);
     } catch (error) {
-        console.error("Failed to load progress:", error);
         toast.error("Failed to load progress. Please try again.");
     }
 };

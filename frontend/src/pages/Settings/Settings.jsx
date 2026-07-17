@@ -989,7 +989,7 @@ const Settings = () => {
               </div>
             ) : (
               /* Socials Content */
-              <div className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6">
+              (<div className="bg-white dark:bg-[#0f172a] rounded-xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-lg font-bold text-slate-950 dark:text-white">
@@ -1056,7 +1056,7 @@ const Settings = () => {
                     />
                   </div>
                 </div>
-              </div>
+              </div>)
             )}
           </div>
         )}

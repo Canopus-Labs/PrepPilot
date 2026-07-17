@@ -48,9 +48,7 @@ const InterviewPrep = () => {
       if (response.data && response.data.session) {
         setSessionsData(response.data.session);
       }
-    } catch (error) {
-      console.error("Error", error);
-    }
+    } catch (error) {}
   };
 
   // generate explanation
@@ -85,9 +83,7 @@ const InterviewPrep = () => {
       if (response.data && response.data.question) {
         fetchSessionDetailsById();
       }
-    } catch (error) {
-      console.error("Error", error);
-    }
+    } catch (error) {}
   };
 
   // load more questions

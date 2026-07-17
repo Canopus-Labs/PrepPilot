@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const express = require("express");
 const router = express.Router();
 const { aiQueue } = require("../config/queue");
@@ -39,7 +40,7 @@ router.get("/:jobId", generalLimiter, async (req, res) => {
       message: `Job is currently ${state}`,
     });
   } catch (error) {
-    console.error("Error fetching job status:", error);
+    logger.error("Error fetching job status:", error);
     res.status(500).json({
       message: "Failed to fetch job status",
       error: error.message,

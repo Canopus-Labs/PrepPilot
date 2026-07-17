@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const axios = require('axios');
 const FormData = require('form-data');
 const { generateWithFallback } = require('../utils/geminiHelper');
@@ -145,7 +146,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
         try {
             jsonResult = JSON.parse(aiResponse);
         } catch (e) {
-            console.error("Failed to parse Gemini JSON:", aiResponse);
+            logger.error("Failed to parse Gemini JSON:", aiResponse);
             return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
         }
 

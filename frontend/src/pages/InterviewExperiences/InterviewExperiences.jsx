@@ -911,7 +911,7 @@ const InterviewExperiences = () => {
         {/* ── Cards Grid ── */}
         {activeTab === "User" && userExperiences.length === 0 ? (
           // Empty state specifically for User tab with no submissions yet
-          <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-violet-500/20 rounded-2xl bg-violet-500/5 dark:bg-violet-900/5">
+          (<div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-violet-500/20 rounded-2xl bg-violet-500/5 dark:bg-violet-900/5">
             <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
               <Plus size={24} className="text-violet-400" />
             </div>
@@ -925,7 +925,7 @@ const InterviewExperiences = () => {
             >
               <Plus size={15} /> Share Your Experience
             </button>
-          </div>
+          </div>)
         ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((exp) => (
@@ -950,7 +950,6 @@ const InterviewExperiences = () => {
           </div>
         )}
       </div>
-
       {/* ── Modals ── */}
       {selectedExp && <DetailModal exp={selectedExp} onClose={() => setSelectedExp(null)} />}
       {showSubmit  && <SubmitModal onClose={() => setShowSubmit(false)} onAdd={handleAddExperience} />}

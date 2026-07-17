@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
@@ -23,8 +24,8 @@ if (!fs.existsSync("uploads")) {
 }
 
 const imageFileFilter = (req, file, cb) => {
-  console.log("FILE:", file.originalname);
-  console.log("MIMETYPE:", file.mimetype);
+  logger.info("FILE:", file.originalname);
+  logger.info("MIMETYPE:", file.mimetype);
 
   const allowedTypes = [
     "image/jpeg",
@@ -35,7 +36,7 @@ const imageFileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    console.log("REJECTED:", file.mimetype);
+    logger.info("REJECTED:", file.mimetype);
     cb(new Error(`Unsupported type: ${file.mimetype}`), false);
   }
 };

@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 /**
  * Global Express error handling middleware.
  * Catches any error passed via next(err) and sends a unified JSON response.
@@ -13,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
     ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
   };
 
-  console.error('[Error] %s %s → %s', req.method, req.url, err.message);
+  logger.error('[Error] %s %s → %s', req.method, req.url, err.message);
   res.status(statusCode).json(response);
 };
 

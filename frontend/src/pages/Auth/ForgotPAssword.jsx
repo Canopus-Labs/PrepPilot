@@ -108,7 +108,7 @@ const ForgotPassword = ({ setCurrentPage }) => {
           </form>
         ) : (
           /* Success State */
-          <div className="text-center py-8">
+          (<div className="text-center py-8">
             <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +125,6 @@ const ForgotPassword = ({ setCurrentPage }) => {
                 />
               </svg>
             </div>
-
             <h3 className="text-2xl font-semibold text-white mb-3">
               Check Your Email
             </h3>
@@ -133,7 +132,6 @@ const ForgotPassword = ({ setCurrentPage }) => {
               We've sent a password reset link to <br />
               <span className="font-medium text-white">{email}</span>
             </p>
-
             <Button
               type="button"
               onClick={() => {
@@ -145,7 +143,7 @@ const ForgotPassword = ({ setCurrentPage }) => {
             >
               Back to Login
             </Button>
-          </div>
+          </div>)
         )}
       </div>
     </div>

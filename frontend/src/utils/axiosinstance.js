@@ -46,13 +46,9 @@ axiosInstance.interceptors.response.use(
                     window.location.href = "/";
                 }
             }
-            else if(error.response.status === 500){
-                console.error("Server error. Please try again later");
-            }
+            else if(error.response.status === 500){}
         }
-        else if(error.code === "ECONNABORTED"){
-            console.error("Request timeout. Please try again");
-        }
+        else if(error.code === "ECONNABORTED"){}
         return Promise.reject(error);   
     }
 );

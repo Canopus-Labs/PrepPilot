@@ -146,7 +146,7 @@ function SheetDetail() {
           followed: true,
           completedTopics,
           percentage
-        }).catch(err => console.error("Failed to sync progress to backend:", err));
+        }).catch(err => );
 
       }, 500);
 
@@ -175,7 +175,7 @@ function SheetDetail() {
         followed: false,
         completedTopics: {},
         percentage: 0
-      }).catch(err => console.error(err));
+      }).catch(err => );
 
     } else {
       setFollowed(true);

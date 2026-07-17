@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const axios = require("axios");
 const Session = require("../models/Session");
 const JobCache = require("../models/JobCache");
@@ -90,9 +91,9 @@ exports.refreshJobCache = async () => {
         { jobs, fetchedAt: new Date() },
         { upsert: true, new: true }
       );
-      console.log(`[JobCron] Refreshed cache for: ${role}`);
+      logger.info(`[JobCron] Refreshed cache for: ${role}`);
     }
   } catch (err) {
-    console.error("[JobCron] Refresh failed:", err.message);
+    logger.error("[JobCron] Refresh failed:", err.message);
   }
 };

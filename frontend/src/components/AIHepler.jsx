@@ -8,7 +8,6 @@ import { useParams } from "react-router-dom";
 export default function AIHelper() {
   const { id } = useParams();
   const { user } = useContext(UserContext);
-  console.log("\nCurrent Logged In User is:\n", user);
   const [messages, setMessages] = useState([
     { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
   ]);
@@ -24,7 +23,6 @@ export default function AIHelper() {
         if (!res.ok) throw new Error("Failed to fetch history");
         
         const data = await res.json();
-        console.log("FETCHED DATA FROM DB:", data);
         if (data && data.messages && data.messages.length > 0) {
           const formattedMessages = data.messages.map((msg, index) => ({
             id: Date.now() + index,
@@ -37,9 +35,7 @@ export default function AIHelper() {
             ...formattedMessages
           ]);
         }
-      } catch (error) {
-        console.error("Error loading chat history:", error);
-      }
+      } catch (error) {}
     };
 
     fetchChatHistory();
@@ -54,9 +50,6 @@ export default function AIHelper() {
   }
 
   async function callApi(prompt, history, onProgress, userId) {
-    console.log("\nBackend received userId:\n", userId);
-    console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
-    console.log("REQUEST URL:", `${BASE_URL}/api/generate`);
     
     const res = await fetch(
       `${BASE_URL}/api/generate`,

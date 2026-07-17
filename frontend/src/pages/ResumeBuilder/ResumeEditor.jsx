@@ -150,8 +150,6 @@ const ResumeEditor = () => {
       setPdfUrl(newPdfUrl);
 
     } catch (err) {
-      console.error(err);
-      
       let errorMessage = "Failed to compile LaTeX. Please check your syntax.";
       if (err.response?.data && err.response.data.type !== 'application/pdf') {
          try {
@@ -163,7 +161,7 @@ const ResumeEditor = () => {
              }
          } catch(e) {}
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsCompiling(false);
@@ -187,7 +185,6 @@ const ResumeEditor = () => {
       });
       toast.success("Resume saved successfully!");
     } catch (err) {
-      console.error(err);
       toast.error("Failed to save resume to Dashboard");
     } finally {
       setIsSaving(false);
