@@ -29,7 +29,7 @@ const deleteSessionSchema = z.object({
 // Middleware for createSession
 const validateCreateSession = (req, res, next) => {
   try {
-    createSessionSchema.parse(req.body);
+    req.body = createSessionSchema.parse(req.body);
     next();
   } catch (error) {
     return handleValidationError(res, error);
