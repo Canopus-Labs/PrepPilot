@@ -1,6 +1,7 @@
 const express = require("express");
 const { generateWithFallback } = require("../utils/geminiHelper");
 const NodeCache = require("node-cache");
+const logger = require("../utils/logger");
 
 const questionCache = new NodeCache({
   stdTTL: 3600,
@@ -24,16 +25,12 @@ const cachedQuestions =
   questionCache.get(cacheKey);
 
 if (cachedQuestions) {
-  console.log(
-    `[Cache HIT] Topic: ${topic}`
-  );
+  logger.info(`[Cache HIT] Topic: ${topic}`);
 
   return res.json(cachedQuestions);
 }
 
-console.log(
-  `[Cache MISS] Topic: ${topic}`
-);
+logger.info(`[Cache MISS] Topic: ${topic}`);
 
   const prompt = `
     Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
@@ -59,7 +56,7 @@ console.log(
       INITIAL_DELAY
     );
 
-    console.log(`[Aptitude] Successfully used model: ${usedModel}`);
+    logger.info(`[Aptitude] Successfully used model: ${usedModel}`);
 
     const rawText = await result.response.text();
     let cleanedText = rawText
@@ -71,8 +68,7 @@ console.log(
     try {
       questions = JSON.parse(cleanedText);
     } catch (err) {
-      console.error("Gemini raw response:", rawText);
-      console.error("Parse error:", err);
+      logger.error(`Parse error: ${err}`);
       return res
         .status(500)
         .json({
@@ -88,7 +84,7 @@ console.log(
 
 res.json(questions);
   } catch (error) {
-    console.error("Gemini API error:", error);
+    logger.error(`Gemini API error: ${error}`);
     res
       .status(500)
       .json({ error: "Failed to generate questions", details: error.message });

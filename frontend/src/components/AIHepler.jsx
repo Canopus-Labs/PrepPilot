@@ -1,11 +1,9 @@
-import React, { useState, useRef, useContext } from "react";
-import { UserContext } from "../context/userContext";
+import React, { useState, useRef } from "react";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
 import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
-  const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([
     { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
   ]);
@@ -24,9 +22,6 @@ export default function AIHelper() {
   }
 
   async function callApi(prompt, history, onProgress) {
-    console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
-    console.log("REQUEST URL:", `${BASE_URL}/api/generate`);
-    
     const res = await fetch(
       `${BASE_URL}/api/generate`,
       {
@@ -45,6 +40,7 @@ export default function AIHelper() {
           friendlyMessage = parsed.message;
         }
       } catch {
+        // Error intentionally not logged in production
       }
       throw new Error(friendlyMessage);
     }
@@ -114,7 +110,9 @@ export default function AIHelper() {
         try {
           const parsed = JSON.parse(displayText);
           displayText = parsed.text || displayText;
-        } catch {}
+        } catch {
+          // Error intentionally not logged in production
+        }
       }
 
       setMessages((cur) =>

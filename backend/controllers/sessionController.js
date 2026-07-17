@@ -1,6 +1,7 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
 const mongoose = require("mongoose");
+const logger = require("../utils/logger");
 
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
@@ -115,7 +116,7 @@ exports.getMySessions = async (req, res) => {
         .populate("questions");
       res.status(200).json(session);
     } catch (error) {
-      console.error("Error in getMySessions:", error);
+      logger.error(`Error in getMySessions: ${error}`);
       res.status(500).json({ success: false, message: "Server Error" });
     }
 };

@@ -48,8 +48,8 @@ const InterviewPrep = () => {
       if (response.data && response.data.session) {
         setSessionsData(response.data.session);
       }
-    } catch (error) {
-      console.error("Error", error);
+    } catch {
+      // Error intentionally not logged in production
     }
   };
 
@@ -68,7 +68,7 @@ const InterviewPrep = () => {
       if (response.data) {
         setExplanation(response.data);
       }
-    } catch (error) {
+    } catch {
       setExplanation(null);
       setErrorMsg("Failed to generate explanation, try again later.");
     } finally {
@@ -85,8 +85,8 @@ const InterviewPrep = () => {
       if (response.data && response.data.question) {
         fetchSessionDetailsById();
       }
-    } catch (error) {
-      console.error("Error", error);
+    } catch {
+      // Error intentionally not logged in production
     }
   };
 

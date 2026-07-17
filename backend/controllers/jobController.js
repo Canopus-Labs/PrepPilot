@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Session = require("../models/Session");
 const JobCache = require("../models/JobCache");
+const logger = require("../utils/logger");
 
 const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID;
 const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
@@ -71,7 +72,7 @@ exports.getJobs = async (req, res) => {
 
     return res.json({ jobs, role, source: "api" });
   } catch (err) {
-    console.error("[Jobs] getJobs error:", err.message);
+    logger.error(`[Jobs] getJobs error: ${err.message}`);
     res.status(500).json({ message: "Failed to fetch jobs", error: err.message });
   }
 };
@@ -91,9 +92,9 @@ exports.refreshJobCache = async () => {
         { jobs, fetchedAt: new Date() },
         { upsert: true, new: true }
       );
-      console.log(`[JobCron] Refreshed cache for: ${role}`);
+      logger.info(`[JobCron] Refreshed cache for: ${role}`);
     }
   } catch (err) {
-    console.error("[JobCron] Refresh failed:", err.message);
+    logger.error(`[JobCron] Refresh failed: ${err.message}`);
   }
 };

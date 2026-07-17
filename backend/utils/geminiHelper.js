@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const logger = require("./logger");
 
 /**
  * Ordered list of fallback Gemini models tried when the primary model
@@ -54,7 +55,7 @@ async function generateWithRetry(model, parts, maxRetries = 1, initialDelay = 10
       }
 
       const delay = initialDelay * Math.pow(2, attempt);
-      console.warn(
+      logger.warn(
         `[Gemini Retry] Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms…`
       );
       await new Promise((resolve) => setTimeout(resolve, delay));

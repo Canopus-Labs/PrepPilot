@@ -1,3 +1,5 @@
+const logger = require("../utils/logger");
+
 const requiredEnvVars = Object.freeze([
   "MONGO_URI",
   "JWT_SECRET",
@@ -20,20 +22,20 @@ const validateEnv = () => {
   });
 
   if (missingVars.length > 0) {
-    console.error("\n❌ Missing required environment variables:\n");
+    logger.error("\n❌ Missing required environment variables:\n");
 
     missingVars.forEach((envVar) => {
-      console.error(`   • ${envVar}`);
+      logger.error(`   • ${envVar}`);
     });
 
-    console.error(
+    logger.error(
       "\n⚠️ Please add the missing environment variables to your .env file.\n",
     );
 
     process.exit(1);
   }
 
-  console.log("✅ Environment variables validated successfully\n");
+  logger.info("✅ Environment variables validated successfully\n");
 };
 
 module.exports = validateEnv;

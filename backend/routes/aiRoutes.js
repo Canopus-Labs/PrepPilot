@@ -6,6 +6,7 @@ const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
 const NodeCache = require('node-cache');
+const logger = require('../utils/logger');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
@@ -83,9 +84,6 @@ async function generateHandler(req, res) {
     );
 
     const rawText = await result.response.text();
-    console.log("Incoming Prompt:", prompt);
-    console.log("Model Used:", usedModel);
-    console.log("Raw Gemini Response:", rawText);
 
     let cleanedText = rawText
       .replace(/^[\s`]*json\s*/i, "")
@@ -93,15 +91,12 @@ async function generateHandler(req, res) {
       .replace(/```$/i, "")
       .trim();
 
-    console.log(
-      "[AI] promptLen=%d model=%s ms=%d",
-      prompt.length,
-      usedModel,
-      Date.now() - start,
+    logger.info(
+      `[AI] promptLen=${prompt.length} model=${usedModel} ms=${Date.now() - start}`,
     );
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
-    console.error("[AI] Generation failed:", error.message);
+    logger.error(`[AI] Generation failed: ${error.message}`);
     return res
       .status(500)
       .json({ error: "Failed to generate content", detail: error.message });

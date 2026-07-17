@@ -1,6 +1,7 @@
 const axios = require('axios');
 const FormData = require('form-data');
 const { generateWithFallback } = require('../utils/geminiHelper');
+const logger = require('../utils/logger');
 
 /**
  * Compile LaTeX resume code to a PDF document.
@@ -66,7 +67,7 @@ const compileResume = async (req, res) => {
         res.send(Buffer.from(response.data));
 
     } catch (error) {
-        console.error("Resume Compilation Error:", error?.message);
+        logger.error(`Resume Compilation Error: ${error?.message}`);
         res.status(500).json({ message: "Failed to compile resume", error: error.message });
     }
 }
@@ -146,14 +147,14 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
         try {
             jsonResult = JSON.parse(aiResponse);
         } catch (e) {
-            console.error("Failed to parse Gemini JSON:", aiResponse);
+            logger.error("Failed to parse Gemini JSON");
             return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
         }
 
         res.status(200).json(jsonResult);
 
     } catch (error) {
-        console.error("Resume Analysis Error:", error);
+        logger.error(`Resume Analysis Error: ${error}`);
         res.status(500).json({ message: "Failed to analyze resume", error: error.message });
     }
 }
@@ -207,7 +208,7 @@ const saveResume = async (req, res) => {
 
         res.status(200).json({ success: true, resume });
     } catch (error) {
-        console.error("Save Resume Error:", error);
+        logger.error(`Save Resume Error: ${error}`);
         res.status(500).json({ success: false, message: "Server Error", error: error.message });
     }
 };
@@ -231,7 +232,7 @@ const getMyResumes = async (req, res) => {
         const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
         res.status(200).json({ success: true, resumes });
     } catch (error) {
-        console.error("Get Resumes Error:", error);
+        logger.error(`Get Resumes Error: ${error}`);
         res.status(500).json({ success: false, message: "Server Error", error: error.message });
     }
 };

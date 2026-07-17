@@ -59,7 +59,6 @@ const ResumeAnalyzer = () => {
 
       setResult(response.data);
     } catch (err) {
-      console.error(err);
       setError(err.response?.data?.message || "Failed to analyze resume. Please try again.");
     } finally {
       setIsAnalyzing(false);

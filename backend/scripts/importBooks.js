@@ -8,6 +8,7 @@ const path = require("path");
 const mongoose = require("mongoose");
 const connectDB = require("../config/db");
 const Book = require("../models/Book");
+const logger = require("../utils/logger");
 
 // books folder lives at project root (one level above backend)
 const BOOKS_ROOT = path.join(__dirname, "..", "..", "books");
@@ -95,26 +96,26 @@ async function importBooks() {
 
 importBooks()
   .then((result) => {
-    console.log(`Imported ${result.imported} files from ${result.categories} categories.`);
+    logger.info(`Imported ${result.imported} files from ${result.categories} categories.`);
     process.exit(0);
   })
   .catch((err) => {
-    console.error("Failed to import books:", err.message);
+    logger.error(`Failed to import books: ${err.message}`);
     process.exit(1);
   });
 
 importBooks()
   .then((result) => {
-    console.log(`Imported ${result.imported} files from ${result.categories} categories.`);
+    logger.info(`Imported ${result.imported} files from ${result.categories} categories.`);
     if (result.skipped.length) {
-      console.log("Skipped (too large >15MB):");
+      logger.info("Skipped (too large >15MB):");
       for (const s of result.skipped) {
-        console.log(`- ${s.category}/${s.name} (${s.size} bytes)`);
+        logger.info(`- ${s.category}/${s.name} (${s.size} bytes)`);
       }
     }
     process.exit(0);
   })
   .catch((err) => {
-    console.error("Failed to import books:", err.message);
+    logger.error(`Failed to import books: ${err.message}`);
     process.exit(1);
   });
