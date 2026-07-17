@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -70,7 +71,10 @@ const registerUser = async (req, res) => {
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // Auto-verify user — email verification temporarily disabled
+        // Generate email verification token
+        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         const user = await User.create({
             name,
             email,
@@ -88,28 +92,25 @@ const registerUser = async (req, res) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // skip email verification until SMTP is configured
+            isEmailVerified: false,
+            emailVerificationToken,
+            emailVerificationExpires
         });
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        // Send Verification Email
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
-        await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            
+            message: "Registration successful. Please check your email to verify your account.",
             _id: user._id,
             name: user.name,
             email: user.email,
             profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
-        console.error("Register error:", error.message);
+        logger.error("Register error:", error.message);
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
     }
 };
@@ -158,7 +159,7 @@ const loginUser = async (req, res) => {
 
         });
     } catch (error) {
-        console.log(error)
+        logger.info(error)
         res.status(500).json({ success: false, message: "Internal server error occurred", error });
     }
 };
