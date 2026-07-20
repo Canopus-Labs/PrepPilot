@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
 const NodeCache = require('node-cache');
+const logger = require('../utils/logger');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
@@ -58,57 +59,31 @@ async function generateHandler(req, res) {
   }
   try {
     const start = Date.now();
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-    for (const m of candidateModels) {
-      try {
-        const model = genAI.getGenerativeModel({ 
-          model: m,
-          systemInstruction: systemInstruction || `You are PrepPilot AI Mentor.
+    const systemInstructionText = systemInstruction || `You are PrepPilot AI Mentor.
 1. Allow friendly greetings and casual onboarding conversation.
 2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
 3. Politely redirect unrelated conversations.
-4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`
-        });
-        
-        // Format history for Gemini API
-        let formattedHistory = history.map(msg => ({
-          role: msg.role === "model" ? "model" : "user",
-          parts: [{ text: msg.text }]
-        }));
+4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`;
 
-        // Gemini requires the first message in history to be from the user
-        if (formattedHistory.length > 0 && formattedHistory[0].role !== "user") {
-          formattedHistory.unshift({ role: "user", parts: [{ text: "Hi" }] });
-        }
+    // Format history for Gemini API
+    let formattedHistory = history.map(msg => ({
+      role: msg.role === "model" ? "model" : "user",
+      parts: [{ text: msg.text }]
+    }));
 
-        const chat = model.startChat({
-          history: formattedHistory
-        });
-
-        result = await chat.sendMessage(prompt);
-        usedModel = m;
-        break;
-      } catch (e) {
-        lastErr = e;
-        continue;
-      }
+    // Gemini requires the first message in history to be from the user
+    if (formattedHistory.length > 0 && formattedHistory[0].role !== "user") {
+      formattedHistory.unshift({ role: "user", parts: [{ text: "Hi" }] });
     }
-    if (!result) throw lastErr || new Error("All Gemini models failed");
+
+    const { result, usedModel } = await generateChatWithFallback(
+      process.env.GEMINI_API_KEY,
+      prompt,
+      formattedHistory,
+      { systemInstruction: systemInstructionText }
+    );
 
     const rawText = await result.response.text();
-    console.log("Incoming Prompt:", prompt);
-    console.log("Model Used:", usedModel);
-    console.log("Raw Gemini Response:", rawText);
 
     let cleanedText = rawText
       .replace(/^[\s`]*json\s*/i, "")
@@ -116,15 +91,12 @@ async function generateHandler(req, res) {
       .replace(/```$/i, "")
       .trim();
 
-    console.log(
-      "[AI] promptLen=%d model=%s ms=%d",
-      prompt.length,
-      usedModel,
-      Date.now() - start,
+    logger.info(
+      `[AI] promptLen=${prompt.length} model=${usedModel} ms=${Date.now() - start}`,
     );
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
-    console.error("[AI] Generation failed:", error.message);
+    logger.error(`[AI] Generation failed: ${error.message}`);
     return res
       .status(500)
       .json({ error: "Failed to generate content", detail: error.message });

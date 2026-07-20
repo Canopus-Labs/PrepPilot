@@ -10,8 +10,8 @@ const ProfileinfoCard = () => {
   const handleLogout = async () => {
     try {
       await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
-    } catch (error) {
-      console.error("Logout request failed:", error);
+    } catch {
+      // Error intentionally not logged in production
     } finally {
       localStorage.clear();
       sessionStorage.clear();

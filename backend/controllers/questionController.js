@@ -23,7 +23,14 @@ const Session = require("../models/Session");
 const addQuestionToSession = async (req, res) => {
   try {
     const { sessionId, questions } = req.body;
-  
+
+    if (!sessionId || !Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid sessionId and non-empty questions array are required.",
+      });
+    }
+
     const session = await Session.findById(sessionId);
 
     if (!session) {
@@ -65,6 +72,11 @@ const addQuestionToSession = async (req, res) => {
 const togglePinQuestion = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Question not found" });
+    }
 
     const session = await Session.findById(question.session);
     if (!session) {
@@ -73,7 +85,7 @@ const togglePinQuestion = async (req, res) => {
         .json({ success: false, message: "Session not found" });
     }
 
-    if (session.user.toString() !== req.user.id) {
+    if (session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",
@@ -124,7 +136,7 @@ const updateQuestionNote = async (req, res) => {
         .json({ success: false, message: "Session not found" });
     }
 
-    if (session.user.toString() !== req.user.id) {
+    if (session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",

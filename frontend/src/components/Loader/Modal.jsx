@@ -1,22 +1,91 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { modalVariants, backdropVariants } from "../../utils/animations";
 
-const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === "Escape") onClose();
-    };
+const FOCUSABLE_SELECTORS = [
+  'a[href]:not([disabled])',
+  'button:not([disabled]):not([tabindex="-1"])',
+  'input:not([disabled]):not([type="hidden"]):not([tabindex="-1"])',
+  'textarea:not([disabled]):not([tabindex="-1"])',
+  'select:not([disabled]):not([tabindex="-1"])',
+  '[tabindex]:not([tabindex="-1"]):not([disabled])',
+].join(", ");
 
-    if (isOpen) {
-      document.addEventListener("keydown", handleEsc);
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
+  const titleId = useId();
+
+  const getFocusableElements = () => {
+    if (!dialogRef.current) return [];
+    return Array.from(dialogRef.current.querySelectorAll(FOCUSABLE_SELECTORS));
+  };
+
+  // Focus management: save trigger, move focus in, restore on close
+  useEffect(() => {
+    if (!isOpen) return;
+
+    previousFocusRef.current = document.activeElement;
+
+    const raf = requestAnimationFrame(() => {
+      const elements = getFocusableElements();
+      if (elements.length > 0) {
+        elements[0].focus();
+      } else if (dialogRef.current) {
+        dialogRef.current.focus();
+      }
+    });
 
     return () => {
-      document.removeEventListener("keydown", handleEsc);
+      cancelAnimationFrame(raf);
+      const prev = previousFocusRef.current;
+      if (prev && typeof prev.focus === "function") {
+        prev.focus();
+      }
+    };
+  }, [isOpen]);
+
+  // Escape key, focus trap, body scroll lock
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const elements = getFocusableElements();
+
+        if (elements.length === 0) {
+          e.preventDefault();
+          return;
+        }
+
+        const first = elements[0];
+        const last = elements[elements.length - 1];
+        const active = document.activeElement;
+
+        if (e.shiftKey) {
+          if (active === first || !dialogRef.current?.contains(active)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (active === last || !dialogRef.current?.contains(active)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
   }, [isOpen, onClose]);
@@ -33,7 +102,12 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
           onClick={onClose}
         >
           <motion.div
-            className="relative flex flex-col bg-[#111827] border border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh]"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={!hideHeader && title ? titleId : undefined}
+            tabIndex={-1}
+            className="relative flex flex-col bg-[#111827] border border-white/10 shadow-2xl rounded-2xl lg:w-[35vw] w-[90vw] max-w-lg p-6 md:p-8 max-h-[90vh] outline-none"
             variants={modalVariants}
             initial="initial"
             animate="animate"
@@ -42,7 +116,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
           >
             {!hideHeader && (
               <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-                <h3 className="text-xl font-bold text-white">{title}</h3>
+                <h3 id={titleId} className="text-xl font-bold text-white">{title}</h3>
               </div>
             )}
 

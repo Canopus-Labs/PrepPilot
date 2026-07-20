@@ -1,56 +1,16 @@
 const express = require("express");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { generateWithFallback } = require("../utils/geminiHelper");
 const NodeCache = require("node-cache");
+const logger = require("../utils/logger");
 
 const questionCache = new NodeCache({
   stdTTL: 3600,
 });
 
 const router = express.Router();
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const MAX_RETRIES = 3;
 const INITIAL_DELAY = 1000;
 
-function isRetryableError(error) {
-  const status = error?.status || error?.code;
-
-  return (
-    status === 429 ||
-    status === 503 ||
-    error?.message?.toLowerCase().includes("timeout") ||
-    error?.message?.toLowerCase().includes("network")
-  );
-}
-
-async function generateWithRetry(model, prompt) {
-  let lastError;
-
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      return await model.generateContent([prompt]);
-    } catch (error) {
-      lastError = error;
-
-      if (!isRetryableError(error)) {
-        throw error;
-      }
-
-      if (attempt === MAX_RETRIES - 1) {
-        throw error;
-      }
-
-      const delay = INITIAL_DELAY * Math.pow(2, attempt);
-
-      console.warn(
-        `[Gemini Retry] Attempt ${attempt + 1}/${MAX_RETRIES} failed. Retrying in ${delay}ms`
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-
-  throw lastError;
-}
 
 // GET /api/questions?topic=Probability
 router.get("/", async (req, res) => {
@@ -65,16 +25,12 @@ const cachedQuestions =
   questionCache.get(cacheKey);
 
 if (cachedQuestions) {
-  console.log(
-    `[Cache HIT] Topic: ${topic}`
-  );
+  logger.info(`[Cache HIT] Topic: ${topic}`);
 
   return res.json(cachedQuestions);
 }
 
-console.log(
-  `[Cache MISS] Topic: ${topic}`
-);
+logger.info(`[Cache MISS] Topic: ${topic}`);
 
   const prompt = `
     Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
@@ -91,46 +47,16 @@ console.log(
   `;
 
   try {
-    // Use working Gemini models with fallback
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
+    // Use centralised helper with per-model retry (exponential backoff)
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt],
+      {},
+      MAX_RETRIES,
+      INITIAL_DELAY
+    );
 
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`[Aptitude] Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-
-        result = await generateWithRetry(
-          model,
-          prompt
-        );
-        usedModel = m;
-        console.log(`[Aptitude] Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(
-          `[Aptitude] Model ${m} exhausted retries:`,
-          e.message
-        );
-        lastErr = e;
-        continue;
-      }
-    }
-
-    if (!result) {
-      return res.status(500).json({
-        error: "Failed to generate questions. Gemini API Key is missing or invalid.",
-        details: lastErr ? lastErr.message : "All Gemini models failed"
-      });
-    }
+    logger.info(`[Aptitude] Successfully used model: ${usedModel}`);
 
     const rawText = await result.response.text();
     let cleanedText = rawText
@@ -142,8 +68,7 @@ console.log(
     try {
       questions = JSON.parse(cleanedText);
     } catch (err) {
-      console.error("Gemini raw response:", rawText);
-      console.error("Parse error:", err);
+      logger.error(`Parse error: ${err}`);
       return res
         .status(500)
         .json({
@@ -159,7 +84,7 @@ console.log(
 
 res.json(questions);
   } catch (error) {
-    console.error("Gemini API error:", error);
+    logger.error(`Gemini API error: ${error}`);
     res
       .status(500)
       .json({ error: "Failed to generate questions", details: error.message });

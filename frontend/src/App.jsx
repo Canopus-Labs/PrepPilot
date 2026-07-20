@@ -39,6 +39,7 @@ import JobsForYou from "./pages/Jobs/JobsForYou";
 import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) return null;
@@ -347,6 +348,16 @@ const App = () => {
                     }
                   />
                 </Route>
+                <Route
+  path="/privacy-policy"
+  element={
+    <ErrorBoundary>
+      <PageTransition>
+        <PrivacyPolicy />
+      </PageTransition>
+    </ErrorBoundary>
+  }
+/>
                 <Route
                  path="*"
                  element={

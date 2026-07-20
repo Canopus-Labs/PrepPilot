@@ -179,7 +179,15 @@ const Settings = () => {
       );
     }
   };
+  
+  const NAME_REGEX = /^[A-Za-z\s]*$/;
+   const handleNameChange = (setter) => (e) => {
+    const value = e.target.value;
 
+    if (NAME_REGEX.test(value)) {
+      setter(value);
+    }
+  };
   // Handle Save Basic Info
   const handleSaveBasicInfo = async (e) => {
     e.preventDefault();
@@ -644,7 +652,7 @@ const Settings = () => {
                       type="text"
                       className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      onChange={handleNameChange(setFirstName)}
                       required
                     />
                   </div>
@@ -656,7 +664,7 @@ const Settings = () => {
                       type="text"
                       className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all"
                       value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      onChange={handleNameChange(setLastName)}
                     />
                   </div>
                 </div>

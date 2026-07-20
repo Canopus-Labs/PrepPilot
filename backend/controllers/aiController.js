@@ -1,4 +1,3 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { z } = require("zod");
 const {
   conceptExplainPrompt,
@@ -7,8 +6,8 @@ const {
 } = require("../utils/prompts");
 const Session = require("../models/Session");
 const Question = require("../models/Question");
-
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const { generateWithFallback } = require("../utils/geminiHelper");
+const logger = require("../utils/logger");
 
 /**
  * Generate interview questions and answers using the Gemini AI service.
@@ -63,33 +62,10 @@ const generateInterviewQuestions = async (req, res) => {
       seenQuestions,
     });
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-
-    if (!result) throw lastErr || new Error("All Gemini models failed");
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
 
     const rawText = await result.response.text();
     let cleanedText = rawText
@@ -118,14 +94,14 @@ const generateInterviewQuestions = async (req, res) => {
         res.status(200).json({ model: usedModel, ...data });
       }
     } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
+      logger.error("Gemini returned invalid JSON");
       res.status(500).json({
         message: "Gemini returned invalid JSON",
         raw: rawText,
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    logger.error(`Gemini API Error: ${error}`);
     res.status(500).json({
       message: "Failed to generate questions",
       error: error.message,
@@ -158,30 +134,10 @@ const generateConceptExplanation = async (req, res) => {
 
     const prompt = conceptExplainPrompt(question);
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-    if (!result) throw lastErr || new Error("All Gemini models failed");
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
 
     const rawText = await result.response.text();
     // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
@@ -212,7 +168,7 @@ const generateConceptExplanation = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    logger.error(`Gemini API Error: ${error}`);
     res.status(500).json({
       message: "Failed to generate explanation",
       error: error.message,
@@ -220,39 +176,36 @@ const generateConceptExplanation = async (req, res) => {
   }
 };
 
+/**
+ * Generate interview preparation tips using the Gemini AI service.
+ * @route POST /api/ai/generate-tips
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required request fields are missing or Gemini fails.
+ * @example
+ * POST /api/ai/generate-tips
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "role": "Frontend Engineer",
+ *   "experience": "2 years"
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "tips": ["Focus on React hooks.", "Practice system design basics.", ...]
+ * }
+ */
 const generateInterviewTips = async (req, res) => {
   try {
     const { role, experience } = req.body;
 
     const prompt = interviewTipsPrompt({ role, experience });
 
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
-
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-
-    for (const m of candidateModels) {
-      try {
-        console.log(`Trying model: ${m}`);
-        const model = ai.getGenerativeModel({ model: m });
-        result = await model.generateContent([prompt]);
-        usedModel = m;
-        console.log(`Successfully used model: ${m}`);
-        break;
-      } catch (e) {
-        console.error(`Model ${m} failed:`, e.message);
-        lastErr = e;
-        continue;
-      }
-    }
-
-    if (!result) throw lastErr || new Error("All Gemini models failed");
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
 
     const rawText = await result.response.text();
     let cleanedText = rawText
@@ -262,16 +215,26 @@ const generateInterviewTips = async (req, res) => {
 
     try {
       const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const tipsSchema = z.object({
+        tips: z.array(z.string()),
+      });
+      const parsed = tipsSchema.safeParse(data);
+      if (!parsed.success) {
+        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+      }
+
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
-      console.error("Gemini returned invalid JSON:", cleanedText);
+      logger.error("Gemini returned invalid JSON");
       res.status(500).json({
         message: "Gemini returned invalid JSON",
         raw: rawText,
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    logger.error(`Gemini API Error: ${error}`);
     res.status(500).json({
       message: "Failed to generate interview tips",
       error: error.message,

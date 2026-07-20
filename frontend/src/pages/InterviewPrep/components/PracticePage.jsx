@@ -34,8 +34,7 @@ const PracticePage = () => {
     try {
       const res = await axiosInstance.get(`${API_PATHS.APTITUDE.GENERATE}?topic=${topic.name}`);
       setQuestions(res.data);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
+    } catch {
       alert("Failed to generate questions.");
     }
     setLoading(false);
@@ -118,8 +117,7 @@ const PracticePage = () => {
                   try {
                     const res = await axiosInstance.get(`${API_PATHS.APTITUDE.GENERATE}?topic=${selectedTopic.name}`);
                     setQuestions((prev) => [...prev, ...res.data]);
-                  } catch (error) {
-                    console.error("Error fetching questions:", error);
+                  } catch {
                     alert("Failed to generate more questions.");
                   }
                   setLoading(false);

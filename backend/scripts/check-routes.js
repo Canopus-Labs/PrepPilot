@@ -33,6 +33,7 @@ http.createServer = (...args) => {
 const mongoose = require("mongoose");
 mongoose.connect = async () => {};
 
+const logger = require("../utils/logger");
 const app = require("../server");
 
 // ---------------------------------------------------------------------------
@@ -109,9 +110,9 @@ const DOCUMENTED_ROUTES = [
 setTimeout(() => {
   const registered = extractRoutes(app);
 
-  console.log(`\nRegistered routes (${registered.length} total):`);
+  logger.info(`\nRegistered routes (${registered.length} total):`);
   for (const r of registered) {
-    console.log(`  ${r.method.padEnd(7)} ${r.path}`);
+    logger.info(`  ${r.method.padEnd(7)} ${r.path}`);
   }
 
   const missing = [];
@@ -123,16 +124,16 @@ setTimeout(() => {
   }
 
   if (missing.length === 0) {
-    console.log(
+    logger.info(
       "\n✅ All documented routes confirmed in the live Express app.\n"
     );
     process.exit(0);
   } else {
-    console.error("\n❌ Documented routes NOT found in the app:");
+    logger.error("\n❌ Documented routes NOT found in the app:");
     for (const m of missing) {
-      console.error(`  ${m.method.padEnd(7)} ${m.path}`);
+      logger.error(`  ${m.method.padEnd(7)} ${m.path}`);
     }
-    console.error(
+    logger.error(
       "\nUpdate API_DOCUMENTATION.md or fix the missing route registrations.\n"
     );
     process.exit(1);

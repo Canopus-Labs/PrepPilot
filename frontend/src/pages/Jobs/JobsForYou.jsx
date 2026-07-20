@@ -75,9 +75,8 @@ const JobsForYou = () => {
       const res = await axiosInstance.get(API_PATHS.JOBS.GET, { params });
       setJobs(res.data.jobs || []);
       setRole(res.data.role || "");
-    } catch (err) {
+    } catch {
       toast.error("Failed to load job listings. Please try again.");
-      console.error(err);
     } finally {
       setLoading(false);
     }

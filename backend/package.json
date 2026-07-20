@@ -30,6 +30,7 @@
     "nodemailer": "^8.0.10",
     "pdf-parse": "^2.4.5",
     "resend": "^6.12.4",
+    "winston": "^3.19.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

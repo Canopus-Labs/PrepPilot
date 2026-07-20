@@ -25,8 +25,8 @@ const Dashboard = () => {
     try {
       const response = await axiosInstance.get(API_PATHS.SESSION.GET_ALL);
       setSessions(response.data);
-    } catch (error) {
-      console.error("Error fetching sessions:", error);
+    } catch {
+      // Error intentionally not logged in production
     }
   };
 
@@ -37,7 +37,7 @@ const Dashboard = () => {
       toast.success("Session deleted successfully!");
       setOpenDeleteAlert({ open: false, data: null });
       fetchAllSessions();
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete session");
     }
   };

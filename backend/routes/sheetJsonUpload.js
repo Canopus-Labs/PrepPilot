@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Sheet = require('../models/Sheet');
 const { protect } = require('../middlewares/authMiddleware');
+const logger = require('../utils/logger');
 
 // POST /api/sheets/upload
 // Body: { filename: "file.json", data: {...sheet data...} }
 router.post('/upload', protect, async (req, res) => {
-  console.log('Received upload:', req.body.filename);
   const { filename, data } = req.body;
 
   if (!filename || !data) {
@@ -39,7 +39,7 @@ router.post('/upload', protect, async (req, res) => {
 
     res.status(201).json({ uploaded: results.length, results });
   } catch (err) {
-    console.error('Error saving to MongoDB:', err);
+    logger.error(`Error saving to MongoDB: ${err}`);
     res.status(500).json({ error: 'Failed to save sheet to database.' });
   }
 });
@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
     const sheets = await Sheet.find({});
     res.json({ sheets });
   } catch (err) {
-    console.error('Error fetching sheets:', err);
+    logger.error(`Error fetching sheets: ${err}`);
     res.status(500).json({ error: 'Failed to fetch sheets.' });
   }
 });
@@ -68,7 +68,7 @@ router.get('/:id', async (req, res) => {
     }
     res.json({ sheet });
   } catch (err) {
-    console.error('Error fetching sheet:', err);
+    logger.error(`Error fetching sheet: ${err}`);
     res.status(500).json({ error: 'Failed to fetch sheet.' });
   }
 });

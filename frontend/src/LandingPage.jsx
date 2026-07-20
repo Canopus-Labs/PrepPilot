@@ -16,15 +16,10 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
+import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
 import {
   Star,
   ChevronLeft,
@@ -67,171 +62,6 @@ const FadeIn = ({ children, delay = 0, className = "" }) => (
     {children}
   </motion.div>
 );
-
-/* ─────────────────────────────────────────────
-   HERO — Typewriter headline
-───────────────────────────────────────────── */
-const TYPEWRITER_WORDS = [
-  "AI Interview Prep",
-  "System Design",
-  "DSA Practice",
-  "Behavioral Questions",
-  "Mock Interviews",
-  "Resume Reviews",
-];
-
-const TypewriterText = () => {
-  const [wordIndex, setWordIndex] = useState(0);
-  const [subIndex, setSubIndex] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-  const [blink, setBlink] = useState(true);
-
-  // Typing / deleting engine
-  useEffect(() => {
-    const currentWord = TYPEWRITER_WORDS[wordIndex];
-
-    if (!deleting && subIndex === currentWord.length) {
-      const pause = setTimeout(() => setDeleting(true), 1500);
-      return () => clearTimeout(pause);
-    }
-
-    if (deleting && subIndex === 0) {
-      const pause = setTimeout(() => {
-        setDeleting(false);
-        setWordIndex((prev) => (prev + 1) % TYPEWRITER_WORDS.length);
-      }, 300);
-      return () => clearTimeout(pause);
-    }
-
-    const speed = deleting ? 32 : 62;
-    const timeout = setTimeout(() => {
-      setSubIndex((prev) => prev + (deleting ? -1 : 1));
-    }, speed);
-
-    return () => clearTimeout(timeout);
-  }, [subIndex, deleting, wordIndex]);
-
-  // Cursor blink
-  useEffect(() => {
-    const blinkInterval = setInterval(() => setBlink((v) => !v), 480);
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  return (
-    <span className="relative inline-flex items-baseline whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-blue-400">
-      {TYPEWRITER_WORDS[wordIndex].substring(0, subIndex) || "\u00A0"}
-      <span
-        aria-hidden="true"
-        className={`ml-1 inline-block w-[3px] sm:w-[4px] h-[0.85em] bg-violet-400 rounded-full transition-opacity duration-100 ${
-          blink ? "opacity-100" : "opacity-0"
-        }`}
-      />
-    </span>
-  );
-};
-
-/* ─────────────────────────────────────────────
-   HERO — floating glass card (parallax + float)
-───────────────────────────────────────────── */
-const FloatingCard = ({ label, sub, tag, style, depth, delay, floatDuration, mouseX, mouseY }) => {
-  const px = useTransform(mouseX, [-0.5, 0.5], [-depth, depth]);
-  const py = useTransform(mouseY, [-0.5, 0.5], [-depth * 0.6, depth * 0.6]);
-
-  return (
-    <motion.div
-      className="hidden lg:block absolute z-20"
-      style={{ ...style, x: px, y: py }}
-    >
-      <motion.div
-        className="flex flex-col gap-2 px-4 py-3.5 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl shadow-black/40 min-w-[180px]"
-        style={{ background: "rgba(15,15,25,0.75)" }}
-        initial={{ opacity: 0, y: 20, scale: 0.88 }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-          y: [0, -10, 0],
-        }}
-        transition={{
-          opacity: { duration: 0.6, delay },
-          scale:   { duration: 0.6, delay },
-          y: { duration: floatDuration, repeat: Infinity, ease: "easeInOut", delay: delay + 0.4 },
-        }}
-      >
-        {/* Top row: check + label */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-lg bg-violet-500/20 border border-violet-400/30 flex items-center justify-center flex-shrink-0">
-            <Check size={12} className="text-violet-300" />
-          </div>
-          <span className="text-[13px] font-semibold text-white whitespace-nowrap">{label}</span>
-        </div>
-        {/* Sub text */}
-        {sub && (
-          <p className="text-[11px] text-gray-500 leading-snug pl-[34px]">{sub}</p>
-        )}
-        {/* Tag */}
-        {tag && (
-          <div className="pl-[34px]">
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/20">
-              {tag}
-            </span>
-          </div>
-        )}
-      </motion.div>
-    </motion.div>
-  );
-};
-
-const FLOATING_CARDS = [
-  {
-    label: "React Interview",
-    sub: "15 questions generated",
-    tag: "Frontend",
-    style: { top: "12%", left: "2%" },
-    depth: 14, delay: 0.1, floatDuration: 5.2,
-  },
-  {
-    label: "System Design",
-    sub: "HLD · LLD · Scalability",
-    tag: "Senior Level",
-    style: { top: "64%", left: "4%" },
-    depth: 20, delay: 0.5, floatDuration: 6.5,
-  },
-  {
-    label: "DSA Mastery",
-    sub: "Arrays · Trees · DP",
-    tag: "NeetCode 150",
-    style: { top: "14%", right: "3%" },
-    depth: 18, delay: 0.9, floatDuration: 5.8,
-  },
-  {
-    label: "Resume Reviewed",
-    sub: "ATS score: 91%",
-    tag: "AI Analysis",
-    style: { top: "62%", right: "3%" },
-    depth: 12, delay: 1.2, floatDuration: 6.2,
-  },
-  {
-    label: "AI Feedback",
-    sub: "Instant concept breakdown",
-    tag: "Gemini 2.5",
-    style: { top: "38%", right: "1%" },
-    depth: 24, delay: 0.3, floatDuration: 7,
-  },
-];
-
-/* ─────────────────────────────────────────────
-   HERO — ambient floating particles
-───────────────────────────────────────────── */
-const PARTICLES = [
-  { top: "18%", left: "12%", size: 4, duration: 6, delay: 0 },
-  { top: "30%", left: "82%", size: 3, duration: 7.5, delay: 0.6 },
-  { top: "55%", left: "20%", size: 5, duration: 8, delay: 1.1 },
-  { top: "62%", left: "70%", size: 3, duration: 6.5, delay: 1.6 },
-  { top: "12%", left: "55%", size: 3, duration: 7, delay: 0.3 },
-  { top: "78%", left: "45%", size: 4, duration: 9, delay: 2 },
-  { top: "45%", left: "8%", size: 3, duration: 6.8, delay: 1.4 },
-  { top: "24%", left: "70%", size: 4, duration: 8.4, delay: 0.9 },
-];
 
 /* ─────────────────────────────────────────────
    How It Works – enhanced accordion step card
@@ -622,8 +452,6 @@ const LandingPage = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const [visibleCards, setVisibleCards] = useState(3);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   // Hero parallax
@@ -647,56 +475,6 @@ const LandingPage = () => {
 
   const scrollToStats = () => {
     statsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setVisibleCards(1);
-      } else if (window.innerWidth < 1024) {
-        setVisibleCards(2);
-      } else {
-        setVisibleCards(3);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const maxIndex = Math.max(0, TESTIMONIALS.length - visibleCards);
-    if (currentIndex > maxIndex) {
-      setCurrentIndex(maxIndex);
-    }
-  }, [visibleCards, currentIndex]);
-
-  useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        const nextIndex = prevIndex + 1;
-        const maxIndex = TESTIMONIALS.length - visibleCards;
-        return nextIndex > maxIndex ? 0 : nextIndex;
-      });
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [visibleCards, isPaused]);
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex - 1;
-      const maxIndex = TESTIMONIALS.length - visibleCards;
-      return nextIndex < 0 ? maxIndex : nextIndex;
-    });
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex + 1;
-      const maxIndex = TESTIMONIALS.length - visibleCards;
-      return nextIndex > maxIndex ? 0 : nextIndex;
-    });
   };
 
   const handleCTA = () => {
@@ -748,9 +526,8 @@ const LandingPage = () => {
           PAGE WRAPPER – dark bg + dot grid
       ══════════════════════════════════════ */}
       <div className="w-full min-h-screen bg-gray-950 dark:bg-gray-950 text-white relative overflow-hidden selection:bg-violet-700/40">
-        {/* Ambient glow blobs */}
+        {/* Ambient glow blob – top only */}
         <div className="pointer-events-none absolute top-[-200px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-violet-600/15 rounded-full blur-[120px]" />
-        <div className="pointer-events-none absolute top-[40%] right-[-150px] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px]" />
 
         {/* ─────────────────────────────────
             NAVBAR – floating pill glassmorphism (opensox.ai style)
@@ -798,6 +575,7 @@ const LandingPage = () => {
 
             {/* Right buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
+              
               {user ? (
                 <ProfileInfoCard />
               ) : (
@@ -844,8 +622,16 @@ const LandingPage = () => {
         </header>
 
         {/* ─────────────────────────────────
-            HERO – premium AI-SaaS motion hero
+            HERO – centered, full width
         ───────────────────────────────── */}
+        <section className="dot-grid-bg relative pt-24 pb-6 px-4 text-center">
+          <FadeIn>
+            {/* Badge pill */}
+            <div className="inline-flex items-center gap-2 mb-6 text-xs font-semibold text-violet-300 bg-violet-500/10 border border-violet-500/25 px-4 py-1.5 rounded-full">
+              <LuSparkles className="text-violet-400" />
+              AI Powered Interview Mastery
+            </div>
+          </FadeIn>
         <section
           ref={heroRef}
           onMouseMove={handleHeroMouseMove}
@@ -914,91 +700,116 @@ const LandingPage = () => {
               </div>
             </FadeIn>
 
-            <FadeIn delay={0.1}>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
-                Master Every Technical Interview with{" "}
-                <br className="hidden sm:block" />
-                <TypewriterText />
-              </h1>
-            </FadeIn>
+          <FadeIn delay={0.08}>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
+              Crack Every Interview with{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-blue-400">
+                AI‑Powered
+              </span>{" "}
+              Learning
+            </h1>
+          </FadeIn>
 
-            <FadeIn delay={0.2}>
-              <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Your personal AI interview coach — role-specific questions,
-                instant explanations, and a prep plan that adapts to you.
-                From first practice question to offer letter.
-              </p>
-            </FadeIn>
+          <FadeIn delay={0.15}>
+            <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Get role-specific questions, expand answers when you need them,
+              dive deeper into concepts, and organize everything your way. From
+              preparation to mastery—your ultimate interview toolkit is here.
+            </p>
+          </FadeIn>
 
-            <FadeIn delay={0.3}>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                {/* Primary CTA */}
-                <motion.button
-                  onClick={handleCTA}
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 18 }}
-                  className="cta-glow group relative flex items-center gap-2 text-white font-semibold px-8 py-3.5 rounded-full text-base overflow-hidden"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(135deg, #7c3aed, #4f46e5, #7c3aed)",
-                    backgroundSize: "200% 200%",
-                    boxShadow: "0 0 20px rgba(124,58,237,0.35)",
-                  }}
+          <FadeIn delay={0.22}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={handleCTA}
+                className="cta-glow flex items-center gap-2 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white font-semibold px-8 py-3.5 rounded-full text-base transition-all duration-200"
+              >
+                <span className="font-mono text-xs text-violet-200">&gt;_</span>
+                Get Started — It's Free
+              </button>
+              <button
+                onClick={() => navigate("/ai-helper")}
+                className="flex items-center gap-2 text-violet-300 border border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10 font-semibold px-8 py-3.5 rounded-full text-base transition-all duration-200"
+              >
+                <LuSparkles className="text-sm" />
+                Try AI Assistance
+              </button>
+            </div>
+            <p className="mt-3 text-xs text-gray-500">
+              No signup required for AI Assistance ✦ Free to explore
+            </p>
+          </FadeIn>
+
+          {/* ── Stats inline ── */}
+          <FadeIn delay={0.3}>
+            <div className="mt-10 max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4">
+              {STATS.map((stat, i) => (
+                <div
+                  key={stat.id}
+                  className={`text-center px-4 py-2 ${i < STATS.length - 1 ? "md:border-r border-white/8" : ""} ${i === 1 ? "border-r border-white/8 md:border-r-0" : ""}`}
                 >
-                  <motion.span
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(135deg, #8b5cf6, #6366f1, #8b5cf6)",
-                      backgroundSize: "200% 200%",
-                    }}
-                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                  />
-                  <span className="relative z-10 font-mono text-xs text-violet-200">
-                    &gt;_
-                  </span>
-                  <span className="relative z-10">Get Started — It's Free</span>
-                  <motion.span
-                    className="relative z-10 inline-flex"
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <LuArrowRight />
-                  </motion.span>
-                </motion.button>
+                  <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-0.5">
+                    {stat.value}
+                  </div>
+                  <div className="text-[11px] text-gray-500 font-medium tracking-wide uppercase">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+        </section>
 
-                {/* Secondary glass CTA */}
-                <motion.button
-                  onClick={() => navigate("/ai-helper")}
-                  whileHover={{ scale: 1.03, y: -2 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group relative flex items-center gap-2 text-violet-300 font-semibold px-8 py-3.5 rounded-full text-base backdrop-blur-md bg-white/[0.04] overflow-hidden"
-                  style={{ border: "1px solid rgba(139,92,246,0.35)" }}
-                >
-                  <motion.span
-                    className="absolute inset-0 rounded-full"
-                    style={{ border: "1px solid rgba(139,92,246,0.6)" }}
-                    animate={{ opacity: [0.2, 0.7, 0.2] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  <motion.span
-                    className="relative z-10 inline-flex"
-                    whileHover={{ rotate: 18 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                  >
-                    <LuSparkles className="text-sm" />
-                  </motion.span>
-                  <span className="relative z-10">Try AI Assistance</span>
-                </motion.button>
-              </div>
+        {/* ─────────────────────────────────
+            MARQUEE / SERVICES STRIP
+        ───────────────────────────────── */}
+        <div className="pb-4">
+          <ServicesMarquee />
+        </div>
 
-              <p className="mt-4 text-xs text-gray-500">
-                No signup required for AI Assistance ✦ Free to explore
-              </p>
+        {/* ─────────────────────────────────
+            FEATURES – 3-col grid (opensox Supercharge style)
+        ───────────────────────────────── */}
+        <section className="py-24">
+          <div className="max-w-6xl mx-auto px-4 mb-8">
+            <FadeIn className="text-center">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+                Supercharge Your{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
+                  Interview Journey
+                </span>
+              </h2>
             </FadeIn>
+          </div>
 
+          {/* 3 equal columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 items-stretch">
+
+            {/* ── CARD 1: Personalized Recommendations ── */}
+            <FadeIn delay={0.05} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 flex flex-col gap-3.5 border-b border-white/6">
+                  {[
+                    { label: "Frontend Engineer Track",  sub: "React · TypeScript · Performance" },
+                    { label: "System Design Deep Dive",  sub: "HLD · LLD · Scalability"          },
+                    { label: "DSA Mastery Sprint",       sub: "Arrays · Graphs · DP"              },
+                    { label: "Behavioral Interview Prep", sub: "STAR · Leadership · Culture"      },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.03] border border-white/6">
+                      <div className="w-1.5 h-10 rounded-full bg-violet-500/60 flex-shrink-0" />
+                      <div>
+                        <p className="text-white text-sm font-medium leading-tight">{item.label}</p>
+                        <p className="text-gray-500 text-xs mt-1">{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Personalized Recommendations</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Curated prep tracks tailored to your target role and experience level.
+                  </p>
+                </div>
             {/* Trust strip */}
             <FadeIn delay={0.4}>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
@@ -1020,128 +831,82 @@ const LandingPage = () => {
               </div>
             </FadeIn>
 
-            <FadeIn delay={0.1}>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
-                Master Every Technical Interview with{" "}
-                <br className="hidden sm:block" />
-                <TypewriterText />
-              </h1>
-            </FadeIn>
-
-            <FadeIn delay={0.2}>
-              <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Your personal AI interview coach — role-specific questions,
-                instant explanations, and a prep plan that adapts to you.
-                From first practice question to offer letter.
-              </p>
-            </FadeIn>
-
-            <FadeIn delay={0.3}>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                {/* Primary CTA */}
-                <motion.button
-                  onClick={handleCTA}
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 18 }}
-                  className="cta-glow group relative flex items-center gap-2 text-white font-semibold px-8 py-3.5 rounded-full text-base overflow-hidden"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(135deg, #7c3aed, #4f46e5, #7c3aed)",
-                    backgroundSize: "200% 200%",
-                    boxShadow: "0 0 20px rgba(124,58,237,0.35)",
-                  }}
-                >
-                  <motion.span
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(135deg, #8b5cf6, #6366f1, #8b5cf6)",
-                      backgroundSize: "200% 200%",
-                    }}
-                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                  />
-                  <span className="relative z-10 font-mono text-xs text-violet-200">
-                    &gt;_
-                  </span>
-                  <span className="relative z-10">Get Started — It's Free</span>
-                  <motion.span
-                    className="relative z-10 inline-flex"
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <LuArrowRight />
-                  </motion.span>
-                </motion.button>
-
-                {/* Secondary glass CTA */}
-                <motion.button
-                  onClick={() => navigate("/ai-helper")}
-                  whileHover={{ scale: 1.03, y: -2 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group relative flex items-center gap-2 text-violet-300 font-semibold px-8 py-3.5 rounded-full text-base backdrop-blur-md bg-white/[0.04] overflow-hidden"
-                  style={{ border: "1px solid rgba(139,92,246,0.35)" }}
-                >
-                  <motion.span
-                    className="absolute inset-0 rounded-full"
-                    style={{ border: "1px solid rgba(139,92,246,0.6)" }}
-                    animate={{ opacity: [0.2, 0.7, 0.2] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  <motion.span
-                    className="relative z-10 inline-flex"
-                    whileHover={{ rotate: 18 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                  >
-                    <LuSparkles className="text-sm" />
-                  </motion.span>
-                  <span className="relative z-10">Try AI Assistance</span>
-                </motion.button>
-              </div>
-
-              <p className="mt-4 text-xs text-gray-500">
-                No signup required for AI Assistance ✦ Free to explore
-              </p>
-            </FadeIn>
-
-            {/* Trust strip */}
-            <FadeIn delay={0.4}>
-              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
-                <div className="flex items-center gap-1.5">
-                  <StarRating count={5} />
+            {/* ── CARD 2: AI Assistance ── */}
+            <FadeIn delay={0.12} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 border-b border-white/6 flex flex-col gap-4">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-7 h-7 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="bg-white/[0.05] border border-white/8 rounded-xl rounded-tl-none px-4 py-3 text-sm text-gray-300 max-w-[85%]">
+                      Explain time complexity of quicksort in the worst case.
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start flex-row-reverse">
+                    <div className="w-7 h-7 rounded-full bg-violet-600/30 border border-violet-500/30 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-violet-400" />
+                    </div>
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl rounded-tr-none px-4 py-3 text-sm text-gray-200 max-w-[85%]">
+                      In the worst case — a sorted array with the last element as pivot — quicksort degrades to <span className="text-violet-300 font-mono">O(n²)</span>. Using randomized pivots avoids this.
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-7 h-7 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="bg-white/[0.05] border border-white/8 rounded-xl rounded-tl-none px-4 py-3 text-sm text-gray-300 max-w-[85%]">
+                      Can you give me a follow-up question on this?
+                    </div>
+                  </div>
+                  <div className="h-8 flex items-center gap-2 px-1">
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
                 </div>
-                <span className="hidden sm:block w-px h-4 bg-white/10" />
-                <span className="text-sm text-gray-400 font-medium">
-                  Trusted by 10,000+ developers
-                </span>
-                <span className="hidden sm:block w-px h-4 bg-white/10" />
-                <span className="text-sm text-gray-400 font-medium">
-                  Built for FAANG &amp; startup interviews
-                </span>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Seamless AI Assistance</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Ask anything and get instant explanations, hints, and concept breakdowns.
+                  </p>
+                </div>
               </div>
             </FadeIn>
-          </div>
 
-          {/* Scroll indicator */}
-          <motion.button
-            onClick={scrollToStats}
-            aria-label="Scroll to explore"
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-gray-500 hover:text-violet-300 transition-colors"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-          >
-            <span className="text-[10px] font-semibold tracking-widest uppercase">
-              Scroll
-            </span>
-            <motion.span
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <ChevronDown size={18} />
-            </motion.span>
-          </motion.button>
+            {/* ── CARD 3: Precision Filters ── */}
+            <FadeIn delay={0.2} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 flex flex-col gap-4 border-b border-white/6">
+                  {[
+                    { label: "Difficulty", tags: ["Easy", "Medium", "Hard", "Expert"] },
+                    { label: "Role Type",  tags: ["Frontend", "Backend", "Full Stack", "DevOps"] },
+                    { label: "Tech Stack", tags: ["React", "Node.js", "Python", "TypeScript"] },
+                  ].map((group) => (
+                    <div key={group.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/6">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                        {group.label}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {group.tags.map((tag) => (
+                          <span key={tag} className="text-sm px-3 py-1.5 rounded-lg border border-white/10 text-gray-300 bg-white/[0.04]">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Precision Filters</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Zero in on questions by difficulty, role type, and your tech stack.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+
+          </div>
         </section>
 
         {/* ─────────────────────────────────
@@ -1330,7 +1095,6 @@ const LandingPage = () => {
         <section className="py-24 px-4 border-t border-white/6 relative overflow-hidden">
           {/* Ambient background elements */}
           <div className="pointer-events-none absolute top-10 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-[120px]" />
-          <div className="pointer-events-none absolute bottom-0 left-1/4 w-80 h-80 bg-blue-500/8 rounded-full blur-[100px]" />
 
           <div className="max-w-6xl mx-auto relative z-10">
             <FadeIn className="text-center mb-16">
@@ -1502,244 +1266,227 @@ const LandingPage = () => {
         {/* ─────────────────────────────────
             TESTIMONIALS – auto-scrolling carousel
         ───────────────────────────────── */}
-        <section className="py-24 px-4 border-t border-white/6 relative overflow-hidden">
-          <div className="max-w-6xl mx-auto relative z-10">
-            <FadeIn className="text-center mb-16">
-              <span className="text-xs font-semibold tracking-widest text-violet-400 uppercase mb-3 block">
-                What Our Users Say
+       {/* Testimonials Scroller */}
+<div
+  className="relative overflow-hidden py-8"
+  onMouseEnter={() => setIsPaused(true)}
+  onMouseLeave={() => setIsPaused(false)}
+>
+  {/* Left Fade */}
+  <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
+
+  {/* Right Fade */}
+  <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
+
+  <div className="overflow-hidden">
+    <div
+      className={`flex gap-6 w-max ${
+        isPaused ? "animate-marquee paused" : "animate-marquee"
+      }`}
+    >
+      {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
+        <div
+          key={`${testimonial.id}-${index}`}
+          className="w-[360px] flex-shrink-0"
+        >
+          <TestimonialCard testimonial={testimonial} />
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+        {/* ─────────────────────────────────
+            READY TO ACE – CTA banner
+        ───────────────────────────────── */}
+        <section className="relative py-28 px-4 overflow-hidden border-t border-white/6" style={{ background: "linear-gradient(to bottom, #030712 0%, #0B0F19 100%)" }}>
+          {/* Smooth top fade from page background */}
+          <div className="pointer-events-none absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-gray-950 to-transparent" />
+          {/* Background glow blobs */}
+          <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[360px] bg-violet-600/20 rounded-full blur-[120px]" />
+          <div className="pointer-events-none absolute bottom-0 right-1/4 w-64 h-64 bg-blue-600/15 rounded-full blur-[90px]" />
+          {/* Smooth bottom fade into footer */}
+          <div className="pointer-events-none absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0B0F19] to-transparent" />
+
+          <div className="relative z-10 max-w-3xl mx-auto text-center">
+            <FadeIn>
+              <span className="inline-block text-xs font-semibold tracking-widest text-violet-400 uppercase mb-4">
+                Your next offer is one prep away
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-                Trusted by{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
-                  Thousands of Developers
+            </FadeIn>
+
+            <FadeIn delay={0.08}>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
+                Ready to{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-blue-400">
+                  Ace Your Interview?
                 </span>
               </h2>
             </FadeIn>
 
-            {/* Testimonials Scroller */}
-            <div
-              className="relative overflow-hidden py-8"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
-              {/* Fading overlays */}
-              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
+            <FadeIn delay={0.15}>
+              <p className="text-base sm:text-lg text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
+                Join thousands of developers who use PrepPilot to land roles at
+                top companies. Start practicing today — no credit card required.
+              </p>
+            </FadeIn>
 
-              {/* Slider Track Wrapper */}
-              <div className="overflow-hidden">
-                <div
-                  className="flex transition-transform duration-500 ease-in-out"
+            <FadeIn delay={0.22}>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <motion.button
+                  onClick={handleCTA}
+                  whileHover={{ scale: 1.05, y: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 18 }}
+                  className="cta-glow relative flex items-center gap-2 text-white font-semibold px-9 py-4 rounded-full text-base overflow-hidden"
                   style={{
-                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
+                    backgroundImage: "linear-gradient(135deg, #7c3aed, #4f46e5, #7c3aed)",
+                    backgroundSize: "200% 200%",
+                    boxShadow: "0 0 24px rgba(124,58,237,0.45)",
                   }}
                 >
-                  {TESTIMONIALS.map((testimonial) => (
-                    <div
-                      key={testimonial.id}
-                      className="flex-none p-3"
-                      style={{ width: `${100 / visibleCards}%` }}
-                    >
-                      <TestimonialCard testimonial={testimonial} />
-                    </div>
-                  ))}
-                </div>
+                  <motion.span
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: "linear-gradient(135deg, #8b5cf6, #6366f1, #8b5cf6)",
+                      backgroundSize: "200% 200%",
+                    }}
+                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                  />
+                  <span className="relative z-10 font-mono text-xs text-violet-200">&gt;_</span>
+                  <span className="relative z-10">Get Started — It's Free</span>
+                  <motion.span
+                    className="relative z-10 inline-flex"
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <LuArrowRight />
+                  </motion.span>
+                </motion.button>
+
+                <motion.button
+                  onClick={() => navigate("/ai-helper")}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2 text-violet-300 font-semibold px-9 py-4 rounded-full text-base backdrop-blur-md bg-white/[0.04]"
+                  style={{ border: "1px solid rgba(139,92,246,0.35)" }}
+                >
+                  <LuSparkles className="text-sm" />
+                  Try AI Assistance
+                </motion.button>
               </div>
 
-              {/* Navigation Arrows and Dot Indicators */}
-              <div className="flex justify-between items-center mt-8 px-4">
-                <button
-                  onClick={handlePrev}
-                  className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-violet-500/50 text-white transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
-                  aria-label="Previous testimonial"
-                >
-                  <ChevronLeft size={20} />
-                </button>
+              <p className="mt-5 text-xs text-gray-500">
+                No signup required for AI Assistance ✦ Free to explore
+              </p>
+            </FadeIn>
 
-                {/* Dots indicators */}
-                <div className="flex space-x-2">
-                  {Array.from({ length: TESTIMONIALS.length - visibleCards + 1 }).map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        currentIndex === idx ? "w-6 bg-violet-500 shadow-lg shadow-violet-500/50" : "w-2.5 bg-white/20 hover:bg-white/40"
-                      }`}
-                      aria-label={`Go to slide ${idx + 1}`}
-                    />
+            {/* Trust strip */}
+            <FadeIn delay={0.3}>
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-1.5">
+                  {[1,2,3,4,5].map((n) => (
+                    <Star key={n} size={14} className="fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-
-                <button
-                  onClick={handleNext}
-                  className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-violet-500/50 text-white transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
-                  aria-label="Next testimonial"
-                >
-                  <ChevronRight size={20} />
-                </button>
+                <span className="hidden sm:block w-px h-4 bg-white/10" />
+                <span className="text-sm text-gray-400">Trusted by 10,000+ developers</span>
+                <span className="hidden sm:block w-px h-4 bg-white/10" />
+                <span className="text-sm text-gray-400">Built for FAANG &amp; startup interviews</span>
               </div>
-            </div>
+            </FadeIn>
           </div>
-        </section>
-
-        {/* ─────────────────────────────────
-            CTA FOOTER BANNER
-        ───────────────────────────────── */}
-        <section className="py-28 px-4 relative overflow-hidden border-t border-white/6">
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="w-[600px] h-[300px] bg-violet-600/15 rounded-full blur-[100px]" />
-          </div>
-          <FadeIn className="relative text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 leading-tight">
-              Ready to Ace Your{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
-                Next Interview?
-              </span>
-            </h2>
-            <p className="text-gray-400 mb-10 text-base sm:text-lg">
-              Join thousands of learners who have transformed their interview
-              preparation with PrepPilot AI.
-            </p>
-            <button
-              onClick={handleCTA}
-              className="cta-glow inline-flex items-center gap-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white font-bold px-10 py-4 rounded-full text-base transition-all duration-200"
-            >
-              <span className="font-mono text-xs text-violet-200">&gt;_</span>
-              Start Preparing for Free
-              <LuArrowRight />
-            </button>
-          </FadeIn>
         </section>
 
         {/* ─────────────────────────────────
             FOOTER
         ───────────────────────────────── */}
-        <footer className="w-full border-t border-white/5 bg-[#0B0F19] text-gray-400 font-sans mt-20">
-          <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 sm:px-8 lg:px-12">
-            {/* Main Multi-Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5">
-              {/* Brand Info Column */}
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex items-center gap-2">
-                  <img
-                    src="/PrepPilot-Logo.png"
-                    alt="PrepPilot Logo"
-                    className="w-6 h-6 object-contain"
-                  />
-                  <span className="font-bold text-xl tracking-tight text-white">
-                    PrepPilot AI
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
-                  Your ultimate companion for crushing technical interviews with AI-powered questions, real-time feedback, and comprehensive preparation tools.
-                </p>
-              </div>
-
-              {/* Column 2: Platform Features */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Features</h3>
-                <ul className="space-y-2.5 text-sm">
-                  <li><a href="/ai-helper" className="hover:text-white transition-colors duration-200">AI Question Gen</a></li>
-                  <li><a href="/coding-sheets" className="hover:text-white transition-colors duration-200">DSA Sheets</a></li>
-                  <li><a href="/compiler" className="hover:text-white transition-colors duration-200">Code Compiler</a></li>
-                  <li><a href="/assessment" className="hover:text-white transition-colors duration-200">Skill Tests</a></li>
-                </ul>
-              </div>
-
-              {/* Column 3: Resources */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Resources</h3>
-                <ul className="space-y-2.5 text-sm">
-                  <li><a href="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</a></li>
-                  <li><a href="/notes-books" className="hover:text-white transition-colors duration-200">Books Library</a></li>
-                  <li><a href="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</a></li>
-                  <li><a href="/interview-experiences" className="hover:text-white transition-colors duration-200">Experiences</a></li>
-                </ul>
-              </div>
-
-              {/* Column 4: Community */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Community</h3>
-                <ul className="space-y-2.5 text-sm">
-                  <li><a href="https://github.com/Canopus-Labs/PrepPilot.git" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
-                  <li><a href="/repository-hive" className="hover:text-white transition-colors duration-200">Repository Hive</a></li>
-                  <li><a href="/oss-blog" className="hover:text-white transition-colors duration-200">OSS Blog</a></li>
-                  <li><a href="/oss-events" className="hover:text-white transition-colors duration-200">Events</a></li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Bottom Bar Container */}
-            <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-              <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
-              <div className="flex space-x-6">
-                <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-                <a href="/terms-and-conditions" className="hover:text-gray-300 transition-colors">Terms of Service</a>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <footer className="w-full bg-[#0B0F19] text-gray-400 font-sans">
+  <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 sm:px-8 lg:px-12">
+    
+    {/* Main Multi-Column Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5">
+      
+      {/* Brand Info Column */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="flex items-center gap-2">
+          <img
+            src="/PrepPilot-Logo.png"
+            alt="PrepPilot Logo"
+            className="w-6 h-6 object-contain"
+          />
+          <span className="font-bold text-xl tracking-tight text-white">
+            PrepPilot AI
+          </span>
+        </div>
+        <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+          Your ultimate companion for crushing technical interviews with AI-powered questions, real-time feedback, and comprehensive preparation tools.
+        </p>
       </div>
-      {/* Premium Back To Top Button */}
+
+      {/* Column 2: Platform Features */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Features</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="/ai-helper" className="hover:text-white transition-colors duration-200">AI Question Gen</a></li>
+          <li><a href="/coding-sheets" className="hover:text-white transition-colors duration-200">DSA Sheets</a></li>
+          <li><a href="/compiler" className="hover:text-white transition-colors duration-200">Code Compiler</a></li>
+          <li><a href="/assessment" className="hover:text-white transition-colors duration-200">Skill Tests</a></li>
+        </ul>
+      </div>
+
+      {/* Column 3: Resources */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Resources</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><Link to="/resume-builder" className="hover:text-white transition-colors duration-200">Resume Builder</Link></li>
+          <li><a href="/notes-books" className="hover:text-white transition-colors duration-200">Books Library</a></li>
+          <li><Link to="/project-ideas" className="hover:text-white transition-colors duration-200">Project Ideas</Link></li>
+          <li><a href="/interview-experiences" className="hover:text-white transition-colors duration-200">Experiences</a></li>
+        </ul>
+      </div>
+
+      {/* Column 4: Community */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Community</h3>
+        <ul className="space-y-2.5 text-sm">
+          <li><a href="https://github.com/Canopus-Labs/PrepPilot.git" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-200">GitHub</a></li>
+          <li><a href="/repository-hive" className="hover:text-white transition-colors duration-200">Repository Hive</a></li>
+          <li><a href="/oss-blog" className="hover:text-white transition-colors duration-200">OSS Blog</a></li>
+          <li><a href="/oss-events" className="hover:text-white transition-colors duration-200">Events</a></li>
+        </ul>
+      </div>
+
+    </div>{/* end grid */}
+
+    {/* Bottom Bar */}
+    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+      <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>
+      <div className="flex space-x-6">
+        <a href="/privacy-policy" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
+        <a href="/terms-and-conditions" className="hover:text-gray-300 transition-colors">Terms of Service</a>
+      </div>
+    </div>
+
+  </div>{/* end max-w-7xl */}
+</footer>
+      </div>{/* end page wrapper */}
+      {/* Back To Top Button */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
             onClick={scrollToTop}
-            initial={{
-              opacity: 0,
-              scale: 0.7,
-              y: 40,
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0,
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.7,
-              y: 40,
-            }}
-            whileHover={{
-              scale: 1.08,
-              y: -4,
-            }}
-            whileTap={{
-              scale: 0.95,
-            }}
-            transition={{
-              duration: 0.25,
-            }}
-            className="fixed bottom-6 right-6 z-[9999]"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 right-6 z-[9999] w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-white border border-white/10 bg-white/5 backdrop-blur-md transition-colors duration-200"
             aria-label="Back To Top"
           >
-            {/* Glow */}
-            <div className="absolute inset-0 bg-violet-600 rounded-full blur-xl opacity-40" />
-
-            {/* Button */}
-            <div
-              className="
-          relative
-          w-10
-          h-10
-          rounded-xl
-          flex
-          items-center
-          justify-center
-          text-white
-          border
-          border-white/10
-          backdrop-blur-xl
-        "
-              style={{
-                background:
-                  "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                boxShadow:
-                  "0 15px 35px rgba(124,58,237,0.45), 0 0 20px rgba(124,58,237,0.35)",
-              }}
-            >
-              <LuArrowUp className="text-xl" />
-            </div>
+            <LuArrowUp className="text-base" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -1761,7 +1508,7 @@ const LandingPage = () => {
               setCurrentPage={setCurrentPage}
               onLoginSuccess={() => {
                 setOpenAuthModal(false);
-
+                setCurrentPage("login");
                 if (pendingRoute) {
                   navigate(pendingRoute);
                   setPendingRoute(null);

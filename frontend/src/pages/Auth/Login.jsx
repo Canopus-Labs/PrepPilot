@@ -6,6 +6,11 @@ import { validateEmail } from "../../utils/helper";
 import { API_PATHS } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
+import {
+  isMockAuthEnabled,
+  mockLogin,
+  saveMockUser,
+} from "../../utils/mockAuth";
 import { LuArrowRight } from "react-icons/lu";
 
 const Login = ({ setCurrentPage, onLoginSuccess }) => {
@@ -33,18 +38,30 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
-        email,
-        password,
-      });
+      const response = isMockAuthEnabled()
+        ? await mockLogin({ email, password })
+        : await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+            email,
+            password,
+          });
       const { token, accessToken } = response.data;
       const authToken = token || accessToken;
 
       if (authToken) {
+        // Keep token storage in one place: the user's Remember Me choice.
         if (rememberMe) {
+          sessionStorage.removeItem("token");
           localStorage.setItem("token", authToken);
         } else {
+          localStorage.removeItem("token");
           sessionStorage.setItem("token", authToken);
+        }
+        if (isMockAuthEnabled()) {
+          saveMockUser({
+            ...response.data,
+            password,
+            accessToken: authToken,
+          });
         }
         updateUser(response.data);
         if (onLoginSuccess) {

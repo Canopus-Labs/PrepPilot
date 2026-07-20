@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
+const logger = require("../utils/logger");
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
@@ -109,7 +110,7 @@ const registerUser = async (req, res) => {
             profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
-        console.error("Register error:", error.message);
+        logger.error(`Register error: ${error.message}`);
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
     }
 };
@@ -158,7 +159,7 @@ const loginUser = async (req, res) => {
 
         });
     } catch (error) {
-        console.log(error)
+        logger.error(`Login error: ${error}`);
         res.status(500).json({ success: false, message: "Internal server error occurred", error });
     }
 };

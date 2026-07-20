@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 const SHEETS_DIR = path.join(__dirname, '../sheets');
 const API_URL = 'http://localhost:8000/api/sheets/upload'; // Use local backend for uploads
@@ -15,9 +16,9 @@ async function uploadSheet(filename) {
       body: JSON.stringify({ filename, data })
     });
     const result = await res.json();
-    console.log(`Uploaded ${filename}:`, result);
+    logger.info(`Uploaded ${filename}: ${JSON.stringify(result)}`);
   } catch (err) {
-    console.error(`Error uploading ${filename}:`, err);
+    logger.error(`Error uploading ${filename}: ${err}`);
   }
 }
 
@@ -26,7 +27,7 @@ async function main() {
   for (const file of files) {
     await uploadSheet(file);
   }
-  console.log('All sheets attempted.');
+  logger.info('All sheets attempted.');
 }
 
 main();

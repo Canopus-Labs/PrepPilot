@@ -200,8 +200,8 @@ useEffect(() => {
                     unlockedAchievements: [...alreadyUnlocked],
                 });
             }
-        } catch (err) {
-            console.error("Failed to sync achievements:", err);
+        } catch {
+            // Error intentionally not logged in production
         }
     };
 
@@ -234,8 +234,7 @@ useEffect(() => {
           .sort((a, b) => b.percentage - a.percentage);
 
         setSheetProgress(activeProgress);
-      } catch (error) {
-        console.error("Dashboard data error:", error);
+      } catch {
         toast.error("Failed to load some dashboard widgets.");
       } finally {
         setLoading(false);
