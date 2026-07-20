@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
-const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
 const NodeCache = require('node-cache');
+const AIChat = require('../models/AIChat');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
@@ -25,11 +25,11 @@ const offTopicCache = new NodeCache({ stdTTL: 3600 });
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt, history = [], systemInstruction } = req.body || {};
+  const { prompt, history = [], systemInstruction, userId } = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
   }
-  
+
   const isContextual = isContextualResponse(prompt, history);
 
   if (!isContextual && !isPrepPilotDomain(prompt)) {
@@ -46,16 +46,18 @@ async function generateHandler(req, res) {
       textResponse = "I'm unable to assist with unrelated topics. Please ask a question related to interviews, coding, aptitude, resumes, or career growth.";
     }
 
-    return res.json({ 
-      text: textResponse, 
-      model: "local-classifier" 
+    return res.json({
+      text: textResponse,
+      model: "local-classifier"
     });
   }
+
   if (!process.env.GEMINI_API_KEY) {
     return res
       .status(500)
       .json({ error: "GEMINI_API_KEY not configured on server" });
   }
+
   try {
     const start = Date.now();
     const systemInstructionText = systemInstruction || `You are PrepPilot AI Mentor.
@@ -99,19 +101,42 @@ async function generateHandler(req, res) {
       usedModel,
       Date.now() - start,
     );
+
+    if (userId) {
+      try {
+        await AIChat.findOneAndUpdate(
+          { user: userId },
+          {
+            $push: {
+              messages: {
+                $each: [
+                  { role: 'user', text: prompt },
+                  { role: 'model', text: cleanedText }
+                ]
+              }
+            }
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`[AI] Successfully saved messages for user: ${userId}`);
+      } catch (err) {
+        console.error("[AI] Failed to save messages to database:", err);
+      }
+    }
+
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
-    console.error("[AI] Generation failed:", error.message);
+    console.error("[AI] Chat generation failed:", error.message);
     return res
       .status(500)
-      .json({ error: "Failed to generate content", detail: error.message });
+      .json({ error: "Failed to generate response", detail: error.message });
   }
 }
 
 // Primary route used by frontend
-router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/generate', aiLimiter, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
-router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/ai/generate', aiLimiter, sanitizeAiPrompt, generateHandler);
 
 // List available models
 /**
@@ -128,6 +153,7 @@ router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, gener
  */
 router.get("/models", async (req, res) => {
   try {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const models = await genAI.listModels();
     const modelNames = models.map((m) => m.name.replace("models/", ""));
@@ -138,6 +164,16 @@ router.get("/models", async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ error: "Failed to list models", detail: e.message });
+  }
+});
+
+router.get('/history/:userId', async (req, res) => {
+  try {
+    const chat = await AIChat.findOne({ user: req.params.userId });
+    return res.json(chat || { messages: [] });
+  } catch (error) {
+    console.error("[AI] Fetch history error:", error);
+    return res.status(500).json({ error: "Failed to fetch history" });
   }
 });
 
