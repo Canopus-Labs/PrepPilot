@@ -1,7 +1,8 @@
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import {
   LuSparkles,
   LuChevronRight,
@@ -19,6 +20,32 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import ServicesMarquee from "./components/ServicesMarquee";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
 import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
+import {
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  FileText,
+  Users,
+  Trophy,
+  Briefcase,
+} from "lucide-react"; // Import icons for testimonials + hero + stats
+import TermsandConditions from "./pages/Terms/TermsandConditions"; // ← Add this
+} from "framer-motion";
+import ServicesMarquee from "./components/ServicesMarquee";
+import {
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  FileText,
+  Users,
+  Trophy,
+  Briefcase,
+} from "lucide-react"; // Import icons for testimonials + hero + stats
+import TermsandConditions from "./pages/Terms/TermsandConditions";
 
 
 /* ─────────────────────────────────────────────
@@ -231,6 +258,188 @@ const TestimonialCard = ({ testimonial }) => (
 );
 
 /* ─────────────────────────────────────────────
+   Stats Data
+───────────────────────────────────────────── */
+const STATS_DATA = [
+  {
+    id: 1,
+    value: 10000,
+    suffix: "+",
+    label: "Questions Generated",
+    icon: FileText,
+  },
+  {
+    id: 2,
+    value: 5000,
+    suffix: "+",
+    label: "Active Learners",
+    icon: Users,
+  },
+  {
+    id: 3,
+    value: 98,
+    suffix: "%",
+    label: "Interview Success Rate",
+    icon: Trophy,
+  },
+  {
+    id: 4,
+    value: 50,
+    suffix: "+",
+    label: "Job Roles Covered",
+    icon: Briefcase,
+  },
+];
+
+/* ─────────────────────────────────────────────
+   Count-up number — animates once when in view
+───────────────────────────────────────────── */
+const CountUp = ({ value, duration = 1.8, isInView, prefersReducedMotion }) => {
+  const [display, setDisplay] = useState(0);
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    if (!isInView || hasRun.current) return;
+    hasRun.current = true;
+
+    if (prefersReducedMotion) {
+      setDisplay(value);
+      return;
+    }
+
+    let rafId;
+    const start = performance.now();
+
+    const tick = (now) => {
+      const progress = Math.min((now - start) / (duration * 1000), 1);
+      // easeOutExpo — fast start, gentle settle
+      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setDisplay(Math.floor(eased * value));
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setDisplay(value);
+      }
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [isInView, value, duration, prefersReducedMotion]);
+
+  return <>{display.toLocaleString()}</>;
+};
+
+/* ─────────────────────────────────────────────
+   Stat Card — glass card with icon + count-up
+───────────────────────────────────────────── */
+const StatCard = ({ stat, index, isInView, prefersReducedMotion }) => {
+  const Icon = stat.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{
+        duration: 0.55,
+        delay: prefersReducedMotion ? 0 : index * 0.1,
+        ease: "easeOut",
+      }}
+      whileHover={
+        prefersReducedMotion
+          ? {}
+          : { y: -6, scale: 1.02, transition: { duration: 0.25, ease: "easeOut" } }
+      }
+      tabIndex={0}
+      role="group"
+      aria-label={`${stat.value}${stat.suffix} ${stat.label}`}
+      className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg p-6 sm:p-7 flex flex-col items-center text-center gap-3 transition-colors duration-300 hover:border-violet-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
+    >
+      {/* Hover glow */}
+      <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-violet-500/10 to-transparent" />
+      <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_30px_rgba(139,92,246,0.25)]" />
+
+      {/* Icon */}
+      <motion.div
+        className="relative z-10 w-12 h-12 rounded-full flex items-center justify-center bg-violet-500/10 border border-violet-500/25"
+        whileHover={prefersReducedMotion ? {} : { scale: 1.12, rotate: 6 }}
+        transition={{ type: "spring", stiffness: 300, damping: 14 }}
+      >
+        <Icon size={20} className="text-violet-400" />
+      </motion.div>
+
+      {/* Number */}
+      <div className="relative z-10 stat-number text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-violet-100 to-violet-300">
+        <CountUp
+          value={stat.value}
+          isInView={isInView}
+          prefersReducedMotion={prefersReducedMotion}
+        />
+        {stat.suffix}
+      </div>
+
+      {/* Label */}
+      <div className="relative z-10 text-sm text-gray-400 font-medium tracking-wide leading-snug">
+        {stat.label}
+      </div>
+    </motion.div>
+  );
+};
+
+/* ─────────────────────────────────────────────
+   Stats Section — viewport-triggered, once
+───────────────────────────────────────────── */
+const StatsSection = ({ statsRef }) => {
+  const localRef = useRef(null);
+  const [isInView, setIsInView] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const node = localRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect(); // trigger only once
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section
+      ref={(node) => {
+        localRef.current = node;
+        if (statsRef) statsRef.current = node;
+      }}
+      className="relative border-y border-white/6 py-20 px-4 overflow-hidden"
+    >
+      {/* Ambient background glow — subtle, behind cards only */}
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-violet-600/10 rounded-full blur-[110px]" />
+      <div className="pointer-events-none absolute top-0 left-[10%] w-64 h-64 bg-blue-600/8 rounded-full blur-[90px]" />
+      <div className="pointer-events-none absolute bottom-0 right-[10%] w-64 h-64 bg-violet-500/8 rounded-full blur-[90px]" />
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+        {STATS_DATA.map((stat, i) => (
+          <StatCard
+            key={stat.id}
+            stat={stat}
+            index={i}
+            isInView={isInView}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+/* ─────────────────────────────────────────────
    Main Component
 ───────────────────────────────────────────── */
 const LandingPage = () => {
@@ -423,6 +632,73 @@ const LandingPage = () => {
               AI Powered Interview Mastery
             </div>
           </FadeIn>
+        <section
+          ref={heroRef}
+          onMouseMove={handleHeroMouseMove}
+          className="dot-grid-bg relative pt-28 pb-24 px-4 text-center overflow-hidden min-h-[92vh] flex flex-col items-center justify-center"
+        >
+          {/* Parallax gradient blobs */}
+          <motion.div
+            className="pointer-events-none absolute top-[-160px] left-1/2 -translate-x-1/2 w-[680px] h-[680px] bg-violet-600/15 rounded-full blur-[120px]"
+            style={{ x: blobX1, y: blobY1 }}
+            animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="pointer-events-none absolute bottom-[-140px] right-[-110px] w-[440px] h-[440px] bg-blue-600/12 rounded-full blur-[110px]"
+            style={{ x: blobX2, y: blobY2 }}
+            animate={{ scale: [1, 1.12, 1], opacity: [0.45, 0.75, 0.45] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1.4 }}
+          />
+
+          {/* Pulsing radial glow behind headline */}
+          <motion.div
+            className="pointer-events-none absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[920px] max-w-[95vw] h-[480px] rounded-full"
+            style={{
+              background:
+                "radial-gradient(closest-side, rgba(139,92,246,0.55), transparent 72%)",
+            }}
+            animate={{ opacity: [0.08, 0.18, 0.08] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          {/* Subtle floating particles */}
+          <div className="pointer-events-none absolute inset-0 hidden sm:block">
+            {PARTICLES.map((p, i) => (
+              <motion.span
+                key={i}
+                className="absolute rounded-full bg-violet-300/40"
+                style={{ top: p.top, left: p.left, width: p.size, height: p.size }}
+                animate={{ y: [0, -18, 0], opacity: [0.15, 0.55, 0.15] }}
+                transition={{
+                  duration: p.duration,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: p.delay,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Floating AI feature cards */}
+          {FLOATING_CARDS.map((card) => (
+            <FloatingCard key={card.label} {...card} mouseX={springX} mouseY={springY} />
+          ))}
+
+          {/* Foreground content */}
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <FadeIn>
+              {/* Badge with shimmer sweep */}
+              <div className="relative inline-flex items-center gap-2 mb-6 text-xs font-semibold text-violet-300 bg-violet-500/10 border border-violet-500/25 px-4 py-1.5 rounded-full overflow-hidden">
+                <LuSparkles className="text-violet-400 relative z-10" />
+                <span className="relative z-10">AI Powered Interview Mastery</span>
+                <motion.span
+                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                  animate={{ x: ["-120%", "220%"] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.4 }}
+                />
+              </div>
+            </FadeIn>
 
           <FadeIn delay={0.08}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6">
@@ -534,6 +810,24 @@ const LandingPage = () => {
                     Curated prep tracks tailored to your target role and experience level.
                   </p>
                 </div>
+            {/* Trust strip */}
+            <FadeIn delay={0.4}>
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+                <div className="flex items-center gap-1.5">
+                  <StarRating count={5} />
+
+          {/* Foreground content */}
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <FadeIn>
+              {/* Badge with shimmer sweep */}
+              <div className="relative inline-flex items-center gap-2 mb-6 text-xs font-semibold text-violet-300 bg-violet-500/10 border border-violet-500/25 px-4 py-1.5 rounded-full overflow-hidden">
+                <LuSparkles className="text-violet-400 relative z-10" />
+                <span className="relative z-10">AI Powered Interview Mastery</span>
+                <motion.span
+                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                  animate={{ x: ["-120%", "220%"] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.4 }}
+                />
               </div>
             </FadeIn>
 
@@ -612,6 +906,186 @@ const LandingPage = () => {
               </div>
             </FadeIn>
 
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────
+            STATS STRIP — premium glass cards
+        ───────────────────────────────── */}
+        <section ref={statsRef} className="relative border-y border-white/6 py-14 px-4">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+            {STATS.map((stat, i) => (
+              <FadeIn key={stat.id} delay={i * 0.07} className="text-center">
+                <div className="stat-number text-4xl sm:text-5xl font-extrabold mb-1 tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-400 font-medium">
+                  {stat.label}
+                </div>
+                <span className="hidden sm:block w-px h-4 bg-white/10" />
+                <span className="text-sm text-gray-400 font-medium">
+                  Trusted by 10,000+ developers
+                </span>
+                <span className="hidden sm:block w-px h-4 bg-white/10" />
+                <span className="text-sm text-gray-400 font-medium">
+                  Built for FAANG &amp; startup interviews
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+
+          {/* Scroll indicator */}
+          <motion.button
+            onClick={scrollToStats}
+            aria-label="Scroll to explore"
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-gray-500 hover:text-violet-300 transition-colors"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.6 }}
+          >
+            <span className="text-[10px] font-semibold tracking-widest uppercase">
+              Scroll
+            </span>
+            <motion.span
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronDown size={18} />
+            </motion.span>
+          </motion.button>
+        </section>
+
+        {/* ─────────────────────────────────
+            STATS STRIP — premium glass cards
+        ───────────────────────────────── */}
+        <StatsSection statsRef={statsRef} />
+
+        {/* ─────────────────────────────────
+            MARQUEE / SERVICES STRIP
+        ───────────────────────────────── */}
+        <div className="border-b border-white/6 py-4">
+          <ServicesMarquee />
+        </div>
+
+        {/* ─────────────────────────────────
+            FEATURES – premium spotlight cards
+        ───────────────────────────────── */}
+        <section className="py-24">
+          <div className="max-w-6xl mx-auto px-4 mb-8">
+            <FadeIn className="text-center">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+                Supercharge Your{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
+                  Interview Journey
+                </span>
+              </h2>
+            </FadeIn>
+          </div>
+
+          {/* 3 equal columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 items-stretch">
+            {/* ── CARD 1: Personalized Recommendations ── */}
+            <FadeIn delay={0.05} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 flex flex-col gap-3.5 border-b border-white/6">
+                  {[
+                    { label: "Frontend Engineer Track", sub: "React · TypeScript · Performance" },
+                    { label: "System Design Deep Dive", sub: "HLD · LLD · Scalability" },
+                    { label: "DSA Mastery Sprint", sub: "Arrays · Graphs · DP" },
+                    { label: "Behavioral Interview Prep", sub: "STAR · Leadership · Culture" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.03] border border-white/6">
+                      <div className="w-1.5 h-10 rounded-full bg-violet-500/60 flex-shrink-0" />
+                      <div>
+                        <p className="text-white text-sm font-medium leading-tight">{item.label}</p>
+                        <p className="text-gray-500 text-xs mt-1">{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Personalized Recommendations</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Curated prep tracks tailored to your target role and experience level.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* ── CARD 2: AI Assistance ── */}
+            <FadeIn delay={0.12} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 border-b border-white/6 flex flex-col gap-4">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-7 h-7 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="bg-white/[0.05] border border-white/8 rounded-xl rounded-tl-none px-4 py-3 text-sm text-gray-300 max-w-[85%]">
+                      Explain time complexity of quicksort in the worst case.
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start flex-row-reverse">
+                    <div className="w-7 h-7 rounded-full bg-violet-600/30 border border-violet-500/30 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-violet-400" />
+                    </div>
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl rounded-tr-none px-4 py-3 text-sm text-gray-200 max-w-[85%]">
+                      In the worst case — a sorted array with the last element as pivot — quicksort degrades to <span className="text-violet-300 font-mono">O(n²)</span>. Using randomized pivots avoids this.
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-7 h-7 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="bg-white/[0.05] border border-white/8 rounded-xl rounded-tl-none px-4 py-3 text-sm text-gray-300 max-w-[85%]">
+                      Can you give me a follow-up question on this?
+                    </div>
+                  </div>
+                  <div className="h-8 flex items-center gap-2 px-1">
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Seamless AI Assistance</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Ask anything and get instant explanations, hints, and concept breakdowns.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* ── CARD 3: Precision Filters ── */}
+            <FadeIn delay={0.2} className="flex h-full">
+              <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-white/8 bg-[#0f0f14] min-h-[520px]">
+                <div className="flex-1 p-8 flex flex-col gap-4 border-b border-white/6">
+                  {[
+                    { label: "Difficulty", tags: ["Easy", "Medium", "Hard", "Expert"] },
+                    { label: "Role Type", tags: ["Frontend", "Backend", "Full Stack", "DevOps"] },
+                    { label: "Tech Stack", tags: ["React", "Node.js", "Python", "TypeScript"] },
+                  ].map((group) => (
+                    <div key={group.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/6">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                        {group.label}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {group.tags.map((tag) => (
+                          <span key={tag} className="text-sm px-3 py-1.5 rounded-lg border border-white/10 text-gray-300 bg-white/[0.04]">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-8 py-6">
+                  <h3 className="text-white font-semibold text-lg mb-1.5">Precision Filters</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Zero in on questions by difficulty, role type, and your tech stack.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
           </div>
         </section>
 
