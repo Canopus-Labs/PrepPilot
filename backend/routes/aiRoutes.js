@@ -128,6 +128,11 @@ router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, gener
  * 200 {"availableModels": ["gemini-2.5-flash"], "configured": "models/gemini-2.5-flash", "note": "..."}
  */
 router.get("/models", async (req, res) => {
+  if (!process.env.GEMINI_API_KEY) {
+    return res
+      .status(500)
+      .json({ error: "GEMINI_API_KEY not configured on server" });
+  }
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const models = await genAI.listModels();
