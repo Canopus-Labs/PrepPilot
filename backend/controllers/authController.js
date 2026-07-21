@@ -2,7 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { sendVerificationEmail } = require("../utils/sendEmail");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
 const ACCESS_TOKEN_EXPIRY = "15m";
@@ -506,4 +506,38 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+/**
+ * Handle forgot password request.
+ * @route POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email });
+        
+        // Always return success to prevent email enumeration attacks
+        if (!user) {
+            return res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+        }
+
+        // Generate reset token and set expiry to 1 hour
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        await sendPasswordResetEmail(user.email, resetUrl);
+
+        res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, forgotPassword };
