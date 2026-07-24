@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { compileResume, analyzeResume, saveResume, getMyResumes } = require('../controllers/resumeController');
+const { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume } = require('../controllers/resumeController');
 const { protect } = require('../middlewares/authMiddleware');
 const { upload, uploadResume } = require('../middlewares/uploadMiddleware');
 const { aiLimiter } = require('../middlewares/rateLimiter');
@@ -27,5 +27,10 @@ router.post('/save', validateSaveResume, saveResume);
 // @desc    Get all saved resumes for logged-in user
 // @access  Private
 router.get('/my-resumes', getMyResumes);
+
+// @route   DELETE /api/resume/:id
+// @desc    Delete a saved resume by ID
+// @access  Private
+router.delete('/:id', deleteResume);
 
 module.exports = router;

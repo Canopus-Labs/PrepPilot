@@ -232,4 +232,18 @@ const getMyResumes = async (req, res, next) => {
     }
 };
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes };
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
+
+/**
+ * Delete a resume by ID (owner only).
+ * @route DELETE /api/resume/:id
+ */
+async function deleteResume(req, res) {
+    try {
+        const resume = await Resume.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+        if (!resume) return res.status(404).json({ message: "Resume not found." });
+        return res.json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ message: "Failed to delete resume.", error: err.message });
+    }
+}

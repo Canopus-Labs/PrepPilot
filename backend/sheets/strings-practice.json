@@ -1,0 +1,374 @@
+{
+  "sheets": [
+    {
+      "id": "strings-practice",
+      "title": "Strings Practice",
+      "description": "Master all essential string problems from basics to advanced for coding interviews.",
+      "followers": 1350,
+      "questions": 34,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Strings Practice Sheet",
+          "topics": [
+            {
+              "title": "Easy Problems",
+              "subtopics": [
+                {
+                  "title": "Reverse a String",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-a-string/1",
+                    "youtube": "https://youtu.be/mdej8UiRCkI"
+                  }
+                },
+                {
+                  "title": "Valid Palindrome",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/valid-palindrome/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/palindrome-string0817/1",
+                    "youtube": "https://youtu.be/dSRFgEs3a6A"
+                  }
+                },
+                {
+                  "title": "Valid Anagram",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/valid-anagram/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/anagram-1587115620/1",
+                    "youtube": "https://youtu.be/1tmEKyRAMuY"
+                  }
+                },
+                {
+                  "title": "Longest Common Prefix",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-common-prefix/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-common-prefix-in-an-array5129/1",
+                    "youtube": "https://youtu.be/VTr3Nh7BadI"
+                  }
+                },
+                {
+                  "title": "First Unique Character in a String",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/first-unique-character-in-a-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/non-repeating-character-1587115620/1",
+                    "youtube": "https://youtu.be/vqLiP9cdDLA"
+                  }
+                },
+                {
+                  "title": "Implement strStr()",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/implement-strstr/1",
+                    "youtube": "https://youtu.be/7UBEku3y2Ig"
+                  }
+                },
+                {
+                  "title": "Reverse String II",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-string-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/SUrrSVfk7pk"
+                  }
+                },
+                {
+                  "title": "Length of Last Word",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/length-of-last-word/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/length-of-last-word5721/1",
+                    "youtube": "https://youtu.be/hi0I4UiPu-M"
+                  }
+                },
+                {
+                  "title": "Roman to Integer",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/roman-to-integer/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/roman-number-to-integer3201/1",
+                    "youtube": "hhttps://youtu.be/ULNj8zXNeC0"
+                  }
+                },
+                {
+                  "title": "Detect Capital",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/detect-capital/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/DrVLI_NXaic"
+                  }
+                },
+                {
+                  "title": "Isomorphic Strings",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/isomorphic-strings/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/isomorphic-strings-1587115620/1",
+                    "youtube": "https://youtu.be/2ISNCDJEgqQ"
+                  }
+                },
+                {
+                  "title": "Ransom Note",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/ransom-note/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/-HkyMzzGWXM"
+                  }
+                },
+                {
+                  "title": "Buddy Strings",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/buddy-strings/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/LTrZCwuCoiE"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Medium Problems",
+              "subtopics": [
+                {
+                  "title": "Reverse Words in a String",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-words-in-a-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-words-in-a-given-string5459/1",
+                    "youtube": "https://youtu.be/mdej8UiRCkI"
+                  }
+                },
+                {
+                  "title": "String to Integer (atoi)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/string-to-integer-atoi/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/implement-atoi/1",
+                    "youtube": "https://youtu.be/qZoFJKyHQ98"
+                  }
+                },
+                {
+                  "title": "Longest Substring Without Repeating Characters",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/length-of-the-longest-substring3036/1",
+                    "youtube": "https://youtu.be/-zSxTJkcdAo"
+                  }
+                },
+                {
+                  "title": "Group Anagrams",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/group-anagrams/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/print-anagrams-together/1",
+                    "youtube": "https://youtu.be/TNe3gF4r128"
+                  }
+                },
+                {
+                  "title": "Longest Palindromic Substring",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-palindromic-substring/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-palindrome-in-a-string1956/1",
+                    "youtube": "https://youtu.be/n_kL8BkURVA"
+                  }
+                },
+                {
+                  "title": "Decode String",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/decode-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/decode-the-string2444/1",
+                    "youtube": "https://youtu.be/E9qHRcQXmDk"
+                  }
+                },
+                {
+                  "title": "Zigzag Conversion",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/zigzag-conversion/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/OO_wrniY8Ts"
+                  }
+                },
+                {
+                  "title": "Find All Anagrams in a String",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-all-anagrams-in-a-string/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/egPDpu26q0M"
+                  }
+                },
+                {
+                  "title": "Partition Labels",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/partition-labels/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/aUVEMnlcw4E"
+                  }
+                },
+                {
+                  "title": "Palindromic Substrings",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/palindromic-substrings/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/count-palindrome-sub-strings-of-a-string0652/1",
+                    "youtube": "https://youtu.be/FsmwSuQuGxE"
+                  }
+                },
+                {
+                  "title": "Longest Repeating Character Replacement",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-repeating-character-replacement/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-repeating-character-replacement/1",
+                    "youtube": "https://youtu.be/_eNhaDCr6P0"
+                  }
+                },
+                {
+                  "title": "Encode and Decode Strings",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/encode-and-decode-strings/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/B1k_sxOSgv8"
+                  }
+                },
+                {
+                  "title": "String Compression",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/string-compression/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/I7drewKcN1Y"
+                  }
+                },
+                {
+                  "title": "Multiply Strings",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/multiply-strings/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/multiply-two-strings/1",
+                    "youtube": "https://youtu.be/1vZswirL8Y8"
+                  }
+                },
+                {
+                  "title": "Remove All Adjacent Duplicates in String II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/w6LcypDgC4w"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Hard Problems",
+              "subtopics": [
+                {
+                  "title": "Minimum Window Substring",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-window-substring/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/smallest-window-in-a-string-containing-all-the-characters-of-another-string-1587115621/1",
+                    "youtube": "https://youtu.be/WJaij9ffOIY"
+                  }
+                },
+                {
+                  "title": "Regular Expression Matching",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/regular-expression-matching/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/3vbBrl-LeDc"
+                  }
+                },
+                {
+                  "title": "Wildcard Matching",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/wildcard-matching/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/wildcard-pattern-matching/1",
+                    "youtube": "https://youtu.be/ZmlQ3vgAOMo"
+                  }
+                },
+                {
+                  "title": "Text Justification",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/text-justification/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/jpU2LVaDa4g"
+                  }
+                },
+                {
+                  "title": "Scramble String",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/scramble-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/scrambled-string/1",
+                    "youtube": "hhttps://youtu.be/Fx96uB9EIDQ"
+                  }
+                },
+                {
+                  "title": "Distinct Subsequences",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/distinct-subsequences/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/distinct-occurrences/1",
+                    "youtube": "hhttps://youtu.be/nVG7eTiD2bY"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

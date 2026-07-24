@@ -13,7 +13,7 @@ const MOCK_USER_KEY = "mock_user";
  */
 export const isMockAuthEnabled = () => {
   try {
-    return localStorage.getItem(MOCK_AUTH_KEY) === "true";
+    return import.meta.env.DEV || localStorage.getItem(MOCK_AUTH_KEY) === "true";
   } catch {
     return false;
   }
@@ -25,7 +25,16 @@ export const isMockAuthEnabled = () => {
 export const getMockUser = () => {
   try {
     const raw = localStorage.getItem(MOCK_USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (raw) return JSON.parse(raw);
+    if (import.meta.env.DEV) {
+      return {
+        _id: "mock-user-id",
+        name: "Dev User",
+        email: "dev@mock.local",
+        profileImageUrl: "",
+      };
+    }
+    return null;
   } catch {
     return null;
   }

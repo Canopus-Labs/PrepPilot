@@ -1,0 +1,384 @@
+{
+  "sheets": [
+    {
+      "id": "stack-practice",
+      "title": "Stack Practice",
+      "description": "Master all essential stack problems from basics to advanced for coding interviews.",
+      "followers": 1820,
+      "questions": 35,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Stack Practice Sheet",
+          "topics": [
+            {
+              "title": "Easy Problems",
+              "subtopics": [
+                {
+                  "title": "Valid Parentheses",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/valid-parentheses/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/parenthesis-checker2744/1",
+                    "youtube": "https://youtu.be/cHT6sG_hUZI"
+                  }
+                },
+                {
+                  "title": "Implement Stack using Queues",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/implement-stack-using-queues/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/stack-using-two-queues/1",
+                    "youtube": "https://youtu.be/LaBE0gNYCaM"
+                  }
+                },
+                {
+                  "title": "Min Stack",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/min-stack/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/get-minimum-element-from-stack/1",
+                    "youtube": "https://youtu.be/NdDIaH91P0g"
+                  }
+                },
+                {
+                  "title": "Baseball Game",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/baseball-game/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/M20zNaYJeBs"
+                  }
+                },
+                {
+                  "title": "Backspace String Compare",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/backspace-string-compare/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/backspace-string-compare/1",
+                    "youtube": "https://youtu.be/u6K3j3n3vbA"
+                  }
+                },
+                {
+                  "title": "Remove Outermost Parentheses",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-outermost-parentheses/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/outermost-parentheses/1",
+                    "youtube": "https://youtu.be/I0osO1BqiGw"
+                  }
+                },
+                {
+                  "title": "Make The String Great",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/make-the-string-great/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/J43ZIltH3AY"
+                  }
+                },
+                {
+                  "title": "Remove All Adjacent Duplicates in String",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/recursively-remove-all-adjacent-duplicates0744/1",
+                    "youtube": "https://youtu.be/VeOUal3_s6c"
+                  }
+                },
+                {
+                  "title": "Next Greater Element I",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/next-greater-element-i/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/e7XQLtOQM3I"
+                  }
+                },
+                {
+                  "title": "Next Greater Element II",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/next-greater-element-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/next-greater-element/1",
+                    "youtube": "https://youtu.be/7PrncD7v9YQ"
+                  }
+                },
+                {
+                  "title": "Build an Array With Stack Operations",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/build-an-array-with-stack-operations/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/nmNLu1Qz-C0"
+                  }
+                },
+                {
+                  "title": "Final Prices With a Special Discount in a Shop",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/final-prices-with-a-special-discount-in-a-shop/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/y5CZ7LhqSAU"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Medium Problems",
+              "subtopics": [
+                {
+                  "title": "Daily Temperatures",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/daily-temperatures/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/ZhZEmGv-sOY"
+                  }
+                },
+                {
+                  "title": "Evaluate Reverse Polish Notation",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/evaluate-reverse-polish-notation/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/BM-bu4tJz7U"
+                  }
+                },
+                {
+                  "title": "Asteroid Collision",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/asteroid-collision/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/asteroid-collision/1",
+                    "youtube": "https://youtu.be/7isfomHzzno"
+                  }
+                },
+                {
+                  "title": "Decode String",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/decode-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/decode-the-string2444/1",
+                    "youtube": "https://youtu.be/xK95Wlng_RA"
+                  }
+                },
+                {
+                  "title": "Simplify Path",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/simplify-path/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/ZV-Hi1e1KL8"
+                  }
+                },
+                {
+                  "title": "Online Stock Span",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/online-stock-span/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/stock-span-problem-1587115621/1",
+                    "youtube": "https://youtu.be/IDC1rnr3vus"
+                  }
+                },
+                {
+                  "title": "Remove K Digits",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-k-digits/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/remove-k-digits/1",
+                    "youtube": "https://youtu.be/jmbuRzYPGrg"
+                  }
+                },
+                {
+                  "title": "Score of Parentheses",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/score-of-parentheses/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/rWsv46ME6lI"
+                  }
+                },
+                {
+                  "title": "Validate Stack Sequences",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/validate-stack-sequences/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/lqP82OhRkAA"
+                  }
+                },
+                {
+                  "title": "Next Greater Element III",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/next-greater-element-iii/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/eAfJJyaAmes"
+                  }
+                },
+                {
+                  "title": "Sum of Subarray Minimums",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sum-of-subarray-minimums/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/sum-of-subarray-minimum/1",
+                    "youtube": "https://youtu.be/v0e8p9JCgRc"
+                  }
+                },
+                {
+                  "title": "Maximum Width Ramp",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximum-width-ramp/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/ClboFCGDT4I"
+                  }
+                },
+                {
+                  "title": "Basic Calculator II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/basic-calculator-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/sfM4DjMfhw4"
+                  }
+                },
+                {
+                  "title": "Exclusive Time of Functions",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/exclusive-time-of-functions/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/dsusgzffTDA"
+                  }
+                },
+                {
+                  "title": "Design Browser History",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/design-browser-history/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/FNcanLK6aZs"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Hard Problems",
+              "subtopics": [
+                {
+                  "title": "Largest Rectangle in Histogram",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/Bzat9vgD0fs"
+                  }
+                },
+                {
+                  "title": "Trapping Rain Water",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/trapping-rain-water/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/trapping-rain-water-1587115621/1",
+                    "youtube": "https://youtu.be/1_5VuquLbXg"
+                  }
+                },
+                {
+                  "title": "Basic Calculator",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/basic-calculator/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/3AEKyHx3tzU"
+                  }
+                },
+                {
+                  "title": "Maximal Rectangle",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximal-rectangle/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/max-rectangle/1",
+                    "youtube": "https://youtu.be/ttVu6G7Ayik"
+                  }
+                },
+                {
+                  "title": "Sliding Window Maximum",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sliding-window-maximum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-of-all-subarrays-of-size-k3101/1",
+                    "youtube": "https://youtu.be/NwBvene4Imo"
+                  }
+                },
+                {
+                  "title": "Parse Lisp Expression",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/parse-lisp-expression/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/N36wbIROe9E"
+                  }
+                },
+                {
+                  "title": "Number of Atoms",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-atoms/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/XnVWIT47H0Y"
+                  }
+                },
+                {
+                  "title": "Remove Invalid Parentheses",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-invalid-parentheses/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/remove-invalid-parentheses/1",
+                    "youtube": "https://youtu.be/Cbbf5qe5stw"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

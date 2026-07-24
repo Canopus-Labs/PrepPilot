@@ -1,510 +1,493 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import moment from "moment";
 import {
-  TrendingUp,
-  FileText,
-  Activity,
-  BookOpen,
-  PlusCircle,
-  Video,
-  ArrowRight,
-  CheckCircle,
+  Github, Linkedin, Twitter, Globe, GraduationCap,
+  MapPin, BookOpen, Video, FileText, ArrowRight,
+  CheckCircle, PlusCircle, Settings, Code2, Star,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import AchievementBadge from "../../components/AchievementBadge";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { CARD_BG } from "../../utils/data";
 
-import SummaryCard from "../../components/Cards/SummaryCard";
-
-// Helper components for the dashboard
-const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass }) => (
-  <div
-    className={`relative overflow-hidden rounded-2xl p-6 ${gradientClass} border border-white/10 dark:border-white/5 shadow-sm`}
-  >
-    <div className="flex justify-between items-start mb-4">
-      <div>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-          {title}
-        </p>
-        <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-          {value}
-        </h3>
-      </div>
-      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-white/40 to-white/20 dark:from-white/15 dark:to-white/5 border border-white/30 dark:border-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-black/10 dark:shadow-black/30">
-        <Icon size={28} className="text-gray-700 dark:text-white/80" />
-      </div>
-    </div>
-  </div>
-);
-
-const SheetProgressCard = ({ progress, navigate }) => {
-  // Try to derive a clean name from sheetId (e.g., neetcode-150 -> Neetcode 150)
-  const formatSheetName = (id) => {
-    if (!id) return "Unknown Sheet";
-    return id
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
+/* ── Donut (SVG, zero deps) ─────────────────────────────────────────────── */
+const DonutChart = ({ value, max, size = 84, stroke = 9, color = "#7c3aed" }) => {
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = max > 0 ? Math.min(value / max, 1) * circ : 0;
   return (
-    <div
-      className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-5 hover:border-violet-300 dark:hover:border-violet-500/50 transition-colors cursor-pointer group flex flex-col justify-between"
-      onClick={() => navigate(`/sheet/${progress.sheetId}`)}
-    >
-      <div>
-        <div className="flex justify-between items-start mb-4">
-          <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-            {formatSheetName(progress.sheetId)}
-          </h4>
-          <span className="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 rounded-lg">
-            {Math.round(progress.percentage || 0)}%
-          </span>
-        </div>
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#ffffff0d" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color}
+          strokeWidth={stroke} strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          style={{ transition: "stroke-dasharray 0.8s ease" }} />
+      </svg>
+      <span className="absolute text-base font-bold text-white">{value}</span>
+    </div>
+  );
+};
 
-        {/* Progress Bar */}
-        <div className="h-2 w-full bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden mb-2">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-1000 ease-out"
-            style={{ width: `${progress.percentage || 0}%` }}
-          />
-        </div>
-      </div>
+/* ── Difficulty breakdown ────────────────────────────────────────────────── */
+const DIFF_CONFIG = {
+  easy:   { label: "Easy",   bar: "bg-emerald-500", text: "text-emerald-400", bg: "bg-emerald-500/10" },
+  medium: { label: "Medium", bar: "bg-yellow-400",  text: "text-yellow-400",  bg: "bg-yellow-400/10" },
+  hard:   { label: "Hard",   bar: "bg-red-500",     text: "text-red-400",     bg: "bg-red-500/10" },
+};
 
-      <div className="mt-4 flex items-center justify-between text-sm">
-        <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <BookOpen size={14} /> Active Practice
+const DiffBar = ({ level, solved, total }) => {
+  const cfg = DIFF_CONFIG[level];
+  const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${cfg.bar}`} />
+          <span className={`font-semibold ${cfg.text}`}>{cfg.label}</span>
+        </div>
+        <span className="text-gray-400">
+          <span className="text-white font-bold">{solved}</span>
+          <span className="text-gray-500"> / {total}</span>
         </span>
-        <ArrowRight
-          size={16}
-          className="text-gray-400 group-hover:text-violet-500 transition-colors transform group-hover:translate-x-1"
-        />
+      </div>
+      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+        <div className={`h-full ${cfg.bar} rounded-full transition-all duration-700`}
+          style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
 };
 
-const ResumeCard = ({ resume, navigate }) => (
-  <div
-    className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-100 dark:border-indigo-500/20 rounded-2xl p-5 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
-    // Use blank if no ID, but generally users can just go back to builder to edit.
-    // The best mapping is to pass the latex code, but currently ResumeBuilder fetches from params or default.
-    // For now, link to the builder page or download PDF directly. We'll simply link to /resume-builder.
-    onClick={() => navigate(`/resume-builder`)}
-  >
+/* ── Small stat card ─────────────────────────────────────────────────────── */
+const StatCard = ({ label, value, icon: Icon, accent }) => (
+  <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5 flex items-center gap-3">
+    <Icon size={20} className={accent} />
     <div>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="p-2.5 bg-indigo-500 text-white rounded-xl shadow-sm">
-          <FileText size={20} />
-        </div>
-        <div>
-          <h4 className="font-bold text-gray-900 dark:text-white line-clamp-1">
-            {resume.title || "My Resume"}
-          </h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Updated {moment(resume.updatedAt).fromNow()}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div className="mt-3 flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-      <span>Edit Resume</span>
-      <ArrowRight
-        size={16}
-        className="ml-1 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all"
-      />
+      <p className="text-2xl font-extrabold text-gray-900 dark:text-white leading-none">{value}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
     </div>
   </div>
 );
 
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+const fmtSheet = (id) =>
+  (id || "Unknown").split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+
+function buildDifficultyStats(progress, sheetsMap) {
+  const stats = { easy: { solved: 0, total: 0 }, medium: { solved: 0, total: 0 }, hard: { solved: 0, total: 0 } };
+
+  progress.forEach(s => {
+    const sheet = sheetsMap[s.sheetId];
+    if (!sheet) return;
+    const completed = s.completedTopics || {};
+
+    sheet.sections?.forEach((section, sIdx) => {
+      section.topics?.forEach((topic, tIdx) => {
+        topic.subtopics?.forEach((sub, subIdx) => {
+          const diff = (sub.difficulty || "medium").toLowerCase();
+          const key = `${sIdx}-${tIdx}-${subIdx}`;
+          const bucket = stats[diff] || stats.medium;
+          bucket.total++;
+          if (completed[key]) bucket.solved++;
+        });
+      });
+    });
+  });
+
+  return stats;
+}
+
+
+/* ── Main ────────────────────────────────────────────────────────────────── */
 const ProgressTrackerDashboard = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  // Data states
   const [sessions, setSessions] = useState([]);
   const [resumes, setResumes] = useState([]);
   const [sheetProgress, setSheetProgress] = useState([]);
-
-  const achievements = [
-  {
-    title: "First Interview",
-    description: "Create your first mock interview session",
-    unlocked: sessions.length >= 1,
-  },
-  {
-    title: "Interview Pro",
-    description: "Complete 5 interview sessions",
-    unlocked: sessions.length >= 5,
-  },
-  {
-    title: "Interview Master",
-    description: "Complete 10 interview sessions",
-    unlocked: sessions.length >= 10,
-  },
-  {
-    title: "Resume Builder",
-    description: "Create your first resume",
-    unlocked: resumes.length >= 1,
-  },
-  {
-    title: "Resume Expert",
-    description: "Create 3 resumes",
-    unlocked: resumes.length >= 3,
-  },
-  {
-    title: "DSA Beginner",
-    description: "Reach 50% progress in any sheet",
-    unlocked: sheetProgress.some(
-      (sheet) => sheet.percentage >= 50
-    ),
-  },
-  {
-    title: "DSA Master",
-    description: "Reach 100% progress in any sheet",
-    unlocked: sheetProgress.some(
-      (sheet) => sheet.percentage >= 100
-    ),
-  },
-];
-
-const achievementsSynced = useRef(null);
-useEffect(() => {
-    if (loading || !user?._id || achievementsSynced.current === user._id) return;
-    achievementsSynced.current = user._id;
-
-    const fetchAndUpdateAchievements = async () => {
-        try {
-            // Get already unlocked achievements from backend
-            const res = await axiosInstance.get("/api/user/achievements");
-            const alreadyUnlocked = new Set(res.data.unlockedAchievements || []);
-
-            const newlyUnlocked = achievements.filter(
-                (b) => b.unlocked && !alreadyUnlocked.has(b.title)
-            );
-
-            newlyUnlocked.forEach((badge) => {
-                toast.success(`🏆 Badge unlocked: ${badge.title}!`);
-                alreadyUnlocked.add(badge.title);
-            });
-
-            if (newlyUnlocked.length > 0) {
-                // Save updated achievements to backend
-                await axiosInstance.post("/api/user/achievements", {
-                    unlockedAchievements: [...alreadyUnlocked],
-                });
-            }
-        } catch (err) {
-            console.error("Failed to sync achievements:", err);
-        }
-    };
-
-    fetchAndUpdateAchievements();
-}, [loading, user, sessions, resumes, sheetProgress]);
-
+  const [sheetsMap, setSheetsMap] = useState({});
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    (async () => {
       setLoading(true);
       try {
-        const [sessionsRes, resumesRes, progressRes] = await Promise.all([
-          axiosInstance
-            .get(API_PATHS.SESSION.GET_ALL)
-            .catch(() => ({ data: [] })),
-          axiosInstance
-            .get(API_PATHS.RESUME.GET_ALL)
-            .catch(() => ({ data: { resumes: [] } })),
-          axiosInstance
-            .get("/api/user/sheet-progress")
-            .catch(() => ({ data: { progressList: [] } })),
+        const [sRes, rRes, pRes, shRes] = await Promise.all([
+          axiosInstance.get(API_PATHS.SESSION.GET_ALL).catch(() => ({ data: [] })),
+          axiosInstance.get(API_PATHS.RESUME.GET_ALL).catch(() => ({ data: { resumes: [] } })),
+          axiosInstance.get("/api/user/sheet-progress").catch(() => ({ data: { progressList: [] } })),
+          axiosInstance.get("/api/sheets").catch(() => ({ data: { sheets: [] } })),
         ]);
+        setSessions(sRes.data || []);
+        setResumes(rRes.data?.resumes || []);
 
-        setSessions(sessionsRes.data || []);
-        setResumes(resumesRes.data?.resumes || []);
+        // Build a sheetId → sheet object lookup
+        const map = {};
+        (shRes.data?.sheets || []).forEach(sh => { map[sh.id] = sh; });
+        setSheetsMap(map);
 
-        // Only show sheets that are actually followed or have progress
-        const activeProgress = (progressRes.data?.progressList || [])
-          .filter((p) => p.percentage > 0 || p.followed)
+        // Start with backend data
+        const backendProgress = pRes.data?.progressList || [];
+        const backendIds = new Set(backendProgress.map(p => p.sheetId));
+
+        // Merge localStorage entries for any followed sheets not yet in backend
+        // and sync them up in the background
+        const localExtra = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.endsWith("-progress")) continue;
+          const sheetId = key.replace(/-progress$/, "");
+          if (backendIds.has(sheetId)) continue;
+          try {
+            const raw = JSON.parse(localStorage.getItem(key) || "{}");
+            if (raw.followed) {
+              localExtra.push({
+                sheetId,
+                followed: true,
+                completedTopics: raw.completedTopics || {},
+                percentage: raw.percentage || 0,
+              });
+              // Background sync to backend
+              axiosInstance.post("/api/user/sheet-progress", {
+                sheetId,
+                followed: true,
+                completedTopics: raw.completedTopics || {},
+                percentage: raw.percentage || 0,
+              }).catch(() => {});
+            }
+          } catch {}
+        }
+
+        const merged = [...backendProgress, ...localExtra]
+          .filter(p => p.percentage > 0 || p.followed)
           .sort((a, b) => b.percentage - a.percentage);
 
-        setSheetProgress(activeProgress);
-      } catch (error) {
-        console.error("Dashboard data error:", error);
-        toast.error("Failed to load some dashboard widgets.");
+        setSheetProgress(merged);
+      } catch {
+        toast.error("Failed to load dashboard data.");
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchDashboardData();
+    })();
   }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] dark:bg-[#0f172a]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600" />
       </div>
     );
   }
 
+  const diffStats   = buildDifficultyStats(sheetProgress, sheetsMap);
+  const solved      = diffStats.easy.solved + diffStats.medium.solved + diffStats.hard.solved;
+  const displayName = user?.firstName
+    ? `${user.firstName}${user.lastName ? " " + user.lastName : ""}`
+    : user?.name || "PrepPilot User";
+  const initial  = displayName.charAt(0).toUpperCase();
+  const socials  = user?.profileDetails?.socials || {};
+  const edu      = user?.educationDetails || {};
+
   return (
-    <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white pb-20 transition-colors duration-300">
-      {/* Header Section */}
-      <div className="bg-white dark:bg-white/5 border-b border-gray-200 dark:border-white/10 pt-8 pb-10 px-6 md:px-12 backdrop-blur-md">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
-              Progress Tracker
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-2xl leading-relaxed">
-              Your centralized hub for interview preparation. Monitor DSA
-              progress, manage mock interviews, and organize your generated
-              resumes.
-            </p>
-          </div>
+    <div className="min-h-full bg-[var(--color-background)] dark:bg-[#0b1120] text-gray-900 dark:text-white">
+      <div className="max-w-[1360px] mx-auto p-4 md:p-6 lg:p-8 space-y-6">
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => navigate("/coding-sheets")}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/20 transition-all flex items-center gap-2"
-            >
-              <BookOpen size={18} />
-              Explore Sheets
-            </button>
-            <button
-              onClick={() => navigate("/role-prep")}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-violet-600 hover:bg-violet-700 text-white shadow-sm shadow-violet-500/30 transition-all flex items-center gap-2"
-            >
-              <PlusCircle size={18} />
-              New Session
-            </button>
-          </div>
-        </div>
-      </div>
+        {/* ══ TOP ROW: Profile + Stats ══════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">
 
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 mt-8 space-y-12">
-        {/* STATS OVERVIEW */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <StatCard
-            title="SDE Sheets Active"
-            value={sheetProgress.length}
-            icon={TrendingUp}
-            colorClass="bg-emerald-500"
-            gradientClass="bg-white dark:bg-black/20"
-          />
-          <StatCard
-            title="Interview Sessions"
-            value={sessions.length}
-            icon={Video}
-            colorClass="bg-violet-500"
-            gradientClass="bg-white dark:bg-black/20"
-          />
-          <StatCard
-            title="Saved Resumes"
-            value={resumes.length}
-            icon={FileText}
-            colorClass="bg-blue-500"
-            gradientClass="bg-white dark:bg-black/20"
-          />
-          <StatCard
-            title="App Readiness"
-            value={
-              sessions.length > 2 && sheetProgress.length > 0
-                ? "High"
-                : "Learning"
-            }
-            icon={Activity}
-            colorClass="bg-fuchsia-500"
-            gradientClass="bg-white dark:bg-black/20"
-          />
-        </div>
-        
-        {/* ACHIEVEMENTS */}
-        <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold"> 🏆 Achievements </h2>
-          <span className="text-sm text-gray-500">
-            {
-            achievements.filter(
-          (badge) => badge.unlocked
-        ).length
-        }{" "}
-        / {achievements.length} unlocked
-        </span>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {achievements.map((badge) => (
-            <AchievementBadge
-            key={badge.title}
-            title={badge.title}
-            description={badge.description}
-            unlocked={badge.unlocked}
-            />
-            ))}
-            </div>
-            </div>
-
-        {/* MAIN CONTENT SPLIT */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT COLUMN: Sessions */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Video className="text-violet-500" size={24} />
-                Recent Interview Sessions
-              </h2>
-              <Link
-                to="/role-prep"
-                className="text-sm font-semibold text-violet-600 dark:text-violet-400 hover:underline"
-              >
-                View All
-              </Link>
-            </div>
-
-            {sessions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {sessions.slice(0, 4).map((data, index) => (
-                  <SummaryCard
-                    key={data._id}
-                    colors={CARD_BG[index % CARD_BG.length]}
-                    role={data.role || ""}
-                    topicsToFocus={data.topicsToFocus || ""}
-                    experience={data.experience || "-"}
-                    questions={data.questions?.length || "-"}
-                    description={data.description || ""}
-                    lastupdated={
-                      data.updatedAt
-                        ? moment(data.updatedAt).format("Do MMM YYYY")
-                        : ""
-                    }
-                    onSelect={() => navigate(`/interview-prep/${data._id}`)}
-                    onDelete={() => {}} // Handle delete in full view if needed, or pass prop
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Video size={28} />
+          {/* Profile card */}
+          <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-6 flex flex-col items-center text-center gap-4">
+            {/* Avatar */}
+            <div className="relative">
+              {user?.profileImageUrl ? (
+                <img src={user.profileImageUrl} alt="avatar"
+                  className="w-20 h-20 rounded-full object-cover ring-2 ring-violet-500/30" />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-3xl font-bold text-white">
+                  {initial}
                 </div>
-                <h3 className="font-bold text-lg mb-2">
-                  No Mock Interviews yet
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-sm mx-auto">
-                  Practice your behavioral and technical speaking skills with
-                  our AI interviewer.
-                </p>
-                <button
-                  onClick={() => navigate("/role-prep")}
-                  className="bg-violet-600 text-white rounded-lg px-6 py-2.5 font-semibold"
-                >
-                  Create Session
-                </button>
+              )}
+              <span className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-[#0b1120] ${user?.isEmailVerified ? "bg-emerald-400" : "bg-gray-400"}`} />
+            </div>
+
+            {/* Name + ID */}
+            <div className="space-y-0.5">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white">{displayName}</h2>
+              {user?.prepPilotId && <p className="text-xs text-violet-400">@{user.prepPilotId}</p>}
+              {user?.bio && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed line-clamp-2">{user.bio}</p>}
+            </div>
+
+            {/* Socials */}
+            {(socials.github || socials.linkedin || socials.twitter || socials.portfolio) && (
+              <div className="flex items-center gap-3 justify-center">
+                {socials.github    && <a href={socials.github}    target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors"><Github   size={15} /></a>}
+                {socials.linkedin  && <a href={socials.linkedin}  target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors"><Linkedin size={15} /></a>}
+                {socials.twitter   && <a href={socials.twitter}   target="_blank" rel="noreferrer" className="text-gray-400 hover:text-sky-400  transition-colors"><Twitter  size={15} /></a>}
+                {socials.portfolio && <a href={socials.portfolio} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-violet-400 transition-colors"><Globe    size={15} /></a>}
               </div>
             )}
 
-            {/* SAVED RESUMES SECTION */}
-            <div className="pt-6 mt-8 border-t border-gray-200 dark:border-white/10">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <FileText className="text-blue-500" size={24} />
-                  Your Resumes
-                </h2>
-                <button
-                  onClick={() => navigate("/resume-builder")}
-                  className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  Create New
-                </button>
-              </div>
-
-              {resumes.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {resumes.map((resume) => (
-                    <ResumeCard
-                      key={resume._id}
-                      resume={resume}
-                      navigate={navigate}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center shadow-sm">
-                  <div className="inline-block p-4 bg-gray-50 dark:bg-gray-800 rounded-full mb-3">
-                    <FileText size={24} className="text-gray-400" />
-                  </div>
-                  <p className="text-gray-500 font-medium text-sm mb-4">
-                    You haven't built any resumes yet.
-                  </p>
-                  <button
-                    onClick={() => navigate("/resume-builder")}
-                    className="text-white bg-gray-800 dark:bg-white/10 hover:dark:bg-white/20 px-5 py-2 rounded-lg font-semibold text-sm transition"
-                  >
-                    Build Resume
-                  </button>
+            {/* Meta */}
+            <div className="w-full text-left space-y-1.5 pt-3 border-t border-gray-100 dark:border-white/8">
+              {user?.country && (
+                <div className="flex items-center gap-2 text-xs text-gray-500"><MapPin size={11} />{user.country}</div>
+              )}
+              {edu.school && (
+                <div className="flex items-center gap-2 text-xs text-gray-500"><GraduationCap size={11} /><span className="truncate">{edu.school}</span></div>
+              )}
+              {edu.degree && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <BookOpen size={11} />
+                  {edu.degree}{edu.branch ? ` · ${edu.branch}` : ""}{edu.graduationYear ? ` (${edu.graduationYear})` : ""}
                 </div>
               )}
             </div>
+
+            <button onClick={() => navigate("/settings")}
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-violet-400/50 transition-all">
+              <Settings size={12} /> Edit Profile
+            </button>
           </div>
 
-          {/* RIGHT COLUMN: Sheet Progress */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <CheckCircle className="text-emerald-500" size={24} />
-              DSA Progress
-            </h2>
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-3 content-start">
+            <StatCard label="Mock Sessions"  value={sessions.length}      icon={Video}       accent="text-violet-400" />
+            <StatCard label="Saved Resumes"  value={resumes.length}       icon={FileText}    accent="text-blue-400" />
+            <StatCard label="Active Sheets"  value={sheetProgress.length} icon={Code2}       accent="text-emerald-400" />
+            <StatCard label="Topics Solved"  value={solved}               icon={CheckCircle} accent="text-fuchsia-400" />
 
-            {sheetProgress.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {sheetProgress.map((progress) => (
-                  <SheetProgressCard
-                    key={progress.sheetId}
-                    progress={progress}
-                    navigate={navigate}
-                  />
-                ))}
+            {/* Quick actions */}
+            <button onClick={() => navigate("/role-prep")}
+              className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors">
+              <PlusCircle size={15} /> New Session
+            </button>
+            <button onClick={() => navigate("/coding-sheets")}
+              className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-white/5 text-sm font-semibold transition-colors">
+              <Code2 size={15} /> DSA Sheets
+            </button>
+          </div>
+        </div>
+
+        {/* ══ MIDDLE ROW: Analysis + Sessions ══════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          {/* DSA Level Analysis */}
+          <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                <Code2 size={15} className="text-violet-400" /> DSA Level Analysis
+              </h2>
+              <button onClick={() => navigate("/coding-sheets")}
+                className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
+                View Sheets <ArrowRight size={11} />
+              </button>
+            </div>
+            {(diffStats.easy.total + diffStats.medium.total + diffStats.hard.total) > 0 ? (
+              <div className="space-y-5">
+                {/* Summary badges */}
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { level: "easy",   ...diffStats.easy },
+                    { level: "medium", ...diffStats.medium },
+                    { level: "hard",   ...diffStats.hard },
+                  ].map(({ level, solved: s, total: t }) => {
+                    const cfg = DIFF_CONFIG[level];
+                    return (
+                      <div key={level} className={`rounded-xl p-3 text-center ${cfg.bg}`}>
+                        <p className={`text-xl font-extrabold ${cfg.text}`}>{s}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">/ {t}</p>
+                        <p className={`text-[11px] font-semibold mt-1 ${cfg.text}`}>{cfg.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Progress bars */}
+                <div className="space-y-3">
+                  <DiffBar level="easy"   solved={diffStats.easy.solved}   total={diffStats.easy.total} />
+                  <DiffBar level="medium" solved={diffStats.medium.solved} total={diffStats.medium.total} />
+                  <DiffBar level="hard"   solved={diffStats.hard.solved}   total={diffStats.hard.total} />
+                </div>
+                {/* Total */}
+                <div className="flex items-center justify-between pt-3 border-t border-white/8 text-xs text-gray-500">
+                  <span>Total solved</span>
+                  <span className="text-white font-bold">
+                    {solved} / {diffStats.easy.total + diffStats.medium.total + diffStats.hard.total}
+                  </span>
+                </div>
               </div>
             ) : (
-              <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen size={28} />
-                </div>
-                <h3 className="font-bold text-lg mb-2">No Active Sheets</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
-                  Follow a DSA Master Sheet to start tracking your coding
-                  progress.
-                </p>
-                <button
-                  onClick={() => navigate("/coding-sheets")}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-6 py-2.5 font-semibold transition"
-                >
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Code2 size={28} className="text-gray-300 dark:text-white/20 mb-2" />
+                <p className="text-sm text-gray-500">Follow a DSA sheet to see difficulty breakdown.</p>
+                <button onClick={() => navigate("/coding-sheets")}
+                  className="mt-3 px-4 py-1.5 text-xs font-semibold bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
                   Explore Sheets
                 </button>
               </div>
             )}
+          </div>
 
-            {/* Quick tips widget */}
-            <div className="bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl p-6 mt-6 shadow-lg shadow-violet-500/20 relative overflow-hidden text-white">
-              <div className="relative z-10">
-                <h3 className="font-bold text-lg mb-2">Tip of the day</h3>
-                <p className="text-violet-100 text-sm leading-relaxed mb-4">
-                  Consistency is key. Aim to solve at least 2 coding problems
-                  and do 1 quick mock interview session every day.
-                </p>
-              </div>
-              {/* Decorative background shapes */}
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
-              <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-20 h-20 bg-black opacity-10 rounded-full blur-xl"></div>
+          {/* Recent Sessions */}
+          <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                <Video size={15} className="text-fuchsia-400" /> Recent Sessions
+              </h2>
+              <Link to="/role-prep" className="text-xs text-fuchsia-400 hover:text-fuchsia-300 flex items-center gap-1 transition-colors">
+                View All <ArrowRight size={11} />
+              </Link>
             </div>
+            {sessions.length > 0 ? (
+              <div className="space-y-2">
+                {sessions.slice(0, 4).map(s => (
+                  <button key={s._id} onClick={() => navigate(`/interview-prep/${s._id}`)}
+                    className="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/8 hover:border-fuchsia-400/30 hover:bg-fuchsia-500/5 transition-all group">
+                    <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 text-fuchsia-400 flex items-center justify-center shrink-0">
+                      <Video size={14} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-fuchsia-400 transition-colors">{s.role || "Untitled"}</p>
+                      <p className="text-[11px] text-gray-500 truncate">{Array.isArray(s.topicsToFocus) ? s.topicsToFocus.join(", ") : s.topicsToFocus || "—"}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[11px] text-gray-500">{s.questions?.length || 0}Q</p>
+                      <p className="text-[10px] text-gray-400">{s.updatedAt ? moment(s.updatedAt).fromNow() : ""}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Video size={28} className="text-gray-300 dark:text-white/20 mb-2" />
+                <p className="text-sm text-gray-500 mb-3">No sessions yet.</p>
+                <button onClick={() => navigate("/role-prep")}
+                  className="px-4 py-1.5 text-xs font-semibold bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-lg transition-colors">
+                  Create Session
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* ══ BOTTOM ROW: Sheet Progress + Solved Donuts + Resumes ══════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+          {/* Sheet Progress */}
+          <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                <CheckCircle size={15} className="text-emerald-400" /> Sheet Progress
+              </h2>
+              <button onClick={() => navigate("/coding-sheets")}
+                className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">+ Add</button>
+            </div>
+            {sheetProgress.length > 0 ? (
+              <div className="space-y-3.5">
+                {sheetProgress.slice(0, 5).map(p => (
+                  <button key={p.sheetId} onClick={() => navigate(`/sheet/${p.sheetId}`)} className="w-full text-left group">
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors truncate max-w-[70%]">{fmtSheet(p.sheetId)}</span>
+                      <span className="text-emerald-400 font-bold shrink-0">{Math.round(p.percentage)}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-white/8 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-700"
+                        style={{ width: `${p.percentage}%` }} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 text-center py-8">Follow a sheet to track progress</p>
+            )}
+          </div>
+
+          {/* Problems Solved (donuts) */}
+          <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
+            <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white mb-4">
+              <Star size={15} className="text-amber-400" /> Problems Solved
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-2.5">Interview Prep</p>
+                <div className="flex items-center gap-4">
+                  <DonutChart value={sessions.length} max={Math.max(sessions.length, 10)} color="#a855f7" />
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between gap-8">
+                      <span className="text-violet-400 font-semibold">Sessions</span>
+                      <span className="text-gray-900 dark:text-white font-bold">{sessions.length}</span>
+                    </div>
+                    <div className="flex justify-between gap-8">
+                      <span className="text-blue-400 font-semibold">Resumes</span>
+                      <span className="text-gray-900 dark:text-white font-bold">{resumes.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-white/8 pt-4">
+                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-2.5">DSA Sheets</p>
+                <div className="flex items-center gap-4">
+                  <DonutChart value={solved} max={Math.max(solved, 100)} color="#10b981" />
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between gap-8">
+                      <span className="text-emerald-400 font-semibold">Started</span>
+                      <span className="text-gray-900 dark:text-white font-bold">{sheetProgress.filter(s => s.percentage < 40).length}</span>
+                    </div>
+                    <div className="flex justify-between gap-8">
+                      <span className="text-yellow-400 font-semibold">Midway</span>
+                      <span className="text-gray-900 dark:text-white font-bold">{sheetProgress.filter(s => s.percentage >= 40 && s.percentage < 80).length}</span>
+                    </div>
+                    <div className="flex justify-between gap-8">
+                      <span className="text-red-400 font-semibold">Advanced</span>
+                      <span className="text-gray-900 dark:text-white font-bold">{sheetProgress.filter(s => s.percentage >= 80).length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Resumes */}
+          <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                <FileText size={15} className="text-blue-400" /> Resumes
+              </h2>
+              <button onClick={() => navigate("/resume-builder")}
+                className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+                <PlusCircle size={11} /> New
+              </button>
+            </div>
+            {resumes.length > 0 ? (
+              <div className="space-y-2">
+                {resumes.slice(0, 4).map(r => (
+                  <button key={r._id} onClick={() => navigate(`/resume-builder/${r._id}`)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/8 hover:border-blue-400/30 hover:bg-blue-500/5 transition-all text-left group">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+                      <FileText size={13} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{r.title || "My Resume"}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{moment(r.updatedAt).fromNow()}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <FileText size={28} className="text-gray-300 dark:text-white/20 mb-2" />
+                <p className="text-sm text-gray-500 mb-3">No resumes yet.</p>
+                <button onClick={() => navigate("/resume-builder")}
+                  className="px-4 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                  Build Resume
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   );

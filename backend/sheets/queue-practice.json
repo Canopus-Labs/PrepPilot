@@ -1,0 +1,364 @@
+{
+  "sheets": [
+    {
+      "id": "queue-practice",
+      "title": "Queue Practice",
+      "description": "Master all essential queue problems from basics to advanced for coding interviews.",
+      "followers": 1540,
+      "questions": 33,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Queue Practice Sheet",
+          "topics": [
+            {
+              "title": "Easy Problems",
+              "subtopics": [
+                {
+                  "title": "Implement Queue using Stacks",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/implement-queue-using-stacks/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/queue-using-two-stacks/1",
+                    "youtube": "https://youtu.be/3Et9MrMc02A"
+                  }
+                },
+                {
+                  "title": "Implement Stack using Queues",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/implement-stack-using-queues/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/stack-using-two-queues/1",
+                    "youtube": "https://youtu.be/LaBE0gNYCaM"
+                  }
+                },
+                {
+                  "title": "Number of Recent Calls",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-recent-calls/",
+                    "gfg": "",
+                    "youtube": "https://www.youtube.com/watch?v=MC8z7jGZtL8"
+                  }
+                },
+                {
+                  "title": "Moving Average from Data Stream",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/moving-average-from-data-stream/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/itmhHWaHupI?si=m4mAJJmDmCZOWif_"
+                  }
+                },
+                {
+                  "title": "Design Circular Queue",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/design-circular-queue/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/WMlBUTu-mBU"
+                  }
+                },
+                {
+                  "title": "Time Needed to Buy Tickets",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/time-needed-to-buy-tickets/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/r2LPa779amQ"
+                  }
+                },
+                {
+                  "title": "First Unique Character in a String",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/first-unique-character-in-a-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/non-repeating-character-1587115620/1",
+                    "youtube": "https://youtu.be/vqLiP9cdDLA"
+                  }
+                },
+                {
+                  "title": "Dota2 Senate",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/dota2-senate/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/r3lOL6srx1E"
+                  }
+                },
+                {
+                  "title": "Find Winner on a Tic Tac Toe Game",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-winner-on-a-tic-tac-toe-game/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/QWI1HDOPvT4"
+                  }
+                },
+                {
+                  "title": "Count Students Unable to Eat Lunch",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-students-unable-to-eat-lunch/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/M0lhTkhUlp4"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Medium Problems",
+              "subtopics": [
+                {
+                  "title": "Binary Tree Level Order Traversal",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/level-order-traversal/1",
+                    "youtube": "https://youtu.be/EoAsWbO7sqg"
+                  }
+                },
+                {
+                  "title": "Binary Tree Zigzag Level Order Traversal",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/zigzag-tree-traversal/1",
+                    "youtube": "https://youtu.be/3OXWEdlIGl4"
+                  }
+                },
+                {
+                  "title": "Rotting Oranges",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/rotting-oranges/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/rotten-oranges2536/1",
+                    "youtube": "https://youtu.be/yf3oUhkvqA0"
+                  }
+                },
+                {
+                  "title": "Open the Lock",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/open-the-lock/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/QHRlC7O-lis"
+                  }
+                },
+                {
+                  "title": "Perfect Squares",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/perfect-squares/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/get-minimum-squares0538/1",
+                    "youtube": "https://youtu.be/Zbn8in7hpXY"
+                  }
+                },
+                {
+                  "title": "Design Front Middle Back Queue",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/design-front-middle-back-queue/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/pQRFEDZbPLo"
+                  }
+                },
+                {
+                  "title": "Reveal Cards In Increasing Order",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reveal-cards-in-increasing-order/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/S6MGVmkMz2c"
+                  }
+                },
+                {
+                  "title": "Sliding Window Maximum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sliding-window-maximum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-of-all-subarrays-of-size-k3101/1",
+                    "youtube": "https://youtu.be/NwBvene4Imo"
+                  }
+                },
+                {
+                  "title": "Jump Game VI",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/jump-game-vi/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/tr1WHelOhJU"
+                  }
+                },
+                {
+                  "title": "K Closest Points to Origin",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/k-closest-points-to-origin/",
+                    "gfg": "hhttps://www.geeksforgeeks.org/problems/k-closest-points-to-origin--172242/1",
+                    "youtube": "https://youtu.be/XC4EotTewro"
+                  }
+                },
+                {
+                  "title": "Shortest Bridge",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/shortest-bridge/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/GSE0-dReL6Y"
+                  }
+                },
+                {
+                  "title": "Snakes and Ladders",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/snakes-and-ladders/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/snake-and-ladder-problem4816/1",
+                    "youtube": "https://youtu.be/26IT3FYm5h8"
+                  }
+                },
+                {
+                  "title": "Walls and Gates",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/walls-and-gates/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/e69C6xhiSQE"
+                  }
+                },
+                {
+                  "title": "Push Dominoes",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/push-dominoes/",
+                    "gfg": "",
+                    "youtube": "hhttps://youtu.be/HrUZKTzStII"
+                  }
+                },
+                {
+                  "title": "Number of Islands (BFS)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-islands/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-the-number-of-islands/1",
+                    "youtube": "https://youtu.be/muncqlKJrH0"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Hard Problems",
+              "subtopics": [
+                {
+                  "title": "Shortest Path in a Grid with Obstacles Elimination",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/zpOhlTndBv0"
+                  }
+                },
+                {
+                  "title": "Bus Routes",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/bus-routes/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/uDbr-6svYKw"
+                  }
+                },
+                {
+                  "title": "Trapping Rain Water II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/trapping-rain-water-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/C6R-Wknlq1w"
+                  }
+                },
+                {
+                  "title": "Sliding Window Maximum",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sliding-window-maximum/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/NwBvene4Imo"
+                  }
+                },
+                {
+                  "title": "Shortest Distance from All Buildings",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/shortest-distance-from-all-buildings/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/yjHXS2w_IvY"
+                  }
+                },
+                {
+                  "title": "Minimum Number of Refueling Stops",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-number-of-refueling-stops/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/tAdMNnd3CII"
+                  }
+                },
+                {
+                  "title": "The Maze III",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/the-maze-iii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/HFLD3KkeVDE"
+                  }
+                },
+                {
+                  "title": "Alien Dictionary",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/alien-dictionary/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/alien-dictionary/1",
+                    "youtube": "https://youtu.be/U3N_je7tWAs"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

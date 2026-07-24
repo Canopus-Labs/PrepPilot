@@ -40,6 +40,7 @@ import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
+import FreeCourses from "./pages/FreeCourses/FreeCourses";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) return null;
@@ -307,6 +308,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <NotesBooks />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/free-courses"
+                    element={
+                      <PageTransition>
+                        <FreeCourses />
                       </PageTransition>
                     }
                   />

@@ -2,26 +2,36 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import { FiTrendingUp, FiBookOpen } from "react-icons/fi";
-import { FiHelpCircle, FiUsers } from "react-icons/fi";
+import { FiHelpCircle, FiUsers, FiAlertCircle, FiRefreshCw } from "react-icons/fi";
 import { BASE_URL } from "../utils/apiPaths";
 
 function SheetList({ type }) {
   const [sheetList, setSheetList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const [timestamp, setTimestamp] = useState(Date.now());
   const [sheetProgresses, setSheetProgresses] = useState({});
 
+  const fetchSheets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`${BASE_URL}/api/sheets`);
+      if (!res.ok) {
+        throw new Error("Unable to load sheets right now.");
+      }
+      const data = await res.json();
+      setSheetList(data.sheets || []);
+    } catch (err) {
+      setError(err.message || "Unexpected error while loading sheets.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Fetch sheets from backend API
-    fetch(`${BASE_URL}/api/sheets`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Fetched sheets:", data.sheets);
-        setSheetList(data.sheets);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    fetchSheets();
   }, []);
 
   useEffect(() => {
@@ -75,6 +85,24 @@ function SheetList({ type }) {
         <p className="p-4 text-gray-900 dark:text-white">Loading sheets...</p>
       </>
     );
+
+  if (error)
+    return (
+      <div className="flex items-start gap-3 m-4 p-4 rounded-xl border border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-200">
+        <FiAlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+        <div className="flex-1">
+          <p className="font-semibold">Couldn't load sheets, please retry</p>
+          <p className="text-sm">{error}</p>
+          <button
+            onClick={fetchSheets}
+            className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-red-300 dark:border-red-500/40 bg-white dark:bg-white/5 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
+          >
+            <FiRefreshCw size={14} /> Retry
+          </button>
+        </div>
+      </div>
+    );
+
   if (!Array.isArray(sheetList)) return <p>No sheets available.</p>;
 
   let filteredSheet = [];
@@ -120,10 +148,9 @@ function SheetList({ type }) {
               <Link
                 to={`/sheet/${sheet.id}`}
                 key={sheet.id}
-                className="group relative bg-white dark:bg-[#1e293b] border border-gray-100 dark:border-gray-700 rounded-xl p-5 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 min-h-[190px] overflow-hidden ring-1 ring-black/5 dark:ring-white/5"
+                className="group relative bg-white dark:bg-[#1e293b] border border-gray-100 dark:border-gray-700 rounded-xl p-5 flex flex-col shadow-sm hover:shadow-md transition-all duration-300 min-h-[190px] overflow-hidden ring-1 ring-black/5 dark:ring-white/5"
               >
-                {/* Glowing Hover Background */}
-                <div className="absolute -right-6 -top-6 w-32 h-32 bg-gradient-to-br from-violet-500 to-fuchsia-500 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 rounded-full blur-3xl transition-opacity duration-500"></div>
+                {/* Glow removed */}
 
                 <div className="flex items-start gap-3 mb-3">
                   <div className="flex-shrink-0 p-2.5 rounded-xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 ring-1 ring-black/5 dark:ring-white/10">
@@ -151,7 +178,7 @@ function SheetList({ type }) {
 
                 <div className="w-full bg-gray-100 dark:bg-gray-800 h-1.5 rounded-full mb-3 overflow-hidden shadow-inner">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 relative transition-all duration-700 ease-out"
+                    className="h-full rounded-full bg-violet-600 relative transition-all duration-700 ease-out"
                     style={{ width: `${progress}%` }}
                   >
                   </div>
