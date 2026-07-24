@@ -3,7 +3,7 @@ const Question = require("../models/Question");
 const mongoose = require("mongoose");
 
 
-const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
+const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;
 const MAX_EXPERIENCE = 50;
 
 /**
