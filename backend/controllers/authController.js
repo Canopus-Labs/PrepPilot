@@ -146,6 +146,7 @@ const loginUser = async (req, res) => {
 
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
+        user.refreshTokenReuseDetected = false;
         await user.save();
         res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         res.json({
@@ -187,20 +188,41 @@ const refreshToken = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not found." });
         }
 
+        // If reuse was previously detected, deny all refresh attempts until user re-logs in.
+        if (user.refreshTokenReuseDetected) {
+            return res.status(401).json({ success: false, message: "Token reuse detected. Please log in again." });
+        }
+
         if (!user.refreshTokenHash || !user.refreshTokenExpiresAt || new Date(user.refreshTokenExpiresAt) < new Date()) {
             user.refreshTokenHash = null;
             user.refreshTokenExpiresAt = null;
+            user.refreshTokenIssuedAt = null;
             await user.save();
             return res.status(401).json({ success: false, message: "Refresh token has expired. Please log in again." });
         }
 
         const refreshIsValid = await bcrypt.compare(incomingRefreshToken, user.refreshTokenHash);
         if (!refreshIsValid) {
+            // Token does not match stored hash. Check if this is reuse after rotation
+            // (the same raw token was presented after it was already rotated).
+            // Detection: the incoming token's `iat` does not match the stored `refreshTokenIssuedAt`.
+            if (user.refreshTokenIssuedAt && decoded.iat && decoded.iat < user.refreshTokenIssuedAt) {
+                user.refreshTokenReuseDetected = true;
+                user.refreshTokenHash = null;
+                user.refreshTokenExpiresAt = null;
+                user.refreshTokenIssuedAt = null;
+                await user.save();
+                return res.status(401).json({ success: false, message: "Refresh token reuse detected. Please log in again." });
+            }
             user.refreshTokenHash = null;
             user.refreshTokenExpiresAt = null;
+            user.refreshTokenIssuedAt = null;
             await user.save();
             return res.status(401).json({ success: false, message: "Refresh token has been revoked. Please log in again." });
         }
+
+        // Record the iat of this token so future uses can be detected as reuse.
+        user.refreshTokenIssuedAt = decoded.iat;
 
         const accessToken = generateAccessToken(user._id);
         const rotatedRefreshToken = generateRefreshToken(user._id);
@@ -246,6 +268,7 @@ const logoutUser = async (req, res) => {
             if (!refreshIsValid) {
                 user.refreshTokenHash = null;
                 user.refreshTokenExpiresAt = null;
+                user.refreshTokenIssuedAt = null;
                 await user.save();
                 return res.status(401).json({ success: false, message: "Refresh token has already been revoked." });
             }
@@ -253,6 +276,7 @@ const logoutUser = async (req, res) => {
 
         user.refreshTokenHash = null;
         user.refreshTokenExpiresAt = null;
+        user.refreshTokenIssuedAt = null;
         await user.save();
 
         res.clearCookie("refreshToken", { path: "/api/auth" });
