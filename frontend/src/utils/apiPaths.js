@@ -13,6 +13,7 @@ export const API_PATHS = {
     UPDATE_PROFILE: "/api/auth/profile",
     CHANGE_PASSWORD: "/api/auth/change-password",
     DELETE_ACCOUNT: "/api/auth/delete-account",
+    REFRESH: "/api/auth/refresh", 
     LOGOUT: "/api/auth/logout",
 },
     IMAGE: {
