@@ -52,7 +52,8 @@ const addQuestionToSession = async (req, res) => {
     await session.save();
     res.status(201).json(createdQuestions);
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    console.error("Add question error:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
 };
 
@@ -97,7 +98,8 @@ const togglePinQuestion = async (req, res) => {
 
     res.status(200).json({ success: true, question });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    console.error("Toggle pin error:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
 };
 
@@ -148,7 +150,8 @@ const updateQuestionNote = async (req, res) => {
 
     res.status(200).json({ success: true, question });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    console.error("Update note error:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
 };
 

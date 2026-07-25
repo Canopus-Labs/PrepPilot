@@ -9,6 +9,7 @@ export const getInitials=(title)=>{
     const words = title.split(" ");
     let initials="";
     for(let i=0; i<Math.min(words.length,2);i++){
+        if (!words[i]) continue;
         initials += words[i][0];
     }
 

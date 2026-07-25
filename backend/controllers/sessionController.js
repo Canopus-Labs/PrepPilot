@@ -94,13 +94,14 @@ await createdSession[0].save({
         if (err.message === "SESSION_LIMIT_REACHED") {
             return res.status(400).json({
                 success: false,
-                error: `Maximum of ${MAX_SESSIONS} sessions reached.`,
+                message: `Maximum of ${MAX_SESSIONS} sessions reached.`,
             });
         }
 
+        console.error("Create session error:", err);
         return res.status(500).json({
             success: false,
-            error: err.message,
+            message: "Internal server error occurred",
         });
     } finally {
         await mongoSession.endSession();
@@ -219,13 +220,14 @@ exports.deleteSession = async (req, res) => {
         if (err.message === "SESSION_NOT_FOUND") {
             return res.status(404).json({
                 success: false,
-                error: "Session not found.",
+                message: "Session not found.",
             });
         }
 
+        console.error("Delete session error:", err);
         return res.status(500).json({
             success: false,
-            error: err.message,
+            message: "Internal server error occurred",
         });
     } finally {
         await transaction.endSession();

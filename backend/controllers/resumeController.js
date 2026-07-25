@@ -66,8 +66,8 @@ const compileResume = async (req, res) => {
         res.send(Buffer.from(response.data));
 
     } catch (error) {
-        console.error("Resume Compilation Error:", error?.message);
-        res.status(500).json({ message: "Failed to compile resume", error: error.message });
+        console.error("Resume Compilation Error:", error);
+        res.status(500).json({ message: "Failed to compile resume" });
     }
 }
 
@@ -154,7 +154,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
 
     } catch (error) {
         console.error("Resume Analysis Error:", error);
-        res.status(500).json({ message: "Failed to analyze resume", error: error.message });
+        res.status(500).json({ message: "Failed to analyze resume" });
     }
 }
 
@@ -208,7 +208,7 @@ const saveResume = async (req, res) => {
         res.status(200).json({ success: true, resume });
     } catch (error) {
         console.error("Save Resume Error:", error);
-        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+        res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 
@@ -232,7 +232,7 @@ const getMyResumes = async (req, res) => {
         res.status(200).json({ success: true, resumes });
     } catch (error) {
         console.error("Get Resumes Error:", error);
-        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+        res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 
@@ -248,6 +248,7 @@ async function deleteResume(req, res) {
         if (!resume) return res.status(404).json({ message: "Resume not found." });
         return res.json({ success: true });
     } catch (err) {
-        return res.status(500).json({ message: "Failed to delete resume.", error: err.message });
+        console.error("Delete resume error:", err);
+        return res.status(500).json({ message: "Failed to delete resume." });
     }
 }
