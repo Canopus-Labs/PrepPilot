@@ -158,6 +158,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
     }
 }
 
+const mongoose = require('mongoose');
 const Resume = require("../models/Resume");
 
 /**
@@ -189,6 +190,9 @@ const saveResume = async (req, res) => {
 
         let resume;
         if (resumeId) {
+            if (!mongoose.Types.ObjectId.isValid(resumeId)) {
+                return res.status(400).json({ success: false, message: "Invalid resumeId format." });
+            }
             resume = await Resume.findOneAndUpdate(
                 { _id: resumeId, user: userId },
                 { title, latexCode },
