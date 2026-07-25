@@ -46,11 +46,29 @@ router.post('/upload', protect, async (req, res) => {
 
 
 
-// GET / - fetch all sheets (for /api/sheets)
+// GET / - fetch all sheets with pagination (for /api/sheets)
 router.get('/', async (req, res) => {
   try {
-    const sheets = await Sheet.find({});
-    res.json({ sheets });
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 10));
+    const skip = (page - 1) * limit;
+
+    const [sheets, totalSheets] = await Promise.all([
+      Sheet.find({}).skip(skip).limit(limit).lean(),
+      Sheet.countDocuments({}),
+    ]);
+
+    res.json({
+      sheets,
+      pagination: {
+        totalSheets,
+        currentPage: page,
+        totalPages: Math.ceil(totalSheets / limit),
+        hasNextPage: page * limit < totalSheets,
+        hasPreviousPage: page > 1,
+        limit,
+      },
+    });
   } catch (err) {
     console.error('Error fetching sheets:', err);
     res.status(500).json({ error: 'Failed to fetch sheets.' });
@@ -58,14 +76,27 @@ router.get('/', async (req, res) => {
 });
 
 
-// GET /:id - fetch single sheet by id (for /api/sheets/:id)
+// GET /:id - fetch single sheet by id with optional section filter (for /api/sheets/:id)
 router.get('/:id', async (req, res) => {
   try {
     // Always find by custom id field (string)
-    const sheet = await Sheet.findOne({ id: req.params.id });
+    const sheet = await Sheet.findOne({ id: req.params.id }).lean();
     if (!sheet) {
       return res.status(404).json({ error: 'Sheet not found.' });
     }
+
+    // If a section title is provided, return only that section
+    const { section: sectionTitle } = req.query;
+    if (sectionTitle && typeof sectionTitle === 'string') {
+      const section = sheet.sections?.find(
+        (s) => s.title.toLowerCase() === sectionTitle.toLowerCase()
+      );
+      if (!section) {
+        return res.status(404).json({ error: 'Section not found in this sheet.' });
+      }
+      return res.json({ sheet: { ...sheet, sections: [section] } });
+    }
+
     res.json({ sheet });
   } catch (err) {
     console.error('Error fetching sheet:', err);
