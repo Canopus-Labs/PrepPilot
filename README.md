@@ -505,6 +505,142 @@ throw new Error("User not found with the provided email");
 | **Mixed Content Warning**     | HTTP frontend accessing HTTPS backend | Use HTTPS for both in production               |
 | **Nodemon not reloading**     | File watch issue                      | Delete node_modules and reinstall              |
 
+---
+
+## Flashcard (Spaced Repetition System) Routes
+
+### Create / Add Flashcard
+- `POST /api/flashcards`
+- Private
+
+Request Body:
+```json
+{
+  "question": "What is the time complexity of quicksort?",
+  "answer": "Average: O(N log N), Worst: O(N^2)",
+  "category": "DSA",
+  "sourceId": "dsa-qs-101"
+}
+```
+Response `201` / `200`:
+```json
+{
+  "success": true,
+  "message": "Flashcard added to SRS deck",
+  "flashcard": {
+    "_id": "660c1...",
+    "question": "What is the time complexity of quicksort?",
+    "answer": "Average: O(N log N), Worst: O(N^2)",
+    "category": "DSA",
+    "interval": 0,
+    "repetition": 0,
+    "efactor": 2.5,
+    "dueDate": "2026-07-25T16:30:00.000Z"
+  }
+}
+```
+Errors:
+- `400` validation error (question or answer missing)
+- `500` server error
+
+---
+
+### Get Flashcards
+- `GET /api/flashcards`
+- Private
+- Query Parameters (optional):
+  - `due` (`true` for daily revision queue, `dueDate <= now`)
+  - `category` (e.g., `"DSA"`, `"Aptitude"`, `"AI"`)
+
+Response `200`:
+```json
+{
+  "success": true,
+  "count": 5,
+  "flashcards": []
+}
+```
+
+---
+
+### Review Flashcard (SM-2 Algorithm)
+- `PUT /api/flashcards/:id/review`
+- Private
+
+Request Body:
+```json
+{
+  "rating": "good"
+}
+```
+> Supported `rating` values: `"again"` (1), `"hard"` (2), `"good"` / `"medium"` (3), `"easy"` (4).
+
+Response `200`:
+```json
+{
+  "success": true,
+  "message": "Flashcard review recorded successfully",
+  "flashcard": {
+    "_id": "660c1...",
+    "interval": 6,
+    "repetition": 2,
+    "efactor": 2.5,
+    "dueDate": "2026-07-31T16:30:00.000Z"
+  }
+}
+```
+Errors:
+- `404` flashcard not found
+- `500` server error
+
+---
+
+### Get SRS Deck Stats
+- `GET /api/flashcards/stats`
+- Private
+
+Response `200`:
+```json
+{
+  "success": true,
+  "stats": {
+    "totalCards": 24,
+    "dueCount": 5,
+    "masteredCount": 8,
+    "reviewedToday": 3
+  }
+}
+```
+
+---
+
+### Delete Flashcard
+- `DELETE /api/flashcards/:id`
+- Private
+
+Response `200`:
+```json
+{
+  "success": true,
+  "message": "Flashcard deleted successfully"
+}
+```
+
+---
+
+## Testing Endpoint
+
+### Health Check
+- `GET /api/test`
+- Public
+
+Response `200`:
+```json
+{
+  "message": "API is working!"
+}
+```
+
 ### Getting Help
 
 ```bash

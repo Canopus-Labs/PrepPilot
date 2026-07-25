@@ -6,8 +6,11 @@ import {
   LuPinOff,
   LuSparkles,
   LuCopy,
+  LuBrainCircuit,
 } from "react-icons/lu";
 import AIResponsePreview from '../../pages/InterviewPrep/components/AIResponsePreview';
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
 
 const QuestionCard = ({
   question,
@@ -15,8 +18,10 @@ const QuestionCard = ({
   onLearnMore,
   isPinned,
   onTogglePin,
+  category = "Practice",
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [addingToSrs, setAddingToSrs] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -28,6 +33,25 @@ const QuestionCard = ({
       toast.success(`${label} copied!`);
     } catch {
       toast.error(`Failed to copy ${label.toLowerCase()}`);
+    }
+  };
+
+  const handleAddToSrs = async (e) => {
+    e.stopPropagation();
+    try {
+      setAddingToSrs(true);
+      const res = await axiosInstance.post(API_PATHS.FLASHCARD.CREATE, {
+        question,
+        answer: answer || "See detailed solution in session",
+        category,
+      });
+      if (res.data.success) {
+        toast.success(res.data.message || "Added to SRS Deck!");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add to SRS Deck");
+    } finally {
+      setAddingToSrs(false);
     }
   };
 
@@ -63,11 +87,21 @@ const QuestionCard = ({
               )}
 
             <button
-              className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500             dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10             dark:hover:text-violet-300 transition-all"
+              className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/10 dark:hover:text-violet-300 transition-all"
               onClick={() => copyToClipboard(question, "Question")}
               title="Copy Question"
             >
               <LuCopy size={18} />
+            </button>
+
+            <button
+              disabled={addingToSrs}
+              className="px-3 py-2 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all flex items-center gap-1.5 text-xs font-semibold"
+              onClick={handleAddToSrs}
+              title="Add to Spaced Repetition Deck"
+            >
+              <LuBrainCircuit size={16} />
+              <span>{addingToSrs ? "Adding..." : "Add to SRS"}</span>
             </button>
 
           {onLearnMore && (

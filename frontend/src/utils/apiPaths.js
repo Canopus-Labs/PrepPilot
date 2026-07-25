@@ -48,4 +48,11 @@ export const API_PATHS = {
     COURSES: {
         GET_ALL: "/api/courses", // GET all free courses
     },
+    FLASHCARD: {
+        CREATE: "/api/flashcards",
+        GET_ALL: "/api/flashcards",
+        GET_STATS: "/api/flashcards/stats",
+        REVIEW: (id) => `/api/flashcards/${id}/review`,
+        DELETE: (id) => `/api/flashcards/${id}`,
+    },
 };

@@ -41,6 +41,7 @@ import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
+import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) return null;
@@ -192,6 +193,16 @@ const App = () => {
                       <PageTransition>
                         <Dashboard />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/spaced-repetition"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <SpacedRepetitionPage />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
