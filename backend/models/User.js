@@ -52,6 +52,12 @@ const UserSchema = new mongoose.Schema(
         
         unlockedAchievements: { type: [String], default: [] },
 
+        // Social links display order
+        socialOrder: {
+            type: [String],
+            default: ["github", "linkedin", "twitter", "portfolio"]
+        },
+
         //Email Verification
         isEmailVerified: { type: Boolean, default: false },
         emailVerificationToken: { type: String, default: null },

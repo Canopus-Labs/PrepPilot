@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import { Reorder } from "framer-motion";
 
 /* ── Donut (SVG, zero deps) ─────────────────────────────────────────────── */
 const DonutChart = ({ value, max, size = 84, stroke = 9, color = "#7c3aed" }) => {
@@ -187,6 +188,8 @@ const ProgressTrackerDashboard = () => {
     : user?.name || "PrepPilot User";
   const initial  = displayName.charAt(0).toUpperCase();
   const socials  = user?.profileDetails?.socials || {};
+  const defaultOrder = ["github", "linkedin", "twitter", "portfolio"];
+  const [socialOrder, setSocialOrder] = useState(user?.socialOrder || defaultOrder);
   const edu      = user?.educationDetails || {};
 
   return (

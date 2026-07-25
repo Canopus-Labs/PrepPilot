@@ -14,6 +14,7 @@ export const API_PATHS = {
     CHANGE_PASSWORD: "/api/auth/change-password",
     DELETE_ACCOUNT: "/api/auth/delete-account",
     LOGOUT: "/api/auth/logout",
+    REORDER_SOCIALS: "/api/auth/socials/reorder",
 },
     IMAGE: {
         UPLOAD_IMAGE: "/api/auth/upload-image", // Upload profile picture

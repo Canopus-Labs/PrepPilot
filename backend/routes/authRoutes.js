@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser } = require("../controllers/authController");
+const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser, reorderSocials } = require("../controllers/authController");
 const { protect } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadMiddleware");
 const { validateUserLogin, validateUserSignup, validateRefreshToken, validateResendEmail } = require("../Input_validators/ValidateAuth");
@@ -21,6 +21,7 @@ router.get("/profile", protect, generalLimiter, getUserProfile);
 router.put("/profile", protect, generalLimiter, updateUserProfile);
 router.put("/change-password", protect, sensitiveAuthLimiter, changePassword);
 router.delete("/delete-account", protect, sensitiveAuthLimiter, deleteUserAccount);
+router.put("/socials/reorder", protect, generalLimiter, reorderSocials);
 router.post("/resend-verification", authLimiter,  validateResendEmail, resendVerificationEmail);
 router.get("/verify-email", verifyEmail);
 

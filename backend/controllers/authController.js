@@ -506,4 +506,32 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+
+/**
+ * Reorder user's social links display order.
+ * @route PUT /api/auth/socials/reorder
+ */
+const reorderSocials = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { order } = req.body;
+
+        if (!Array.isArray(order) || order.length === 0) {
+            return res.status(400).json({ success: false, message: "Order must be a non-empty array" });
+        }
+
+        const validPlatforms = ["github", "linkedin", "twitter", "portfolio"];
+        const isValid = order.every(p => validPlatforms.includes(p));
+        if (!isValid) {
+            return res.status(400).json({ success: false, message: "Invalid platform name in order" });
+        }
+
+        await User.findByIdAndUpdate(userId, { socialOrder: order });
+        res.json({ success: true, message: "Social links reordered successfully" });
+    } catch (error) {
+        console.error("Reorder socials error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, reorderSocials };
