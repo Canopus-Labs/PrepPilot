@@ -15,6 +15,7 @@ const SignUp = ({ setCurrentPage }) => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -54,6 +55,7 @@ const SignUp = ({ setCurrentPage }) => {
     if (!/[a-z]/.test(password)) { setError("Password must contain at least one lowercase letter."); return; }
     if (!/[0-9]/.test(password)) { setError("Password must contain at least one number."); return; }
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password)) { setError("Password must contain at least one special character (e.g. !@#$%^&*)."); return; }
+    if (password !== confirmPassword) { setError("Passwords do not match."); return; }
 
     setError("");
     setLoading(true);
@@ -319,6 +321,20 @@ const SignUp = ({ setCurrentPage }) => {
               </div>
             </div>
           )}
+
+          <Input
+            value={confirmPassword}
+            onChange={({ target }) => {
+              const value = target.value;
+              setConfirmPassword(value);
+              if (error === "Passwords do not match." && password === value) {
+                setError("");
+              }
+            }}
+            label="Confirm Password"
+            placeholder="Re-enter your password"
+            type="password"
+          />
 
           {error && (
             <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
