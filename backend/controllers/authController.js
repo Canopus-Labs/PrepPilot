@@ -3,6 +3,12 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const mongoose = require("mongoose");
+const Session = require("../models/Session");
+const Resume = require("../models/Resume");
+const Question = require("../models/Question");
+const UserSheetProgress = require("../models/UserSheetProgress");
+const { sendVerificationEmail } = require("../utils/sendEmail");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
@@ -18,24 +24,15 @@ const getRefreshCookieOptions = () => ({
     path: "/api/auth",
 });
 
-/**
- * Generate an access token for the authenticated user.
- * @param {string} userId - MongoDB user ID.
- * @returns {string} JWT access token valid for 15 minutes.
- */
 const generateAccessToken = (userId) => {
     return jwt.sign({ id: userId, tokenType: "access" }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
 };
 
-/**
- * Generate a refresh token for the authenticated user.
- * @param {string} userId - MongoDB user ID.
- * @returns {string} JWT refresh token valid for 7 days.
- */
 const generateRefreshToken = (userId) => {
     return jwt.sign({ id: userId, tokenType: "refresh" }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 };
 
+const registerUser = async (req, res) => {
 /**
  * Register a new user account.
  * @route POST /api/auth/register
@@ -63,12 +60,10 @@ const registerUser = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "A user with this email already exists." });
         }
 
-        // Split name into first and last names for defaults
         const nameParts = name.trim().split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
-        // Generate default unique PrepPilot ID
         const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
         // Generate email verification token
@@ -92,6 +87,7 @@ const registerUser = async (req, res, next) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
+            isEmailVerified: true,
             isEmailVerified: false,
             emailVerificationToken,
             emailVerificationExpires
@@ -110,6 +106,12 @@ const registerUser = async (req, res, next) => {
             profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
+        console.error("Register error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const loginUser = async (req, res) => {
         logger.error("Register error:", error.message);
         res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
         next(error);
@@ -129,13 +131,11 @@ const loginUser = async (req, res, next) => {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
-        // Verify password against stored hash
         const isMatch = await user.isValidPassword(password);
         if (!isMatch) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
-        // Block login until email is verified
         if (!user.isEmailVerified) {
             return res.status(403).json({
                 success: false,
@@ -160,6 +160,8 @@ const loginUser = async (req, res, next) => {
 
         });
     } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
         logger.info(error)
         res.status(500).json({ success: false, message: "Internal server error occurred", error });
         next(error);
@@ -220,6 +222,8 @@ const refreshToken = async (req, res, next) => {
         
         });
     } catch (error) {
+        console.error("Refresh token error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
         next(error);
     }
 };
@@ -261,6 +265,12 @@ const logoutUser = async (req, res, next) => {
         res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "User logged out successfully." });
     } catch (error) {
+        console.error("Logout error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const verifyEmail = async (req, res) => {
         next(error);
     }
 };
@@ -277,7 +287,6 @@ const verifyEmail = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Verification token is missing." });
         }
 
-        // Find user with matching token that hasn't expired yet
         const user = await User.findOne({
             emailVerificationToken: token,
             emailVerificationExpires: { $gt: new Date() },
@@ -290,7 +299,6 @@ const verifyEmail = async (req, res, next) => {
             });
         }
 
-        // Mark email as verified and clear the token fields
         user.isEmailVerified = true;
         user.emailVerificationToken = null;
         user.emailVerificationExpires = null;
@@ -298,6 +306,12 @@ const verifyEmail = async (req, res, next) => {
 
         res.json({ success: true, message: "Email verified successfully. You can now log in." });
     } catch (error) {
+        console.error("Verify email error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const resendVerificationEmail = async (req, res) => {
         next(error);
     }
 };
@@ -316,17 +330,14 @@ const resendVerificationEmail = async (req, res, next) => {
 
         const user = await User.findOne({ email });
 
-        // Return success even if user not found — avoids exposing which emails are registered
         if (!user) {
             return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
         }
 
-        // If already verified, no need to resend
         if (user.isEmailVerified) {
             return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
         }
 
-        // Generate a fresh token and reset expiry to 24 hours from now
         user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
         user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await user.save();
@@ -336,6 +347,12 @@ const resendVerificationEmail = async (req, res, next) => {
 
         res.json({ success: true, message: "Verification email resent. Please check your inbox." });
     } catch (error) {
+        console.error("Resend verification error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const getUserProfile = async (req, res) => {
         next(error);
     }
 };
@@ -351,6 +368,13 @@ const getUserProfile = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
         res.json(user);
+    }catch(error){
+        console.error("Get profile error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const updateUserProfile = async (req, res) => {
     } catch (error) {
         next(error);
     }
@@ -381,7 +405,6 @@ const updateUserProfile = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Update fields if they are sent in request
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (bio !== undefined) user.bio = bio;
@@ -389,14 +412,12 @@ const updateUserProfile = async (req, res, next) => {
         if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
         if (visibility !== undefined) user.visibility = visibility;
 
-        // Sync name based on firstName and lastName
         if (firstName !== undefined || lastName !== undefined) {
             const fName = firstName !== undefined ? firstName : user.firstName;
             const lName = lastName !== undefined ? lastName : user.lastName;
             user.name = `${fName} ${lName}`.trim() || user.name;
         }
 
-        // Handle PrepPilot ID uniqueness check if changed
         if (prepPilotId !== undefined && prepPilotId !== user.prepPilotId) {
             if (prepPilotId.trim() !== "") {
                 const existingUser = await User.findOne({ prepPilotId: prepPilotId.trim() });
@@ -405,11 +426,10 @@ const updateUserProfile = async (req, res, next) => {
                 }
                 user.prepPilotId = prepPilotId.trim();
             } else {
-                user.prepPilotId = undefined; // sparse allow null
+                user.prepPilotId = undefined;
             }
         }
 
-        // Update nested structures if they are provided
         if (educationDetails) {
             user.educationDetails = {
                 school: educationDetails.school !== undefined ? educationDetails.school : user.educationDetails.school,
@@ -443,10 +463,15 @@ const updateUserProfile = async (req, res, next) => {
 
         await user.save();
 
-        // return updated user, excluding password
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
+        console.error("Update profile error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const changePassword = async (req, res) => {
         next(error);
     }
 };
@@ -474,18 +499,23 @@ const changePassword = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Compare original password
         const isMatch = await user.isValidPassword(originalPassword);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password
         user.password = newPassword;
         await user.save();
 
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
+        console.error("Change password error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+const deleteUserAccount = async (req, res) => {
+    const mongoSession = await mongoose.startSession();
         next(error);
     }
 };
@@ -496,15 +526,33 @@ const changePassword = async (req, res, next) => {
  */
 const deleteUserAccount = async (req, res, next) => {
     try {
-        const userId = req.user._id;
-        const user = await User.findById(userId);
-        if (!user) {
+        await mongoSession.withTransaction(async () => {
+            const userId = req.user._id;
+
+            const user = await User.findById(userId).session(mongoSession);
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            const sessions = await Session.find({ user: userId }).session(mongoSession);
+            const sessionIds = sessions.map(s => s._id);
+            await Question.deleteMany({ session: { $in: sessionIds } }).session(mongoSession);
+            await Session.deleteMany({ user: userId }).session(mongoSession);
+            await Resume.deleteMany({ user: userId }).session(mongoSession);
+            await UserSheetProgress.deleteMany({ userId }).session(mongoSession);
+            await User.findByIdAndDelete(userId).session(mongoSession);
+        });
+
+        res.clearCookie("refreshToken", { path: "/api/auth" });
+        res.json({ success: true, message: "Account and all associated data deleted successfully" });
+    } catch (error) {
+        if (error.message === "User not found") {
             return res.status(404).json({ success: false, message: "User not found" });
         }
-
-        await User.findByIdAndDelete(userId);
-        res.json({ success: true, message: "Account deleted successfully" });
-    } catch (error) {
+        console.error("Delete account error:", error);
+        res.status(500).json({ success: false, message: "Failed to delete account" });
+    } finally {
+        await mongoSession.endSession();
         next(error);
     }
 };
