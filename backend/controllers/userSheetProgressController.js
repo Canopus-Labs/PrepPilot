@@ -50,6 +50,13 @@ exports.saveProgress = async (req, res) => {
 
   const validatedSheetId = sheetId.trim();
 
+  // Build update fields only for fields that are explicitly defined in the request.
+  // This prevents $set from clearing fields when a client sends a partial payload.
+  const updateFields = {};
+  if (followed !== undefined) updateFields.followed = followed;
+  if (completedTopics !== undefined) updateFields.completedTopics = completedTopics;
+  if (percentage !== undefined) updateFields.percentage = percentage;
+
   try {
     const progress = await UserSheetProgress.findOneAndUpdate(
       {
@@ -57,11 +64,7 @@ exports.saveProgress = async (req, res) => {
         sheetId: validatedSheetId,
       },
       {
-        $set: {
-          followed,
-          completedTopics,
-          percentage,
-        },
+        $set: updateFields,
       },
       {
         upsert: true,
