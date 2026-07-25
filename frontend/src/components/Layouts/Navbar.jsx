@@ -14,6 +14,7 @@ const Navbar = () => {
     { id: 3, title: "Role-Specific Preparation", path: "/role-prep" },
     { id: 4, title: "DSA Master Sheets", path: "/coding-sheets" },
     { id: 5, title: "Skill Assessment", path: "/assessment" },
+    { id: 6, title: "SRS Revision", path: "/spaced-repetition" },
   ];
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

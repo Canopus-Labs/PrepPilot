@@ -22,6 +22,12 @@ const NAV_ITEMS = [
     icon: LayoutDashboard,
   },
   {
+    id: "srs-revision",
+    title: "SRS Revision",
+    path: "/spaced-repetition",
+    icon: BrainCircuit,
+  },
+  {
     id: "aptitude",
     title: "Aptitude",
     icon: Calculator,

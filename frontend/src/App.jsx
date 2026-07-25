@@ -348,15 +348,15 @@ const App = () => {
                     }
                   />
                   <Route
-  path="/spaced-repetition"
-  element={
-    <ProtectedRoute>
-      <MainLayout>
-        <SpacedRepetitionPage />
-      </MainLayout>
-    </ProtectedRoute>
-  }
-/>
+                    path="/spaced-repetition"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <SpacedRepetitionPage />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/terms-and-conditions"
                     element={
