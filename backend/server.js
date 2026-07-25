@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const srsRoutes = require("./routes/spacedRepetitionRoutes");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -108,6 +109,7 @@ app.use("/api/user", generalLimiter, achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips } = require("./Input_validators/ValidateAi.js");
 app.use("/api/resume", generalLimiter, resumeRoutes);
+app.use("/api/srs", generalLimiter, srsRoutes);
 
 // AI routes with Zod validation
 app.post(
