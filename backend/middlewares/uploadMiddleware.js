@@ -34,30 +34,31 @@ const diskStorage = multer.diskStorage({
 
 // File filter for image uploads
 const imageFileFilter = (req, file, cb) => {
-  console.log("FILE:", file.originalname);
-  console.log("MIMETYPE:", file.mimetype);
-
-  const allowedTypes = [
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedMimeTypes = new Set([
     "image/jpeg",
     "image/png",
     "image/jpg",
     "image/webp",
-  ];
+  ]);
+  const allowedExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    console.log("REJECTED:", file.mimetype);
-    cb(new Error(`Unsupported type: ${file.mimetype}`), false);
+  if (!allowedMimeTypes.has(file.mimetype) || !allowedExtensions.has(ext)) {
+    console.log("REJECTED:", file.mimetype, "| ext:", ext);
+    cb(new Error(`Unsupported file type. Expected an image (jpg, png, webp) but got mimetype '${file.mimetype}' and extension '${ext}'.`), false);
+    return;
   }
+
+  cb(null, true);
 };
 
 // File filter for resume (PDF) uploads
 const resumeFileFilter = (req, file, cb) => {
-  if (file.mimetype === "application/pdf") {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (file.mimetype === "application/pdf" && ext === ".pdf") {
     cb(null, true);
   } else {
-    cb(new Error("Only .pdf format is allowed for resume uploads"), false);
+    cb(new Error("Only .pdf format is allowed for resume uploads. Ensure the file extension matches the content type."), false);
   }
 };
 
