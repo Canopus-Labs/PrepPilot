@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -8,6 +9,8 @@ const Resume = require("../models/Resume");
 const Question = require("../models/Question");
 const UserSheetProgress = require("../models/UserSheetProgress");
 const { sendVerificationEmail } = require("../utils/sendEmail");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/sendEmail");
+const { validatePassword } = require('../utils/passwordPolicy');
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
@@ -30,6 +33,11 @@ const generateRefreshToken = (userId) => {
 };
 
 const registerUser = async (req, res) => {
+/**
+ * Register a new user account.
+ * @route POST /api/auth/register
+ */
+const registerUser = async (req, res, next) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
         
@@ -58,6 +66,10 @@ const registerUser = async (req, res) => {
 
         const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
+        // Generate email verification token
+        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         const user = await User.create({
             name,
             email,
@@ -76,20 +88,18 @@ const registerUser = async (req, res) => {
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
             isEmailVerified: true,
+            isEmailVerified: false,
+            emailVerificationToken,
+            emailVerificationExpires
         });
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        // Send Verification Email
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
-        await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            
+            message: "Registration successful. Please check your email to verify your account.",
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -102,6 +112,17 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
+        logger.error("Register error:", error.message);
+        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        next(error);
+    }
+};
+
+/**
+ * Authenticate a user and return a JWT token.
+ * @route POST /api/auth/login
+ */
+const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -141,10 +162,13 @@ const loginUser = async (req, res) => {
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
+        logger.info(error)
+        res.status(500).json({ success: false, message: "Internal server error occurred", error });
+        next(error);
     }
 };
 
-const refreshToken = async (req, res) => {
+const refreshToken = async (req, res, next) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -200,10 +224,11 @@ const refreshToken = async (req, res) => {
     } catch (error) {
         console.error("Refresh token error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
+        next(error);
     }
 };
 
-const logoutUser = async (req, res) => {
+const logoutUser = async (req, res, next) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -246,6 +271,15 @@ const logoutUser = async (req, res) => {
 };
 
 const verifyEmail = async (req, res) => {
+        next(error);
+    }
+};
+
+/**
+ * Verify a user's email address via the token link sent to their inbox.
+ * @route GET /api/auth/verify-email
+ */
+const verifyEmail = async (req, res, next) => {
     try {
         const { token } = req.query;
 
@@ -278,6 +312,15 @@ const verifyEmail = async (req, res) => {
 };
 
 const resendVerificationEmail = async (req, res) => {
+        next(error);
+    }
+};
+
+/**
+ * Resend verification email to an unverified user.
+ * @route POST /api/auth/resend-verification
+ */
+const resendVerificationEmail = async (req, res, next) => {
     try {
         const { email } = req.body;
 
@@ -310,6 +353,15 @@ const resendVerificationEmail = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
+        next(error);
+    }
+};
+
+/**
+ * Get the profile of the currently authenticated user.
+ * @route GET /api/auth/profile
+ */
+const getUserProfile = async (req, res, next) => {
     try {
         const user = req.user;
         if(!user){
@@ -323,6 +375,16 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateUserProfile = async (req, res) => {
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Update the user profile settings.
+ * @route PUT /api/auth/profile
+ */
+const updateUserProfile = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const {
@@ -410,6 +472,15 @@ const updateUserProfile = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
+        next(error);
+    }
+};
+
+/**
+ * Update user password.
+ * @route PUT /api/auth/change-password
+ */
+const changePassword = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const { originalPassword, newPassword } = req.body;
@@ -445,6 +516,15 @@ const changePassword = async (req, res) => {
 
 const deleteUserAccount = async (req, res) => {
     const mongoSession = await mongoose.startSession();
+        next(error);
+    }
+};
+
+/**
+ * Permanently delete user account.
+ * @route DELETE /api/auth/delete-account
+ */
+const deleteUserAccount = async (req, res, next) => {
     try {
         await mongoSession.withTransaction(async () => {
             const userId = req.user._id;
@@ -473,7 +553,42 @@ const deleteUserAccount = async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to delete account" });
     } finally {
         await mongoSession.endSession();
+        next(error);
     }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+/**
+ * Handle forgot password request.
+ * @route POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email });
+        
+        // Always return success to prevent email enumeration attacks
+        if (!user) {
+            return res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+        }
+
+        // Generate reset token and set expiry to 1 hour
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        await sendPasswordResetEmail(user.email, resetUrl);
+
+        res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, forgotPassword };

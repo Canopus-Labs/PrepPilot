@@ -9,6 +9,7 @@ export const API_PATHS = {
     VERIFY_EMAIL: "/api/auth/verify-email",
     RESEND_VERIFICATION: "/api/auth/resend-verification",
     GET_PROFILE: "/api/auth/profile",
+    FORGOT_PASSWORD: "/api/auth/forgot-password",
 
     UPDATE_PROFILE: "/api/auth/profile",
     CHANGE_PASSWORD: "/api/auth/change-password",

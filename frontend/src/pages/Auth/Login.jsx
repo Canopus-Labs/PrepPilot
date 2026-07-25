@@ -88,6 +88,50 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
   };
 
   return (
+<<<<<<< HEAD
+    <div className="w-full">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-3">
+          <img src="/PrepPilot-Logo.png" alt="PrepPilot Logo" className="w-8 h-8 object-contain" />
+          <span className="font-semibold text-gray-300">PrepPilot</span>
+        </div>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-violet-300 to-blue-300 bg-clip-text text-transparent mb-2">
+          Welcome Back
+        </h2>
+        <p className="text-sm text-gray-400">Sign in to continue your interview preparation journey</p>
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-4">
+        <Input
+          value={email}
+          onChange={({ target }) => setEmail(target.value)}
+          label="Email Address"
+          placeholder="your@email.com"
+          type="text"
+          autoFocus
+        />
+
+        <Input
+  value={password}
+  onChange={({ target }) => setPassword(target.value)}
+  label="Password"
+  placeholder="Min 8 characters"
+  type="password"
+  aria-invalid={!!error}
+  aria-describedby={error ? "login-error" : undefined}
+/>
+
+        {/* Error Message */}
+        {error && (
+  <div
+    id="login-error"
+    role="alert"
+    aria-live="polite"
+    className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
+  >
+            <p className="text-red-400 text-sm font-medium">{error}</p>
+=======
     <div className="w-full relative">
       <div className="relative z-10">
         {/* Header */}
@@ -99,6 +143,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
               className="w-8 h-8 object-contain"
             />
             <span className="font-semibold text-gray-200">PrepPilot</span>
+>>>>>>> c9ec96de0ec9608236389ef076844f92c9da2018
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 tracking-tight">
             Welcome Back

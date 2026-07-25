@@ -26,6 +26,8 @@ const SignUp = ({ setCurrentPage }) => {
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
+<<<<<<< HEAD
+=======
   // Computed inside the component so they react to `password` state
   const passwordChecks = {
     length: password.length >= 8,
@@ -39,11 +41,14 @@ const SignUp = ({ setCurrentPage }) => {
   const passwordStrength =
     strengthScore <= 2 ? "Weak" : strengthScore <= 4 ? "Medium" : "Strong";
 
+>>>>>>> c9ec96de0ec9608236389ef076844f92c9da2018
   const handleSignup = async (e) => {
     e.preventDefault();
     let profileImageUrl = "";
 
-    if (!fullName) { setError("Please enter your full name"); return; }
+    
+    if (!fullName.trim()) {setError("Please enter your full name");return;}
+    if (!/^[A-Za-z]+(?:\s+[A-Za-z]+)*$/.test(fullName.trim())) {setError("Full name can only contain letters and spaces");return;}
     if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
     if (!password || password.length < 8) { setError("Password must be at least 8 characters long."); return; }
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }
@@ -97,7 +102,10 @@ const SignUp = ({ setCurrentPage }) => {
       setResendCooldown(60);
       const interval = setInterval(() => {
         setResendCooldown((prev) => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
@@ -200,6 +208,68 @@ const SignUp = ({ setCurrentPage }) => {
             type="password"
           />
 
+          {password && (
+            <div className="mt-2 space-y-3">
+              {/* Segmented strength bar */}
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map((seg) => (
+                  <div
+                    key={seg}
+                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                      seg <= strengthScore
+                        ? strengthScore <= 2
+                          ? "bg-red-500"
+                          : strengthScore <= 4
+                          ? "bg-yellow-400"
+                          : "bg-emerald-400"
+                        : "bg-white/10"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Label */}
+              <p
+                className={`text-xs font-medium ${
+                  strengthScore <= 2
+                    ? "text-red-400"
+                    : strengthScore <= 4
+                    ? "text-yellow-400"
+                    : "text-emerald-400"
+                }`}
+              >
+                {passwordStrength} password
+              </p>
+
+              {/* Requirement chips */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "length", label: "8+ chars" },
+                  { key: "uppercase", label: "Uppercase" },
+                  { key: "lowercase", label: "Lowercase" },
+                  { key: "number", label: "Number" },
+                  { key: "special", label: "Special" },
+                ].map(({ key, label }) => (
+                  <span
+                    key={key}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                      passwordChecks[key]
+                        ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
+                        : "bg-white/5 text-gray-500 ring-1 ring-white/10"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        passwordChecks[key] ? "bg-emerald-400" : "bg-gray-600"
+                      }`}
+                    />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Password strength indicator */}
           {password && (
             <div className="mt-2 space-y-3">
@@ -267,7 +337,7 @@ const SignUp = ({ setCurrentPage }) => {
           />
 
           {error && (
-            <div id="signup-error" role="alert" aria-live="polite" className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
               <p className="text-red-400 text-sm font-medium">{error}</p>
             </div>
           )}
