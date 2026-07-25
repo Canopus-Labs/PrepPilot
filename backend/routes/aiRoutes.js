@@ -101,10 +101,10 @@ async function generateHandler(req, res) {
     );
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
-    console.error("[AI] Generation failed:", error.message);
+    console.error("[AI] Generation failed:", error);
     return res
       .status(500)
-      .json({ error: "Failed to generate content", detail: error.message });
+      .json({ error: "Failed to generate content" });
   }
 }
 
@@ -137,7 +137,8 @@ router.get("/models", async (req, res) => {
       note: "Actual availability depends on your API key & region. Set GEMINI_MODEL in .env to force a specific one.",
     });
   } catch (e) {
-    res.status(500).json({ error: "Failed to list models", detail: e.message });
+    console.error("List models error:", e);
+    res.status(500).json({ error: "Failed to list models" });
   }
 });
 

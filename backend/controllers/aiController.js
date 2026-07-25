@@ -103,7 +103,6 @@ const generateInterviewQuestions = async (req, res) => {
     console.error("Gemini API Error:", error);
     res.status(500).json({
       message: "Failed to generate questions",
-      error: error.message,
     });
   }
 };
@@ -170,7 +169,6 @@ const generateConceptExplanation = async (req, res) => {
     console.error("Gemini API Error:", error);
     res.status(500).json({
       message: "Failed to generate explanation",
-      error: error.message,
     });
   }
 };
@@ -236,7 +234,6 @@ const generateInterviewTips = async (req, res) => {
     console.error("Gemini API Error:", error);
     res.status(500).json({
       message: "Failed to generate interview tips",
-      error: error.message,
     });
   }
 };
