@@ -83,9 +83,6 @@ async function generateHandler(req, res) {
     );
 
     const rawText = await result.response.text();
-    console.log("Incoming Prompt:", prompt);
-    console.log("Model Used:", usedModel);
-    console.log("Raw Gemini Response:", rawText);
 
     let cleanedText = rawText
       .replace(/^[\s`]*json\s*/i, "")
@@ -93,12 +90,6 @@ async function generateHandler(req, res) {
       .replace(/```$/i, "")
       .trim();
 
-    console.log(
-      "[AI] promptLen=%d model=%s ms=%d",
-      prompt.length,
-      usedModel,
-      Date.now() - start,
-    );
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
     console.error("[AI] Generation failed:", error);
