@@ -10,6 +10,7 @@ import SummaryCard from "../../components/Cards/SummaryCard";
 import Modal from "../../components/Loader/Modal";
 import CreateSessionForm from "./CreateSessionForm";
 import DeleteAlertContent from "../../components/DeleteAlertContent";
+import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -18,15 +19,19 @@ import { CARD_BG } from "../../utils/data";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ open: false, data: null });
 
   const fetchAllSessions = async () => {
+    setLoading(true);
     try {
       const response = await axiosInstance.get(API_PATHS.SESSION.GET_ALL);
       setSessions(response.data);
     } catch (error) {
       console.error("Error fetching sessions:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,8 +65,15 @@ const Dashboard = () => {
             </p>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center items-center py-20">
+              <SpinnerLoader />
+            </div>
+          )}
+
           {/* Sessions Grid */}
-          {sessions.length > 0 ? (
+          {!loading && sessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sessions.map((data, index) => (
                 <SummaryCard
@@ -78,7 +90,7 @@ const Dashboard = () => {
                 />
               ))}
             </div>
-          ) : (
+          {!loading && sessions.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 px-6 mt-8 text-center border border-gray-200 dark:border-white/10 rounded-2xl bg-gray-50/50 dark:bg-gray-800/20 shadow-sm">
               <div className="flex items-center justify-center w-16 h-16 mb-5 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-400 dark:text-gray-500 shadow-sm">
                 <User size={28} strokeWidth={1.5} />
@@ -102,7 +114,7 @@ const Dashboard = () => {
           )}
 
           {/* Add New Floating Button */}
-          {sessions.length > 0 && (
+          {!loading && sessions.length > 0 && (
             <button
               className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-14 flex items-center gap-2 px-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-1 transition-all duration-300 z-50 ring-2 ring-white/20 dark:ring-transparent"
               onClick={() => setOpenCreateModal(true)}
