@@ -20,20 +20,11 @@ router.get("/", async (req, res) => {
   const normalizedTopic = topic.trim().toLowerCase();
   const cacheKey = `questions:${normalizedTopic}`;
 
-const cachedQuestions =
-  questionCache.get(cacheKey);
+const cachedQuestions = questionCache.get(cacheKey);
 
 if (cachedQuestions) {
-  console.log(
-    `[Cache HIT] Topic: ${topic}`
-  );
-
   return res.json(cachedQuestions);
 }
-
-console.log(
-  `[Cache MISS] Topic: ${topic}`
-);
 
   const prompt = `
     Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
@@ -58,8 +49,6 @@ console.log(
       MAX_RETRIES,
       INITIAL_DELAY
     );
-
-    console.log(`[Aptitude] Successfully used model: ${usedModel}`);
 
     const rawText = await result.response.text();
     let cleanedText = rawText
