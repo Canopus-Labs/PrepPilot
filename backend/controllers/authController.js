@@ -5,9 +5,9 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
-const ACCESS_TOKEN_EXPIRY = "15m";
-const REFRESH_TOKEN_EXPIRY = "7d";
-const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const ACCESS_TOKEN_EXPIRY = "7d";
+const REFRESH_TOKEN_EXPIRY = "30d";
+const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
 const getRefreshCookieOptions = () => ({
     httpOnly: true,

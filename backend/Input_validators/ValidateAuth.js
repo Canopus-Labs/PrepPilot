@@ -21,10 +21,6 @@ const loginUserZod = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-const refreshTokenZod = z.object({
-  refreshToken: z.string().min(1, "Refresh token is required"),
-});
-
 const resendVerificationZod = z.object({
   email: z.string().email("Enter a valid email"),
 });
@@ -50,12 +46,11 @@ const validateUserLogin = (req, res, next) => {
 };
 
 const validateRefreshToken = (req, res, next) => {
-  try {
-    refreshTokenZod.parse(req.body);
-    next();
-  } catch (err) {
-    return handleValidationError(res, err); // Bug fix: was err.errors (v3), now uses handleValidationError with err.issues (v4)
+  // The refresh token arrives as an httpOnly cookie, not in the request body
+  if (!req.cookies?.refreshToken) {
+    return res.status(400).json({ success: false, message: "Refresh token is required." });
   }
+  next();
 };
 
 const validateResendEmail = (req, res, next) => {

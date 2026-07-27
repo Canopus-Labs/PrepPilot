@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  RotateCcw, Sparkles, Brain, CheckCircle2, Clock, Calendar,
+  RotateCcw, Brain, CheckCircle2, Clock,
   Plus, Trash2, BookOpen, Layers, Flame, Award, ChevronRight, RefreshCw, X
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -143,11 +142,10 @@ const SpacedRepetitionPage = () => {
     <div className="min-h-screen bg-[#0B0F19] text-gray-100 p-4 md:p-8 custom-scrollbar">
       {/* Header Banner */}
       <div className="max-w-6xl mx-auto mb-8">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-900/40 via-purple-900/30 to-indigo-900/40 border border-violet-500/20 p-6 md:p-8 backdrop-blur-xl shadow-2xl">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative overflow-hidden rounded-2xl bg-[#111827] border border-white/8 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-400 text-xs font-semibold uppercase tracking-wider mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-semibold uppercase tracking-wider mb-3">
                 <Brain size={14} /> Cognitive Revision System (SM-2)
               </div>
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
@@ -160,9 +158,9 @@ const SpacedRepetitionPage = () => {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-violet-600/25 transition-all transform hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm transition-colors shrink-0"
             >
-              <Plus size={18} /> Add Custom Flashcard
+              <Plus size={16} /> Add Custom Flashcard
             </button>
           </div>
         </div>
@@ -194,7 +192,7 @@ const SpacedRepetitionPage = () => {
               <Award size={22} />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Mastered ($I \ge 21\text{d}$)</p>
+              <p className="text-xs text-gray-400 font-medium">Mastered (21+ days)</p>
               <p className="text-2xl font-bold text-white">{stats.masteredCount}</p>
             </div>
           </div>
@@ -292,69 +290,58 @@ const SpacedRepetitionPage = () => {
               </span>
             </div>
 
-            {/* 3D Flip Card */}
-            <div className="perspective-1000 mb-6">
-              <motion.div
-                className="w-full min-h-[320px] rounded-3xl bg-[#111827] border border-white/10 p-6 md:p-8 cursor-pointer relative shadow-2xl flex flex-col justify-between"
-                onClick={() => setIsFlipped(!isFlipped)}
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                {!isFlipped ? (
-                  /* FRONT OF CARD */
-                  <div className="flex flex-col h-full justify-between">
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                        <span className="inline-flex items-center gap-1"><BookOpen size={14} /> Question</span>
-                        <span>Click card to reveal answer</span>
-                      </div>
-                      <h2 className="text-xl md:text-2xl font-semibold text-white leading-relaxed">
-                        {currentCard.question}
-                      </h2>
-                    </div>
+            {/* Flip Card */}
+            <div className="mb-6 relative w-full min-h-[320px] cursor-pointer" style={{ perspective: "1200px" }}
+              onClick={() => setIsFlipped(!isFlipped)}>
+              
+              {/* Card container */}
+              <div className="relative w-full min-h-[320px] transition-transform duration-500"
+                style={{ transformStyle: "preserve-3d", transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
 
-                    <div className="pt-6 border-t border-white/5 flex items-center justify-between text-xs text-gray-400">
-                      <span>Interval: {currentCard.interval}d</span>
-                      <span className="text-violet-400 font-semibold flex items-center gap-1">
-                        Flip Card <ChevronRight size={14} />
-                      </span>
+                {/* Front */}
+                <div className="absolute inset-0 rounded-3xl bg-[#111827] border border-white/10 p-6 md:p-8 shadow-2xl flex flex-col justify-between"
+                  style={{ backfaceVisibility: "hidden" }}>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span className="inline-flex items-center gap-1"><BookOpen size={14} /> Question</span>
+                      <span>Click card to reveal answer</span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-semibold text-white leading-relaxed">
+                      {currentCard.question}
+                    </h2>
+                  </div>
+                  <div className="pt-6 border-t border-white/5 flex items-center justify-between text-xs text-gray-400">
+                    <span>Interval: {currentCard.interval}d</span>
+                    <span className="text-violet-400 font-semibold flex items-center gap-1">
+                      Flip Card <ChevronRight size={14} />
+                    </span>
+                  </div>
+                </div>
+
+                {/* Back */}
+                <div className="absolute inset-0 rounded-3xl bg-[#111827] border border-emerald-500/20 p-6 md:p-8 shadow-2xl flex flex-col justify-between"
+                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span className="inline-flex items-center gap-1 text-emerald-400"><CheckCircle2 size={14} /> Answer</span>
+                      <span>Ease Factor: {currentCard.efactor}</span>
+                    </div>
+                    <div className="prose prose-invert max-w-none text-gray-200 text-sm md:text-base leading-relaxed overflow-y-auto max-h-[220px] custom-scrollbar pr-2">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {currentCard.answer}
+                      </ReactMarkdown>
                     </div>
                   </div>
-                ) : (
-                  /* BACK OF CARD */
-                  <div
-                    className="flex flex-col h-full justify-between"
-                    style={{ transform: "rotateY(180deg)" }}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                        <span className="inline-flex items-center gap-1 text-emerald-400"><CheckCircle2 size={14} /> Answer</span>
-                        <span>Ease Factor: {currentCard.efactor}</span>
-                      </div>
-
-                      <div className="prose prose-invert max-w-none text-gray-200 text-sm md:text-base leading-relaxed overflow-y-auto max-h-[220px] custom-scrollbar pr-2">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {currentCard.answer}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/5 text-xs text-gray-400 text-center">
-                      Rate difficulty below to schedule next review
-                    </div>
+                  <div className="pt-4 border-t border-white/5 text-xs text-gray-400 text-center">
+                    Rate difficulty below to schedule next review
                   </div>
-                )}
-              </motion.div>
+                </div>
+              </div>
             </div>
 
             {/* Rating Buttons */}
             {isFlipped && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-4 gap-2 md:gap-3"
-              >
+              <div className="grid grid-cols-4 gap-2 md:gap-3">
                 <button
                   disabled={reviewing}
                   onClick={() => handleReviewRating("again")}
@@ -394,7 +381,7 @@ const SpacedRepetitionPage = () => {
                     {Math.max(7, Math.round((currentCard.interval || 1) * currentCard.efactor * 1.3))} days
                   </span>
                 </button>
-              </motion.div>
+              </div>
             )}
           </div>
         ) : (
