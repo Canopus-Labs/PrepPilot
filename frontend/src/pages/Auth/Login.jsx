@@ -23,6 +23,12 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
+  const clearError = () => {
+    if (error) {
+      setError(null);
+     }
+    };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateEmail(email)) {
@@ -34,7 +40,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
       return;
     }
 
-    setError("");
+    setError(null);
     setLoading(true);
 
     try {
@@ -104,24 +110,30 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div className="w-full">
-            <Input
-              value={email}
-              onChange={({ target }) => setEmail(target.value)}
-              label="Email Address"
-              placeholder="your@email.com"
-              type="text"
-              autoFocus
-            />
+        <Input
+         value={email}
+         onChange={({ target }) => {
+         setEmail(target.value);
+         clearError();
+         }}
+         label="Email Address"
+         placeholder="your@email.com"
+         type="text"
+         autoFocus
+        />
           </div>
 
           <div className="w-full">
-            <Input
-              value={password}
-              onChange={({ target }) => setPassword(target.value)}
-              label="Password"
-              placeholder="Min 8 characters"
-              type="password"
-            />
+        <Input
+        value={password}
+        onChange={({ target }) => {
+          setPassword(target.value);
+          clearError();
+         }}
+         label="Password"
+         placeholder="Min 8 characters"
+         type="password"
+        />
           </div>
 
           {/* Remember Me + Forgot Password */}

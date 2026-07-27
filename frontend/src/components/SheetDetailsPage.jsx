@@ -9,7 +9,6 @@ import axiosInstance from "../utils/axiosinstance";
 import { UserContext } from "../context/userContext";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
 
-// Optimized row component to prevent 150+ re-renders on a single click
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
   let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
   const diffStr = (sub.difficulty || "").toLowerCase();
@@ -19,7 +18,7 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
   return (
     <div className="group flex flex-col sm:flex-row sm:items-center px-5 py-3.5 border-b border-gray-100 dark:border-white/5 last:border-0 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200 gap-4 sm:gap-6">
-      <div className="flex items-start sm:items-center gap-3.5 flex-1">
+      <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
         <button
           onClick={() => onToggle(sectionIdx, topicIdx, subIdx)}
           disabled={!followed}
@@ -33,7 +32,7 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
           )}
         </button>
         
-        <span className={`text-sm font-medium transition-all duration-200 ${
+        <span className={`block truncate text-sm font-medium transition-all duration-200 ${
           completed ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-200 group-hover:text-violet-600 dark:group-hover:text-violet-400"
         }`}>
           {sub.title}
@@ -160,7 +159,6 @@ function SheetDetail() {
       }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completedTopics, followed]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
@@ -178,7 +176,6 @@ function SheetDetail() {
       setFollowed(false);
       setCompletedTopics({});
       
-      // Update backend to unfollow
       axiosInstance.post("/api/user/sheet-progress", {
         sheetId: id,
         followed: false,
@@ -189,8 +186,6 @@ function SheetDetail() {
     } else {
       setFollowed(true);
 
-      // Save follow immediately to backend — the useEffect only fires on
-      // completedTopics changes, so we must explicitly save the follow here
       localStorage.setItem(
         `${id}-progress`,
         JSON.stringify({ followed: true, completedTopics, percentage: 0 })
@@ -228,7 +223,6 @@ function SheetDetail() {
     <>
       <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white px-5 md:px-12 lg:px-24 py-8 transition-colors duration-300">
         
-        {/* Modern Hero Section */}
         <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-8 shadow-sm border border-gray-200 dark:border-white/10 relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="max-w-3xl">
@@ -273,7 +267,6 @@ function SheetDetail() {
             </div>
           </div>
 
-          {/* Top Level Progress Bar */}
           <div className="mt-6 pt-5 border-t border-gray-200 dark:border-white/10">
             <div className="flex justify-between items-end mb-2">
               <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Overall Progress</span>
@@ -288,7 +281,6 @@ function SheetDetail() {
           </div>
         </div>
 
-        {/* Traditional DSA List/Table UI */}
         <div className="flex flex-col gap-8">
           {sheet.sections?.map((section, sectionIdx) => (
             <div key={sectionIdx} className="w-full">
@@ -333,7 +325,6 @@ function SheetDetail() {
           ))}
         </div>
 
-        {/* Completion banner */}
         {completedCount === totalSubtopics && totalSubtopics > 0 && (
           <div className="mt-12 bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white text-center p-8 rounded-2xl shadow-xl border border-white/20 animate-fade-in-up">
              <h2 className="text-2xl font-black mb-2 flex items-center justify-center gap-3 drop-shadow-md">

@@ -986,6 +986,7 @@ const LandingPage = () => {
 
     </div>{/* end grid */}
 
+
     {/* Bottom Bar */}
     <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
       <p>© {new Date().getFullYear()} PrepPilot AI. All rights reserved.</p>

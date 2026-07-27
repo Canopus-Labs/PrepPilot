@@ -110,7 +110,7 @@ const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, 
 app.use("/api/resume", generalLimiter, resumeRoutes);
 
 // AI routes with Zod validation
-app.use(
+app.post(
   "/api/ai/generate-questions",
   sensitiveRouteHeaders,
   aiLimiter,
@@ -119,7 +119,7 @@ app.use(
   generateInterviewQuestions          // Controller
 );
 
-app.use(
+app.post(
   "/api/ai/generate-explanation",
   sensitiveRouteHeaders,
   aiLimiter,
@@ -128,7 +128,7 @@ app.use(
   generateConceptExplanation          // Controller
 );
 
-app.use(
+app.post(
   "/api/ai/generate-tips",
   sensitiveRouteHeaders,
   aiLimiter,
@@ -142,6 +142,9 @@ app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
 const coursesRoutes = require("./routes/coursesRoutes");
 app.use("/api/courses", generalLimiter, coursesRoutes);
+const flashcardRoutes = require("./routes/flashcardRoutes");
+app.use("/api/flashcards", generalLimiter, flashcardRoutes);
+
 
 //Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));

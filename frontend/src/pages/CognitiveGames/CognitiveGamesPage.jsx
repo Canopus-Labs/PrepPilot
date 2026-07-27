@@ -1,18 +1,25 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import GridMemoryGame from "../../components/GridMemoryGame";
-import { Grid3x3 } from "lucide-react";
+import PatternMatrixGame from "../../components/PatternMatrixGame";
+import MemoryMatchGame from "../../components/MemoryMatchGame";
+import { Grid3x3, Gamepad2 } from "lucide-react";
 
 // ─── Games data ────────────────────────────────────────────────────────────────
 // Add more brain-training games here in the future — each just needs a
 // name/icon/desc and a matching component rendered below.
 const gamesData = [
   {
-    name: "Grid Memory",
+    name: "Pattern Memory",
     icon: Grid3x3,
-    desc: "Train spatial recall by memorising and clicking coloured cell patterns.",
-    component: GridMemoryGame,
+    desc: "Train visual-spatial recall by memorizing and recreating grid tile patterns.",
+    component: PatternMatrixGame,
+  },
+  {
+    name: "Memory Match",
+    icon: Gamepad2,
+    desc: "Train visual working memory and association by matching card pairs in 3D.",
+    component: MemoryMatchGame,
   },
 ];
 
