@@ -26,10 +26,21 @@ router.post('/upload', protect, async (req, res) => {
         continue;
       }
 
-      // Insert or update sheet by id
+      // Cast id to plain string to prevent operator injection
+      const safeId = String(sheetObj.id || '');
+
+      // Build safe update object with only whitelisted fields
+      const updateData = {
+        id: safeId,
+        title: sheetObj.title,
+        content: sheetObj.content,
+        metadata: sheetObj.metadata,
+      };
+
+      // Insert or update sheet by id using sanitized query and update
       const sheet = await Sheet.findOneAndUpdate(
-        { id: sheetObj.id },
-        sheetObj,
+        { id: safeId },
+        updateData,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
 
