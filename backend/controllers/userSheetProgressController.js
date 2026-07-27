@@ -17,7 +17,7 @@ exports.getAllProgress = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      error: err.message,
+      error: 'Internal server error',
     });
   }
 };
@@ -90,14 +90,14 @@ exports.saveProgress = async (req, res) => {
       } catch (retryErr) {
         return res.status(500).json({
           success: false,
-          error: retryErr.message,
+          error: 'Internal server error',
         });
       }
     }
 
     return res.status(500).json({
       success: false,
-      error: err.message,
+      error: 'Internal server error',
     });
   }
 };
@@ -137,7 +137,7 @@ exports.getProgress = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      error: err.message,
+      error: 'Internal server error',
     });
   }
 };
