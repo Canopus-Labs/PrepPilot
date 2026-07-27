@@ -96,7 +96,6 @@ const generateInterviewQuestions = async (req, res) => {
       console.error("Gemini returned invalid JSON:", cleanedText);
       res.status(500).json({
         message: "Gemini returned invalid JSON",
-        raw: rawText,
       });
     }
   } catch (error) {
@@ -162,7 +161,6 @@ const generateConceptExplanation = async (req, res) => {
     } catch (err) {
       res.status(500).json({
         message: "Gemini returned invalid JSON",
-        raw: rawText,
       });
     }
   } catch (error) {
@@ -227,7 +225,6 @@ const generateInterviewTips = async (req, res) => {
       console.error("Gemini returned invalid JSON:", cleanedText);
       res.status(500).json({
         message: "Gemini returned invalid JSON",
-        raw: rawText,
       });
     }
   } catch (error) {
