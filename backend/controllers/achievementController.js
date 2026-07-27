@@ -7,7 +7,7 @@ exports.getAchievements = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
         res.json({ success: true, unlockedAchievements: user.unlockedAchievements });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
 
@@ -40,6 +40,6 @@ exports.saveAchievements = async (req, res) => {
         );
         res.json({ success: true });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
