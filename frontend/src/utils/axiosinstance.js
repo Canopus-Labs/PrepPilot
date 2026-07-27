@@ -27,15 +27,15 @@ axiosInstance.interceptors.request.use(
 
 // ── Token refresh state ───────────────────────────────────────────────────
 let isRefreshing = false;
-let refreshSubscribers = [];   // callbacks waiting for the new token
+let refreshSubscribers = [];   // subscribers waiting for the new token
 
 function onTokenRefreshed(newToken) {
-    refreshSubscribers.forEach((cb) => cb(newToken));
+    refreshSubscribers.forEach((subscriber) => subscriber.resolve(newToken));
     refreshSubscribers = [];
 }
 
-function addRefreshSubscriber(cb) {
-    refreshSubscribers.push(cb);
+function addRefreshSubscriber(resolveCb, rejectCb) {
+    refreshSubscribers.push({ resolve: resolveCb, reject: rejectCb });
 }
 
 // ── Response interceptor — silent token refresh on 401 ───────────────────
@@ -69,12 +69,13 @@ axiosInstance.interceptors.response.use(
             if (isRefreshing) {
                 // Another refresh is already in-flight — queue this request
                 return new Promise((resolve, reject) => {
-                    addRefreshSubscriber((newToken) => {
-                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                        resolve(axiosInstance(originalRequest));
-                    });
-                    // If refresh ultimately fails, reject queued requests too
-                    // (handled below via the catch that calls reject)
+                    addRefreshSubscriber(
+                        (newToken) => {
+                            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                            resolve(axiosInstance(originalRequest));
+                        },
+                        (error) => reject(error)
+                    );
                 });
             }
 
@@ -108,8 +109,12 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
-                // Refresh failed — clear tokens but don't force redirect here.
-                // ProtectedRoute and userContext will handle the redirect gracefully.
+                // Refresh failed — reject all queued requests before clearing
+                refreshSubscribers.forEach((subscriber) => {
+                    if (subscriber.reject) {
+                        subscriber.reject(refreshError);
+                    }
+                });
                 refreshSubscribers = [];
                 localStorage.removeItem("token");
                 sessionStorage.removeItem("token");
