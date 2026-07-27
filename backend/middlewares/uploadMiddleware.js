@@ -34,8 +34,6 @@ const diskStorage = multer.diskStorage({
 
 // File filter for image uploads
 const imageFileFilter = (req, file, cb) => {
-  console.log("FILE:", file.originalname);
-  console.log("MIMETYPE:", file.mimetype);
 
   const allowedTypes = [
     "image/jpeg",
@@ -47,7 +45,6 @@ const imageFileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    console.log("REJECTED:", file.mimetype);
     cb(new Error(`Unsupported type: ${file.mimetype}`), false);
   }
 };
