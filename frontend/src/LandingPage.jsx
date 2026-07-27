@@ -375,6 +375,15 @@ const LandingPage = () => {
                   <button
                     onClick={() => setOpenAuthModal(true)}
                     className="hidden sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150 cursor-pointer"
+                    className="hidden cursor-pointer sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 0 24px 4px rgba(124,58,237,0.65)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 0 16px 2px rgba(124,58,237,0.45)")
+                    }
                     style={{
                       background: "rgba(255,255,255,0.06)",
                       border: "1px solid rgba(255,255,255,0.12)",

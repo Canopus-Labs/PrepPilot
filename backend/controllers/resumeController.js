@@ -17,7 +17,7 @@ const { generateWithFallback } = require('../utils/geminiHelper');
  * @example
  * 200 <PDF binary response>
  */
-const compileResume = async (req, res) => {
+const compileResume = async (req, res, next) => {
     try {
         const { code } = req.body;
       
@@ -66,8 +66,7 @@ const compileResume = async (req, res) => {
         res.send(Buffer.from(response.data));
 
     } catch (error) {
-        console.error("Resume Compilation Error:", error?.message);
-        res.status(500).json({ message: "Failed to compile resume", error: error.message });
+        next(error);
     }
 }
 
@@ -93,7 +92,7 @@ const compileResume = async (req, res) => {
  *   "suggestions": ["Add a summary section."]
  * }
  */
-const analyzeResume = async (req, res) => {
+const analyzeResume = async (req, res, next) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No resume file uploaded" });
@@ -153,8 +152,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
         res.status(200).json(jsonResult);
 
     } catch (error) {
-        console.error("Resume Analysis Error:", error);
-        res.status(500).json({ message: "Failed to analyze resume", error: error.message });
+        next(error);
     }
 }
 
@@ -178,7 +176,7 @@ const Resume = require("../models/Resume");
  * @example
  * 200 {"success": true, "resume": {"_id":"...","title":"..."}}
  */
-const saveResume = async (req, res) => {
+const saveResume = async (req, res, next) => {
     try {
         const { title, latexCode, resumeId } = req.body;
         const userId = req.user._id;
@@ -207,8 +205,7 @@ const saveResume = async (req, res) => {
 
         res.status(200).json({ success: true, resume });
     } catch (error) {
-        console.error("Save Resume Error:", error);
-        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+        next(error);
     }
 };
 
@@ -225,24 +222,21 @@ const saveResume = async (req, res) => {
  * @example
  * 200 {"success": true, "resumes": [{"_id":"...","title":"...","latexCode":"..."}]}
  */
-const getMyResumes = async (req, res) => {
+const getMyResumes = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
         res.status(200).json({ success: true, resumes });
     } catch (error) {
-        console.error("Get Resumes Error:", error);
-        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+        next(error);
     }
 };
-
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
 
 /**
  * Delete a resume by ID (owner only).
  * @route DELETE /api/resume/:id
  */
-async function deleteResume(req, res) {
+const deleteResume = async (req, res) => {
     try {
         const resume = await Resume.findOneAndDelete({ _id: req.params.id, user: req.user._id });
         if (!resume) return res.status(404).json({ message: "Resume not found." });
@@ -250,4 +244,6 @@ async function deleteResume(req, res) {
     } catch (err) {
         return res.status(500).json({ message: "Failed to delete resume.", error: err.message });
     }
-}
+};
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
