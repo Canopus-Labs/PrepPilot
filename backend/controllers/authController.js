@@ -505,7 +505,16 @@ const changePassword = async (req, res, next) => {
         }
 
         user.password = newPassword;
+
+        // Invalidate any existing refresh token so a compromised session
+        // can't keep issuing access tokens after the password is changed
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
+
         await user.save();
+
+        // Force the client to re-authenticate
+        res.clearCookie("refreshToken", { path: "/api/auth" });
 
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
