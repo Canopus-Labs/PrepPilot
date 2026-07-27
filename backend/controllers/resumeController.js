@@ -236,8 +236,6 @@ const getMyResumes = async (req, res) => {
     }
 };
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
-
 /**
  * Delete a resume by ID (owner only).
  * @route DELETE /api/resume/:id
@@ -252,3 +250,5 @@ async function deleteResume(req, res) {
         return res.status(500).json({ message: "Failed to delete resume." });
     }
 }
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
