@@ -91,7 +91,6 @@ exports.refreshJobCache = async () => {
         { jobs, fetchedAt: new Date() },
         { upsert: true, new: true }
       );
-      console.log(`[JobCron] Refreshed cache for: ${role}`);
     }
   } catch (err) {
     console.error("[JobCron] Refresh failed:", err.message);
