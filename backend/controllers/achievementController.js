@@ -14,7 +14,7 @@ exports.getAchievements = async (req, res) => {
 exports.saveAchievements = async (req, res) => {
     const { unlockedAchievements } = req.body;
 
-        if (!unlockedAchievements || !Array.isArray(unlockedAchievements)) {
+    if (!unlockedAchievements || !Array.isArray(unlockedAchievements)) {
         return res.status(400).json({
             success: false,
             error: "unlockedAchievements must be a valid array"
