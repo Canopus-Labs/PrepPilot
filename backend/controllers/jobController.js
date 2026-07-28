@@ -71,7 +71,7 @@ exports.getJobs = async (req, res) => {
 
     return res.json({ jobs, role, source: "api" });
   } catch (err) {
-    console.error("[Jobs] getJobs error:", err.message);
+    console.error("[Jobs] getJobs error");
     res.status(500).json({ message: "Failed to fetch jobs", error: err.message });
   }
 };
@@ -94,6 +94,6 @@ exports.refreshJobCache = async () => {
       console.log(`[JobCron] Refreshed cache for: ${role}`);
     }
   } catch (err) {
-    console.error("[JobCron] Refresh failed:", err.message);
+    console.error("[JobCron] Refresh failed");
   }
 };
