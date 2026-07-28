@@ -57,9 +57,9 @@ const isContextualResponse = (prompt, history) => {
   
   if (contextualRegex.test(trimmed)) {
     // Only contextual if there's a previous assistant message
-    if (history && history.length > 0) {
-      const lastMessage = history[history.length - 1];
-      if (lastMessage.role === "model") {
+    if (history && history.length > 1) {
+      const lastMessage = history[history.length - 2];
+      if (lastMessage && lastMessage.role === "model") {
         return true;
       }
     }
