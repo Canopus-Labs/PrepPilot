@@ -37,7 +37,7 @@ const addQuestionToSession = async (req, res) => {
       return res.status(404).json({ success: false, message: "Requested session could not be found" });
     }
 
-    if (session.user.toString() !== req.user._id.toString()) {
+    if (!session.user || session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
     const createdQuestions = await Question.insertMany(
@@ -86,7 +86,7 @@ const togglePinQuestion = async (req, res) => {
         .json({ success: false, message: "Session not found" });
     }
 
-    if (session.user.toString() !== req.user._id.toString()) {
+    if (!session.user || session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",
@@ -138,7 +138,7 @@ const updateQuestionNote = async (req, res) => {
         .json({ success: false, message: "Session not found" });
     }
 
-    if (session.user.toString() !== req.user._id.toString()) {
+    if (!session.user || session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",
