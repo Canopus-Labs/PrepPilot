@@ -77,8 +77,7 @@ console.log(
         .status(500)
         .json({
           error: "Failed to parse Gemini response",
-          details: err.message,
-          raw: rawText,
+          details: 'Internal server error',
         });
     }
     questionCache.set(
@@ -91,7 +90,7 @@ res.json(questions);
     console.error("Gemini API error:", error);
     res
       .status(500)
-      .json({ error: "Failed to generate questions", details: error.message });
+      .json({ error: "Failed to generate questions", details: 'Internal server error' });
   }
 });
 module.exports = router;
