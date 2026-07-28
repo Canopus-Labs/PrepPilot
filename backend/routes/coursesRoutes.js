@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
     const data = require(path.join(__dirname, "../data/allcourses.json"));
     res.json(data);
   } catch (err) {
-    console.error("[courses] Failed to load allcourses.json:", err.message);
+    console.error("[courses] Failed to load allcourses.json");
     res.status(500).json({ error: "Failed to load courses data." });
   }
 });
