@@ -84,7 +84,7 @@ const generateInterviewQuestions = async (req, res) => {
       );
       const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({ message: "Invalid AI response format", details: 'Invalid AI response format' });
       }
 
       if (Array.isArray(data)) {
@@ -154,7 +154,7 @@ const generateConceptExplanation = async (req, res) => {
       });
       const parsed = explanationSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({ message: "Invalid AI response format", details: 'Invalid AI response format' });
       }
 
       res.status(200).json({ model: usedModel, ...data });
@@ -217,7 +217,7 @@ const generateInterviewTips = async (req, res) => {
       });
       const parsed = tipsSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({ message: "Invalid AI response format", details: 'Invalid AI response format' });
       }
 
       res.status(200).json({ model: usedModel, ...data });
