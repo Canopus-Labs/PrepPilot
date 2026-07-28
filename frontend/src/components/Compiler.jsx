@@ -27,7 +27,7 @@ int main() {
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setLanguage(lang);
-    setCode(codeTemplates[lang]);
+    setCode(codeTemplates[lang] || "// Select a supported language");
   };
   const [output, setOutput] = useState("No output");
 
