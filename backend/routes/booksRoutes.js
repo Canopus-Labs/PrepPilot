@@ -145,8 +145,8 @@ router.get("/", async (_req, res) => {
             })),
           };
         } catch (err) {
-          console.error(`[books] Failed to read dir ${dir.name}:`, err.message);
-          warnings.push(`Skipped ${dir.name}: ${err.message}`);
+          console.error(`[books] Failed to read dir ${dir.name}`);
+          warnings.push(`Skipped ${dir.name}: Failed to read directory`);
           return null;
         }
       }),
