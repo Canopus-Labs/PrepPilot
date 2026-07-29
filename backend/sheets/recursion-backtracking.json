@@ -1,0 +1,294 @@
+{
+  "sheets": [
+    {
+      "id": "recursion-backtracking",
+      "title": "Recursion & Backtracking",
+      "description": "Master Recursion and Backtracking — from basic recursive problems to classic interview challenges like N-Queens, Sudoku Solver, Subsets, Permutations, and Word Search. Essential for every technical interview.",
+      "followers": 1980,
+      "questions": 28,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Recursion & Backtracking Sheet",
+          "topics": [
+            {
+              "title": "Recursion Basics",
+              "subtopics": [
+                {
+                  "title": "Reverse a String using Recursion",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-a-string/1",
+                    "youtube": "https://youtu.be/rBGGMoKVGts"
+                  }
+                },
+                {
+                  "title": "Power of Two",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/power-of-two/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/power-of-2/1",
+                    "youtube": "https://youtu.be/HdobA5GNj-I"
+                  }
+                },
+                {
+                  "title": "Pow(x, n) — Fast Exponentiation",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/powx-n/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/power-of-numbers/1",
+                    "youtube": "https://youtu.be/l0YC3876qxg"
+                  }
+                },
+                {
+                  "title": "Generate All Parentheses",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/generate-parentheses/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/generate-all-possible-parentheses/1",
+                    "youtube": "https://youtu.be/s9fokUqJ76A"
+                  }
+                },
+                {
+                  "title": "Letter Combinations of a Phone Number",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/possible-words-from-phone-digits-1587115620/1",
+                    "youtube": "https://youtu.be/0snEunUacZY"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Subsets & Combinations",
+              "subtopics": [
+                {
+                  "title": "Subsets",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/subsets/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/power-set4302/1",
+                    "youtube": "https://youtu.be/REOH22Xwdkk"
+                  }
+                },
+                {
+                  "title": "Subsets II (with Duplicates)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/subsets-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/subsets-with-duplicates/1",
+                    "youtube": "https://youtu.be/Vn2v6ajA7U0"
+                  }
+                },
+                {
+                  "title": "Combination Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/combination-sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/combination-sum-part-2/1",
+                    "youtube": "https://youtu.be/GBKI9VSKdGg"
+                  }
+                },
+                {
+                  "title": "Combination Sum II (No Reuse)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/combination-sum-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/combination-sum-ii-1587115620/1",
+                    "youtube": "https://youtu.be/G1fRTGRxXU8"
+                  }
+                },
+                {
+                  "title": "Combination Sum III",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/combination-sum-iii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/Xg_UtMYuHZo"
+                  }
+                },
+                {
+                  "title": "Combinations",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/combinations/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/combinations/1",
+                    "youtube": "https://youtu.be/q0s6m7AiM7o"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Permutations",
+              "subtopics": [
+                {
+                  "title": "Permutations",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/permutations/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/permutations-of-a-given-string-1587115620/1",
+                    "youtube": "https://youtu.be/YK78FU5Ffjw"
+                  }
+                },
+                {
+                  "title": "Permutations II (with Duplicates)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/permutations-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/permutations-of-a-string-1587115620/1",
+                    "youtube": "https://youtu.be/qhBVWR0YYvo"
+                  }
+                },
+                {
+                  "title": "Next Permutation",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/next-permutation/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/next-permutation5226/1",
+                    "youtube": "https://youtu.be/JDOXKqF60RQ"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Grid & String Backtracking",
+              "subtopics": [
+                {
+                  "title": "Word Search",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-search/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/word-search/1",
+                    "youtube": "https://youtu.be/pfiQ_PS1g8E"
+                  }
+                },
+                {
+                  "title": "Word Search II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-search-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/asbcE9mZz_U"
+                  }
+                },
+                {
+                  "title": "Rat in a Maze",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/rat-in-a-maze-problem/1",
+                    "youtube": "https://youtu.be/bLGZhJlt4y0"
+                  }
+                },
+                {
+                  "title": "Palindrome Partitioning",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/palindrome-partitioning/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/palindrome-patitioning4845/1",
+                    "youtube": "https://youtu.be/WBgsABoClE0"
+                  }
+                },
+                {
+                  "title": "Restore IP Addresses",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/restore-ip-addresses/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/generate-ip-addresses/1",
+                    "youtube": "https://youtu.be/61tN4YEdiTM"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Classic Hard Backtracking",
+              "subtopics": [
+                {
+                  "title": "N-Queens",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/n-queens/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/n-queen-problem0315/1",
+                    "youtube": "https://youtu.be/i05Ju7AftcM"
+                  }
+                },
+                {
+                  "title": "N-Queens II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/n-queens-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/i05Ju7AftcM"
+                  }
+                },
+                {
+                  "title": "Sudoku Solver",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sudoku-solver/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/solve-the-sudoku-1587115621/1",
+                    "youtube": "https://youtu.be/FWAIf_EVUKE"
+                  }
+                },
+                {
+                  "title": "Valid Sudoku",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/valid-sudoku/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/check-if-the-sudoku-is-valid/1",
+                    "youtube": "https://youtu.be/TjFXEUCMqI8"
+                  }
+                },
+                {
+                  "title": "Knight's Tour",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/knights-tour/1",
+                    "youtube": "https://youtu.be/ab_dY3dZFHM"
+                  }
+                },
+                {
+                  "title": "M-Coloring Problem",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1",
+                    "youtube": "https://youtu.be/wuVwUK25Rfc"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
