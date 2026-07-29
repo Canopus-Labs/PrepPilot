@@ -36,6 +36,13 @@ exports.createSession = async (req, res) => {
             const { role, experience, topicsToFocus, description } = req.body;
             const experienceNumber = Number(experience);
  
+            if (!role || role.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Role is required.",
+                });
+            }
+
             if (isNaN(experienceNumber)) {
               return res.status(400).json({
                     success: false,

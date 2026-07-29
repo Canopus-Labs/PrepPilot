@@ -145,6 +145,13 @@ const reviewFlashcard = async (req, res) => {
     const { rating } = req.body;
     const userId = req.user._id;
 
+    if (!rating) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating is required. Supported values: 'again', 'hard', 'good', 'easy'.",
+      });
+    }
+
     const flashcard = await Flashcard.findOne({ _id: id, userId });
     if (!flashcard) {
       return res.status(404).json({
