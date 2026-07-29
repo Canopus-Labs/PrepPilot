@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
-export const RESUME_TEMPLATES = [
+const RESUME_TEMPLATES = [
   {
     id: "jakes-resume",
     name: "Jake's Resume",
@@ -21,6 +21,11 @@ export const RESUME_TEMPLATES = [
     id: "harvard-pro",
     name: "Harvard Professional",
     description: "The classic, conservative single-column format favored by top consulting and finance firms.",
+  },
+  {
+    id: "modern-tech",
+    name: "Modern Tech Resume",
+    description: "A polished single-column software engineering resume with project, skills, and impact-focused sections.",
   },
 ];
 
