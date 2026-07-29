@@ -66,8 +66,6 @@ router.get("/", async (req, res) => {
         .status(500)
         .json({
           error: "Failed to parse Gemini response",
-          details: err.message,
-          raw: rawText,
         });
     }
     questionCache.set(cacheKey, questions);
@@ -77,7 +75,7 @@ router.get("/", async (req, res) => {
     console.error("Gemini API error:", error);
     res
       .status(500)
-      .json({ error: "Failed to generate questions", details: error.message });
+      .json({ error: "Failed to generate questions" });
   }
 });
 module.exports = router;
