@@ -1,0 +1,334 @@
+{
+  "sheets": [
+    {
+      "id": "two-pointers-sliding-window",
+      "title": "Two Pointers & Sliding Window",
+      "description": "Master the Two Pointers and Sliding Window patterns — among the most frequently tested techniques in coding interviews. Covers fixed/variable windows, pair problems, subarrays, and strings.",
+      "followers": 2640,
+      "questions": 30,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Two Pointers & Sliding Window Sheet",
+          "topics": [
+            {
+              "title": "Two Pointers — Easy",
+              "subtopics": [
+                {
+                  "title": "Valid Palindrome",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/valid-palindrome/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/palindrome-string0817/1",
+                    "youtube": "https://youtu.be/jJXJ16kPFWg"
+                  }
+                },
+                {
+                  "title": "Two Sum II — Input Array Is Sorted",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/pair-with-given-sum-in-a-sorted-array4940/1",
+                    "youtube": "https://youtu.be/cQ1Oz4ckceM"
+                  }
+                },
+                {
+                  "title": "Squares of a Sorted Array",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/squares-of-a-sorted-array/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/sorted-squares/1",
+                    "youtube": "https://youtu.be/FPCZsG_AkUg"
+                  }
+                },
+                {
+                  "title": "Merge Sorted Array",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/merge-sorted-array/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/merge-two-sorted-arrays5135/1",
+                    "youtube": "https://youtu.be/P1Ic85RarKY"
+                  }
+                },
+                {
+                  "title": "Move Zeroes",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/move-zeroes/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/move-all-zeroes-to-end-of-array0751/1",
+                    "youtube": "https://youtu.be/aayNRwUN3Do"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Two Pointers — Medium & Hard",
+              "subtopics": [
+                {
+                  "title": "3Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/3sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/triplet-sum-in-array-1587115621/1",
+                    "youtube": "https://youtu.be/jzZsG8n2R9A"
+                  }
+                },
+                {
+                  "title": "3Sum Closest",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/3sum-closest/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/three-sum-closest/1",
+                    "youtube": "https://youtu.be/qD7UoKEfGeo"
+                  }
+                },
+                {
+                  "title": "Container With Most Water",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/container-with-most-water/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/container-with-most-water0535/1",
+                    "youtube": "https://youtu.be/UuiTKBwPgAo"
+                  }
+                },
+                {
+                  "title": "Sort Colors (Dutch National Flag)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sort-colors/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/sort-an-array-of-0s-1s-and-2s4231/1",
+                    "youtube": "https://youtu.be/tp8JIuCXBaU"
+                  }
+                },
+                {
+                  "title": "4Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/4sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-all-four-sum-numbers1732/1",
+                    "youtube": "https://youtu.be/EYeR-_1NRlQ"
+                  }
+                },
+                {
+                  "title": "Trapping Rain Water",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/trapping-rain-water/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/trapping-rain-water-1587115621/1",
+                    "youtube": "https://youtu.be/ZI2z5pq0TqA"
+                  }
+                },
+                {
+                  "title": "Valid Palindrome II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/valid-palindrome-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/check-if-string-is-palindrome-after-removing-a-character/1",
+                    "youtube": "https://youtu.be/JrxRYBwG6EI"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Sliding Window — Fixed Size",
+              "subtopics": [
+                {
+                  "title": "Maximum Average Subarray I",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximum-average-subarray-i/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313/1",
+                    "youtube": "https://youtu.be/oCplCFqBLYk"
+                  }
+                },
+                {
+                  "title": "Maximum Sum Subarray of Size K",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313/1",
+                    "youtube": "https://youtu.be/XFLyWWBe_-4"
+                  }
+                },
+                {
+                  "title": "Contains Duplicate II",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/contains-duplicate-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/check-if-array-contains-contiguous-integers-with-duplicates-allowed/1",
+                    "youtube": "https://youtu.be/ypn0aZ0nrL4"
+                  }
+                },
+                {
+                  "title": "Number of Sub-arrays of Size K and Average >= Threshold",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/D8B4tKxMTnY"
+                  }
+                },
+                {
+                  "title": "Sliding Window Maximum",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sliding-window-maximum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-of-all-subarrays-of-size-k3101/1",
+                    "youtube": "https://youtu.be/NwBvene4Imo"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Sliding Window — Variable Size",
+              "subtopics": [
+                {
+                  "title": "Longest Substring Without Repeating Characters",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/length-of-the-longest-substring3036/1",
+                    "youtube": "https://youtu.be/wiGpZaVARGQ"
+                  }
+                },
+                {
+                  "title": "Longest Repeating Character Replacement",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-repeating-character-replacement/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-repeating-character-replacement/1",
+                    "youtube": "https://youtu.be/gqXU1UyA8pk"
+                  }
+                },
+                {
+                  "title": "Minimum Size Subarray Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-size-subarray-sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/smallest-subarray-with-sum-greater-than-x5651/1",
+                    "youtube": "https://youtu.be/aYqYMIqZx5s"
+                  }
+                },
+                {
+                  "title": "Fruit Into Baskets",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/fruit-into-baskets/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/fruit-into-baskets-1587115621/1",
+                    "youtube": "https://youtu.be/za2YuucS0tw"
+                  }
+                },
+                {
+                  "title": "Max Consecutive Ones III",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/max-consecutive-ones-iii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximize-number-of-1s0905/1",
+                    "youtube": "https://youtu.be/8orkQ_pzF4g"
+                  }
+                },
+                {
+                  "title": "Longest Subarray of 1s After Deleting One Element",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-subarray-of-1s-after-deleting-one-element/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/1Pu7bBCt3sA"
+                  }
+                },
+                {
+                  "title": "Subarray Product Less Than K",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/subarray-product-less-than-k/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/count-the-subarrays-having-product-less-than-k1708/1",
+                    "youtube": "https://youtu.be/R3cgDMsFOXI"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Sliding Window — Hard & String Patterns",
+              "subtopics": [
+                {
+                  "title": "Minimum Window Substring",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-window-substring/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/smallest-window-in-a-string-containing-all-the-characters-of-another-string-1587115621/1",
+                    "youtube": "https://youtu.be/jSto0O4AJbM"
+                  }
+                },
+                {
+                  "title": "Permutation in String",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/permutation-in-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/permutation-in-a-string/1",
+                    "youtube": "https://youtu.be/UbyhOgBN834"
+                  }
+                },
+                {
+                  "title": "Find All Anagrams in a String",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-all-anagrams-in-a-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/count-occurrences-of-anagrams5839/1",
+                    "youtube": "https://youtu.be/G8xtZy0fDKg"
+                  }
+                },
+                {
+                  "title": "Longest Substring with At Most K Distinct Characters",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1",
+                    "youtube": "https://youtu.be/Luw6RBmMBPE"
+                  }
+                },
+                {
+                  "title": "Substring with Concatenation of All Words",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/substring-with-concatenation-of-all-words/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/EzKJ1oSkGFM"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
