@@ -72,7 +72,7 @@ exports.getJobs = async (req, res) => {
     return res.json({ jobs, role, source: "api" });
   } catch (err) {
     console.error("[Jobs] getJobs error:", err.message);
-    res.status(500).json({ message: "Failed to fetch jobs", error: err.message });
+    res.status(500).json({ message: "Failed to fetch jobs", error: "Internal server error" });
   }
 };
 
