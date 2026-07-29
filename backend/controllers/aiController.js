@@ -33,7 +33,7 @@ const { generateWithFallback } = require("../utils/geminiHelper");
  *   ]
  * }
  */
-const generateInterviewQuestions = async (req, res) => {
+const generateInterviewQuestions = async (req, res, next) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
 
@@ -92,6 +92,11 @@ const generateInterviewQuestions = async (req, res) => {
 
       return res.status(200).json({ model: usedModel, question: parsed.data });
     } catch (err) {
+        next(err);
+    }
+  } catch (error) {
+        next(error);
+    }
       console.error("Gemini returned invalid JSON:", cleanedText);
       return res.status(500).json({
         message: "Gemini returned invalid JSON",
@@ -125,7 +130,7 @@ const generateInterviewQuestions = async (req, res) => {
  *   "explanation": "..."
  * }
  */
-const generateConceptExplanation = async (req, res) => {
+const generateConceptExplanation = async (req, res, next) => {
   try {
     const { question } = req.body;
 
@@ -161,6 +166,11 @@ const generateConceptExplanation = async (req, res) => {
 
       return res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
+        next(err);
+    }
+  } catch (error) {
+        next(error);
+    }
       console.error("Gemini returned invalid JSON:", cleanedText);
       return res.status(500).json({
         message: "Gemini returned invalid JSON",
@@ -195,7 +205,7 @@ const generateConceptExplanation = async (req, res) => {
  *   "tips": ["Focus on React hooks.", "Practice system design basics.", ...]
  * }
  */
-const generateInterviewTips = async (req, res) => {
+const generateInterviewTips = async (req, res, next) => {
   try {
     const { role, experience } = req.body;
 
@@ -233,6 +243,11 @@ const generateInterviewTips = async (req, res) => {
 
       return res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
+        next(err);
+    }
+  } catch (error) {
+        next(error);
+    }
       console.error("Gemini returned invalid JSON:", cleanedText);
       return res.status(500).json({
         message: "Gemini returned invalid JSON",

@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
@@ -152,6 +153,11 @@ router.post('/ai/generate', aiLimiter, sanitizeAiPrompt, generateHandler);
  * 200 {"availableModels": ["gemini-2.5-flash"], "configured": "models/gemini-2.5-flash", "note": "..."}
  */
 router.get("/models", async (req, res) => {
+  if (!process.env.GEMINI_API_KEY) {
+    return res
+      .status(500)
+      .json({ error: "GEMINI_API_KEY not configured on server" });
+  }
   try {
     const { GoogleGenerativeAI } = require("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);

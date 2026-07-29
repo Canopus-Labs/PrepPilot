@@ -17,7 +17,7 @@ const { generateWithFallback } = require('../utils/geminiHelper');
  * @example
  * 200 <PDF binary response>
  */
-const compileResume = async (req, res) => {
+const compileResume = async (req, res, next) => {
     try {
         const { code } = req.body;
       
@@ -93,7 +93,7 @@ const compileResume = async (req, res) => {
  *   "suggestions": ["Add a summary section."]
  * }
  */
-const analyzeResume = async (req, res) => {
+const analyzeResume = async (req, res, next) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No resume file uploaded" });
@@ -178,7 +178,7 @@ const Resume = require("../models/Resume");
  * @example
  * 200 {"success": true, "resume": {"_id":"...","title":"..."}}
  */
-const saveResume = async (req, res) => {
+const saveResume = async (req, res, next) => {
     try {
         const { title, latexCode, resumeId } = req.body;
         const userId = req.user._id;
@@ -225,7 +225,7 @@ const saveResume = async (req, res) => {
  * @example
  * 200 {"success": true, "resumes": [{"_id":"...","title":"...","latexCode":"..."}]}
  */
-const getMyResumes = async (req, res) => {
+const getMyResumes = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
@@ -240,7 +240,7 @@ const getMyResumes = async (req, res) => {
  * Delete a resume by ID (owner only).
  * @route DELETE /api/resume/:id
  */
-async function deleteResume(req, res) {
+const deleteResume = async (req, res) => {
     try {
         const resume = await Resume.findOneAndDelete({ _id: req.params.id, user: req.user._id });
         if (!resume) return res.status(404).json({ message: "Resume not found." });

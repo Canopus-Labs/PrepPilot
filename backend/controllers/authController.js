@@ -1,8 +1,14 @@
+const logger = require("../utils/logger");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { sendVerificationEmail } = require("../utils/sendEmail");
+const mongoose = require("mongoose");
+const Session = require("../models/Session");
+const Resume = require("../models/Resume");
+const Question = require("../models/Question");
+const UserSheetProgress = require("../models/UserSheetProgress");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
 const ACCESS_TOKEN_EXPIRY = "7d";
@@ -17,20 +23,10 @@ const getRefreshCookieOptions = () => ({
     path: "/api/auth",
 });
 
-/**
- * Generate an access token for the authenticated user.
- * @param {string} userId - MongoDB user ID.
- * @returns {string} JWT access token valid for 15 minutes.
- */
 const generateAccessToken = (userId) => {
     return jwt.sign({ id: userId, tokenType: "access" }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
 };
 
-/**
- * Generate a refresh token for the authenticated user.
- * @param {string} userId - MongoDB user ID.
- * @returns {string} JWT refresh token valid for 7 days.
- */
 const generateRefreshToken = (userId) => {
     return jwt.sign({ id: userId, tokenType: "refresh" }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 };
@@ -39,7 +35,7 @@ const generateRefreshToken = (userId) => {
  * Register a new user account.
  * @route POST /api/auth/register
  */
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
         
@@ -62,15 +58,16 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "A user with this email already exists." });
         }
 
-        // Split name into first and last names for defaults
         const nameParts = name.trim().split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
-        // Generate default unique PrepPilot ID
         const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // Auto-verify user — email verification temporarily disabled
+        // Generate email verification token
+        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         const user = await User.create({
             name,
             email,
@@ -88,21 +85,18 @@ const registerUser = async (req, res) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // skip email verification until SMTP is configured
+            isEmailVerified: false,
+            emailVerificationToken,
+            emailVerificationExpires
         });
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        // Send Verification Email
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
-        await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            
+            message: "Registration successful. Please check your email to verify your account.",
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -118,7 +112,7 @@ const registerUser = async (req, res) => {
  * Authenticate a user and return a JWT token.
  * @route POST /api/auth/login
  */
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -127,13 +121,11 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
-        // Verify password against stored hash
         const isMatch = await user.isValidPassword(password);
         if (!isMatch) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
-        // Block login until email is verified
         if (!user.isEmailVerified) {
             return res.status(403).json({
                 success: false,
@@ -155,7 +147,6 @@ const loginUser = async (req, res) => {
             email: user.email,
             profileImageUrl: user.profileImageUrl,
             accessToken,
-
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -163,7 +154,7 @@ const loginUser = async (req, res) => {
     }
 };
 
-const refreshToken = async (req, res) => {
+const refreshToken = async (req, res, next) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -214,7 +205,6 @@ const refreshToken = async (req, res) => {
             success: true,
             message: "Token refreshed successfully.",
             accessToken,
-        
         });
     } catch (error) {
         console.error("Refresh token error:", error);
@@ -222,7 +212,7 @@ const refreshToken = async (req, res) => {
     }
 };
 
-const logoutUser = async (req, res) => {
+const logoutUser = async (req, res, next) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -268,7 +258,7 @@ const logoutUser = async (req, res) => {
  * Verify a user's email address via the token link sent to their inbox.
  * @route GET /api/auth/verify-email
  */
-const verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res, next) => {
     try {
         const { token } = req.query;
 
@@ -276,7 +266,6 @@ const verifyEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: "Verification token is missing." });
         }
 
-        // Find user with matching token that hasn't expired yet
         const user = await User.findOne({
             emailVerificationToken: token,
             emailVerificationExpires: { $gt: new Date() },
@@ -289,7 +278,6 @@ const verifyEmail = async (req, res) => {
             });
         }
 
-        // Mark email as verified and clear the token fields
         user.isEmailVerified = true;
         user.emailVerificationToken = null;
         user.emailVerificationExpires = null;
@@ -306,7 +294,7 @@ const verifyEmail = async (req, res) => {
  * Resend verification email to an unverified user.
  * @route POST /api/auth/resend-verification
  */
-const resendVerificationEmail = async (req, res) => {
+const resendVerificationEmail = async (req, res, next) => {
     try {
         const { email } = req.body;
 
@@ -316,17 +304,14 @@ const resendVerificationEmail = async (req, res) => {
 
         const user = await User.findOne({ email });
 
-        // Return success even if user not found — avoids exposing which emails are registered
         if (!user) {
             return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
         }
 
-        // If already verified, no need to resend
         if (user.isEmailVerified) {
             return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
         }
 
-        // Generate a fresh token and reset expiry to 24 hours from now
         user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
         user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await user.save();
@@ -345,14 +330,14 @@ const resendVerificationEmail = async (req, res) => {
  * Get the profile of the currently authenticated user.
  * @route GET /api/auth/profile
  */
-const getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res, next) => {
     try {
         const user = req.user;
         if(!user){
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
         res.json(user);
-    }catch(error){
+    } catch(error) {
         console.error("Get profile error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
@@ -362,7 +347,7 @@ const getUserProfile = async (req, res) => {
  * Update the user profile settings.
  * @route PUT /api/auth/profile
  */
-const updateUserProfile = async (req, res) => {
+const updateUserProfile = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const {
@@ -383,7 +368,6 @@ const updateUserProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Update fields if they are sent in request
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (bio !== undefined) user.bio = bio;
@@ -391,14 +375,12 @@ const updateUserProfile = async (req, res) => {
         if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
         if (visibility !== undefined) user.visibility = visibility;
 
-        // Sync name based on firstName and lastName
         if (firstName !== undefined || lastName !== undefined) {
             const fName = firstName !== undefined ? firstName : user.firstName;
             const lName = lastName !== undefined ? lastName : user.lastName;
             user.name = `${fName} ${lName}`.trim() || user.name;
         }
 
-        // Handle PrepPilot ID uniqueness check if changed
         if (prepPilotId !== undefined && prepPilotId !== user.prepPilotId) {
             if (prepPilotId.trim() !== "") {
                 const existingUser = await User.findOne({ prepPilotId: prepPilotId.trim() });
@@ -407,11 +389,10 @@ const updateUserProfile = async (req, res) => {
                 }
                 user.prepPilotId = prepPilotId.trim();
             } else {
-                user.prepPilotId = undefined; // sparse allow null
+                user.prepPilotId = undefined;
             }
         }
 
-        // Update nested structures if they are provided
         if (educationDetails) {
             user.educationDetails = {
                 school: educationDetails.school !== undefined ? educationDetails.school : user.educationDetails.school,
@@ -445,7 +426,6 @@ const updateUserProfile = async (req, res) => {
 
         await user.save();
 
-        // return updated user, excluding password
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
@@ -458,7 +438,7 @@ const updateUserProfile = async (req, res) => {
  * Update user password.
  * @route PUT /api/auth/change-password
  */
-const changePassword = async (req, res) => {
+const changePassword = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const { originalPassword, newPassword } = req.body;
@@ -477,15 +457,22 @@ const changePassword = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Compare original password
         const isMatch = await user.isValidPassword(originalPassword);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password
         user.password = newPassword;
+
+        // Invalidate any existing refresh token so a compromised session
+        // can't keep issuing access tokens after the password is changed
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
+
         await user.save();
+
+        // Force the client to re-authenticate
+        res.clearCookie("refreshToken", { path: "/api/auth" });
 
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
@@ -498,20 +485,72 @@ const changePassword = async (req, res) => {
  * Permanently delete user account.
  * @route DELETE /api/auth/delete-account
  */
-const deleteUserAccount = async (req, res) => {
+const deleteUserAccount = async (req, res, next) => {
+    const mongoSession = await mongoose.startSession();
     try {
-        const userId = req.user._id;
-        const user = await User.findById(userId);
-        if (!user) {
+        await mongoSession.withTransaction(async () => {
+            const userId = req.user._id;
+
+            const user = await User.findById(userId).session(mongoSession);
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            const sessions = await Session.find({ user: userId }).session(mongoSession);
+            const sessionIds = sessions.map(s => s._id);
+            await Question.deleteMany({ session: { $in: sessionIds } }).session(mongoSession);
+            await Session.deleteMany({ user: userId }).session(mongoSession);
+            await Resume.deleteMany({ user: userId }).session(mongoSession);
+            await UserSheetProgress.deleteMany({ userId }).session(mongoSession);
+            await User.findByIdAndDelete(userId).session(mongoSession);
+        });
+
+        res.clearCookie("refreshToken", { path: "/api/auth" });
+        res.json({ success: true, message: "Account and all associated data deleted successfully" });
+    } catch (error) {
+        if (error.message === "User not found") {
             return res.status(404).json({ success: false, message: "User not found" });
         }
+        console.error("Delete account error:", error);
+        res.status(500).json({ success: false, message: "Failed to delete account" });
+    } finally {
+        await mongoSession.endSession();
+    }
+};
 
-        await User.findByIdAndDelete(userId);
-        res.json({ success: true, message: "Account deleted successfully" });
+/**
+ * Handle forgot password request.
+ * @route POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email });
+        
+        // Always return success to prevent email enumeration attacks
+        if (!user) {
+            return res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+        }
+
+        // Generate reset token and set expiry to 1 hour
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        await sendPasswordResetEmail(user.email, resetUrl);
+
+        res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, forgotPassword };
