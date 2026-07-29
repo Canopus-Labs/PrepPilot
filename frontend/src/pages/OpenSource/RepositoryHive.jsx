@@ -63,7 +63,13 @@ const RepositoryHive = () => {
         queryParams.push(searchQuery.trim());
       }
 
-      const query = queryParams.join(" ");
+      const query = queryParams.join(" ").trim();
+      if (!query) {
+        setRepositories([]);
+        setLoading(false);
+        return;
+      }
+
       const sortMap = {
         stars: "sort=stars&order=desc",
         recent: "sort=updated&order=desc",
