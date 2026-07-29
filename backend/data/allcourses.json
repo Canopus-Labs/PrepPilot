@@ -189,6 +189,18 @@
         "name": "AWS for Beginners",
         "source": "Great Learning",
         "link": "https://www.mygreatlearning.com/academy/learn-for-free/courses/aws-for-beginners1"
+      },
+      {
+        "icon": "fa-solid fab fa-aws",
+        "name": "AWS Cloud Practitioner Essentials (Free)",
+        "source": "AWS Skill Builder",
+        "link": "https://explore.skillbuilder.aws/learn/course/external/view/elearning/134/aws-cloud-practitioner-essentials"
+      },
+      {
+        "icon": "fa-brands fa-microsoft",
+        "name": "Microsoft Azure Fundamentals AZ-900 (Free Learning Path)",
+        "source": "Microsoft Learn",
+        "link": "https://learn.microsoft.com/en-us/training/paths/microsoft-azure-fundamentals-describe-cloud-concepts/"
       }
     ]
   },
