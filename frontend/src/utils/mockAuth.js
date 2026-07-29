@@ -13,6 +13,8 @@ const MOCK_USER_KEY = "mock_user";
  */
 export const isMockAuthEnabled = () => {
   try {
+    // Only enable mock auth when the flag is explicitly set in localStorage.
+    // Never enable automatically in DEV — always use the real backend.
     return localStorage.getItem(MOCK_AUTH_KEY) === "true";
   } catch {
     return false;
@@ -25,7 +27,8 @@ export const isMockAuthEnabled = () => {
 export const getMockUser = () => {
   try {
     const raw = localStorage.getItem(MOCK_USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (raw) return JSON.parse(raw);
+    return null;
   } catch {
     return null;
   }

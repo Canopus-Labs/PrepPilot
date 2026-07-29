@@ -357,7 +357,7 @@ const LandingPage = () => {
                 <button
                   key={item.route}
                   onClick={() => handleNav(item.route)}
-                  className="px-3.5 py-2 text-sm text-gray-300 hover:text-white transition-colors duration-150 whitespace-nowrap"
+                  className="px-3.5 py-2 text-sm text-gray-300 hover:text-white transition-colors duration-150 whitespace-nowrap cursor-pointer"
                 >
                   {item.label}
                 </button>
@@ -374,7 +374,7 @@ const LandingPage = () => {
                   {/* Login – outlined dark button (like opensox "Contribute") */}
                   <button
                     onClick={() => setOpenAuthModal(true)}
-                    className="hidden cursor-pointer sm:flex items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
+                    className="hidden sm:flex cursor-pointer items-center gap-1.5 text-sm text-gray-200 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-150"
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.boxShadow =
                         "0 0 24px 4px rgba(124,58,237,0.65)")
@@ -993,6 +993,7 @@ const LandingPage = () => {
       </div>
 
     </div>{/* end grid */}
+
 
     {/* Bottom Bar */}
     <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">

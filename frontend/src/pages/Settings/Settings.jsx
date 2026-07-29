@@ -180,7 +180,7 @@ const Settings = () => {
     }
   };
   
-  const NAME_REGEX = /^[A-Za-z\s]*$/;
+  const NAME_REGEX = /^[A-Za-z0-9\s]*$/;
    const handleNameChange = (setter) => (e) => {
     const value = e.target.value;
 

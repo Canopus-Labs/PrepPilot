@@ -1,0 +1,374 @@
+{
+  "sheets": [
+    {
+      "id": "linkedList-practice",
+      "title": "Linked List Practice",
+      "description": "Master all essential Linked List problems from basics to advanced for coding interviews.",
+      "followers": 1420,
+      "questions": 34,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Linked List Practice Sheet",
+          "topics": [
+            {
+              "title": "Easy Problems",
+              "subtopics": [
+                {
+                  "title": "Reverse a Linked List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-linked-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-a-linked-list/1",
+                    "youtube": "https://youtu.be/D2vI2DNJGd8"
+                  }
+                },
+                {
+                  "title": "Middle of the Linked List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/middle-of-the-linked-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/finding-middle-element-in-a-linked-list/1",
+                    "youtube": "https://youtu.be/7LjQ57RqgEc"
+                  }
+                },
+                {
+                  "title": "Linked List Cycle",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/linked-list-cycle/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/detect-loop-in-linked-list/1",
+                    "youtube": "https://youtu.be/wiOo4DC5GGA"
+                  }
+                },
+                {
+                  "title": "Merge Two Sorted Lists",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/merge-two-sorted-lists/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/merge-two-sorted-linked-lists/1",
+                    "youtube": "https://youtu.be/jXu-H7XuClE"
+                  }
+                },
+                {
+                  "title": "Remove Duplicates from Sorted List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-duplicates-from-sorted-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/remove-duplicate-element-from-sorted-linked-list/1",
+                    "youtube": "https://youtu.be/7pgs-wT5d4c"
+                  }
+                },
+                {
+                  "title": "Delete Node in a Linked List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/delete-node-in-a-linked-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/delete-without-head-pointer/1",
+                    "youtube": "https://youtu.be/TvLWOECe8mQ"
+                  }
+                },
+                {
+                  "title": "Palindrome Linked List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/palindrome-linked-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/check-if-linked-list-is-pallindrome/1",
+                    "youtube": "https://youtu.be/lRY_G-u_8jk"
+                  }
+                },
+                {
+                  "title": "Intersection of Two Linked Lists",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/intersection-of-two-linked-lists/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/intersection-point-in-y-shapped-linked-lists/1",
+                    "youtube": "https://youtu.be/0DYoPz2Tpt4"
+                  }
+                },
+                {
+                  "title": "Remove Linked List Elements",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-linked-list-elements/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/delete-a-node-in-single-linked-list/1",
+                    "youtube": "https://youtu.be/JI71sxtHTng"
+                  }
+                },
+                {
+                  "title": "Convert Binary Number in a Linked List to Integer",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/convert-binary-number-in-a-linked-list-to-integer/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/decimal-equivalent-of-binary-linked-list/1",
+                    "youtube": "https://youtu.be/sUf_-_c1zYI"
+                  }
+                },
+                {
+                  "title": "Remove Nth Node From End of List",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/nth-node-from-end-of-linked-list/1",
+                    "youtube": "https://youtu.be/3kMKYQ2wNIU"
+                  }
+                },
+                {
+                  "title": "Reverse Linked List II",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-linked-list-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-a-sublist-of-a-linked-list/1",
+                    "youtube": "https://youtu.be/bRZ_Fy4zRRY"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Medium Problems",
+              "subtopics": [
+                {
+                  "title": "Add Two Numbers",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/add-two-numbers/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/add-two-numbers-represented-by-linked-lists/1",
+                    "youtube": "https://youtu.be/XmRrGzR6udg"
+                  }
+                },
+                {
+                  "title": "Odd Even Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/odd-even-linked-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/segregate-even-and-odd-nodes-in-a-linked-list5035/1",
+                    "youtube": "https://youtu.be/qf6qp7GzD5Q"
+                  }
+                },
+                {
+                  "title": "Swap Nodes in Pairs",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/swap-nodes-in-pairs/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/pairwise-swap-of-nodes-in-linkelist/1",
+                    "youtube": "https://youtu.be/8yLiGS4ntHw"
+                  }
+                },
+                {
+                  "title": "Rotate List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/rotate-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/rotate-a-linked-list/1",
+                    "youtube": "https://youtu.be/uT7YI7XbTY8"
+                  }
+                },
+                {
+                  "title": "Partition List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/partition-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/partition-a-linked-list-around-a-given-value/1",
+                    "youtube": "https://youtu.be/NYZKRUT_8MY"
+                  }
+                },
+                {
+                  "title": "Reorder List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reorder-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reorder-list/1",
+                    "youtube": "https://youtu.be/7cp_HR1BT1E"
+                  }
+                },
+                {
+                  "title": "Sort List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sort-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/insertion-sort-for-singly-linked-list/1",
+                    "youtube": "https://youtu.be/8ocB7a_c-Cc"
+                  }
+                },
+                {
+                  "title": "Copy List with Random Pointer",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/copy-list-with-random-pointer/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/8ze7Zopdsaw"
+                  }
+                },
+                {
+                  "title": "Flatten a Multilevel Doubly Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/I8b0rff5F9M"
+                  }
+                },
+                {
+                  "title": "Linked List Cycle II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/linked-list-cycle-ii/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/vlrxs-LPni4"
+                  }
+                },
+                {
+                  "title": "Remove Zero Sum Consecutive Nodes from Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/remove-zero-sum-consecutive-nodes-from-linked-list/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/5UWEVMg10rY"
+                  }
+                },
+                {
+                  "title": "Delete the Middle Node of a Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/delete-middle-of-linked-list/1",
+                    "youtube": "hhttps://youtu.be/KEcXDqthMLE"
+                  }
+                },
+                {
+                  "title": "Maximum Twin Sum of a Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximum-twin-sum-of-a-linked-list/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/zmE2U90GG1w"
+                  }
+                },
+                {
+                  "title": "Insertion Sort List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/insertion-sort-list/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/insertion-sort-for-singly-linked-list/1",
+                    "youtube": "https://youtu.be/fzx8CWqbxxI"
+                  }
+                },
+                {
+                  "title": "Design Linked List",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/design-linked-list/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/Wf4QhpdVFQo"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Hard Problems",
+              "subtopics": [
+                {
+                  "title": "Merge k Sorted Lists",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/merge-k-sorted-lists/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/merge-k-sorted-linked-lists/1",
+                    "youtube": "https://youtu.be/Q64u-W3l3mA"
+                  }
+                },
+                {
+                  "title": "Reverse Nodes in k-Group",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-nodes-in-k-group/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-a-linked-list-in-groups-of-given-size/1",
+                    "youtube": "https://youtu.be/lIar1skcQYI"
+                  }
+                },
+                {
+                  "title": "LFU Cache",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/lfu-cache/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/lfu-cache-1665050355/1",
+                    "youtube": "https://youtu.be/-Vch0tHAsOM"
+                  }
+                },
+                {
+                  "title": "LRU Cache",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/lru-cache/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/lru-cache/1",
+                    "youtube": "https://youtu.be/81h8O-0U5oo"
+                  }
+                },
+                {
+                  "title": "All O`one Data Structure",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/all-oone-data-structure/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/GJJ2OWKHADs"
+                  }
+                },
+                {
+                  "title": "Reverse Linked List in Groups of Given Size",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reverse-nodes-in-k-group/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-a-linked-list-in-groups-of-given-size/1",
+                    "youtube": "https://youtu.be/lIar1skcQYI"
+                  }
+                },
+                {
+                  "title": "Clone a Linked List with Next and Random Pointer",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/clone-a-linked-list-with-next-and-random-pointer/1",
+                    "youtube": "https://youtu.be/q570bKdrnlw"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

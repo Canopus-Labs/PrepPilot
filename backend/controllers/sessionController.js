@@ -3,7 +3,7 @@ const Question = require("../models/Question");
 const mongoose = require("mongoose");
 
 
-const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
+const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;
 const MAX_EXPERIENCE = 50;
 
 /**
@@ -33,16 +33,17 @@ exports.createSession = async (req, res) => {
     try {
         await mongoSession.withTransaction(async () => {
             const userId = req.user._id;
-            const experience = Number(req.body.experience);
+            const { role, experience, topicsToFocus, description } = req.body;
+            const experienceNumber = Number(experience);
  
-            if (isNaN(experience)) {
+            if (isNaN(experienceNumber)) {
               return res.status(400).json({
                     success: false,
                     message: "Years of experience must be a valid number.",
            });
          }
 
-          if (experience < 0 || experience > MAX_EXPERIENCE) {
+          if (experienceNumber < 0 || experienceNumber > MAX_EXPERIENCE) {
              return res.status(400).json({
                    success: false,
                    message: `Years of experience must be between 0 and ${MAX_EXPERIENCE}.`,
@@ -60,13 +61,29 @@ exports.createSession = async (req, res) => {
                 [
                     {
                         user: userId,
-                        ...req.body,
+                        role,
+                        experience,
+                        topicsToFocus,
+                        description,
                     },
                 ],
                 {
                     session: mongoSession,
                 }
             );
+            const createdQuestions = await Question.insertMany(
+  (req.body.question || []).map((q) => ({
+    session: createdSession[0]._id,
+    question: q.question,
+    answer: q.answer,
+  })),
+  { session: mongoSession }
+);
+createdSession[0].questions = createdQuestions.map((q) => q._id);
+
+await createdSession[0].save({
+  session: mongoSession,
+});
 
             res.status(201).json({
                 success: true,
@@ -77,13 +94,14 @@ exports.createSession = async (req, res) => {
         if (err.message === "SESSION_LIMIT_REACHED") {
             return res.status(400).json({
                 success: false,
-                error: `Maximum of ${MAX_SESSIONS} sessions reached.`,
+                message: `Maximum of ${MAX_SESSIONS} sessions reached.`,
             });
         }
 
+        console.error("Create session error:", err);
         return res.status(500).json({
             success: false,
-            error: err.message,
+            message: "Internal server error occurred",
         });
     } finally {
         await mongoSession.endSession();
@@ -202,13 +220,14 @@ exports.deleteSession = async (req, res) => {
         if (err.message === "SESSION_NOT_FOUND") {
             return res.status(404).json({
                 success: false,
-                error: "Session not found.",
+                message: "Session not found.",
             });
         }
 
+        console.error("Delete session error:", err);
         return res.status(500).json({
             success: false,
-            error: err.message,
+            message: "Internal server error occurred",
         });
     } finally {
         await transaction.endSession();

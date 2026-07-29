@@ -385,131 +385,78 @@ html.dark {
   }
 }
 
-<<<<<<< HEAD
+/* Infinite Testimonials */
+@keyframes marquee {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+.animate-marquee.paused {
+  animation-play-state: paused;
+}
+
 /* ==========================================================================
    ✨ MODERN PREMIUM APPLICATION UI & EFFECTS UPGRADES
    ========================================================================== */
 
-/* 1. Global Interactive Layout Adjustments */
 @media (min-width: 769px) {
   body, a, button, input, select, textarea, [role="button"] {
-    cursor: none !important; /* Conceals classic ugly OS cursor for desktops */
+    cursor: none !important;
   }
 }
 
-/* 2. Precision Custom Dot Core Pointer */
 .custom-dot-pointer {
-  width: 6px;
-  height: 6px;
-  background-color: var(--primary, #6b21a8); /* Tailored signature purple look */
-  position: fixed;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 99999;
+  width: 6px; height: 6px;
+  background-color: var(--primary, #6b21a8);
+  position: fixed; transform: translate(-50%, -50%);
+  border-radius: 50%; pointer-events: none; z-index: 99999;
   transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
 }
+.custom-dot-pointer.hovered { width: 4px; height: 4px; background-color: var(--accent, #a855f7); }
 
-.custom-dot-pointer.hovered {
-  width: 4px;
-  height: 4px;
-  background-color: var(--accent, #a855f7);
-}
-
-/* 3. Fluid Trailing Light Follower Ring */
 .custom-trailing-ring {
-  width: 32px;
-  height: 32px;
+  width: 32px; height: 32px;
   border: 1.5px solid var(--primary, #6b21a8);
-  background-color: transparent;
-  position: fixed;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 99998;
-  opacity: 0.75;
-  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
-              height 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
-              background-color 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
-              border-color 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  background-color: transparent; position: fixed;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  pointer-events: none; z-index: 99998; opacity: 0.75;
+  transition: width 0.3s cubic-bezier(0.25,1,0.5,1),
+              height 0.3s cubic-bezier(0.25,1,0.5,1),
+              background-color 0.3s cubic-bezier(0.25,1,0.5,1),
+              border-color 0.3s cubic-bezier(0.25,1,0.5,1);
 }
-
-/* Smooth expansion ring visual feedback on interactive items */
 .custom-trailing-ring.hovered {
-  width: 50px;
-  height: 50px;
+  width: 50px; height: 50px;
   border-color: var(--accent, #a855f7);
-  background-color: rgba(168, 85, 247, 0.08); /* Sophisticated subtle inner color fill */
+  background-color: rgba(168, 85, 247, 0.08);
 }
 
-/* 4. Elegant Page Card Entrance Animation Frames */
 @keyframes smoothLayoutEntrance {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(16px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-/* Apply graceful page loading reveal mechanics to key interface zones */
 .main-layout, .dashboard-layout, main, .landing-page, .auth-container {
-  animation: smoothLayoutEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: smoothLayoutEntrance 0.65s cubic-bezier(0.16,1,0.3,1) both;
 }
 
-/* 5. Fluid Micro-Interaction Feedback Rules */
 button, a, .topic-card, .summary-card, .profile-info-card, .badge-item {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              box-shadow 0.25s ease, 
-              background-color 0.2s ease, 
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 0.25s ease, background-color 0.2s ease,
               border-color 0.2s ease !important;
 }
-
-/* Refined lifting scale action on high emphasis components */
 button:hover, a:hover, .topic-card:hover, .summary-card:hover {
   transform: translateY(-3px) scale(1.02) !important;
-  box-shadow: 0 12px 20px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -4px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 12px 20px -4px rgba(0,0,0,0.12), 0 4px 8px -4px rgba(0,0,0,0.06) !important;
 }
-
-/* Gentle tactile compression effect on mouse clicks */
 button:active, a:active, .topic-card:active {
   transform: translateY(-1px) scale(0.99) !important;
 }
 
-/* 6. Accessibility Safeguard Guardrail (Honoring Prefer-Reduced-Motion Settings) */
 @media (prefers-reduced-motion: reduce) {
-  .custom-dot-pointer, .custom-trailing-ring {
-    display: none !important;
-  }
-  body, a, button, input, select, textarea, [role="button"] {
-    cursor: auto !important;
-  }
-  .main-layout, .dashboard-layout, main, .landing-page, .auth-container {
-    animation: none !important;
-  }
-  button:hover, a:hover, .topic-card:hover, .summary-card:hover {
-    transform: none !important;
-    box-shadow: none !important;
-  }
-=======
-/* Infinite Testimonials */
-
-@keyframes marquee {
-  from {
-    transform: translateX(0%);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-.animate-marquee.paused {
-  animation-play-state: paused;
->>>>>>> 95844e8d83e22f68446df2598244f272dc1468ed
+  .custom-dot-pointer, .custom-trailing-ring { display: none !important; }
+  body, a, button, input, select, textarea, [role="button"] { cursor: auto !important; }
+  .main-layout, .dashboard-layout, main, .landing-page, .auth-container { animation: none !important; }
+  button:hover, a:hover, .topic-card:hover, .summary-card:hover { transform: none !important; box-shadow: none !important; }
 }

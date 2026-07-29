@@ -5,7 +5,7 @@ const { handleValidationError } = require("./ValidateQuestions");
 const saveProgressSchema = z.object({
   sheetId: z.string().min(1, "Sheet ID is required"),
   followed: z.boolean().optional(),
-  completedTopics: z.array(z.string()).optional(),
+  completedTopics: z.record(z.string(), z.boolean()).optional(),
   percentage: z.number().int().min(0, "Percentage must be at least 0").max(100, "Percentage cannot exceed 100"),
 });
 

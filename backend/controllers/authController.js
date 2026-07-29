@@ -5,9 +5,9 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
-const ACCESS_TOKEN_EXPIRY = "15m";
-const REFRESH_TOKEN_EXPIRY = "7d";
-const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const ACCESS_TOKEN_EXPIRY = "7d";
+const REFRESH_TOKEN_EXPIRY = "30d";
+const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
@@ -109,8 +109,8 @@ const registerUser = async (req, res) => {
             profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
-        console.error("Register error:", error.message);
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Register error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -158,8 +158,8 @@ const loginUser = async (req, res) => {
 
         });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ success: false, message: "Internal server error occurred", error });
+        console.error("Login error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -217,7 +217,8 @@ const refreshToken = async (req, res) => {
         
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Refresh token error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -258,7 +259,8 @@ const logoutUser = async (req, res) => {
         res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "User logged out successfully." });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Logout error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -295,7 +297,8 @@ const verifyEmail = async (req, res) => {
 
         res.json({ success: true, message: "Email verified successfully. You can now log in." });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Verify email error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -333,7 +336,8 @@ const resendVerificationEmail = async (req, res) => {
 
         res.json({ success: true, message: "Verification email resent. Please check your inbox." });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Resend verification error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -349,7 +353,8 @@ const getUserProfile = async (req, res) => {
         }
         res.json(user);
     }catch(error){
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Get profile error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -444,7 +449,8 @@ const updateUserProfile = async (req, res) => {
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Update profile error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -483,7 +489,8 @@ const changePassword = async (req, res) => {
 
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Change password error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
@@ -502,7 +509,8 @@ const deleteUserAccount = async (req, res) => {
         await User.findByIdAndDelete(userId);
         res.json({ success: true, message: "Account deleted successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+        console.error("Delete account error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 

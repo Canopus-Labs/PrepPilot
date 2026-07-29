@@ -2,13 +2,13 @@ import { useParams } from "react-router-dom";
 import gfg from "../assets/gfg.svg";
 import leetcode from "../assets/leetcode.svg";
 import youtube from "../assets/youtube.svg";
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo, useContext } from "react";
 
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
+import { UserContext } from "../context/userContext";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
 
-// Optimized row component to prevent 150+ re-renders on a single click
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
   let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
   const diffStr = (sub.difficulty || "").toLowerCase();
@@ -18,7 +18,7 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
   return (
     <div className="group flex flex-col sm:flex-row sm:items-center px-5 py-3.5 border-b border-gray-100 dark:border-white/5 last:border-0 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200 gap-4 sm:gap-6">
-      <div className="flex items-start sm:items-center gap-3.5 flex-1">
+      <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
         <button
           onClick={() => onToggle(sectionIdx, topicIdx, subIdx)}
           disabled={!followed}
@@ -32,8 +32,8 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
           )}
         </button>
         
-        <span className={`text-sm font-medium transition-all duration-200 ${
-          completed ? "text-gray-400 dark:text-gray-500 line-through decoration-gray-300 dark:decoration-gray-600 origin-left" : "text-gray-800 dark:text-gray-200 group-hover:text-violet-600 dark:group-hover:text-violet-400"
+        <span className={`block truncate text-sm font-medium transition-all duration-200 ${
+          completed ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-200 group-hover:text-violet-600 dark:group-hover:text-violet-400"
         }`}>
           {sub.title}
         </span>
@@ -87,6 +87,7 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
 function SheetDetail() {
   const { id } = useParams();
+  const { sheetProgress: ctxProgress, refreshSheetProgress } = useContext(UserContext);
   const [sheet, setSheet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [completedTopics, setCompletedTopics] = useState({});
@@ -97,15 +98,29 @@ function SheetDetail() {
       .then((res) => res.json())
       .then((data) => {
         setSheet(data.sheet);
-        const saved = localStorage.getItem(`${id}-progress`);
-        if (saved) {
-          const progressData = JSON.parse(saved);
-            setFollowed(progressData.followed || false);
-            setCompletedTopics(progressData.completedTopics || {});
+
+        // 1. Try backend (UserContext) — available immediately after login, works cross-device
+        const backendRecord = (ctxProgress || []).find(p => p.sheetId === id);
+
+        if (backendRecord) {
+          setFollowed(backendRecord.followed || false);
+          setCompletedTopics(backendRecord.completedTopics || {});
+        } else {
+          // 2. Fall back to localStorage for offline / not-yet-synced state
+          try {
+            const saved = localStorage.getItem(`${id}-progress`);
+            if (saved) {
+              const progressData = JSON.parse(saved);
+              setFollowed(progressData.followed || false);
+              setCompletedTopics(progressData.completedTopics || {});
+            }
+          } catch {}
         }
+
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const totalSubtopics =
@@ -122,37 +137,29 @@ function SheetDetail() {
   const completedCount = Object.values(completedTopics).filter(Boolean).length;
 
   useEffect(() => {
-    if (followed) {
-      const percentage =
-        totalSubtopics > 0
-          ? Math.round((completedCount / totalSubtopics) * 100)
-          : 0;
+    if (!followed) return;
 
-      // Debounce the localStorage save slightly to avoid blocking rapid clicks
-      const saveToStorage = setTimeout(() => {
-        localStorage.setItem(
-          `${id}-progress`,
-          JSON.stringify({
-            followed: true,
-            completedTopics,
-            percentage,
-          })
-        );
-        localStorage.setItem("sheet-last-update", Date.now().toString());
+    const percentage =
+      totalSubtopics > 0
+        ? Math.round((completedCount / totalSubtopics) * 100)
+        : 0;
 
-        // Sync to backend so dashboard can see it
-        axiosInstance.post("/api/user/sheet-progress", {
-          sheetId: id,
-          followed: true,
-          completedTopics,
-          percentage
-        }).catch(err => console.error("Failed to sync progress to backend:", err));
+    const saveToStorage = setTimeout(() => {
+      localStorage.setItem(
+        `${id}-progress`,
+        JSON.stringify({ followed: true, completedTopics, percentage })
+      );
+      localStorage.setItem("sheet-last-update", Date.now().toString());
 
-      }, 500);
+      axiosInstance.post("/api/user/sheet-progress", {
+        sheetId: id,
+        followed: true,
+        completedTopics,
+        percentage,
+      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
-      return () => clearTimeout(saveToStorage);
-    }
-  }, [completedTopics, completedCount, followed, id, totalSubtopics]);
+    return () => clearTimeout(saveToStorage);
+  }, [completedTopics, followed]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;
@@ -169,17 +176,28 @@ function SheetDetail() {
       setFollowed(false);
       setCompletedTopics({});
       
-      // Update backend to unfollow
       axiosInstance.post("/api/user/sheet-progress", {
         sheetId: id,
         followed: false,
         completedTopics: {},
         percentage: 0
-      }).catch(err => console.error(err));
+      }).then(() => refreshSheetProgress?.()).catch(err => console.error(err));
 
     } else {
       setFollowed(true);
-      // Backend sync occurs in the useEffect above when `followed` becomes true
+
+      localStorage.setItem(
+        `${id}-progress`,
+        JSON.stringify({ followed: true, completedTopics, percentage: 0 })
+      );
+      localStorage.setItem("sheet-last-update", Date.now().toString());
+
+      axiosInstance.post("/api/user/sheet-progress", {
+        sheetId: id,
+        followed: true,
+        completedTopics,
+        percentage: 0,
+      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync follow to backend:", err));
     }
   };
 
@@ -205,12 +223,8 @@ function SheetDetail() {
     <>
       <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white px-5 md:px-12 lg:px-24 py-8 transition-colors duration-300">
         
-        {/* Modern Hero Section */}
         <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-8 shadow-sm border border-gray-200 dark:border-white/10 relative overflow-hidden">
-          {/* Subtle Background Glow */}
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          
-          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="max-w-3xl">
               <h1 className="text-2xl md:text-3xl font-bold mb-3 text-gray-900 dark:text-white tracking-tight">
                 {sheet.title}
@@ -253,22 +267,20 @@ function SheetDetail() {
             </div>
           </div>
 
-          {/* Top Level Progress Bar */}
           <div className="mt-6 pt-5 border-t border-gray-200 dark:border-white/10">
             <div className="flex justify-between items-end mb-2">
               <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Overall Progress</span>
               <span className="text-sm font-bold text-violet-600 dark:text-violet-400">{progressPercent}%</span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-800 h-2 rounded-full overflow-hidden shadow-inner flex">
+            <div className="w-full bg-gray-200 dark:bg-white/10 h-2 rounded-full overflow-hidden shadow-inner flex">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-700 ease-out"
+                className="h-full rounded-full bg-violet-600 transition-all duration-700 ease-out"
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>
           </div>
         </div>
 
-        {/* Traditional DSA List/Table UI */}
         <div className="flex flex-col gap-8">
           {sheet.sections?.map((section, sectionIdx) => (
             <div key={sectionIdx} className="w-full">
@@ -313,7 +325,6 @@ function SheetDetail() {
           ))}
         </div>
 
-        {/* Completion banner */}
         {completedCount === totalSubtopics && totalSubtopics > 0 && (
           <div className="mt-12 bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white text-center p-8 rounded-2xl shadow-xl border border-white/20 animate-fade-in-up">
              <h2 className="text-2xl font-black mb-2 flex items-center justify-center gap-3 drop-shadow-md">

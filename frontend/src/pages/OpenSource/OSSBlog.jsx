@@ -97,13 +97,6 @@ const scrollToTop = () => {
     return `${Math.ceil(diffDays / 365)} years ago`;
   };
 
-  const calculateReadTime = (content) => {
-    if (!content) return 1;
-    const wordsPerMinute = 200;
-    const wordCount = content.split(/\s+/).length;
-    return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
-  };
-
   return (
     <div ref={scrollRef}  className="h-screen overflow-y-auto bg-gray-50 dark:bg-[#0f172a]">
        {showScrollTop && (
@@ -217,7 +210,7 @@ const scrollToTop = () => {
                 key={article.id}
                 href={article.url}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -295,7 +288,7 @@ const scrollToTop = () => {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span>
-                          📖 {calculateReadTime(article.body_markdown)} min
+                          📖 {article.reading_time_minutes || 1} min
                         </span>
                       </div>
                     </div>

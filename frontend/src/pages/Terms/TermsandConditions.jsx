@@ -7,7 +7,8 @@ import {
   LuShield,
   LuGlobe,
 } from "react-icons/lu";
-
+import { Link } from "react-router-dom";
+import { LuArrowLeft } from "react-icons/lu"; 
 const sectionsData = [
   { id: "intro",        title: "Introduction",          icon: LuFileText      },
   { id: "acceptance",  title: "Acceptance of Terms",    icon: LuUser          },
@@ -152,6 +153,15 @@ const TermsandConditions = () => {
 
   return (
     <div className="min-h-full bg-white dark:bg-[#0b1120] text-gray-800 dark:text-gray-200 transition-colors duration-300">
+      <div className="absolute top-6 right-4 sm:right-6 lg:right-8 z-50">
+              <Link 
+                to="/" 
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm"
+              >
+                <LuArrowLeft size={14} />
+                Back to Home
+              </Link>
+            </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex gap-8">
 
         {/* LEFT — Table of Contents */}

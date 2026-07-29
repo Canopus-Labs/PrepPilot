@@ -5,7 +5,19 @@ const GITHUB_OWNER = "KaranUnique";
 const GITHUB_REPO = "Free-programming-books";
 const BRANCH = "main";
 const ALLOWED_DOWNLOAD_HOSTS = new Set(["raw.githubusercontent.com"]);
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+let GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+if (GITHUB_TOKEN && (GITHUB_TOKEN.includes("your_token_here") || GITHUB_TOKEN === "github_pat_your_token_here")) {
+  GITHUB_TOKEN = "";
+}
+
+
+// In-memory cache configurations
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const prefixFilesCache = new Map();
+let cachedCategoryDirs = null;
+let categoryDirsFetchedAt = 0;
+let cachedGitTree = null;
+let gitTreeFetchedAt = 0;
 
 async function fetchJson(url) {
   const resp = await fetch(url, {
@@ -25,39 +37,90 @@ function buildRawUrl(path) {
   return `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${BRANCH}/${encodeURI(path)}`;
 }
 
+async function getGitTree() {
+  if (cachedGitTree && (Date.now() - gitTreeFetchedAt < CACHE_TTL_MS)) {
+    return cachedGitTree;
+  }
+
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/${BRANCH}?recursive=1`;
+  const response = await fetchJson(url);
+
+  if (response && Array.isArray(response.tree)) {
+    cachedGitTree = response.tree;
+    gitTreeFetchedAt = Date.now();
+    return cachedGitTree;
+  }
+
+  throw new Error("Invalid Git Trees response");
+}
+
 async function listFilesRecursive(prefix, page, limit) {
-  const files = [];
-  const queue = [prefix];
   const requestedPage = Number.isFinite(page) && page >= 1 ? page : 1;
   const itemsPerPage = Number.isFinite(limit) && limit >= 1 ? limit : 20;
   const startIndex = (requestedPage - 1) * itemsPerPage;
   const endIndex = requestedPage * itemsPerPage;
-  let totalItems = 0;
 
-  while (queue.length) {
-    const current = queue.shift();
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURI(current)}?ref=${BRANCH}`;
-    const entries = await fetchJson(url);
-    for (const entry of entries) {
-      if (entry.type === "dir") {
-        queue.push(`${current}/${entry.name}`);
-      } else if (entry.type === "file") {
-        if (totalItems >= startIndex && totalItems < endIndex) {
-          files.push({
-            path: `${current}/${entry.name}`,
-            name: entry.name,
-            size: entry.size,
-            url: entry.download_url || buildRawUrl(`${current}/${entry.name}`),
-          });
-        }
-        totalItems += 1;
-      }
+  let allFiles = [];
+  let tree = cachedGitTree;
+
+  if (!tree) {
+    try {
+      tree = await getGitTree();
+    } catch (err) {
+      // Ignore tree fetch failure; it will fall back to legacy queue
     }
   }
 
+  if (tree && Array.isArray(tree)) {
+    const categoryFiles = tree.filter(
+      (e) => e.type === "blob" && (e.path === prefix || e.path.startsWith(`${prefix}/`))
+    );
+
+    allFiles = categoryFiles.map((e) => ({
+      path: e.path,
+      name: e.path.split("/").pop(),
+      size: e.size,
+      url: buildRawUrl(e.path),
+    }));
+  } else {
+    const cached = prefixFilesCache.get(prefix);
+    if (cached && (Date.now() - cached.fetchedAt < CACHE_TTL_MS)) {
+      allFiles = cached.files;
+    } else {
+      const queue = [prefix];
+      while (queue.length) {
+        const current = queue.shift();
+        const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURI(current)}?ref=${BRANCH}`;
+        const entries = await fetchJson(url);
+        if (!Array.isArray(entries)) {
+          break;
+        }
+        for (const entry of entries) {
+          if (entry.type === "dir") {
+            queue.push(`${current}/${entry.name}`);
+          } else if (entry.type === "file") {
+            allFiles.push({
+              path: `${current}/${entry.name}`,
+              name: entry.name,
+              size: entry.size,
+              url: entry.download_url || buildRawUrl(`${current}/${entry.name}`),
+            });
+          }
+        }
+      }
+      prefixFilesCache.set(prefix, {
+        files: allFiles,
+        fetchedAt: Date.now(),
+      });
+    }
+  }
+
+  const paginatedItems = allFiles.slice(startIndex, endIndex);
+  const totalItems = allFiles.length;
+
   return {
     totalItems,
-    items: files,
+    items: paginatedItems,
     currentPage: requestedPage,
     pageSize: itemsPerPage,
     totalPages: Math.max(1, Math.ceil(totalItems / itemsPerPage)),
@@ -82,12 +145,39 @@ async function listFilesRecursive(prefix, page, limit) {
  */
 router.get("/", async (_req, res) => {
   try {
-    const rootUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents?ref=${BRANCH}`;
-    const rootEntries = await fetchJson(rootUrl);
+    let categoryDirs;
+    let treeData = null;
 
-    const categoryDirs = rootEntries.filter(
-      (e) => e.type === "dir" && e.name !== "src" && e.name !== "public",
-    );
+    try {
+      treeData = await getGitTree();
+    } catch (err) {
+      console.warn("[books] Failed to fetch git tree, trying contents fallback:", err.message);
+    }
+
+    if (treeData && Array.isArray(treeData)) {
+      categoryDirs = treeData
+        .filter(
+          (e) => e.type === "tree" && !e.path.includes("/") && e.path !== "src" && e.path !== "public"
+        )
+        .map((e) => ({
+          name: e.path,
+          type: "dir",
+        }));
+    } else {
+      if (cachedCategoryDirs && (Date.now() - categoryDirsFetchedAt < CACHE_TTL_MS)) {
+        categoryDirs = cachedCategoryDirs;
+      } else {
+        const rootUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents?ref=${BRANCH}`;
+        const rootEntries = await fetchJson(rootUrl);
+
+        categoryDirs = rootEntries.filter(
+          (e) => e.type === "dir" && e.name !== "src" && e.name !== "public",
+        );
+        cachedCategoryDirs = categoryDirs;
+        categoryDirsFetchedAt = Date.now();
+      }
+    }
+
     const warnings = [];
 
     const page = Number.parseInt(_req.query.page, 10);

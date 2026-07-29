@@ -13,6 +13,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import InteractiveCursor from './components/InteractiveCursor';
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import AuthPage from "./pages/Auth/AuthPage";
 import VerifyEmail from "./pages/Auth/verifyEmail";
 import LandingPage from "./LandingPage";
 import Dashboard from "./pages/Home/Dashboard";
@@ -40,9 +41,17 @@ import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
+import FreeCourses from "./pages/FreeCourses/FreeCourses";
+import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600" />
+      </div>
+    );
+  }
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -79,11 +88,17 @@ const App = () => {
                   element={
                     <ErrorBoundary>
                       <PageTransition>
-                        <div className="min-h-screen w-full flex items-center justify-center bg-[#0B0F19] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0B0F19] to-[#05080f]">
-                          <div className="w-full max-w-[420px] rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/5 bg-[#111827]">
-                            <Login />
-                          </div>
-                        </div>
+                        <AuthPage />
+                      </PageTransition>
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <ErrorBoundary>
+                      <PageTransition>
+                        <AuthPage />
                       </PageTransition>
                     </ErrorBoundary>
                   }
@@ -192,6 +207,16 @@ const App = () => {
                       <PageTransition>
                         <Dashboard />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/spaced-repetition"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <SpacedRepetitionPage />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
@@ -307,6 +332,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <NotesBooks />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/free-courses"
+                    element={
+                      <PageTransition>
+                        <FreeCourses />
                       </PageTransition>
                     }
                   />
