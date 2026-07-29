@@ -1,4 +1,4 @@
-import { LuCopy, LuCheck, LuCode } from 'react-icons/lu';
+import { LuCopy, LuCheck, LuCode } from "react-icons/lu";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -7,8 +7,34 @@ import ReactMarkdown from 'react-markdown';
 
 const AIResponsePreview = ({ content }) => {
     if (!content) return null;
+    const [copied, setCopied] = useState(false);
+
+const copyResponse = async () => {
+    try {
+        await navigator.clipboard.writeText(content);
+
+        setCopied(true);
+
+        setTimeout(() => {
+            setCopied(false);
+        }, 2000);
+    } catch (err) {
+        alert("Failed to copy the response.");
+        console.error("Failed to copy:", err);
+    }
+};
     return (
         <div className="w-full">
+            <div className="flex justify-end mb-3">
+    <button
+    onClick={copyResponse}
+    aria-label="Copy entire response"
+    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition"
+>
+    {copied ? <LuCheck size={18} /> : <LuCopy size={18} />}
+    {copied ? "Copied!" : "Copy Response"}
+</button>
+</div>
             <div className="text-[15px] md:text-base leading-relaxed prose prose-slate dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
