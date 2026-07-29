@@ -151,7 +151,7 @@ router.get("/", async (_req, res) => {
     try {
       treeData = await getGitTree();
     } catch (err) {
-      console.warn("[books] Failed to fetch git tree, trying contents fallback:", err.message);
+      console.warn("[books] Failed to fetch git tree, trying contents fallback");
     }
 
     if (treeData && Array.isArray(treeData)) {
@@ -207,8 +207,8 @@ router.get("/", async (_req, res) => {
             })),
           };
         } catch (err) {
-          console.error(`[books] Failed to read dir ${dir.name}:`, err.message);
-          warnings.push(`Skipped ${dir.name}: ${err.message}`);
+          console.error(`[books] Failed to read dir ${dir.name}`);
+          warnings.push(`Skipped ${dir.name}`);
           return null;
         }
       }),
