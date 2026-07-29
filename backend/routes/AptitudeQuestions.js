@@ -20,20 +20,11 @@ router.get("/", async (req, res) => {
   const normalizedTopic = topic.trim().toLowerCase();
   const cacheKey = `questions:${normalizedTopic}`;
 
-const cachedQuestions =
-  questionCache.get(cacheKey);
+  const cachedQuestions = questionCache.get(cacheKey);
 
-if (cachedQuestions) {
-  console.log(
-    `[Cache HIT] Topic: ${topic}`
-  );
-
-  return res.json(cachedQuestions);
-}
-
-console.log(
-  `[Cache MISS] Topic: ${topic}`
-);
+  if (cachedQuestions) {
+    return res.json(cachedQuestions);
+  }
 
   const prompt = `
     Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
@@ -51,15 +42,13 @@ console.log(
 
   try {
     // Use centralised helper with per-model retry (exponential backoff)
-    const { result, usedModel } = await generateWithFallback(
+    const { result } = await generateWithFallback(
       process.env.GEMINI_API_KEY,
       [prompt],
       {},
       MAX_RETRIES,
       INITIAL_DELAY
     );
-
-    console.log(`[Aptitude] Successfully used model: ${usedModel}`);
 
     const rawText = await result.response.text();
     let cleanedText = rawText
@@ -81,12 +70,9 @@ console.log(
           raw: rawText,
         });
     }
-    questionCache.set(
-  cacheKey,
-  questions
-);
+    questionCache.set(cacheKey, questions);
 
-res.json(questions);
+    res.json(questions);
   } catch (error) {
     console.error("Gemini API error:", error);
     res
