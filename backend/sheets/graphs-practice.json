@@ -1,0 +1,454 @@
+{
+  "sheets": [
+    {
+      "id": "graphs-practice",
+      "title": "Graph Algorithms Practice",
+      "description": "Master all essential graph problems — BFS, DFS, Topological Sort, Shortest Path, Union-Find, Cycle Detection, and more. Covers every graph topic asked in FAANG/MAANG interviews.",
+      "followers": 2150,
+      "questions": 40,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Graph Algorithms Practice Sheet",
+          "topics": [
+            {
+              "title": "BFS & DFS Fundamentals",
+              "subtopics": [
+                {
+                  "title": "Number of Islands",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-islands/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-the-number-of-islands/1",
+                    "youtube": "https://youtu.be/pV2kpPD66nE"
+                  }
+                },
+                {
+                  "title": "Flood Fill",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/flood-fill/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/flood-fill-algorithm1856/1",
+                    "youtube": "https://youtu.be/C-2_uSRli8o"
+                  }
+                },
+                {
+                  "title": "Rotting Oranges",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/rotting-oranges/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/rotten-oranges2536/1",
+                    "youtube": "https://youtu.be/yf3oaQhbzmU"
+                  }
+                },
+                {
+                  "title": "01 Matrix",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/01-matrix/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/nearest-1-in-a-binary-matrix4630/1",
+                    "youtube": "https://youtu.be/edXdVwkYHF8"
+                  }
+                },
+                {
+                  "title": "Clone Graph",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/clone-graph/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/clone-graph/1",
+                    "youtube": "https://youtu.be/mQeF6bN8hMk"
+                  }
+                },
+                {
+                  "title": "Word Ladder",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-ladder/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/word-ladder/1",
+                    "youtube": "https://youtu.be/tRPda0rcf8E"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Cycle Detection",
+              "subtopics": [
+                {
+                  "title": "Detect Cycle in Undirected Graph (BFS)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/graph-valid-tree/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1",
+                    "youtube": "https://youtu.be/A8ko93TyOns"
+                  }
+                },
+                {
+                  "title": "Detect Cycle in Directed Graph (DFS)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/course-schedule/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1",
+                    "youtube": "https://youtu.be/9twcmtQj4DU"
+                  }
+                },
+                {
+                  "title": "Find Eventual Safe States",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-eventual-safe-states/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/eventual-safe-states/1",
+                    "youtube": "https://youtu.be/uRbJ1OF9aYM"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Topological Sort",
+              "subtopics": [
+                {
+                  "title": "Topological Sort (DFS)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/topological-sort/1",
+                    "youtube": "https://youtu.be/5lZ0iJMrUMk"
+                  }
+                },
+                {
+                  "title": "Kahn's Algorithm (BFS Topological Sort)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/topological-sort/1",
+                    "youtube": "https://youtu.be/73sneFXuTEg"
+                  }
+                },
+                {
+                  "title": "Course Schedule",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/course-schedule/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/prerequisite-tasks/1",
+                    "youtube": "https://youtu.be/EgI5nU9etnU"
+                  }
+                },
+                {
+                  "title": "Course Schedule II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/course-schedule-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/course-schedule/1",
+                    "youtube": "https://youtu.be/WAOfKpxYHR8"
+                  }
+                },
+                {
+                  "title": "Alien Dictionary",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/alien-dictionary/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/alien-dictionary/1",
+                    "youtube": "https://youtu.be/U3N_je7tWAs"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Shortest Path Algorithms",
+              "subtopics": [
+                {
+                  "title": "Shortest Path in Binary Matrix",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/shortest-path-in-binary-matrix/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/YnEvHDHfvBo"
+                  }
+                },
+                {
+                  "title": "Dijkstra's Algorithm — Shortest Path",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/network-delay-time/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/implementing-dijkstra-set-1-adjacency-matrix/1",
+                    "youtube": "https://youtu.be/V6H1qAeB-l4"
+                  }
+                },
+                {
+                  "title": "Bellman-Ford Algorithm",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/distance-from-the-source-bellman-ford-algorithm/1",
+                    "youtube": "https://youtu.be/0vVofAhAYjc"
+                  }
+                },
+                {
+                  "title": "Floyd-Warshall Algorithm",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1",
+                    "youtube": "https://youtu.be/YbY8cVwWAvw"
+                  }
+                },
+                {
+                  "title": "Cheapest Flights Within K Stops",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/cheapest-flights-within-k-stops/1",
+                    "youtube": "https://youtu.be/9-_EPIW7_6E"
+                  }
+                },
+                {
+                  "title": "Path With Minimum Effort",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/path-with-minimum-effort/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/path-with-minimum-effort/1",
+                    "youtube": "https://youtu.be/0ytpZyiZFhA"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Minimum Spanning Tree",
+              "subtopics": [
+                {
+                  "title": "Prim's Algorithm — MST",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/min-cost-to-connect-all-points/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1",
+                    "youtube": "https://youtu.be/mJcZjjKzeqk"
+                  }
+                },
+                {
+                  "title": "Kruskal's Algorithm — MST",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/min-cost-to-connect-all-points/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1",
+                    "youtube": "https://youtu.be/1KRmCzBl_mQ"
+                  }
+                },
+                {
+                  "title": "Min Cost to Connect All Points",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/min-cost-to-connect-all-points/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/f7JOBJIC-NA"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Union-Find (Disjoint Set Union)",
+              "subtopics": [
+                {
+                  "title": "Number of Connected Components in an Undirected Graph",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-provinces/1",
+                    "youtube": "https://youtu.be/ZGr5nX-Gi6Y"
+                  }
+                },
+                {
+                  "title": "Redundant Connection",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/redundant-connection/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/detect-cycle-using-dsu/1",
+                    "youtube": "https://youtu.be/FXWRE67PLL0"
+                  }
+                },
+                {
+                  "title": "Accounts Merge",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/accounts-merge/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/account-merge/1",
+                    "youtube": "https://youtu.be/FMwpt_aQOGo"
+                  }
+                },
+                {
+                  "title": "Making a Large Island",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/making-a-large-island/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/lgiz0Oup6gM"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Strongly Connected Components & Bridges",
+              "subtopics": [
+                {
+                  "title": "Kosaraju's Algorithm — SCC",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/strongly-connected-components-kosarajus-algo/1",
+                    "youtube": "https://youtu.be/V8qIqJxCioo"
+                  }
+                },
+                {
+                  "title": "Tarjan's Algorithm — SCC",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/strongly-connected-component-tarjanss-algo-1587115621/1",
+                    "youtube": "https://youtu.be/wUgWX0nc4NY"
+                  }
+                },
+                {
+                  "title": "Critical Connections in a Network (Bridges)",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/critical-connections-in-a-network/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/bridge-edge-in-graph/1",
+                    "youtube": "https://youtu.be/qrAub5z8FeA"
+                  }
+                },
+                {
+                  "title": "Articulation Points in a Graph",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/articulation-point-1/1",
+                    "youtube": "https://youtu.be/64KK9K4RpKE"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Bipartite Graph & Coloring",
+              "subtopics": [
+                {
+                  "title": "Is Graph Bipartite?",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/is-graph-bipartite/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/bipartite-graph/1",
+                    "youtube": "https://youtu.be/-vu34sct1g8"
+                  }
+                },
+                {
+                  "title": "Possible Bipartition",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/possible-bipartition/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/0ACfAqs8mm0"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Advanced Graph Problems",
+              "subtopics": [
+                {
+                  "title": "Number of Provinces",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-provinces/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-provinces/1",
+                    "youtube": "https://youtu.be/ACzkVtewUYA"
+                  }
+                },
+                {
+                  "title": "Surrounded Regions",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/surrounded-regions/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/replace-os-with-xs0052/1",
+                    "youtube": "https://youtu.be/9z2BunfoZ5Y"
+                  }
+                },
+                {
+                  "title": "Number of Enclaves",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-enclaves/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-enclaves/1",
+                    "youtube": "https://youtu.be/rxKcepXQgU4"
+                  }
+                },
+                {
+                  "title": "Swim in Rising Water",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/swim-in-rising-water/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/amvrKlMLuGY"
+                  }
+                },
+                {
+                  "title": "Bus Routes",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/bus-routes/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/WT5RYBlT81I"
+                  }
+                },
+                {
+                  "title": "Word Ladder II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-ladder-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/word-ladder-ii/1",
+                    "youtube": "https://youtu.be/DREutrv2XD0"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
