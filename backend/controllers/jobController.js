@@ -52,7 +52,7 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
-    const role    = latestSession?.role || req.query.role || "software engineer";
+    const role    = req.query.role || latestSession?.role || "software engineer";
     const country = req.query.country   || ADZUNA_COUNTRY;
     const cacheKey = `${role.toLowerCase()}|${country}`;
 
