@@ -18,7 +18,7 @@ const togglePinQuestionSchema = z.object({
 
 // Schema for updating note
 const updateQuestionNoteSchema = z.object({
-  note: z.string().min(1, "Note cannot be empty"),
+  note: z.string(),
 });
 
 

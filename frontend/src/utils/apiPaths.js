@@ -9,10 +9,12 @@ export const API_PATHS = {
     VERIFY_EMAIL: "/api/auth/verify-email",
     RESEND_VERIFICATION: "/api/auth/resend-verification",
     GET_PROFILE: "/api/auth/profile",
+    FORGOT_PASSWORD: "/api/auth/forgot-password",
 
     UPDATE_PROFILE: "/api/auth/profile",
     CHANGE_PASSWORD: "/api/auth/change-password",
     DELETE_ACCOUNT: "/api/auth/delete-account",
+    REFRESH: "/api/auth/refresh", 
     LOGOUT: "/api/auth/logout",
 },
     IMAGE: {
@@ -47,5 +49,12 @@ export const API_PATHS = {
     },
     COURSES: {
         GET_ALL: "/api/courses", // GET all free courses
+    },
+    FLASHCARD: {
+        CREATE: "/api/flashcards",
+        GET_ALL: "/api/flashcards",
+        GET_STATS: "/api/flashcards/stats",
+        REVIEW: (id) => `/api/flashcards/${id}/review`,
+        DELETE: (id) => `/api/flashcards/${id}`,
     },
 };

@@ -20,7 +20,7 @@ const Session = require("../models/Session");
  * @example
  * 201 [{"_id":"...","session":"...","question":"...","answer":"..."}]
  */
-const addQuestionToSession = async (req, res) => {
+const addQuestionToSession = async (req, res, next) => {
   try {
     const { sessionId, questions } = req.body;
 
@@ -37,7 +37,7 @@ const addQuestionToSession = async (req, res) => {
       return res.status(404).json({ success: false, message: "Requested session could not be found" });
     }
 
-    if (session.user.toString() !== req.user._id.toString()) {
+    if (!session.user || session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
     const createdQuestions = await Question.insertMany(
@@ -52,7 +52,8 @@ const addQuestionToSession = async (req, res) => {
     await session.save();
     res.status(201).json(createdQuestions);
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    console.error("Add question error:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
 };
 
@@ -69,7 +70,7 @@ const addQuestionToSession = async (req, res) => {
  * @example
  * 200 {"success": true, "question": {"_id": "...", "isPinned": true, ...}}
  */
-const togglePinQuestion = async (req, res) => {
+const togglePinQuestion = async (req, res, next) => {
   try {
     const question = await Question.findById(req.params.id);
     if (!question) {
@@ -85,7 +86,7 @@ const togglePinQuestion = async (req, res) => {
         .json({ success: false, message: "Session not found" });
     }
 
-    if (session.user.toString() !== req.user._id.toString()) {
+    if (!session.user || session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",
@@ -97,7 +98,8 @@ const togglePinQuestion = async (req, res) => {
 
     res.status(200).json({ success: true, question });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    console.error("Toggle pin error:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
 };
 
@@ -118,7 +120,7 @@ const togglePinQuestion = async (req, res) => {
  * @example
  * 200 {"success": true, "question": {"_id": "...","note":"..."}}
  */
-const updateQuestionNote = async (req, res) => {
+const updateQuestionNote = async (req, res, next) => {
   try {
     const { note } = req.body;
     const question = await Question.findById(req.params.id);
@@ -136,7 +138,7 @@ const updateQuestionNote = async (req, res) => {
         .json({ success: false, message: "Session not found" });
     }
 
-    if (session.user.toString() !== req.user._id.toString()) {
+    if (!session.user || session.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",
@@ -148,7 +150,8 @@ const updateQuestionNote = async (req, res) => {
 
     res.status(200).json({ success: true, question });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error occurred", error: error.message });
+    console.error("Update note error:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
 };
 

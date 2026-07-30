@@ -42,3 +42,33 @@ describe("listFilesRecursive pagination", () => {
     expect(result.items[0].name).toBe("c.txt");
   });
 });
+
+describe("listFilesRecursive using Git Trees API", () => {
+  it("processes Git Trees API correctly and filters files in-memory", async () => {
+    const sampleTreeResponse = {
+      tree: [
+        { type: "blob", path: "category/a.txt", size: 10 },
+        { type: "blob", path: "category/b.txt", size: 20 },
+        { type: "tree", path: "category/sub", size: 0 },
+        { type: "blob", path: "other/c.txt", size: 30 },
+      ]
+    };
+
+    vi.stubGlobal("fetch", vi.fn(async () => ({
+      ok: true,
+      json: async () => sampleTreeResponse,
+      text: async () => "",
+    })));
+
+    const result = await listFilesRecursive("category", 1, 5);
+
+    expect(result.totalItems).toBe(2);
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].path).toBe("category/a.txt");
+    expect(result.items[0].name).toBe("a.txt");
+    expect(result.items[0].size).toBe(10);
+    expect(result.items[1].path).toBe("category/b.txt");
+    expect(result.items[1].name).toBe("b.txt");
+    expect(result.items[1].size).toBe(20);
+  });
+});

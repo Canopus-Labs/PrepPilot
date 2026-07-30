@@ -1,0 +1,102 @@
+[
+  {
+    "title": "[Data]: Add DSA Sheet — Two Pointers & Sliding Window",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nPrepPilot currently has limited DSA sheets. We need a dedicated sheet for **Two Pointers & Sliding Window** problems, which are among the most frequently tested patterns in coding interviews.\n\n## ✅ What needs to be done\n\n- Create a new JSON file at `backend/sheets/two-pointers-sliding-window.json`\n- Follow the exact schema used in existing sheets (see `backend/sheets/arrays-practice.json` as reference)\n- Include at least **20–30 subtopics** covering classic problems (e.g. Longest Substring Without Repeating Characters, Container With Most Water, etc.)\n- Add difficulty levels: `easy`, `medium`, `hard`\n- Include `gfg`, `leetcode`, and `youtube` links for each problem where available\n- Run `node backend/seedSheets.js` to verify the sheet loads correctly\n\n## 📁 Reference File\n\nSee `backend/sheets/arrays-practice.json` for the expected JSON structure.\n\n## 🙋 Good For\n\nContributors familiar with DSA who want to help grow the learning content."
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Dynamic Programming Patterns",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nDynamic Programming is one of the hardest and most important topics for coding interviews. PrepPilot needs a dedicated DP sheet.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/dynamic-programming.json`\n- Include at least **25–35 subtopics** covering DP patterns: Knapsack, LCS, LIS, Coin Change, Matrix DP, etc.\n- Follow the schema in `backend/sheets/arrays-practice.json`\n- Add difficulty labels and resource links (GFG, LeetCode, YouTube)\n- Run `node backend/seedSheets.js` to test\n\n## 📁 Reference\n\n`backend/sheets/arrays-practice.json`\n\n## 🙋 Good For\n\nContributors who have studied DP and want to create structured learning content."
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Graph Algorithms (BFS, DFS, Shortest Path)",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nGraph problems are heavily featured in FAANG/MAANG interviews. A dedicated Graph sheet is missing from PrepPilot.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/graphs-practice.json`\n- Cover: BFS, DFS, Topological Sort, Dijkstra, Union-Find, Cycle Detection, etc.\n- Minimum **25 subtopics** with difficulty + links\n- Follow the schema in existing sheets\n- Seed and verify with `node backend/seedSheets.js`\n\n## 📁 Reference\n\n`backend/sheets/arrays-practice.json`"
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Tree & Binary Tree Problems",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nTrees and Binary Trees are a core DSA topic. We need a dedicated sheet for structured practice.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/trees-practice.json`\n- Cover: Binary Tree traversals, BST operations, Height/Depth, LCA, Diameter, Path Sum, etc.\n- Include at least **25 subtopics** with difficulty and links\n- Follow the schema in `backend/sheets/linkedList-practice.json`\n- Seed with `node backend/seedSheets.js`"
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Recursion & Backtracking",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nRecursion and Backtracking problems are asked in virtually every technical interview. A dedicated sheet is needed.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/recursion-backtracking.json`\n- Cover: N-Queens, Sudoku Solver, Subsets, Permutations, Combination Sum, Word Search, etc.\n- Minimum **20 subtopics** with easy/medium/hard levels and resource links\n- Follow existing sheet schema and run seed script to verify"
+  },
+  {
+    "title": "[Data]: Collect Free Certifications — Cloud Computing (AWS, GCP, Azure)",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nThe Free Courses section in PrepPilot needs more free certification resources for Cloud Computing platforms. Many valuable free certs are not yet listed.\n\n## ✅ What needs to be done\n\n- Add new entries to `backend/data/allcourses.json` and `frontend/src/data/allcourses.json` under the relevant categories (`AWS`, `Cloud Computing`)\n- Collect **free certification courses** from platforms like:\n  - AWS Skill Builder (free tier)\n  - Google Cloud Skills Boost (free labs)\n  - Microsoft Learn (AZ-900 learning paths)\n  - IBM SkillsBuild\n- Each entry must include: `name`, `source`, `link`, and an appropriate `icon`\n- Verify links are active and genuinely free\n\n## 📁 Reference\n\nSee existing entries in `backend/data/allcourses.json` for the required JSON format.\n\n## ⚠️ Rules\n\n- Only add courses that are **completely free** (no credit card required)\n- No referral or affiliate links"
+  },
+  {
+    "title": "[Data]: Collect Free Certifications — Cybersecurity & Ethical Hacking",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nExpand the Free Courses section with more free certification resources in Cybersecurity and Ethical Hacking that are not currently listed.\n\n## ✅ What needs to be done\n\n- Add entries to `backend/data/allcourses.json` and `frontend/src/data/allcourses.json` under `Cyber Security` and `Ethical Hacking`\n- Collect free certs from:\n  - Cisco NetAcad (free cybersecurity courses)\n  - EC-Council CodeRed (free tier)\n  - TryHackMe (free paths)\n  - SANS Cyber Aces\n  - Coursera (audit mode)\n- Follow the existing JSON schema exactly\n- Only include links that are currently active and free\n\n## 📁 Reference\n\n`backend/data/allcourses.json` — see `Cyber Security` section"
+  },
+  {
+    "title": "[Data]: Collect Free Certifications — Data Science & Machine Learning",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nThe Data Science and Machine Learning sections in the Free Courses page can be expanded with more free certification resources.\n\n## ✅ What needs to be done\n\n- Add new entries to `backend/data/allcourses.json` and `frontend/src/data/allcourses.json` under `Data Science`, `Machine Learning`, and `Artificial Intelligence`\n- Sources to check for free certifications:\n  - DeepLearning.AI (free audit)\n  - fast.ai (completely free)\n  - Hugging Face courses\n  - DataCamp (free tier)\n  - Stanford Online (free audit)\n  - Elements of AI (free)\n- Ensure no duplicates with existing entries\n- Follow existing JSON schema"
+  },
+  {
+    "title": "[Game]: Build a Memory Card Matching Game for Cognitive Training",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nPrepPilot has a Cognitive Games section (`/cognitive-games`) to help users build cognitive skills. We need a new **Memory Card Matching Game**.\n\n## ✅ What needs to be done\n\n- Create a new React component at `frontend/src/components/MemoryCardGame.jsx`\n- Game rules: Show a grid of face-down cards; user flips two at a time; matched pairs stay revealed; goal is to match all pairs in minimum moves\n- Cards can show DSA concept names, algorithm names, or tech logos to make it relevant to interview prep\n- Show: moves count, timer, and a win screen when all pairs matched\n- Follow the existing game card style from `CognitiveGamesPage.jsx`\n- Register the game in `CognitiveGamesPage.jsx`\n\n## 📁 Reference\n\n`frontend/src/components/GridMemoryGame.jsx` and `frontend/src/pages/CognitiveGames/CognitiveGamesPage.jsx`"
+  },
+  {
+    "title": "[Game]: Build a Typing Speed Challenge Game for Focus Training",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nAdd a **Typing Speed Challenge** game to the Cognitive Games section. Typing speed is a practical skill for coding interviews and tests focus/concentration.\n\n## ✅ What needs to be done\n\n- Create `frontend/src/components/TypingSpeedGame.jsx`\n- Display a random paragraph (can use DSA/CS-related sentences or code snippets)\n- Track: WPM (words per minute), accuracy %, time elapsed\n- Highlight correct characters in green, incorrect in red as the user types\n- Show results screen with WPM, accuracy, and option to retry\n- Register the game in `CognitiveGamesPage.jsx`\n\n## 📁 Reference\n\n`frontend/src/pages/CognitiveGames/CognitiveGamesPage.jsx`"
+  },
+  {
+    "title": "[Game]: Build a Number Sequence / Pattern Recognition Game",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nAdd a **Number Sequence / Pattern Recognition** game to help users sharpen logical and analytical thinking — a core skill tested in aptitude rounds.\n\n## ✅ What needs to be done\n\n- Create `frontend/src/components/PatternRecognitionGame.jsx`\n- Show a sequence of numbers with a missing element (e.g. Fibonacci, arithmetic, geometric)\n- User selects the correct next number from 4 options\n- 10 questions per round, timer per question\n- Show score, correct answers, and difficulty increases progressively\n- Register the game in `CognitiveGamesPage.jsx`\n\n## 📁 Reference\n\n`frontend/src/pages/CognitiveGames/CognitiveGamesPage.jsx`"
+  },
+  {
+    "title": "[Resume]: Add Complete LaTeX Code for Jake's Resume Template",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nThe **Jake's Resume** template in the Resume Builder currently only has a minimal placeholder LaTeX code. It needs a complete, production-ready LaTeX implementation.\n\n## ✅ What needs to be done\n\n- Open `frontend/src/pages/ResumeBuilder/ResumeEditor.jsx`\n- Find the `TEMPLATES[\"jakes-resume\"].code` field\n- Replace the current placeholder with the **full Jake's Resume LaTeX code** from the original source: https://www.overleaf.com/latex/templates/jakes-resume/syzfjbzwjncs\n- The complete template should include all sections: Contact, Education, Experience, Projects, Skills\n- Test it compiles correctly in the editor (click Recompile)\n- Make sure the output PDF looks professional\n\n## 📁 File to edit\n\n`frontend/src/pages/ResumeBuilder/ResumeEditor.jsx` — `TEMPLATES[\"jakes-resume\"].code`"
+  },
+  {
+    "title": "[Resume]: Add Complete LaTeX Code for Deedy CV Template",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nThe **Deedy CV** template currently has only a placeholder: `\\Huge\\textbf{Deedy CV placeholder}`. It needs the full two-column LaTeX implementation.\n\n## ✅ What needs to be done\n\n- Open `frontend/src/pages/ResumeBuilder/ResumeEditor.jsx`\n- Find `TEMPLATES[\"deedy-cv\"].code`\n- Replace with the full Deedy-Resume LaTeX code from: https://www.overleaf.com/latex/templates/deedy-resume/bjryvfszhnbn\n- Ensure all required LaTeX packages are included in the template\n- Test compilation in the editor — fix any package issues for the texlive.net compiler\n- The output should be a clean two-column resume PDF\n\n## 📁 File to edit\n\n`frontend/src/pages/ResumeBuilder/ResumeEditor.jsx` — `TEMPLATES[\"deedy-cv\"].code`"
+  },
+  {
+    "title": "[Resume]: Add Complete LaTeX Code for Harvard Professional Template",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nThe **Harvard Professional** template has only a one-line placeholder. It needs a complete, clean single-column professional LaTeX resume.\n\n## ✅ What needs to be done\n\n- Open `frontend/src/pages/ResumeBuilder/ResumeEditor.jsx`\n- Find `TEMPLATES[\"harvard-pro\"].code`\n- Replace with a complete Harvard-style single-column resume in LaTeX\n- Sections to include: Summary, Education, Experience, Skills, Projects, Certifications\n- Reference: https://www.overleaf.com/gallery/tagged/cv (search Harvard style)\n- Test compilation and ensure clean PDF output\n\n## 📁 File to edit\n\n`frontend/src/pages/ResumeBuilder/ResumeEditor.jsx` — `TEMPLATES[\"harvard-pro\"].code`"
+  },
+  {
+    "title": "[Resume]: Add a New Modern Tech Resume LaTeX Template",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nAdd a new **Modern Tech Resume** template to the Resume Builder. This will give users more choices beyond the current 3 templates.\n\n## ✅ What needs to be done\n\n- Find or create a clean, modern single-column LaTeX resume template suitable for software engineers\n- Add it to `TEMPLATES` in `frontend/src/pages/ResumeBuilder/ResumeEditor.jsx` with a new key (e.g. `\"modern-tech\"`)\n- Add the corresponding entry in `RESUME_TEMPLATES` array in `frontend/src/pages/ResumeBuilder/ResumeTemplates.jsx` with name and description\n- The template must compile successfully on texlive.net\n- Test with the Recompile button in the editor\n\n## 📁 Files to edit\n\n- `frontend/src/pages/ResumeBuilder/ResumeEditor.jsx`\n- `frontend/src/pages/ResumeBuilder/ResumeTemplates.jsx`"
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Bit Manipulation Problems",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nBit Manipulation is a frequently tested DSA topic in product-based company interviews. A dedicated sheet is missing from PrepPilot.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/bit-manipulation.json`\n- Cover: AND/OR/XOR operations, Brian Kernighan's algorithm, Power of 2, Single Number, Counting Bits, etc.\n- Minimum **15–20 subtopics** with difficulty labels and GFG/LeetCode/YouTube links\n- Follow schema from `backend/sheets/arrays-practice.json`\n- Run `node backend/seedSheets.js` to verify"
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Heap & Priority Queue Problems",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nHeap and Priority Queue problems come up frequently in interviews. A dedicated sheet for these would help PrepPilot users practice systematically.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/heap-priority-queue.json`\n- Cover: Min/Max Heap operations, K Largest Elements, Merge K Sorted Lists, Top K Frequent, Median Finder, etc.\n- Minimum **15–20 subtopics** with difficulty and links\n- Follow existing sheet schema\n- Seed with `node backend/seedSheets.js` and verify it appears on the sheets page"
+  },
+  {
+    "title": "[Data]: Collect Free Certifications — DevOps, Docker & Kubernetes",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nDevOps tools like Docker and Kubernetes are increasingly asked about in backend and cloud roles. Expand the Free Courses section with free certifications in this area.\n\n## ✅ What needs to be done\n\n- Add entries to `backend/data/allcourses.json` and `frontend/src/data/allcourses.json` under `Docker` and new categories like `DevOps` or `Kubernetes`\n- Collect free resources from:\n  - KodeKloud (free Docker/K8s courses)\n  - Play with Docker (free labs)\n  - Linux Foundation free courses\n  - Coursera audit mode\n  - IBM SkillsBuild DevOps path\n- No duplicate entries, no paid courses\n- Follow the existing JSON schema exactly"
+  },
+  {
+    "title": "[Game]: Build a Code Output Prediction Game for Interview Prep",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nAdd a **Code Output Prediction** game to the Cognitive Games section. This directly trains a key interview skill — reading code and predicting output.\n\n## ✅ What needs to be done\n\n- Create `frontend/src/components/CodeOutputGame.jsx`\n- Show a short code snippet (JavaScript or Python, 5–10 lines) and ask the user to predict the output\n- Provide 4 multiple-choice options\n- 10 questions per round with a 30-second timer per question\n- Score tracking with explanation shown after each answer\n- Questions can be stored as a static array in the component covering: closures, loops, type coercion, recursion basics\n- Register in `CognitiveGamesPage.jsx`\n\n## 📁 Reference\n\n`frontend/src/pages/CognitiveGames/CognitiveGamesPage.jsx`"
+  },
+  {
+    "title": "[Data]: Add DSA Sheet — Trie Data Structure Problems",
+    "labels": ["good first issue", "ECSoC26", "gssoc:approved"],
+    "body": "## 📋 Task Description\n\nTrie (Prefix Tree) problems are asked in interviews at top companies. PrepPilot needs a dedicated Trie sheet.\n\n## ✅ What needs to be done\n\n- Create `backend/sheets/trie-practice.json`\n- Cover: Insert/Search/Delete in Trie, Word Search, Auto-complete, Longest Prefix Matching, etc.\n- Minimum **15 subtopics** with easy/medium/hard difficulty and GFG/LeetCode links\n- Follow the schema in `backend/sheets/arrays-practice.json`\n- Run `node backend/seedSheets.js` to seed and verify the sheet loads on `/coding-sheets`"
+  }
+]

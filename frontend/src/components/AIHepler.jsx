@@ -1,11 +1,14 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect} from "react";
 import { UserContext } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
 import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
+import { useParams } from "react-router-dom";
 
 export default function AIHelper() {
+  const { id } = useParams();
   const { user } = useContext(UserContext);
+  console.log("\nCurrent Logged In User is:\n", user);
   const [messages, setMessages] = useState([
     { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
   ]);
@@ -13,7 +16,34 @@ export default function AIHelper() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const endRef = useRef(null);
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      if (!user?._id) return; 
+      try {
+        const res = await fetch(`${BASE_URL}/api/history/${user._id}`); 
+        if (!res.ok) throw new Error("Failed to fetch history");
+        
+        const data = await res.json();
+        console.log("FETCHED DATA FROM DB:", data);
+        if (data && data.messages && data.messages.length > 0) {
+          const formattedMessages = data.messages.map((msg, index) => ({
+            id: Date.now() + index,
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            text: msg.text
+          }));
 
+          setMessages([
+            { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
+            ...formattedMessages
+          ]);
+        }
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
+    };
+
+    fetchChatHistory();
+  }, [user?._id]);
   function scrollToBottom() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }
@@ -23,16 +53,16 @@ export default function AIHelper() {
     setTimeout(scrollToBottom, 50);
   }
 
-  async function callApi(prompt, history, onProgress) {
+  async function callApi(prompt, history, onProgress, userId) {
+    console.log("\nBackend received userId:\n", userId);
     console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
     console.log("REQUEST URL:", `${BASE_URL}/api/generate`);
-    
     const res = await fetch(
       `${BASE_URL}/api/generate`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, history }),
+        body: JSON.stringify({ prompt,history,userId}),
       }
     );
 
@@ -103,7 +133,7 @@ export default function AIHelper() {
         text: m.text
       }));
 
-      const full = await callApi(prompt, historyForBackend, onProgress);
+      const full = await callApi(prompt, historyForBackend, onProgress,user?._id);
 
       let displayText = lastText || full || "(no response)";
       if (

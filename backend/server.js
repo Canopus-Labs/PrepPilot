@@ -75,20 +75,6 @@ app.use((req, res, next) => {
   next();
 });
 
-connectDB()
-  .then((success) => {
-    if (success) {
-      console.log("MongoDB connected successfully");
-    } else {
-      console.warn(
-        "⚠️ Failed to connect to MongoDB - server will run without database connection",
-      );
-    }
-  })
-  .catch((err) => {
-    console.error("Database connection error:", err.message);
-  });
-
 // middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -137,14 +123,21 @@ app.post(
   generateInterviewTips               // Controller
 );
 
-
 app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
 const coursesRoutes = require("./routes/coursesRoutes");
 app.use("/api/courses", generalLimiter, coursesRoutes);
+const flashcardRoutes = require("./routes/flashcardRoutes");
+app.use("/api/flashcards", generalLimiter, flashcardRoutes);
+
 
 //Serve uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Disposition", "inline");
+  },
+}));
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
@@ -152,6 +145,10 @@ app.get("/api/test", (req, res) => {
 });
 
 // Remove duplicate CORS middleware (already set above)
+
+const errorHandler = require("./middlewares/errorHandler");
+// Must be registered AFTER all routes
+app.use(errorHandler);
 
 // Daily job cache refresh — warm on boot, then every 24 hours.
 // Only runs when Adzuna is configured; otherwise refreshJobCache() no-ops.
@@ -161,30 +158,39 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
 
-// Start Server
+// Start Server - wait for DB connection before listening
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server connected and running on port ${PORT}`);
-  if (process.env.NODE_ENV === "production") {
-    console.log("Allowed CORS origins (production):");
-  } else {
-    console.log("Allowed CORS origins (development):");
-  }
-  for (const o of allowedOrigins) {
-    console.log("  -", o);
-  }
-});
-
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(
-      `Port ${PORT} is already in use. Please free the port or use a different one.`,
-    );
+;(async () => {
+  const connected = await connectDB();
+  if (!connected) {
+    console.error("Failed to connect to MongoDB. Exiting.");
     process.exit(1);
-  } else {
-    console.error("Server error:", err);
   }
-});
+  console.log("MongoDB connected successfully");
+
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server connected and running on port ${PORT}`);
+    if (process.env.NODE_ENV === "production") {
+      console.log("Allowed CORS origins (production):");
+    } else {
+      console.log("Allowed CORS origins (development):");
+    }
+    for (const o of allowedOrigins) {
+      console.log("  -", o);
+    }
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(
+        `Port ${PORT} is already in use. Please free the port or use a different one.`,
+      );
+      process.exit(1);
+    } else {
+      console.error("Server error:", err);
+    }
+  });
+})();
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
