@@ -1053,6 +1053,18 @@
         "name": "Cyber security: Understand Threats and Prevent Attacks",
         "source": "Alison",
         "link": "https://alison.com/course/cyber-security-understand-threats-and-prevent-attacks"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "Cisco Introduction to Cybersecurity (Free)",
+        "source": "Cisco NetAcad",
+        "link": "https://www.netacad.com/courses/cybersecurity/introduction-cybersecurity"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "TryHackMe - Pre-Security Learning Path (Free)",
+        "source": "TryHackMe",
+        "link": "https://tryhackme.com/path/outline/presecurity"
       }
     ]
   },
