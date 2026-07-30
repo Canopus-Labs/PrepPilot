@@ -9,6 +9,12 @@ const UserSchema = new mongoose.Schema(
         profileImageUrl: { type: String, default: null },
         refreshTokenHash: { type: String, default: null },
         refreshTokenExpiresAt: { type: Date, default: null },
+        // Tracks the `iat` of the currently active refresh token.
+        // If a refresh token with a different `iat` is presented, it indicates reuse
+        // after rotation (potential token theft) and triggers revocation.
+        refreshTokenIssuedAt: { type: Number, default: null },
+        // Set to true when reuse is detected; all refresh attempts fail until login.
+        refreshTokenReuseDetected: { type: Boolean, default: false },
         
         // Basic Info
         firstName: { type: String, default: "" },
