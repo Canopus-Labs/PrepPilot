@@ -12,7 +12,6 @@ const {
   generateInterviewTips,
 } = require("./controllers/aiController");
 const { protect } = require("./middlewares/authMiddleware");
-// const Question = require("./models/Question");
 const authRoutes = require("./routes/authRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const questionRoutes = require("./routes/questionRoutes");
@@ -22,14 +21,10 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
-// Remove ES Module import for cors. Use CommonJS require below.
 const app = express();
 
 app.set("trust proxy", 1);
 app.use(generalHeaders); 
-// CORS settings: derive from env
-// FRONTEND_ORIGIN=primary production frontend
-// EXTRA_ORIGINS=comma separated additional origins (staging, preview, etc.)
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
@@ -57,7 +52,6 @@ app.use((req, res, next) => {
     res.header("Vary", "Origin");
     res.header("Access-Control-Allow-Credentials", "true");
   } else if (origin) {
-    // Debug log for rejected origins (only once per process for each origin)
     if (!global.__rejectedCors) global.__rejectedCors = new Set();
     if (!global.__rejectedCors.has(origin)) {
       global.__rejectedCors.add(origin);
@@ -108,6 +102,8 @@ app.use("/api/user", generalLimiter, achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips } = require("./Input_validators/ValidateAi.js");
 app.use("/api/resume", generalLimiter, resumeRoutes);
+const notesSummaryRoutes = require("./routes/notesSummaryRoutes");
+app.use("/api/notes-summary", generalLimiter, notesSummaryRoutes);
 
 // AI routes with Zod validation
 app.post(
@@ -146,7 +142,6 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-//Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
 
 // Debug route to verify backend is working
@@ -154,10 +149,7 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!" });
 });
 
-// Remove duplicate CORS middleware (already set above)
 
-// Daily job cache refresh — warm on boot, then every 24 hours.
-// Only runs when Adzuna is configured; otherwise refreshJobCache() no-ops.
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
   refreshJobCache();

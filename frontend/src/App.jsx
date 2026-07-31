@@ -36,6 +36,7 @@ import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
 import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import NotesSummarizer from "./pages/NotesSummarizer/NotesSummarizer";
 import JobsForYou from "./pages/Jobs/JobsForYou";
 import HelpSupport from "./pages/Support/HelpSupport";
 import Settings from "./pages/Settings/Settings";
@@ -332,6 +333,16 @@ const App = () => {
                       <PageTransition>
                         <NotesBooks />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/notes-summarizer"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <NotesSummarizer />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
