@@ -134,7 +134,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
             ]
         );
         
-        let aiResponse = result.response.text();
+        let aiResponse = await result.response.text();
         
         // Robustly clean: remove all leading/trailing code block markers
         aiResponse = aiResponse

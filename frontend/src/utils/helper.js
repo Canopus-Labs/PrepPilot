@@ -1,4 +1,5 @@
 export const validateEmail = (email) => {
+    if (!email || typeof email !== 'string') return false;
     const regex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
     return regex.test(email);
 };

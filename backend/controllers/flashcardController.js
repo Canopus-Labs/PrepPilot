@@ -95,7 +95,7 @@ const createFlashcard = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create flashcard",
-      error: error.message,
+      error: "A server error occurred",
     });
   }
 };
@@ -129,7 +129,7 @@ const getUserFlashcards = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch flashcards",
-      error: error.message,
+      error: "A server error occurred",
     });
   }
 };
@@ -144,6 +144,13 @@ const reviewFlashcard = async (req, res) => {
     const { id } = req.params;
     const { rating } = req.body;
     const userId = req.user._id;
+
+    if (!rating) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating is required. Supported values: 'again', 'hard', 'good', 'easy'.",
+      });
+    }
 
     const flashcard = await Flashcard.findOne({ _id: id, userId });
     if (!flashcard) {
@@ -179,7 +186,7 @@ const reviewFlashcard = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to review flashcard",
-      error: error.message,
+      error: "A server error occurred",
     });
   }
 };
@@ -210,7 +217,7 @@ const deleteFlashcard = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to delete flashcard",
-      error: error.message,
+      error: "A server error occurred",
     });
   }
 };
@@ -254,7 +261,7 @@ const getFlashcardStats = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch SRS stats",
-      error: error.message,
+      error: "A server error occurred",
     });
   }
 };

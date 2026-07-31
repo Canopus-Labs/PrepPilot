@@ -1,0 +1,519 @@
+{
+  "sheets": [
+    {
+      "id": "dynamic-programming",
+      "title": "Dynamic Programming Patterns",
+      "description": "Master all essential Dynamic Programming patterns — Knapsack, LCS, LIS, Coin Change, Matrix DP, DP on Trees, and more. Covers every DP topic asked in FAANG/MAANG interviews.",
+      "followers": 3120,
+      "questions": 35,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Dynamic Programming Patterns Sheet",
+          "topics": [
+            {
+              "title": "1D DP — Fundamentals",
+              "subtopics": [
+                {
+                  "title": "Climbing Stairs",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/climbing-stairs/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/count-ways-to-reach-the-nth-stair-1587115620/1",
+                    "youtube": "https://youtu.be/mLfjzJsN8us"
+                  }
+                },
+                {
+                  "title": "Fibonacci Number",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/fibonacci-number/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/nth-fibonacci-number1335/1",
+                    "youtube": "https://youtu.be/oBt53YbR9Kk"
+                  }
+                },
+                {
+                  "title": "House Robber",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/house-robber/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/stickler-theif-1587115621/1",
+                    "youtube": "https://youtu.be/73r3KWiEvyk"
+                  }
+                },
+                {
+                  "title": "House Robber II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/house-robber-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/house-robber-ii/1",
+                    "youtube": "https://youtu.be/rWAJCfYYOvM"
+                  }
+                },
+                {
+                  "title": "Min Cost Climbing Stairs",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/min-cost-climbing-stairs/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/min-cost-climbing-stairs/1",
+                    "youtube": "https://youtu.be/ktmzAZWkEK8"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Knapsack Pattern",
+              "subtopics": [
+                {
+                  "title": "0/1 Knapsack Problem",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1",
+                    "youtube": "https://youtu.be/GqOmJHQZivw"
+                  }
+                },
+                {
+                  "title": "Partition Equal Subset Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/partition-equal-subset-sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/subset-sum-problem2014/1",
+                    "youtube": "https://youtu.be/IsvocB5BJhw"
+                  }
+                },
+                {
+                  "title": "Target Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/target-sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/target-sum-1626326450/1",
+                    "youtube": "https://youtu.be/g0npyaQtAQM"
+                  }
+                },
+                {
+                  "title": "Last Stone Weight II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/last-stone-weight-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/minimum-sum-partition3317/1",
+                    "youtube": "https://youtu.be/zIv1bNVjkYQ"
+                  }
+                },
+                {
+                  "title": "Count of Subsets with Given Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/perfect-sum-problem5633/1",
+                    "youtube": "https://youtu.be/F7wqWbqYn9g"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Coin Change & Unbounded Knapsack",
+              "subtopics": [
+                {
+                  "title": "Coin Change",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/coin-change/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-coins1824/1",
+                    "youtube": "https://youtu.be/H9bfqozjoqs"
+                  }
+                },
+                {
+                  "title": "Coin Change II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/coin-change-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/coin-change2448/1",
+                    "youtube": "https://youtu.be/Mjy4hd2xgrs"
+                  }
+                },
+                {
+                  "title": "Unbounded Knapsack",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/knapsack-with-duplicate-items4201/1",
+                    "youtube": "https://youtu.be/oBt53YbR9Kk"
+                  }
+                },
+                {
+                  "title": "Minimum Cost For Tickets",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-cost-for-tickets/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/minimum-cost-for-tickets/1",
+                    "youtube": "https://youtu.be/fboqa1VhKos"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Longest Common Subsequence (LCS)",
+              "subtopics": [
+                {
+                  "title": "Longest Common Subsequence",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-common-subsequence/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-common-subsequence-1587115620/1",
+                    "youtube": "https://youtu.be/sSno9rV8Rhg"
+                  }
+                },
+                {
+                  "title": "Edit Distance",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/edit-distance/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/edit-distance3702/1",
+                    "youtube": "https://youtu.be/fJaKO8FbDdo"
+                  }
+                },
+                {
+                  "title": "Shortest Common Supersequence",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/shortest-common-supersequence/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/shortest-common-supersequence0322/1",
+                    "youtube": "https://youtu.be/823Grn4_dCQ"
+                  }
+                },
+                {
+                  "title": "Distinct Subsequences",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/distinct-subsequences/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-distinct-subsequences/1",
+                    "youtube": "https://youtu.be/nVG7eTiD2bY"
+                  }
+                },
+                {
+                  "title": "Longest Palindromic Subsequence",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-palindromic-subsequence/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-palindromic-subsequence-1612327620/1",
+                    "youtube": "https://youtu.be/6i_T5kkfv4A"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Longest Increasing Subsequence (LIS)",
+              "subtopics": [
+                {
+                  "title": "Longest Increasing Subsequence",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-increasing-subsequence/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-increasing-subsequence-1587115620/1",
+                    "youtube": "https://youtu.be/ekcwMsSIzVc"
+                  }
+                },
+                {
+                  "title": "Number of Longest Increasing Subsequences",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-longest-increasing-subsequence/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-longest-increasing-subsequences/1",
+                    "youtube": "https://youtu.be/cKVl1TFdNXg"
+                  }
+                },
+                {
+                  "title": "Longest Bitonic Subsequence",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-bitonic-subsequence0824/1",
+                    "youtube": "https://youtu.be/TWHytKnOPaQ"
+                  }
+                },
+                {
+                  "title": "Russian Doll Envelopes",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/russian-doll-envelopes/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1",
+                    "youtube": "https://youtu.be/Q4feg7fiqjw"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Matrix / Grid DP",
+              "subtopics": [
+                {
+                  "title": "Unique Paths",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/unique-paths/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-unique-paths5339/1",
+                    "youtube": "https://youtu.be/t_f0nwwdg5o"
+                  }
+                },
+                {
+                  "title": "Unique Paths II (with Obstacles)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/unique-paths-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/unique-paths-in-a-grid--170646/1",
+                    "youtube": "https://youtu.be/GdL4gz3GYMg"
+                  }
+                },
+                {
+                  "title": "Minimum Path Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-path-sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/minimum-cost-path3833/1",
+                    "youtube": "https://youtu.be/pGMsrvt9ok4"
+                  }
+                },
+                {
+                  "title": "Triangle — Minimum Path Sum",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/triangle/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/path-in-matrix3805/1",
+                    "youtube": "https://youtu.be/SrP-PiLSYC0"
+                  }
+                },
+                {
+                  "title": "Maximal Square",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximal-square/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/largest-square-formed-in-a-matrix0806/1",
+                    "youtube": "https://youtu.be/6X7Ha2PrDmM"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "String DP",
+              "subtopics": [
+                {
+                  "title": "Palindromic Substrings",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/palindromic-substrings/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/count-palindrome-sub-strings-of-a-string0652/1",
+                    "youtube": "https://youtu.be/4RACzI5-du8"
+                  }
+                },
+                {
+                  "title": "Longest Palindromic Substring",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/longest-palindromic-substring/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-palindrome-in-a-string3411/1",
+                    "youtube": "https://youtu.be/XYQecbcd6_c"
+                  }
+                },
+                {
+                  "title": "Word Break",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-break/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/word-break1352/1",
+                    "youtube": "https://youtu.be/Sx9NNgInc3A"
+                  }
+                },
+                {
+                  "title": "Interleaving String",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/interleaving-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/interleaved-strings/1",
+                    "youtube": "https://youtu.be/bb0xBV-ysAo"
+                  }
+                },
+                {
+                  "title": "Wildcard Matching",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/wildcard-matching/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/wildcard-pattern-matching/1",
+                    "youtube": "https://youtu.be/ZmlQ3vgAOMo"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "DP on Trees",
+              "subtopics": [
+                {
+                  "title": "Diameter of Binary Tree",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/diameter-of-binary-tree/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/diameter-of-binary-tree/1",
+                    "youtube": "https://youtu.be/bkxqA8Rfv04"
+                  }
+                },
+                {
+                  "title": "Binary Tree Maximum Path Sum",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-path-sum-from-any-node/1",
+                    "youtube": "https://youtu.be/Hr5cWUld4vU"
+                  }
+                },
+                {
+                  "title": "House Robber III (DP on Tree)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/house-robber-iii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/house-robber-iii/1",
+                    "youtube": "https://youtu.be/nHR8tgMoSBk"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Interval & Partition DP",
+              "subtopics": [
+                {
+                  "title": "Matrix Chain Multiplication",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/matrix-chain-multiplication0303/1",
+                    "youtube": "https://youtu.be/prx1psByp7U"
+                  }
+                },
+                {
+                  "title": "Burst Balloons",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/burst-balloons/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/burst-balloons/1",
+                    "youtube": "https://youtu.be/Yz4LlDSlkns"
+                  }
+                },
+                {
+                  "title": "Palindrome Partitioning II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/palindrome-partitioning-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/palindromic-patitioning4845/1",
+                    "youtube": "https://youtu.be/_H8V5hJUGd0"
+                  }
+                },
+                {
+                  "title": "Strange Printer",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/strange-printer/",
+                    "gfg": "",
+                    "youtube": "https://youtu.be/EvDCCMDPRww"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "DP on Stocks",
+              "subtopics": [
+                {
+                  "title": "Best Time to Buy and Sell Stock",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/buy-stock-2/1",
+                    "youtube": "https://youtu.be/1pkOgXD63yU"
+                  }
+                },
+                {
+                  "title": "Best Time to Buy and Sell Stock II",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/stock-buy-and-sell2615/1",
+                    "youtube": "https://youtu.be/HWJ9kIPpzXs"
+                  }
+                },
+                {
+                  "title": "Best Time to Buy and Sell Stock with Cooldown",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/buy-and-sell-a-share-at-most-twice/1",
+                    "youtube": "https://youtu.be/I7j0F7AHpb8"
+                  }
+                },
+                {
+                  "title": "Best Time to Buy and Sell Stock III (At most 2 transactions)",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/buy-and-sell-a-share-at-most-twice/1",
+                    "youtube": "https://youtu.be/37s1_xBiqH0"
+                  }
+                },
+                {
+                  "title": "Best Time to Buy and Sell Stock IV (At most K transactions)",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-profit4657/1",
+                    "youtube": "https://youtu.be/oDhu5uQ6a2s"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
