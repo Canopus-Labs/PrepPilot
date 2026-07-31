@@ -1,33 +1,25 @@
-import React from "react";
-import Sidebar from "./Sidebar";
-import { useLocation } from "react-router-dom";
-import ErrorBoundary from "../ErrorBoundary";
+import React from 'react';
+import Navbar from './Navbar'; // Or however it is imported at the top
 
-const MainLayout = ({ children }) => {
-  const location = useLocation();
-
+export default function MainLayout({ children }) {
   return (
     <>
-      <div className="hidden md:flex h-screen w-full bg-white dark:bg-[#0b1120] text-gray-900 dark:text-gray-100 overflow-hidden transition-colors duration-300">
-        <Sidebar />
-        <main className="flex-1 h-full overflow-y-auto w-full relative">
-          <ErrorBoundary variant="section" key={location.pathname}>
-            {children}
-          </ErrorBoundary>
-        </main>
-      </div>
+      {/* 1. Add the Skip Link right here at the very top */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-lg transition-all"
+      >
+        Skip to main content
+      </a>
 
-      {/* Mobile Layout */}
-      <div className="md:hidden flex flex-col h-screen w-full bg-white dark:bg-[#0b1120] text-gray-900 dark:text-gray-100 overflow-hidden transition-colors duration-300">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto w-full relative">
-          <ErrorBoundary variant="section" key={location.pathname}>
-            {children}
-          </ErrorBoundary>
-        </main>
-      </div>
+      {/* This renders your header section */}
+      <Navbar />
+
+      {/* 2. Locate the wrapper container that holds the page content (like a div or main tag) */}
+      {/* Add id="main-content" and tabIndex={-1} to it */}
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
+        {children}
+      </main>
     </>
   );
-};
-
-export default MainLayout;
+}

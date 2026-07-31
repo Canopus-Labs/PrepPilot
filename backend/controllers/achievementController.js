@@ -1,17 +1,18 @@
 const User = require('../models/User');
 const { VALID_ACHIEVEMENTS } = require('../constants/achievements');
 
-exports.getAchievements = async (req, res) => {
+exports.getAchievements = async (req, res, next) => {
     try {
         const user = await User.findById(req.user._id).select('unlockedAchievements');
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
         res.json({ success: true, unlockedAchievements: user.unlockedAchievements });
     } catch (err) {
         res.status(500).json({ success: false, error: "A server error occurred" });
+        next(err);
     }
 };
 
-exports.saveAchievements = async (req, res) => {
+exports.saveAchievements = async (req, res, next) => {
     const { unlockedAchievements } = req.body;
 
         if (!unlockedAchievements || !Array.isArray(unlockedAchievements)) {
@@ -41,5 +42,6 @@ exports.saveAchievements = async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false, error: "A server error occurred" });
+        next(err);
     }
 };

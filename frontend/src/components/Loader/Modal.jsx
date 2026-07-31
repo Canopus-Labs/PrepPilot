@@ -94,7 +94,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 p-4 pt-8"
           variants={backdropVariants}
           initial="initial"
           animate="animate"
@@ -130,8 +130,7 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
               ✕
             </button>
 
-            {/* scrollbar-hide hides the bar visually while still allowing scroll if content overflows */}
-            <div className="w-full overflow-y-auto scrollbar-hide">
+            <div className="w-full overflow-y-auto max-h-[90vh] pr-1">
               {children}
             </div>
           </motion.div>

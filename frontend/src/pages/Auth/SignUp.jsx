@@ -38,21 +38,14 @@ const SignUp = ({ setCurrentPage }) => {
   const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
   const passwordStrength =
     strengthScore <= 2 ? "Weak" : strengthScore <= 4 ? "Medium" : "Strong";
-  // Checks if the string has at least one number (0-9)
-  function containsNumber(str) {
-    return /\d/.test(str);
-  }
-  // Checks if the string has at least one alphanumeric character (letter or number)
-  function containsAlphanumeric(str) {
-    return /[a-zA-Z0-9]/.test(str);
-  }
+
   const handleSignup = async (e) => {
     e.preventDefault();
     let profileImageUrl = "";
 
-    if (!fullName) { setError("Please enter your full name"); return; }
-    if(containsNumber(fullName) || !containsAlphanumeric(fullName)) { setError("Full name should not contain numbers or special characters"); return; }
-    if (!validateEmail(email) && !email.endsWith(".com") && !email.includes("@")) { setError("Please enter a valid email address"); return; }
+    if (!fullName.trim()) { setError("Please enter your full name"); return; }
+    if (!/^[A-Za-z]+(?:\s+[A-Za-z]+)*$/.test(fullName.trim())) { setError("Full name can only contain letters and spaces"); return; }
+    if (!validateEmail(email)) { setError("Please enter a valid email address"); return; }
     if (!password || password.length < 8) { setError("Password must be at least 8 characters long."); return; }
     if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter."); return; }
     if (!/[a-z]/.test(password)) { setError("Password must contain at least one lowercase letter."); return; }
@@ -105,7 +98,10 @@ const SignUp = ({ setCurrentPage }) => {
       setResendCooldown(60);
       const interval = setInterval(() => {
         setResendCooldown((prev) => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
@@ -208,10 +204,9 @@ const SignUp = ({ setCurrentPage }) => {
             type="password"
           />
 
-          {/* Password strength indicator */}
           {password && (
             <div className="mt-2 space-y-3">
-              {/* Segmented bars */}
+              {/* Segmented strength bar */}
               <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((seg) => (
                   <div
@@ -229,9 +224,16 @@ const SignUp = ({ setCurrentPage }) => {
                 ))}
               </div>
 
-              <p className={`text-xs font-medium ${
-                strengthScore <= 2 ? "text-red-400" : strengthScore <= 4 ? "text-yellow-400" : "text-emerald-400"
-              }`}>
+              {/* Label */}
+              <p
+                className={`text-xs font-medium ${
+                  strengthScore <= 2
+                    ? "text-red-400"
+                    : strengthScore <= 4
+                    ? "text-yellow-400"
+                    : "text-emerald-400"
+                }`}
+              >
                 {passwordStrength} password
               </p>
 
@@ -252,7 +254,11 @@ const SignUp = ({ setCurrentPage }) => {
                         : "bg-white/5 text-gray-500 ring-1 ring-white/10"
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ? "bg-emerald-400" : "bg-gray-600"}`} />
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        passwordChecks[key] ? "bg-emerald-400" : "bg-gray-600"
+                      }`}
+                    />
                     {label}
                   </span>
                 ))}
@@ -260,6 +266,7 @@ const SignUp = ({ setCurrentPage }) => {
             </div>
           )}
 
+          {/* Password strength indicator — single instance */}
           <Input
             value={confirmPassword}
             onChange={({ target }) => {
@@ -275,7 +282,7 @@ const SignUp = ({ setCurrentPage }) => {
           />
 
           {error && (
-            <div id="signup-error" role="alert" aria-live="polite" className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
               <p className="text-red-400 text-sm font-medium">{error}</p>
             </div>
           )}

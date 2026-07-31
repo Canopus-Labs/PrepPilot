@@ -33,7 +33,7 @@ const { generateWithFallback } = require("../utils/geminiHelper");
  *   ]
  * }
  */
-const generateInterviewQuestions = async (req, res) => {
+const generateInterviewQuestions = async (req, res, next) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
 
@@ -84,24 +84,29 @@ const generateInterviewQuestions = async (req, res) => {
       );
       const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
+      return res.status(200).json({ model: usedModel, question: parsed.data });
     } catch (err) {
+        next(err);
+    }
+  } catch (error) {
+        next(error);
+    }
       console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
+      return res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({
-      message: "Failed to generate questions",
+    console.error("Gemini API Error (generate-questions):", error);
+    return res.status(500).json({
+      message: "Failed to generate interview questions",
+      error: error.message,
     });
   }
 };
@@ -125,7 +130,7 @@ const generateInterviewQuestions = async (req, res) => {
  *   "explanation": "..."
  * }
  */
-const generateConceptExplanation = async (req, res) => {
+const generateConceptExplanation = async (req, res, next) => {
   try {
     const { question } = req.body;
 
@@ -137,7 +142,6 @@ const generateConceptExplanation = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
     let cleanedText = rawText
       .replace(/^\s*```json\s*/i, "")
       .replace(/^\s*```\s*/i, "")
@@ -154,19 +158,29 @@ const generateConceptExplanation = async (req, res) => {
       });
       const parsed = explanationSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      res.status(200).json({ model: usedModel, ...data });
+      return res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
-      res.status(500).json({
+        next(err);
+    }
+  } catch (error) {
+        next(error);
+    }
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      return res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({
-      message: "Failed to generate explanation",
+    console.error("Gemini API Error (generate-explanation):", error);
+    return res.status(500).json({
+      message: "Failed to generate concept explanation",
+      error: error.message,
     });
   }
 };
@@ -191,9 +205,13 @@ const generateConceptExplanation = async (req, res) => {
  *   "tips": ["Focus on React hooks.", "Practice system design basics.", ...]
  * }
  */
-const generateInterviewTips = async (req, res) => {
+const generateInterviewTips = async (req, res, next) => {
   try {
     const { role, experience } = req.body;
+
+    if (!role || !experience) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
     const prompt = interviewTipsPrompt({ role, experience });
 
@@ -217,19 +235,27 @@ const generateInterviewTips = async (req, res) => {
       });
       const parsed = tipsSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      res.status(200).json({ model: usedModel, ...data });
+      return res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
+        next(err);
+    }
+  } catch (error) {
+        next(error);
+    }
       console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
+      return res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({
+    console.error("Gemini API Error (generate-tips):", error);
+    return res.status(500).json({
       message: "Failed to generate interview tips",
     });
   }
