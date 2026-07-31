@@ -39,6 +39,7 @@ async function fetchRemotePdf(url) {
       timeout: 20000,
       maxContentLength: NOTES_MAX_FILE_SIZE,
       maxBodyLength: NOTES_MAX_FILE_SIZE,
+      maxRedirects: 0,  
       headers: { Accept: "application/pdf" },
     });
     return Buffer.from(response.data);
@@ -59,10 +60,10 @@ async function fetchRemotePdf(url) {
  * @returns {object}
  */
 function parseAiJson(raw) {
-  let cleaned = raw
-    .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-    .replace(/(\s*```\s*)+$/i, "")
-    .trim();
+  let cleaned = raw.trim();
+  cleaned = cleaned.replace(/^```json\s*/i, "").replace(/^```\s*/i, "");
+  cleaned = cleaned.replace(/```\s*$/i, "");
+  cleaned = cleaned.trim();
 
   try {
     return JSON.parse(cleaned);
@@ -232,10 +233,24 @@ const saveSummary = async (req, res) => {
     const payload = req.body;
 
     const summary = await NotesSummary.findOneAndUpdate(
-      { user: userId, fileName: payload.fileName },
-      { user: userId, ...payload },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
+  { user: userId, fileName: payload.fileName },
+  {
+    user: userId,
+    fileName: payload.fileName,
+    sourceType: payload.sourceType,
+    sourceUrl: payload.sourceUrl,
+    pageCount: payload.pageCount,
+    wordCount: payload.wordCount,
+    contentHash: payload.contentHash,
+    summary: payload.summary,
+    topics: payload.topics,
+    prerequisites: payload.prerequisites,
+    difficulty: payload.difficulty,
+    readingTime: payload.readingTime,
+    learningOutcomes: payload.learningOutcomes,
+  },
+  { new: true, upsert: true, setDefaultsOnInsert: true }
+);
 
     const count = await NotesSummary.countDocuments({ user: userId });
     if (count > MAX_SAVED_SUMMARIES_PER_USER) {
