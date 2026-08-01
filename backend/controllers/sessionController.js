@@ -174,6 +174,7 @@ exports.getSessionById = async (req, res) => {
     }
     res.status(200).json({ success:true , session })
   } catch (error) {
+    console.error("Error in getSessionById:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
