@@ -89,6 +89,83 @@ const TEMPLATES = {
 \\Huge\\textbf{Harvard Pro}
 \\end{document}`,
   },
+  "modern-tech": {
+    name: "Modern Tech Resume",
+    code: `\\documentclass[letterpaper,10pt]{article}
+\\usepackage[margin=0.65in]{geometry}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{enumitem}
+\\usepackage{titlesec}
+\\usepackage{xcolor}
+
+\\definecolor{accent}{HTML}{2563EB}
+\\titleformat{\\section}{\\large\\bfseries\\color{accent}}{}{0em}{}[\\vspace{-0.4em}\\rule{\\textwidth}{0.4pt}]
+\\setlist[itemize]{leftmargin=1.1em, itemsep=2pt, topsep=2pt}
+\\pagenumbering{gobble}
+\\setlength{\\parindent}{0pt}
+
+\\begin{document}
+
+\\begin{center}
+  {\\LARGE\\textbf{Aarav Sharma}}\\\\
+  \\vspace{3pt}
+  Full-Stack Software Engineer $\\mid$ AI Product Builder\\\\
+  \\href{mailto:aarav.sharma@email.com}{aarav.sharma@email.com} $\\mid$
+  +91 98765 43210 $\\mid$
+  \\href{https://linkedin.com/in/aaravsharma}{linkedin.com/in/aaravsharma} $\\mid$
+  \\href{https://github.com/aaravsharma}{github.com/aaravsharma}
+\\end{center}
+
+\\section*{Summary}
+Product-focused engineer experienced in building performant web applications, AI-assisted workflows, and reliable backend services. Strong in React, Node.js, Python, REST APIs, and cloud-ready product delivery.
+
+\\section*{Technical Skills}
+\\textbf{Languages:} JavaScript, TypeScript, Python, SQL, C++\\\\
+\\textbf{Frontend:} React, Next.js, Tailwind CSS, Vite, Accessibility\\\\
+\\textbf{Backend:} Node.js, Express, FastAPI, MongoDB, PostgreSQL, REST APIs\\\\
+\\textbf{Tools:} Git, Docker, GitHub Actions, Vercel, AWS, Jest, Vitest
+
+\\section*{Experience}
+\\textbf{Software Engineering Intern} \\hfill Jan 2025 -- Present\\\\
+\\textit{NovaStack Labs} \\hfill Remote
+\\begin{itemize}
+  \\item Built reusable React dashboards for monitoring user activity, reducing manual review time by 35\\%.
+  \\item Integrated REST APIs with robust loading, error, and empty states across customer-facing workflows.
+  \\item Improved Lighthouse accessibility score from 82 to 96 by fixing labels, contrast, and keyboard navigation.
+\\end{itemize}
+
+\\textbf{Open Source Contributor} \\hfill May 2024 -- Present\\\\
+\\textit{Community Projects}
+\\begin{itemize}
+  \\item Delivered bug fixes, documentation updates, and UI improvements across MERN and Python repositories.
+  \\item Added regression-safe changes with focused validation notes and reviewer-friendly pull requests.
+\\end{itemize}
+
+\\section*{Projects}
+\\textbf{AI Interview Coach} \\hfill React, FastAPI, OpenAI API
+\\begin{itemize}
+  \\item Created an AI feedback tool that scores interview answers and suggests structured improvements.
+  \\item Added persistent session history and prompt templates for behavioral and technical interview practice.
+\\end{itemize}
+
+\\textbf{Developer Analytics Board} \\hfill Next.js, PostgreSQL, Prisma
+\\begin{itemize}
+  \\item Built a responsive analytics dashboard with charts, filters, and exportable performance summaries.
+  \\item Implemented API pagination and optimistic UI updates for fast project management workflows.
+\\end{itemize}
+
+\\section*{Education}
+\\textbf{Bachelor of Technology in Computer Science} \\hfill 2021 -- 2025\\\\
+Indira Gandhi Delhi Technical University for Women
+
+\\section*{Achievements}
+\\begin{itemize}
+  \\item Finalist, National AI Hackathon 2025.
+  \\item Maintainer-reviewed contributor to multiple open-source web and AI projects.
+\\end{itemize}
+
+\\end{document}`,
+  },
   blank: {
     name: "Blank Document",
     code: `\\documentclass[a4paper]{article}
@@ -155,7 +232,6 @@ const ResumeEditor = () => {
       }
     };
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // Auto-compile once code is loaded
@@ -203,7 +279,9 @@ const ResumeEditor = () => {
           const text = await err.response.data.text();
           const json = JSON.parse(text);
           if (json.message) msg = json.message + (json.log ? "\n\nLog:\n" + json.log : "");
-        } catch {}
+        } catch {
+          // Keep the generic compile message when the error payload is not JSON.
+        }
       }
       setError(msg);
     } finally {

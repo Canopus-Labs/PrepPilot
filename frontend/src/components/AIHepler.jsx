@@ -24,9 +24,6 @@ export default function AIHelper() {
   }
 
   async function callApi(prompt, history, onProgress) {
-    console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
-    console.log("REQUEST URL:", `${BASE_URL}/api/generate`);
-    
     const res = await fetch(
       `${BASE_URL}/api/generate`,
       {

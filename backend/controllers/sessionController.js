@@ -3,7 +3,7 @@ const Question = require("../models/Question");
 const mongoose = require("mongoose");
 
 
-const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;;
+const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;
 const MAX_EXPERIENCE = 50;
 
 /**
@@ -36,6 +36,13 @@ exports.createSession = async (req, res) => {
             const { role, experience, topicsToFocus, description } = req.body;
             const experienceNumber = Number(experience);
  
+            if (!role || role.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Role is required.",
+                });
+            }
+
             if (isNaN(experienceNumber)) {
               return res.status(400).json({
                     success: false,

@@ -13,7 +13,9 @@ const MOCK_USER_KEY = "mock_user";
  */
 export const isMockAuthEnabled = () => {
   try {
-    return import.meta.env.DEV || localStorage.getItem(MOCK_AUTH_KEY) === "true";
+    // Only enable mock auth when the flag is explicitly set in localStorage.
+    // Never enable automatically in DEV — always use the real backend.
+    return localStorage.getItem(MOCK_AUTH_KEY) === "true";
   } catch {
     return false;
   }
@@ -26,14 +28,6 @@ export const getMockUser = () => {
   try {
     const raw = localStorage.getItem(MOCK_USER_KEY);
     if (raw) return JSON.parse(raw);
-    if (import.meta.env.DEV) {
-      return {
-        _id: "mock-user-id",
-        name: "Dev User",
-        email: "dev@mock.local",
-        profileImageUrl: "",
-      };
-    }
     return null;
   } catch {
     return null;

@@ -2,10 +2,11 @@ import { useParams } from "react-router-dom";
 import gfg from "../assets/gfg.svg";
 import leetcode from "../assets/leetcode.svg";
 import youtube from "../assets/youtube.svg";
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo, useContext } from "react";
 
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
+import { UserContext } from "../context/userContext";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
 
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
@@ -86,6 +87,7 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
 function SheetDetail() {
   const { id } = useParams();
+  const { sheetProgress: ctxProgress, refreshSheetProgress } = useContext(UserContext);
   const [sheet, setSheet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [completedTopics, setCompletedTopics] = useState({});
@@ -96,15 +98,29 @@ function SheetDetail() {
       .then((res) => res.json())
       .then((data) => {
         setSheet(data.sheet);
-        const saved = localStorage.getItem(`${id}-progress`);
-        if (saved) {
-          const progressData = JSON.parse(saved);
-            setFollowed(progressData.followed || false);
-            setCompletedTopics(progressData.completedTopics || {});
+
+        // 1. Try backend (UserContext) — available immediately after login, works cross-device
+        const backendRecord = (ctxProgress || []).find(p => p.sheetId === id);
+
+        if (backendRecord) {
+          setFollowed(backendRecord.followed || false);
+          setCompletedTopics(backendRecord.completedTopics || {});
+        } else {
+          // 2. Fall back to localStorage for offline / not-yet-synced state
+          try {
+            const saved = localStorage.getItem(`${id}-progress`);
+            if (saved) {
+              const progressData = JSON.parse(saved);
+              setFollowed(progressData.followed || false);
+              setCompletedTopics(progressData.completedTopics || {});
+            }
+          } catch {}
         }
+
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const totalSubtopics =
@@ -140,8 +156,7 @@ function SheetDetail() {
         followed: true,
         completedTopics,
         percentage,
-      }).catch(err => console.error("Failed to sync progress to backend:", err));
-    }, 500);
+      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
   }, [completedTopics, followed]);
@@ -166,7 +181,7 @@ function SheetDetail() {
         followed: false,
         completedTopics: {},
         percentage: 0
-      }).catch(err => console.error(err));
+      }).then(() => refreshSheetProgress?.()).catch(err => console.error(err));
 
     } else {
       setFollowed(true);
@@ -182,7 +197,7 @@ function SheetDetail() {
         followed: true,
         completedTopics,
         percentage: 0,
-      }).catch(err => console.error("Failed to sync follow to backend:", err));
+      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync follow to backend:", err));
     }
   };
 

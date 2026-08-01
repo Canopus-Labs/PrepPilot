@@ -25,6 +25,11 @@ const cachedQuestions = questionCache.get(cacheKey);
 if (cachedQuestions) {
   return res.json(cachedQuestions);
 }
+  const cachedQuestions = questionCache.get(cacheKey);
+
+  if (cachedQuestions) {
+    return res.json(cachedQuestions);
+  }
 
   const prompt = `
     Generate 5 multiple-choice aptitude questions on the topic: ${topic}.
@@ -42,7 +47,7 @@ if (cachedQuestions) {
 
   try {
     // Use centralised helper with per-model retry (exponential backoff)
-    const { result, usedModel } = await generateWithFallback(
+    const { result } = await generateWithFallback(
       process.env.GEMINI_API_KEY,
       [prompt],
       {},
@@ -66,21 +71,16 @@ if (cachedQuestions) {
         .status(500)
         .json({
           error: "Failed to parse Gemini response",
-          details: err.message,
-          raw: rawText,
         });
     }
-    questionCache.set(
-  cacheKey,
-  questions
-);
+    questionCache.set(cacheKey, questions);
 
-res.json(questions);
+    res.json(questions);
   } catch (error) {
     console.error("Gemini API error:", error);
     res
       .status(500)
-      .json({ error: "Failed to generate questions", details: error.message });
+      .json({ error: "Failed to generate questions" });
   }
 });
 module.exports = router;

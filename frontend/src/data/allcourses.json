@@ -189,6 +189,18 @@
         "name": "AWS for Beginners",
         "source": "Great Learning",
         "link": "https://www.mygreatlearning.com/academy/learn-for-free/courses/aws-for-beginners1"
+      },
+      {
+        "icon": "fa-solid fab fa-aws",
+        "name": "AWS Cloud Practitioner Essentials (Free)",
+        "source": "AWS Skill Builder",
+        "link": "https://explore.skillbuilder.aws/learn/course/external/view/elearning/134/aws-cloud-practitioner-essentials"
+      },
+      {
+        "icon": "fa-brands fa-microsoft",
+        "name": "Microsoft Azure Fundamentals AZ-900 (Free Learning Path)",
+        "source": "Microsoft Learn",
+        "link": "https://learn.microsoft.com/en-us/training/paths/microsoft-azure-fundamentals-describe-cloud-concepts/"
       }
     ]
   },
@@ -1041,6 +1053,18 @@
         "name": "Cyber security: Understand Threats and Prevent Attacks",
         "source": "Alison",
         "link": "https://alison.com/course/cyber-security-understand-threats-and-prevent-attacks"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "Cisco Introduction to Cybersecurity (Free)",
+        "source": "Cisco NetAcad",
+        "link": "https://www.netacad.com/courses/cybersecurity/introduction-cybersecurity"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "TryHackMe - Pre-Security Learning Path (Free)",
+        "source": "TryHackMe",
+        "link": "https://tryhackme.com/path/outline/presecurity"
       }
     ]
   },

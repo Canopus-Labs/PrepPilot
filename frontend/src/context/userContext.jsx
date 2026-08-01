@@ -41,7 +41,14 @@ export const UserProvider = ({ children }) => {
         const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
         setUser(response.data);
     } catch (error) {
-        clearUser(); // only logs out if AUTH fails 
+        // Only clear the session if the error is a genuine auth failure
+        // (401 after the interceptor already tried to refresh, or no token at all).
+        // Don't clear on network errors or 5xx so we don't log users out on transient failures.
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+            clearUser();
+        }
+        setLoading(false);
         return;
     } finally {
         setLoading(false);
@@ -51,7 +58,6 @@ export const UserProvider = ({ children }) => {
         setSheetProgress(progressRes.data.progressList || []);
     } catch (error) {
         console.error("Failed to load progress:", error);
-        toast.error("Failed to load progress. Please try again.");
     }
 };
         fetchUser();

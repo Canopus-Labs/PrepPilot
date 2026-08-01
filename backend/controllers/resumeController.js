@@ -134,7 +134,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
             ]
         );
         
-        let aiResponse = result.response.text();
+        let aiResponse = await result.response.text();
         
         // Robustly clean: remove all leading/trailing code block markers
         aiResponse = aiResponse
@@ -236,8 +236,6 @@ const getMyResumes = async (req, res) => {
     }
 };
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
-
 /**
  * Delete a resume by ID (owner only).
  * @route DELETE /api/resume/:id
@@ -252,3 +250,5 @@ async function deleteResume(req, res) {
         return res.status(500).json({ message: "Failed to delete resume." });
     }
 }
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
