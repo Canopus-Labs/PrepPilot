@@ -348,9 +348,6 @@ const ProjectIdeas = () => {
         selectedLevel,
       );
 
-      console.log("BASE_URL:", BASE_URL);
-      console.log("Prompt:", prompt);
-
       const res = await fetch(`${BASE_URL}/api/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -360,15 +357,12 @@ const ProjectIdeas = () => {
         }),
       });
 
-      console.log("Response Status:", res.status);
-
       if (!res.ok) throw new Error(`Server error ${res.status}`);
 
       const data = await res.json();
       const fullText = data.text || "";
 
       const parsed = tryParseJSON(fullText);
-      console.log("Parsed Response:", parsed);
       if (parsed && Array.isArray(parsed)) {
         if (parsed.length > 0) {
           setIdeas(parsed);

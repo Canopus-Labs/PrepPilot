@@ -30,7 +30,7 @@ export default function SkillAssessmentComingSoon() {
           </div>
           <div className="mt-8">
             <span className="inline-block bg-purple-600 text-white px-6 py-3 rounded-full font-semibold text-lg shadow">
-              🚀 Stay tuned for launch!
+              Stay tuned for launch!
             </span>
           </div>
         </div>

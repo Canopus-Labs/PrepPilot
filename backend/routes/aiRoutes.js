@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
@@ -83,9 +84,6 @@ async function generateHandler(req, res) {
     );
 
     const rawText = await result.response.text();
-    console.log("Incoming Prompt:", prompt);
-    console.log("Model Used:", usedModel);
-    console.log("Raw Gemini Response:", rawText);
 
     let cleanedText = rawText
       .replace(/^[\s`]*json\s*/i, "")
