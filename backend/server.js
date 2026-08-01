@@ -86,6 +86,30 @@ connectDB()
 // middleware
 app.use(express.json());
 app.use(cookieParser());
+const { doubleCsrf } = require("csrf-csrf");
+
+const {
+  generateCsrfToken,
+  doubleCsrfProtection,
+} = doubleCsrf({
+  getSecret: () => process.env.CSRF_SECRET, // add this to .env
+  cookieName: "__Host-psifi.x-csrf-token",
+  cookieOptions: {
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+  },
+  getSessionIdentifier: (req) => req.cookies?.token || "", // adapt to your auth cookie name
+});
+
+// Expose a route the frontend calls once to get a CSRF token
+app.get("/api/csrf-token", (req, res) => {
+  const token = generateCsrfToken(req, res);
+  res.json({ csrfToken: token });
+});
+
+// Apply protection to all state-changing routes
+app.use(doubleCsrfProtection);
 
 
 //Routes

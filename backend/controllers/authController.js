@@ -9,8 +9,21 @@ const ACCESS_TOKEN_EXPIRY = "7d";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+    path: "/api/auth",
+});
+
+// CSRF cookie must be readable by frontend JS so it can be echoed back in a
+// header on requests that rely on the ambient refreshToken cookie.
+// It intentionally mirrors the refreshToken cookie's SameSite/secure/path
+// settings so it is only ever sent alongside it.
+const getCsrfCookieOptions = () => ({
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: REFRESH_TOKEN_MAX_AGE_MS,
@@ -36,13 +49,38 @@ const generateRefreshToken = (userId) => {
 };
 
 /**
+ * Set the httpOnly refresh-token cookie together with a readable CSRF token
+ * cookie (double-submit pattern). Any route that authenticates purely off
+ * the refreshToken cookie (refresh, logout) should require the matching
+ * X-CSRF-Token header via the requireCsrfToken middleware.
+ * @param {import('express').Response} res
+ * @param {string} refreshTokenValue
+ * @returns {string} the generated CSRF token (rarely needed by callers)
+ */
+const setAuthCookies = (res, refreshTokenValue) => {
+    const csrfToken = crypto.randomBytes(24).toString("hex");
+    res.cookie("refreshToken", refreshTokenValue, getRefreshCookieOptions());
+    res.cookie("csrfToken", csrfToken, getCsrfCookieOptions());
+    return csrfToken;
+};
+
+/**
+ * Clear both the refresh-token cookie and its paired CSRF cookie.
+ * @param {import('express').Response} res
+ */
+const clearAuthCookies = (res) => {
+    res.clearCookie("refreshToken", { path: "/api/auth" });
+    res.clearCookie("csrfToken", { path: "/api/auth" });
+};
+
+/**
  * Register a new user account.
  * @route POST /api/auth/register
  */
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
-        
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
 
         if (!emailRegex.test(email)) {
@@ -92,17 +130,19 @@ const registerUser = async (req, res) => {
         });
 
         const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        const refreshTokenValue = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = await bcrypt.hash(refreshTokenValue, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
+
+        setAuthCookies(res, refreshTokenValue);
+
         return res.status(201).json({
             success: true,
             message: "Account created successfully. You can now log in.",
             accessToken,
-            
+
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -142,12 +182,14 @@ const loginUser = async (req, res) => {
         }
 
         const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        const refreshTokenValue = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = await bcrypt.hash(refreshTokenValue, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
+
+        setAuthCookies(res, refreshTokenValue);
+
         res.json({
             success: true,
             _id: user._id,
@@ -163,6 +205,12 @@ const loginUser = async (req, res) => {
     }
 };
 
+/**
+ * Rotate the refresh token using the ambient refreshToken cookie.
+ * Requires a valid X-CSRF-Token header matching the csrfToken cookie
+ * (enforced by the requireCsrfToken middleware on this route).
+ * @route POST /api/auth/refresh-token
+ */
 const refreshToken = async (req, res) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
@@ -209,12 +257,13 @@ const refreshToken = async (req, res) => {
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
 
-        res.cookie("refreshToken", rotatedRefreshToken, getRefreshCookieOptions());
+        setAuthCookies(res, rotatedRefreshToken);
+
         res.json({
             success: true,
             message: "Token refreshed successfully.",
             accessToken,
-        
+
         });
     } catch (error) {
         console.error("Refresh token error:", error);
@@ -222,6 +271,12 @@ const refreshToken = async (req, res) => {
     }
 };
 
+/**
+ * Log the user out and revoke their refresh token.
+ * Requires a valid X-CSRF-Token header matching the csrfToken cookie
+ * (enforced by the requireCsrfToken middleware on this route).
+ * @route POST /api/auth/logout
+ */
 const logoutUser = async (req, res) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken;
@@ -256,7 +311,7 @@ const logoutUser = async (req, res) => {
         user.refreshTokenExpiresAt = null;
         await user.save();
 
-        res.clearCookie("refreshToken", { path: "/api/auth" });
+        clearAuthCookies(res);
         res.json({ success: true, message: "User logged out successfully." });
     } catch (error) {
         console.error("Logout error:", error);
