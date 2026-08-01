@@ -9,7 +9,7 @@ const {
 const { aiOutputSchema } = require("../Input_validators/ValidateNotesSummary");
 const { NOTES_MAX_FILE_SIZE } = require("../middlewares/uploadMiddleware");
 const NotesSummary = require("../models/NotesSummary");
-
+const Joi = require("joi");
 
 const ALLOWED_REMOTE_HOSTS = new Set(["raw.githubusercontent.com"]);
 const MAX_SAVED_SUMMARIES_PER_USER = 30;
@@ -239,6 +239,34 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
   }
 };
 
+const Joi = require("joi");
+
+const saveSummarySchema = Joi.object({
+  fileName: Joi.string().trim().max(255).required(),
+
+  sourceType: Joi.string().trim().required(),
+
+  sourceUrl: Joi.string().uri().allow("", null),
+
+  pageCount: Joi.number().integer().min(0).required(),
+
+  wordCount: Joi.number().integer().min(0).required(),
+
+  contentHash: Joi.string().required(),
+
+  summary: Joi.string().required(),
+
+  topics: Joi.array().items(Joi.string()).required(),
+
+  prerequisites: Joi.array().items(Joi.string()).required(),
+
+  difficulty: Joi.string().required(),
+
+  readingTime: Joi.number().min(0).required(),
+
+  learningOutcomes: Joi.array().items(Joi.string()).required(),
+});
+
 /**
  * @route POST /api/notes-summary/save
  * @access Private
@@ -246,67 +274,85 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
 const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
-    const {
-    fileName,
-    sourceType,
-    sourceUrl,
-    pageCount,
-    wordCount,
-    contentHash,
-    summary,
-    topics,
-    prerequisites,
-    difficulty,
-    readingTime,
-    learningOutcomes,
-  } = req.body;
 
-  if (typeof fileName !== "string" || fileName.trim() === "") {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid file name.",
+    const { error, value } = saveSummarySchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
     });
-  }
-  const update = {
-    user: userId,
-    fileName: String(fileName),
-    sourceType: String(sourceType),
-    sourceUrl: typeof sourceUrl === "string" ? sourceUrl : "",
-    pageCount: Number(pageCount),
-    wordCount: Number(wordCount),
-    contentHash: String(contentHash),
-    summary: String(summary),
-    topics: Array.isArray(topics) ? topics : [],
-    prerequisites: Array.isArray(prerequisites) ? prerequisites : [],
-    difficulty: String(difficulty),
-    readingTime: Number(readingTime),
-    learningOutcomes: Array.isArray(learningOutcomes)
-      ? learningOutcomes
-      : [],
-  };
 
-   await NotesSummary.findOneAndUpdate(
-    { user: userId, fileName },
-    update,
-    {
-      new: true,
-      upsert: true,
-      setDefaultsOnInsert: true,
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((d) => d.message),
+      });
     }
-  );
+
+    const {
+      fileName,
+      sourceType,
+      sourceUrl,
+      pageCount,
+      wordCount,
+      contentHash,
+      summary: summaryText,
+      topics,
+      prerequisites,
+      difficulty,
+      readingTime,
+      learningOutcomes,
+    } = value;
+
+    const savedSummary = await NotesSummary.findOneAndUpdate(
+      {
+        user: userId,
+        fileName,
+      },
+      {
+        user: userId,
+        fileName,
+        sourceType,
+        sourceUrl,
+        pageCount,
+        wordCount,
+        contentHash,
+        summary: summaryText,
+        topics,
+        prerequisites,
+        difficulty,
+        readingTime,
+        learningOutcomes,
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
     const count = await NotesSummary.countDocuments({ user: userId });
+
     if (count > MAX_SAVED_SUMMARIES_PER_USER) {
       const excess = await NotesSummary.find({ user: userId })
         .sort({ updatedAt: 1 })
         .limit(count - MAX_SAVED_SUMMARIES_PER_USER)
         .select("_id");
-      await NotesSummary.deleteMany({ _id: { $in: excess.map((d) => d._id) } });
+
+      await NotesSummary.deleteMany({
+        _id: { $in: excess.map((d) => d._id) },
+      });
     }
 
-    res.status(200).json({ success: true, summary: summary.toSafeObject() });
+    res.status(200).json({
+      success: true,
+      summary: savedSummary.toSafeObject(),
+    });
   } catch (error) {
     console.error("Save Notes Summary Error:", error);
-    res.status(500).json({ success: false, message: "Failed to save summary." });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to save summary.",
+    });
   }
 };
 
