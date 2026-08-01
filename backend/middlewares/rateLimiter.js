@@ -1,12 +1,23 @@
 const rateLimit = require('express-rate-limit');
 
-// Authentication endpoints: 50 login/register attempts per 15 minutes
+// Login endpoint: strict brute-force protection (10 attempts per 15 minutes)
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 login attempts per window
+    message: { error: 'Too many login attempts. Your account is temporarily locked. Please try again after 15 minutes.' },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: (req) => req.method !== 'POST' || req.path !== '/login', // Only apply to POST /login
+});
+
+// Authentication endpoints: 50 register/refresh/logout attempts per 15 minutes
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 50, // Limit each IP to 50 requests per `window`
-    message: { error: 'Too many login/registration attempts, please try again after 15 minutes.' },
+    message: { error: 'Too many registration or authentication attempts, please try again after 15 minutes.' },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: (req) => req.method === 'POST' && req.path === '/login', // Skip login, use loginLimiter instead
 });
 
 // AI generation endpoints: 20 requests per hour (to control costs)
@@ -37,6 +48,7 @@ const sensitiveAuthLimiter = rateLimit({
 });
 
 module.exports = {
+    loginLimiter,
     authLimiter,
     aiLimiter,
     generalLimiter,

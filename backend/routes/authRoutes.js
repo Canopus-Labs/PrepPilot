@@ -7,6 +7,7 @@ const csrfHeaderCheck = require("../middlewares/csrfHeaderCheck");
 const router = express.Router();
 
 const {
+  loginLimiter,
   authLimiter,
   generalLimiter,
   sensitiveAuthLimiter,
