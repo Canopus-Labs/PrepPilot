@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume } = require('../controllers/resumeController');
 const { protect } = require('../middlewares/authMiddleware');
-const { upload, uploadResume } = require('../middlewares/uploadMiddleware');
+const { upload, uploadResume, validateResumeMagicBytes } = require('../middlewares/uploadMiddleware');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateCompileResume, validateAnalyzeResume, validateSaveResume } = require('../Input_validators/ValidateResume');
 
@@ -16,7 +16,7 @@ router.post('/compile', aiLimiter,validateCompileResume, compileResume);
 // @route   POST /api/resume/analyze
 // @desc    Analyze resume using Gemini API
 // @access  Private — requires auth; aiLimiter caps Gemini API calls to 20/hr per IP
-router.post('/analyze', aiLimiter, uploadResume.single("resume"), validateAnalyzeResume, analyzeResume);
+router.post('/analyze', aiLimiter, uploadResume.single("resume"), validateResumeMagicBytes, validateAnalyzeResume, analyzeResume);
 
 // @route   POST /api/resume/save
 // @desc    Save or update a resume

@@ -53,13 +53,20 @@ const generateInterviewQuestions = async (req, res) => {
     const seenQuestions = pastQuestions.map((q) => q.question);
 
     // Build prompt with seen questions so Gemini avoids repeating them
-    const prompt = questionAnswerPrompt({
-      role,
-      experience,
-      topicsToFocus,
-      numberOfQuestions,
-      seenQuestions,
-    });
+    let prompt;
+    try {
+      prompt = questionAnswerPrompt({
+        role,
+        experience,
+        topicsToFocus,
+        numberOfQuestions,
+        seenQuestions,
+      });
+    } catch (validationError) {
+      return res.status(400).json({
+        message: validationError.message,
+      });
+    }
 
     const { result, usedModel } = await generateWithFallback(
       process.env.GEMINI_API_KEY,
@@ -195,7 +202,14 @@ const generateInterviewTips = async (req, res) => {
   try {
     const { role, experience } = req.body;
 
-    const prompt = interviewTipsPrompt({ role, experience });
+    let prompt;
+    try {
+      prompt = interviewTipsPrompt({ role, experience });
+    } catch (validationError) {
+      return res.status(400).json({
+        message: validationError.message,
+      });
+    }
 
     const { result, usedModel } = await generateWithFallback(
       process.env.GEMINI_API_KEY,

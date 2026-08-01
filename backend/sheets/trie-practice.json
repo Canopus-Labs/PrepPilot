@@ -55,6 +55,53 @@
                     "youtube": "https://youtu.be/gmkvOEmhCgM"
                   }
                 },
+      "title": "Trie (Prefix Tree) Practice",
+      "description": "Master Trie data structure fundamentals -- insert, search, prefix matching, autocomplete, and pattern recognition. Covers all essential problems for FAANG/MAANG interviews.",
+      "followers": 1842,
+      "questions": 28,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Trie (Prefix Tree) Practice Sheet",
+          "topics": [
+            {
+              "title": "Trie Operations - Insert & Search",
+              "subtopics": [
+                {
+                  "title": "Implement Trie (Prefix Tree)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/trie-insert-and-search/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Search a Key in Trie",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/trie-insert-and-search/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Check if a String is Prefix of Any String in Trie",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/check-if-a-string-is-a-prefix-of-an-array/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/check-if-a-string-is-a-prefix-of-an-array/",
+                    "youtube": ""
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Starts With / Prefix Problems",
+              "subtopics": [
                 {
                   "title": "Longest Common Prefix",
                   "difficulty": "easy",
@@ -163,6 +210,109 @@
                     "gfg": "",
                     "leetcode": "https://leetcode.com/problems/stream-of-characters/",
                     "youtube": "https://youtu.be/CjJN_azEYEQ"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+                    "leetcode": "https://leetcode.com/problems/longest-common-prefix/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-common-prefix-in-an-array/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Implement Magic Dictionary",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/implement-magic-dictionary/",
+                    "gfg": "",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Prefix and Suffix Search",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-squares/",
+                    "gfg": "",
+                    "youtube": ""
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Word Search & Pattern Problems",
+              "subtopics": [
+                {
+                  "title": "Word Search II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/word-search-ii/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/word-search-ii/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Number of Matching Subsequences",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/number-of-matching-subsequences/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/number-of-matching-subsequences/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Maximum XOR With an Element From Array",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximum-xor-with-an-element-from-array/",
+                    "gfg": "",
+                    "youtube": ""
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Counting & Filtering with Trie",
+              "subtopics": [
+                {
+                  "title": "Maximum XOR With an Element From Array",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/maximum-xor-with-an-element-from-array/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-xor-with-an-element-from-array/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Map Sum Pairs",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/map-sum-pairs/",
+                    "gfg": "",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Replace Words",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/replace-words/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/replace-words/",
+                    "youtube": ""
                   }
                 }
               ]
