@@ -267,30 +267,33 @@ const saveSummary = async (req, res) => {
       message: "Invalid file name.",
     });
   }
+  const update = {
+    user: userId,
+    fileName: String(fileName),
+    sourceType: String(sourceType),
+    sourceUrl: typeof sourceUrl === "string" ? sourceUrl : "",
+    pageCount: Number(pageCount),
+    wordCount: Number(wordCount),
+    contentHash: String(contentHash),
+    summary: String(summary),
+    topics: Array.isArray(topics) ? topics : [],
+    prerequisites: Array.isArray(prerequisites) ? prerequisites : [],
+    difficulty: String(difficulty),
+    readingTime: Number(readingTime),
+    learningOutcomes: Array.isArray(learningOutcomes)
+      ? learningOutcomes
+      : [],
+  };
 
-    const summary = await NotesSummary.findOneAndUpdate(
-      { user: userId, fileName },
-      {
-        user: userId,
-        fileName,
-        sourceType,
-        sourceUrl,
-        pageCount,
-        wordCount,
-        contentHash,
-        summary,
-        topics,
-        prerequisites,
-        difficulty,
-        readingTime,
-        learningOutcomes,
-      },
-      {
-        new: true,
-        upsert: true,
-        setDefaultsOnInsert: true,
-      }
-    );
+   await NotesSummary.findOneAndUpdate(
+    { user: userId, fileName },
+    update,
+    {
+      new: true,
+      upsert: true,
+      setDefaultsOnInsert: true,
+    }
+  );
     const count = await NotesSummary.countDocuments({ user: userId });
     if (count > MAX_SAVED_SUMMARIES_PER_USER) {
       const excess = await NotesSummary.find({ user: userId })
