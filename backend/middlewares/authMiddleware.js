@@ -29,6 +29,11 @@ const protect = async (req, res, next) => {
         });
       }
 
+      // Reject tokens issued before the user's current version (logout / password change).
+      if ((decoded.tokenVersion ?? 0) !== (req.user.tokenVersion ?? 0)) {
+        return res.status(401).json({ message: "Session expired, please log in again" });
+      }
+
       next();
     } else {
       res.status(401).json({ message: "Not authorized, no token" });

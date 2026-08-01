@@ -9,6 +9,8 @@ const UserSchema = new mongoose.Schema(
         profileImageUrl: { type: String, default: null },
         refreshTokenHash: { type: String, default: null },
         refreshTokenExpiresAt: { type: Date, default: null },
+        // Bumped on logout / password change to invalidate outstanding access tokens.
+        tokenVersion: { type: Number, default: 0 },
         
         // Basic Info
         firstName: { type: String, default: "" },
