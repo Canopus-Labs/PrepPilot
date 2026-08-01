@@ -1,0 +1,159 @@
+{
+  "sheets": [
+    {
+      "id": "heap-priority-queue",
+      "title": "Heap & Priority Queue Practice",
+      "description": "Master Heap and Priority Queue data structures -- min-heap, max-heap, k-th largest/smallest, top K problems, median finder, and heap sort. Covers every heap problem asked in FAANG/MAANG interviews.",
+      "followers": 2103,
+      "questions": 32,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Heap & Priority Queue Practice Sheet",
+          "topics": [
+            {
+              "title": "Heap Basics & Implementation",
+              "subtopics": [
+                {
+                  "title": "Min Heap Implementation",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/min-heap-in-java/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Max Heap Implementation",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/max-heap-in-java/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Convert Min Heap to Max Heap",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/convert-min-heap-to-max-heap/",
+                    "youtube": ""
+                  }
+                }
+              ]
+            },
+            {
+              "title": "K-th Largest / Smallest Element",
+              "subtopics": [
+                {
+                  "title": "Kth Largest Element in an Array",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-largest-elements/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Kth Smallest Element in a Sorted Matrix",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-k-th-smallest-element-in-given-n-sorted-matrices/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Kth Largest Sum Subarray",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-th-largest-sum-subarray/",
+                    "youtube": ""
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Top K Problems",
+              "subtopics": [
+                {
+                  "title": "Top K Frequent Elements",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/top-k-frequent-elements/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-most-occuring-elements/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Sort Characters By Frequency",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sort-characters-by-frequency/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/sort-characters-by-frequency/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Top K Frequent Words",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/top-k-frequent-words/",
+                    "gfg": "",
+                    "youtube": ""
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Merging & Combining Heaps",
+              "subtopics": [
+                {
+                  "title": "Merge K Sorted Lists",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/merge-k-sorted-lists/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Find Median from Data Stream",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-median-from-data-stream/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/finding-median-in-a-set/",
+                    "youtube": ""
+                  }
+                },
+                {
+                  "title": "Smallest Number After K Swaps",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-smallest-number/",
+                    "youtube": ""
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
