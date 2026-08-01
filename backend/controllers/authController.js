@@ -96,10 +96,10 @@ const registerUser = async (req, res) => {
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshTokenValue, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-        res.cookie("refreshToken", refreshTokenValue, getRefreshCookieOptions());
+        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
             message: "Account created successfully. You can now log in.",
@@ -146,10 +146,10 @@ const loginUser = async (req, res) => {
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshTokenValue, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-        res.cookie("refreshToken", refreshTokenValue, getRefreshCookieOptions());
+        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         res.json({
             success: true,
             _id: user._id,
