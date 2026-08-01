@@ -1,7 +1,60 @@
+
 {
   "sheets": [
     {
       "id": "trie-practice",
+      "title": "Trie Practice",
+      "description": "Master Trie (Prefix Tree) problems from fundamentals to advanced interview questions.",
+      "followers": 1745,
+      "questions": 15,
+      "category": "popular",
+      "sections": [
+        {
+          "title": "Trie Practice",
+          "topics": [
+            {
+              "title": "Trie (Prefix Tree)",
+              "subtopics": [
+                {
+                  "title": "Implement Trie (Insert, Search, StartsWith)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/trie-insert-and-search/",
+                    "leetcode": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+                    "youtube": "https://www.youtube.com/watch?v=oobqoCJlHA0"
+                  }
+                },
+                {
+                  "title": "Insert a Word in Trie",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/trie-insert-and-search/",
+                    "leetcode": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+                    "youtube": "https://youtu.be/I6i4AyDsMQA"
+                  }
+                },
+                {
+                  "title": "Search a Word in Trie",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/trie-insert-and-search/",
+                    "leetcode": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+                    "youtube": "https://youtu.be/7LEoZXI-i_0"
+                  }
+                },
+                {
+                  "title": "Delete a Word from Trie",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/trie-delete/",
+                    "leetcode": "",
+                    "youtube": "https://youtu.be/gmkvOEmhCgM"
+                  }
+                },
       "title": "Trie (Prefix Tree) Practice",
       "description": "Master Trie data structure fundamentals -- insert, search, prefix matching, autocomplete, and pattern recognition. Covers all essential problems for FAANG/MAANG interviews.",
       "followers": 1842,
@@ -54,6 +107,119 @@
                   "difficulty": "easy",
                   "status": "not-started",
                   "links": {
+                    "gfg": "https://www.geeksforgeeks.org/problems/longest-common-prefix-in-an-array5129/1",
+                    "leetcode": "https://leetcode.com/problems/longest-common-prefix/",
+                    "youtube": "https://www.youtube.com/watch?v=0sWShKIJoo4"
+                  }
+                },
+                {
+                  "title": "Design Add and Search Words Data Structure",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/trie-data-structure-in-cpp/",
+                    "leetcode": "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
+                    "youtube": "https://www.youtube.com/watch?v=BTf05gs_8iU"
+                  }
+                },
+                {
+                  "title": "Word Search II",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/boggle-find-possible-words-board-characters/",
+                    "leetcode": "https://leetcode.com/problems/word-search-ii/",
+                    "youtube": "https://www.youtube.com/watch?v=asbcE9mZz_U"
+                  }
+                },
+                {
+                  "title": "Replace Words",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/replace-words/",
+                    "youtube": "https://youtu.be/FxmFhwmKumU"
+                  }
+                },
+                {
+                  "title": "Map Sum Pairs",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-the-longest-string--170645/0",
+                    "leetcode": "https://leetcode.com/problems/map-sum-pairs/",
+                    "youtube": "https://youtu.be/YiA7aP8zEko"
+                  }
+                },
+                {
+                  "title": "Longest Word in Dictionary",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-the-longest-string--170645/0",
+                    "leetcode": "https://leetcode.com/problems/longest-word-in-dictionary/",
+                    "youtube": "https://youtu.be/MbvGOab6Sfg"
+                  }
+                },
+                {
+                  "title": "Search Suggestions System (Auto Complete)",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/implement-a-phone-directory/",
+                    "leetcode": "https://leetcode.com/problems/search-suggestions-system/",
+                    "youtube": "https://youtu.be/lbfi2OZL0Ls"
+                  }
+                },
+                {
+                  "title": "Longest Word With All Prefixes",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-the-longest-string--170645/0",
+                    "leetcode": "https://leetcode.com/problems/longest-word-with-all-prefixes/",
+                    "youtube": "https://youtu.be/AWnBa91lThI"
+                  }
+                },
+                {
+                  "title": "Prefix and Suffix Search",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/prefix-suffix-search/",
+                    "leetcode": "https://leetcode.com/problems/prefix-and-suffix-search/",
+                    "youtube": "https://youtu.be/U7fIQ7qAeuE"
+                  }
+                },
+                {
+                  "title": "Maximum XOR of Two Numbers in an Array",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/maximum-xor-of-two-numbers-in-an-array/",
+                    "leetcode": "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/",
+                    "youtube": "https://www.youtube.com/watch?v=EIhAwfHubE8"
+                  }
+                },
+                {
+                  "title": "Stream of Characters",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/stream-of-characters/",
+                    "youtube": "https://youtu.be/CjJN_azEYEQ"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
                     "leetcode": "https://leetcode.com/problems/longest-common-prefix/",
                     "gfg": "https://www.geeksforgeeks.org/problems/longest-common-prefix-in-an-array/",
                     "youtube": ""
