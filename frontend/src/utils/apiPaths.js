@@ -42,6 +42,12 @@ export const API_PATHS = {
         SAVE: "/api/resume/save", // Save resume to backend
         GET_ALL: "/api/resume/my-resumes", // Get all user's saved resumes
     },
+    NOTES_SUMMARY: {
+        SUMMARIZE: "/api/notes-summary/summarize", // AI PDF notes summarizer via Gemini
+        SAVE: "/api/notes-summary/save", // Save a generated summary
+        GET_ALL: "/api/notes-summary/my-summaries", // Get all user's saved summaries
+        DELETE: (id) => `/api/notes-summary/${id}`, // Delete a saved summary
+    },
     JOBS: {
         GET: "/api/jobs",  // GET /api/jobs?role=...&country=...
     },

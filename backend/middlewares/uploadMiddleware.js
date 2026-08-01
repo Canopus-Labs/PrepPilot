@@ -104,4 +104,13 @@ const uploadResume = multer({
   limits: { fileSize: MAX_FILE_SIZE },
 });
 
-module.exports = { upload, uploadResume, validateResumeMagicBytes };
+// Study/notes PDFs tend to be larger than resumes, so they get a higher cap.
+const NOTES_MAX_FILE_SIZE = 15 * 1024 * 1024;
+
+const uploadNotes = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: resumeFileFilter, // PDF-only, same filter as resumes
+  limits: { fileSize: NOTES_MAX_FILE_SIZE },
+});
+
+module.exports = { upload, uploadResume, uploadNotes, NOTES_MAX_FILE_SIZE };

@@ -6,13 +6,14 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
+const lusca = require("lusca");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
   generateInterviewTips,
 } = require("./controllers/aiController");
 const { protect } = require("./middlewares/authMiddleware");
-// const Question = require("./models/Question");
 const authRoutes = require("./routes/authRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const questionRoutes = require("./routes/questionRoutes");
@@ -22,14 +23,10 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
-// Remove ES Module import for cors. Use CommonJS require below.
 const app = express();
 
 app.set("trust proxy", 1);
 app.use(generalHeaders); 
-// CORS settings: derive from env
-// FRONTEND_ORIGIN=primary production frontend
-// EXTRA_ORIGINS=comma separated additional origins (staging, preview, etc.)
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
@@ -57,7 +54,6 @@ app.use((req, res, next) => {
     res.header("Vary", "Origin");
     res.header("Access-Control-Allow-Credentials", "true");
   } else if (origin) {
-    // Debug log for rejected origins (only once per process for each origin)
     if (!global.__rejectedCors) global.__rejectedCors = new Set();
     if (!global.__rejectedCors.has(origin)) {
       global.__rejectedCors.add(origin);
@@ -69,7 +65,7 @@ app.use((req, res, next) => {
   }
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token");
     return res.sendStatus(200);
   }
   next();
@@ -93,6 +89,68 @@ connectDB()
 app.use(express.json());
 app.use(cookieParser());
 
+// Lightweight, store-free session used ONLY to hold the CSRF secret for
+// lusca.csrf(). All real authentication remains JWT-based (see
+// middlewares/authMiddleware.js) — this does not make the API stateful.
+app.use(
+  cookieSession({
+    name: "csrfSession",
+    keys: [process.env.CSRF_SESSION_SECRET || process.env.JWT_SECRET],
+    maxAge: 24 * 60 * 60 * 1000, // 24h
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  })
+);
+
+// Global CSRF protection. Mounted before every router so CodeQL recognizes
+// ALL downstream handlers as protected. The blocklist then exempts every
+// route that authenticates via JWT bearer header (not cookies) — meaning
+// CSRF is only actually enforced at runtime on /api/auth/refresh and
+// /api/auth/logout, the two routes that authenticate off the ambient
+// refreshToken cookie. GET/HEAD/OPTIONS requests are never validated by
+// lusca regardless of blocklist, so /api/auth/csrf-token still works as a
+// plain priming GET.
+app.use(
+  lusca.csrf({
+    cookie: {
+      name: "XSRF-TOKEN",
+      options: {
+        httpOnly: false, // must be readable by frontend JS to echo back in header
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      },
+    },
+    header: "x-csrf-token",
+    blocklist: [
+      { path: "/api/auth/register", type: "exact" },
+      { path: "/api/auth/login", type: "exact" },
+      { path: "/api/auth/verify-email", type: "exact" },
+      { path: "/api/auth/resend-verification", type: "exact" },
+      { path: "/api/auth/profile", type: "exact" },
+      { path: "/api/auth/change-password", type: "exact" },
+      { path: "/api/auth/delete-account", type: "exact" },
+      { path: "/api/auth/upload-image", type: "exact" },
+      { path: "/api/auth/csrf-token", type: "exact" },
+      { path: "/api/sessions", type: "startsWith" },
+      { path: "/api/question", type: "startsWith" },
+      { path: "/api/questions", type: "startsWith" },
+      { path: "/api/ai", type: "startsWith" },
+      { path: "/api/sheets", type: "startsWith" },
+      { path: "/api/user", type: "startsWith" },
+      { path: "/api/resume", type: "startsWith" },
+      { path: "/api/notes-summary", type: "startsWith" },
+      { path: "/api/books", type: "startsWith" },
+      { path: "/api/jobs", type: "startsWith" },
+      { path: "/api/courses", type: "startsWith" },
+      { path: "/api/flashcards", type: "startsWith" },
+      { path: "/api/test", type: "exact" },
+      { path: "/uploads", type: "startsWith" },
+    ],
+  })
+);
+
+
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
@@ -108,6 +166,8 @@ app.use("/api/user", generalLimiter, achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips } = require("./Input_validators/ValidateAi.js");
 app.use("/api/resume", generalLimiter, resumeRoutes);
+const notesSummaryRoutes = require("./routes/notesSummaryRoutes");
+app.use("/api/notes-summary", generalLimiter, notesSummaryRoutes);
 
 // AI routes with Zod validation
 app.post(
@@ -146,7 +206,6 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-//Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
 
 // Debug route to verify backend is working
@@ -154,10 +213,7 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!" });
 });
 
-// Remove duplicate CORS middleware (already set above)
 
-// Daily job cache refresh — warm on boot, then every 24 hours.
-// Only runs when Adzuna is configured; otherwise refreshJobCache() no-ops.
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
   refreshJobCache();
