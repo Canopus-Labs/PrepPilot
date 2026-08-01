@@ -6,8 +6,8 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 const AIResponsePreview = ({ content }) => {
-    if (!content) return null;
     const [copied, setCopied] = useState(false);
+    if (!content) return null;
 
 const copyResponse = async () => {
     try {
