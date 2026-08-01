@@ -239,7 +239,6 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
   }
 };
 
-const Joi = require("joi");
 
 const saveSummarySchema = Joi.object({
   fileName: Joi.string().trim().max(255).required(),
