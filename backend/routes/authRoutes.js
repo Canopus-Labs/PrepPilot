@@ -6,6 +6,7 @@ const { validateUserLogin, validateUserSignup, validateRefreshToken, validateRes
 const router = express.Router();
 
 const {
+  loginLimiter,
   authLimiter,
   generalLimiter,
   sensitiveAuthLimiter,
@@ -14,7 +15,7 @@ const {
 
 // Auth Routes
 router.post("/register", authLimiter, validateUserSignup, registerUser);
-router.post("/login", authLimiter, validateUserLogin, loginUser);
+router.post("/login", loginLimiter, validateUserLogin, loginUser);
 router.post("/refresh", authLimiter,validateRefreshToken, refreshToken);
 router.post("/logout", authLimiter, validateRefreshToken, logoutUser);
 router.get("/profile", protect, generalLimiter, getUserProfile);
