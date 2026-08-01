@@ -246,28 +246,51 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
 const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
-    const payload = req.body;
+    const {
+    fileName,
+    sourceType,
+    sourceUrl,
+    pageCount,
+    wordCount,
+    contentHash,
+    summary,
+    topics,
+    prerequisites,
+    difficulty,
+    readingTime,
+    learningOutcomes,
+  } = req.body;
+
+  if (typeof fileName !== "string" || fileName.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid file name.",
+    });
+  }
 
     const summary = await NotesSummary.findOneAndUpdate(
-  { user: userId, fileName: payload.fileName },
-  {
-    user: userId,
-    fileName: payload.fileName,
-    sourceType: payload.sourceType,
-    sourceUrl: payload.sourceUrl,
-    pageCount: payload.pageCount,
-    wordCount: payload.wordCount,
-    contentHash: payload.contentHash,
-    summary: payload.summary,
-    topics: payload.topics,
-    prerequisites: payload.prerequisites,
-    difficulty: payload.difficulty,
-    readingTime: payload.readingTime,
-    learningOutcomes: payload.learningOutcomes,
-  },
-  { new: true, upsert: true, setDefaultsOnInsert: true }
-);
-
+      { user: userId, fileName },
+      {
+        user: userId,
+        fileName,
+        sourceType,
+        sourceUrl,
+        pageCount,
+        wordCount,
+        contentHash,
+        summary,
+        topics,
+        prerequisites,
+        difficulty,
+        readingTime,
+        learningOutcomes,
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    );
     const count = await NotesSummary.countDocuments({ user: userId });
     if (count > MAX_SAVED_SUMMARIES_PER_USER) {
       const excess = await NotesSummary.find({ user: userId })
