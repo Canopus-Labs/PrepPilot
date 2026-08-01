@@ -113,4 +113,4 @@ const uploadNotes = multer({
   limits: { fileSize: NOTES_MAX_FILE_SIZE },
 });
 
-module.exports = { upload, uploadResume, uploadNotes, NOTES_MAX_FILE_SIZE };
+module.exports = { upload, uploadResume, uploadNotes, NOTES_MAX_FILE_SIZE, validateResumeMagicBytes };

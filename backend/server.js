@@ -6,8 +6,6 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
-const cookieSession = require("cookie-session");
-const lusca = require("lusca");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -64,8 +62,8 @@ app.use((req, res, next) => {
     }
   }
   if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, x-requested-with");
     return res.sendStatus(200);
   }
   next();
@@ -88,68 +86,6 @@ connectDB()
 // middleware
 app.use(express.json());
 app.use(cookieParser());
-
-// Lightweight, store-free session used ONLY to hold the CSRF secret for
-// lusca.csrf(). All real authentication remains JWT-based (see
-// middlewares/authMiddleware.js) — this does not make the API stateful.
-app.use(
-  cookieSession({
-    name: "csrfSession",
-    keys: [process.env.CSRF_SESSION_SECRET || process.env.JWT_SECRET],
-    maxAge: 24 * 60 * 60 * 1000, // 24h
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  })
-);
-
-// Global CSRF protection. Mounted before every router so CodeQL recognizes
-// ALL downstream handlers as protected. The blocklist then exempts every
-// route that authenticates via JWT bearer header (not cookies) — meaning
-// CSRF is only actually enforced at runtime on /api/auth/refresh and
-// /api/auth/logout, the two routes that authenticate off the ambient
-// refreshToken cookie. GET/HEAD/OPTIONS requests are never validated by
-// lusca regardless of blocklist, so /api/auth/csrf-token still works as a
-// plain priming GET.
-app.use(
-  lusca.csrf({
-    cookie: {
-      name: "XSRF-TOKEN",
-      options: {
-        httpOnly: false, // must be readable by frontend JS to echo back in header
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      },
-    },
-    header: "x-csrf-token",
-    blocklist: [
-      { path: "/api/auth/register", type: "exact" },
-      { path: "/api/auth/login", type: "exact" },
-      { path: "/api/auth/verify-email", type: "exact" },
-      { path: "/api/auth/resend-verification", type: "exact" },
-      { path: "/api/auth/profile", type: "exact" },
-      { path: "/api/auth/change-password", type: "exact" },
-      { path: "/api/auth/delete-account", type: "exact" },
-      { path: "/api/auth/upload-image", type: "exact" },
-      { path: "/api/auth/csrf-token", type: "exact" },
-      { path: "/api/sessions", type: "startsWith" },
-      { path: "/api/question", type: "startsWith" },
-      { path: "/api/questions", type: "startsWith" },
-      { path: "/api/ai", type: "startsWith" },
-      { path: "/api/sheets", type: "startsWith" },
-      { path: "/api/user", type: "startsWith" },
-      { path: "/api/resume", type: "startsWith" },
-      { path: "/api/notes-summary", type: "startsWith" },
-      { path: "/api/books", type: "startsWith" },
-      { path: "/api/jobs", type: "startsWith" },
-      { path: "/api/courses", type: "startsWith" },
-      { path: "/api/flashcards", type: "startsWith" },
-      { path: "/api/test", type: "exact" },
-      { path: "/uploads", type: "startsWith" },
-    ],
-  })
-);
-
 
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
