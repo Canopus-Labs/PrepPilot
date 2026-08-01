@@ -1,10 +1,10 @@
 const express = require("express");
+const lusca = require("lusca");
 const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser } = require("../controllers/authController");
 const { protect } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadMiddleware");
 const { validateUserLogin, validateUserSignup, validateRefreshToken, validateResendEmail } = require("../Input_validators/ValidateAuth");
 const csrfHeaderCheck = require("../middlewares/csrfHeaderCheck");
-const csrfTokenCheck = require("../middlewares/csrfTokenCheck");
 const router = express.Router();
 
 const {
@@ -14,12 +14,35 @@ const {
   sensitiveAuthLimiter,
 } = require("../middlewares/rateLimiter");
 
+// CSRF protection (double-submit token) for the two routes that authenticate
+// purely off the ambient refreshToken cookie: /refresh and /logout.
+// Requires cookie-session to be mounted in server.js so lusca has req.session
+// to store the secret in.
+const csrfProtection = lusca.csrf({
+  cookie: {
+    name: "XSRF-TOKEN",
+    options: {
+      httpOnly: false, // must be readable by frontend JS to echo back in the header
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/api/auth",
+    },
+  },
+  header: "x-csrf-token",
+});
 
 // Auth Routes
 router.post("/register", authLimiter, validateUserSignup, registerUser);
 router.post("/login", authLimiter, validateUserLogin, loginUser);
-router.post("/refresh", authLimiter, csrfHeaderCheck, csrfTokenCheck, validateRefreshToken, refreshToken);
-router.post("/logout", authLimiter, csrfHeaderCheck, csrfTokenCheck, validateRefreshToken, logoutUser);
+
+// Frontend should GET this once on app load to prime the XSRF-TOKEN cookie
+// before it ever needs to call /refresh or /logout.
+router.get("/csrf-token", generalLimiter, csrfProtection, (req, res) => {
+  res.json({ success: true });
+});
+
+router.post("/refresh", authLimiter, csrfHeaderCheck, csrfProtection, validateRefreshToken, refreshToken);
+router.post("/logout", authLimiter, csrfHeaderCheck, csrfProtection, validateRefreshToken, logoutUser);
 router.get("/profile", protect, generalLimiter, getUserProfile);
 router.put("/profile", protect, generalLimiter, updateUserProfile);
 router.put("/change-password", protect, sensitiveAuthLimiter, changePassword);

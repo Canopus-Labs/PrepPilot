@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -63,7 +64,7 @@ app.use((req, res, next) => {
   }
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token");
     return res.sendStatus(200);
   }
   next();
@@ -86,30 +87,20 @@ connectDB()
 // middleware
 app.use(express.json());
 app.use(cookieParser());
-const { doubleCsrf } = require("csrf-csrf");
 
-const {
-  generateCsrfToken,
-  doubleCsrfProtection,
-} = doubleCsrf({
-  getSecret: () => process.env.CSRF_SECRET, // add this to .env
-  cookieName: "__Host-psifi.x-csrf-token",
-  cookieOptions: {
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
+// Lightweight, store-free session used ONLY to hold the CSRF secret for
+// lusca.csrf(). All real authentication remains JWT-based (see
+// middlewares/authMiddleware.js) — this does not make the API stateful.
+app.use(
+  cookieSession({
+    name: "csrfSession",
+    keys: [process.env.CSRF_SESSION_SECRET || process.env.JWT_SECRET],
+    maxAge: 24 * 60 * 60 * 1000, // 24h
     httpOnly: true,
-  },
-  getSessionIdentifier: (req) => req.cookies?.token || "", // adapt to your auth cookie name
-});
-
-// Expose a route the frontend calls once to get a CSRF token
-app.get("/api/csrf-token", (req, res) => {
-  const token = generateCsrfToken(req, res);
-  res.json({ csrfToken: token });
-});
-
-// Apply protection to all state-changing routes
-app.use(doubleCsrfProtection);
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  })
+);
 
 
 //Routes
