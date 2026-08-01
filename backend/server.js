@@ -21,12 +21,6 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
-const { doubleCsrf } = require("csrf-csrf");
-const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
-  getSecret: () => process.env.CSRF_SECRET,
-  cookieName: "__Host-csrf",
-  cookieOptions: { sameSite: "strict", secure: true, httpOnly: true },
-});
 const app = express();
 
 app.set("trust proxy", 1);
@@ -93,7 +87,6 @@ connectDB()
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(doubleCsrfProtection);
 
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
