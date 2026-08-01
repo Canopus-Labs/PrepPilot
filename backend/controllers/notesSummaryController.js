@@ -29,12 +29,28 @@ async function fetchRemotePdf(url) {
   if (parsed.protocol !== "https:") {
     throw new PdfIntegrityError("PDF URLs must use https.");
   }
-  if (!ALLOWED_REMOTE_HOSTS.has(parsed.hostname)) {
+  const hostname = parsed.hostname.toLowerCase();
+
+  if (!ALLOWED_REMOTE_HOSTS.has(hostname)) {
     throw new PdfIntegrityError("This PDF source is not allowed.");
   }
 
+  if (parsed.username || parsed.password) {
+    throw new PdfIntegrityError(
+      "URLs containing credentials are not allowed."
+    );
+  }
+
+  if (parsed.port && parsed.port !== "443") {
+    throw new PdfIntegrityError(
+      "Only the default HTTPS port is allowed."
+    );
+  }
+
   try {
-    const response = await axios.get(parsed.toString(), {
+    const safeUrl = `https://${hostname}${parsed.pathname}${parsed.search}`;
+
+    const response = await axios.get(safeUrl, {
       responseType: "arraybuffer",
       timeout: 20000,
       maxContentLength: NOTES_MAX_FILE_SIZE,
