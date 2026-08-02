@@ -8,7 +8,7 @@ exports.getAllProgress = async (req, res) => {
   const userId = req.user._id;
 
   try {
-    const progressList = await UserSheetProgress.find({ userId });
+    const progressList = await UserSheetProgress.find({ userId }).limit(50);
 
     res.json({
       success: true,
