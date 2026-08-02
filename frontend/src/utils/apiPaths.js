@@ -54,6 +54,9 @@ export const API_PATHS = {
     COURSES: {
         GET_ALL: "/api/courses", // GET all free courses
     },
+    BEHAVIORAL: {
+    ANALYZE: "/api/behavioral/analyze",
+    },
     FLASHCARD: {
         CREATE: "/api/flashcards",
         GET_ALL: "/api/flashcards",

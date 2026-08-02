@@ -45,6 +45,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
@@ -152,6 +153,16 @@ const App = () => {
                     </MainLayout>
                   }
                 >
+                  <Route
+                    path="/behavioral-coach"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <BehavioralCoach />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/dashboard"
                     element={
