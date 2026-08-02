@@ -66,8 +66,8 @@ const JobsForYou = () => {
   const [loading, setLoading] = useState(true);
   const [customRole, setCustomRole] = useState("");
   const [searchError, setSearchError] = useState("");
-
-  const fetchJobs = async (selectedCountry, overrideRole = "") => {
+  
+  const fetchJobs = useCallback(async (selectedCountry, overrideRole = "") => {
     setLoading(true);
     try {
       const params = { country: selectedCountry };
@@ -81,15 +81,19 @@ const JobsForYou = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const customRoleRef = React.useRef(customRole);
+  useEffect(() => {
+    customRoleRef.current = customRole;
+  }, [customRole]);
 
   useEffect(() => {
-    fetchJobs(country);
-  }, []);
+    fetchJobs(country, customRoleRef.current);
+  }, [country, fetchJobs]);
 
   const handleCountryChange = (e) => {
     setCountry(e.target.value);
-    fetchJobs(e.target.value, customRole);
   };
 
   const handleSearch = (e) => {
