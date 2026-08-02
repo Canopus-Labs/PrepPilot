@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from "lucide-react";
 
 class ErrorBoundary extends Component {
@@ -208,5 +209,10 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(["fullscreen", "section"]),
+};
 
 export default ErrorBoundary;
