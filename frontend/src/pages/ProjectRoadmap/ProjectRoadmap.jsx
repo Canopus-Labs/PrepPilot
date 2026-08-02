@@ -35,7 +35,7 @@ const ProjectRoadmap = () => {
   const [saving, setSaving] = useState(false);
   const [regeneratingSection, setRegeneratingSection] = useState(null);
   const [savingPdf, setSavingPdf] = useState(false);
-
+  const [isDeleting, setIsDeleting] = useState(false);
   // ── Fetch saved roadmaps ──────────────────────────────
   const fetchRoadmaps = async () => {
     if (!user) {
@@ -137,6 +137,7 @@ const ProjectRoadmap = () => {
 
   const handleDeleteRoadmap = async (id) => {
     if (!window.confirm("Delete this roadmap? This can't be undone.")) return;
+    setIsDeleting(true);
     try {
       await axiosInstance.delete(API_PATHS.ROADMAP.DELETE(id));
       toast.success("Roadmap deleted");
@@ -147,6 +148,8 @@ const ProjectRoadmap = () => {
       fetchRoadmaps();
     } catch (err) {
       toast.error("Failed to delete roadmap");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -311,6 +314,7 @@ const ProjectRoadmap = () => {
             onOpen={handleOpenRoadmap}
             onDelete={handleDeleteRoadmap}
             onCreateNew={handleCreateNew}
+            isDeleting={isDeleting}
           />
         )}
 

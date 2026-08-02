@@ -19,7 +19,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const RoadmapCard = ({ roadmap, onOpen, onDelete }) => (
+const RoadmapCard = ({ roadmap, onOpen, onDelete, isDeleting }) => (
   <div
     onClick={() => onOpen(roadmap._id)}
     className="group flex flex-col bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-5 space-y-4 cursor-pointer hover:border-violet-400 dark:hover:border-violet-500/50 transition-all"
@@ -40,11 +40,12 @@ const RoadmapCard = ({ roadmap, onOpen, onDelete }) => (
       </div>
       <button
         type="button"
+        disabled={isDeleting}
         onClick={(e) => {
           e.stopPropagation();
           onDelete(roadmap._id);
         }}
-        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all shrink-0"
+        className={`opacity-0 group-hover:opacity-100 transition-all shrink-0 ${isDeleting ? "text-gray-300 cursor-not-allowed" : "text-gray-400 hover:text-red-500"}`}
         aria-label="Delete roadmap"
       >
         <Trash2 size={16} strokeWidth={1.5} />
@@ -77,7 +78,7 @@ const RoadmapCard = ({ roadmap, onOpen, onDelete }) => (
   </div>
 );
 
-const RoadmapDashboard = ({ roadmaps, loading, onOpen, onDelete, onCreateNew }) => {
+const RoadmapDashboard = ({ roadmaps, loading, onOpen, onDelete, onCreateNew, isDeleting }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -127,7 +128,13 @@ const RoadmapDashboard = ({ roadmaps, loading, onOpen, onDelete, onCreateNew }) 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {roadmaps.map((r) => (
-            <RoadmapCard key={r._id} roadmap={r} onOpen={onOpen} onDelete={onDelete} />
+            <RoadmapCard
+              key={r._id}
+              roadmap={r}
+              onOpen={onOpen}
+              onDelete={onDelete}
+              isDeleting={isDeleting}
+            />
           ))}
         </div>
       )}
