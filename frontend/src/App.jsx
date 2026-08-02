@@ -45,6 +45,8 @@ import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
+import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
+import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -221,6 +223,16 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Analytics />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/spaced-repetition"
                     element={
                       <ProtectedRoute>
@@ -252,6 +264,16 @@ const App = () => {
                       <PageTransition>
                         <SheetList type="all" />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/daily-challenge"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <DailyCodingChallenge />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
