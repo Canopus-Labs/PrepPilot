@@ -44,6 +44,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -149,6 +150,16 @@ const App = () => {
                     </MainLayout>
                   }
                 >
+                  <Route
+                    path="/behavioral-coach"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <BehavioralCoach />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/dashboard"
                     element={
