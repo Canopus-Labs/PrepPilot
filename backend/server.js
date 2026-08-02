@@ -158,7 +158,7 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use("/uploads", protect, express.static(path.join(__dirname, "uploads"), {}));
 
 // Error handling middleware should be the last middleware before server start
 app.use(errorHandler);
