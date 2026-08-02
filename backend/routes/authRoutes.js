@@ -20,7 +20,7 @@ const {
 
 // Auth Routes
 router.post("/register", authLimiter, validateUserSignup, registerUser);
-router.post("/login", authLimiter, validateUserLogin, loginUser);
+router.post("/login", loginLimiter, validateUserLogin, loginUser);
 
 // Frontend should GET this once on app load to prime the XSRF-TOKEN cookie
 // before it ever needs to call /refresh or /logout.
@@ -35,7 +35,7 @@ router.put("/profile", protect, generalLimiter, updateUserProfile);
 router.put("/change-password", protect, sensitiveAuthLimiter, changePassword);
 router.delete("/delete-account", protect, sensitiveAuthLimiter, deleteUserAccount);
 router.post("/resend-verification", authLimiter,  validateResendEmail, resendVerificationEmail);
-router.get("/verify-email", verifyEmail);
+router.get("/verify-email", authLimiter, verifyEmail);
 
 /**
  * Upload a user profile image.
