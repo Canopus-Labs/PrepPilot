@@ -86,6 +86,7 @@ connectDB()
 // middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use(generalLimiter); // Apply rate limiter globally
 
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
