@@ -52,6 +52,34 @@ const Dashboard = () => {
       <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white md:px-10 relative overflow-hidden transition-colors duration-300">
         <div className="container mx-auto pt-8 pb-16 px-4 md:px-0 relative z-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 md:mb-10 gap-4">
+
+  <div>
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
+      Your Interview Sessions
+    </h1>
+
+    <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
+      Manage, review, and dynamically create your AI-driven mock interview sessions.
+    </p>
+  </div>
+
+  <button
+    onClick={() => navigate("/interview-replay")}
+    className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-md transition-all"
+  >
+    🎥 Interview Replay
+  </button>
+
+</div>
+    onClick={() => navigate("/daily-challenge")}
+    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+  >
+    🔥 Daily Challenge
+  </button>
+
+</div>
+          <div className="flex items-center justify-between mb-8 md:mb-10">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
                 Your Interview Sessions
@@ -86,7 +114,7 @@ const Dashboard = () => {
                   role={data.role || ""}
                   topicsToFocus={data.topicsToFocus || ""}
                   experience={data.experience || "-"}
-                  questions={data.questions?.length || "-"}
+      f            questions={data.questions?.length || "-"}
                   description={data.description || ""}
                   lastupdated={data.updatedAt ? moment(data.updatedAt).format("Do MMM YYYY") : ""}
                   onSelect={() => navigate(`/interview-prep/${data._id}`)}
