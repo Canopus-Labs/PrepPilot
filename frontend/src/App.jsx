@@ -44,6 +44,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import InterviewReplay from "./pages/InterviewReplay/InterviewReplay";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
@@ -212,6 +213,11 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/interview-replay"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <InterviewReplay />
                     path="/analytics"
                     element={
                       <ProtectedRoute>
