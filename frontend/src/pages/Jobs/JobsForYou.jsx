@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Briefcase, MapPin, DollarSign, ExternalLink, RefreshCw } from "lucide-react";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
@@ -59,7 +59,7 @@ const JobCard = ({ job }) => (
 );
 
 const JobsForYou = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const [jobs, setJobs]       = useState([]);
   const [role, setRole]       = useState("");
   const [country, setCountry] = useState("in");

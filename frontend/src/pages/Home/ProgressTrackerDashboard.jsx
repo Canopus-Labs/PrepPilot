@@ -7,7 +7,7 @@ import {
   CheckCircle, PlusCircle, Settings, Code2, Star,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
@@ -101,7 +101,7 @@ function buildDifficultyStats(progress, sheetsMap) {
 
 /* ── Main ────────────────────────────────────────────────────────────────── */
 const ProgressTrackerDashboard = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);

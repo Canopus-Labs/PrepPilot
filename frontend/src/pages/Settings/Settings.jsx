@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import { useTheme } from "../../context/themeContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -46,7 +46,7 @@ import {
 } from "lucide-react";
 const Settings = () => {
   const navigate = useNavigate();
-  const { user, clearUser, updateUser } = useContext(UserContext);
+  const { user, clearUser, updateUser } = useUser();
   const { theme, toggleTheme } = useTheme();
   // Sidebar Tabs State
   const [activeSection, setActiveSection] = useState("basic-info");

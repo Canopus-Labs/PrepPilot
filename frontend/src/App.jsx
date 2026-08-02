@@ -23,7 +23,7 @@ const AIHelper = lazy(() => import("./components/AIHepler"));
 const PracticePage = lazy(() => import("./pages/InterviewPrep/components/PracticePage"));
 const CognitiveGamesPage = lazy(() => import("./pages/CognitiveGames/CognitiveGamesPage"));
 import { useContext } from "react";
-import { UserContext } from "./context/userContext";
+import { useUser } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
 import { Navigate, Outlet } from "react-router-dom";
 const ResumeTemplates = lazy(() => import("./pages/ResumeBuilder/ResumeTemplates"));
@@ -66,7 +66,7 @@ import InterviewReplay from "./pages/InterviewReplay/InterviewReplay";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useContext(UserContext);
+  const { user, loading } = useUser();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
