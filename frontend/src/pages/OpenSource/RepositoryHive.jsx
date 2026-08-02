@@ -40,11 +40,12 @@ const RepositoryHive = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("stars");
 
+  const searchQueryRef = React.useRef(searchQuery);
   useEffect(() => {
-    fetchRepositories();
-  }, [selectedFilters, sortBy]);
+    searchQueryRef.current = searchQuery;
+  }, [searchQuery]);
 
-  const fetchRepositories = async () => {
+  const fetchRepositories = React.useCallback(async () => {
     setLoading(true);
     setError("");
 
@@ -59,8 +60,9 @@ const RepositoryHive = () => {
         }
       });
 
-      if (searchQuery.trim()) {
-        queryParams.push(searchQuery.trim());
+      const currentQuery = searchQueryRef.current;
+      if (currentQuery.trim()) {
+        queryParams.push(currentQuery.trim());
       }
 
       const query = queryParams.join(" ").trim();
@@ -98,7 +100,11 @@ const RepositoryHive = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedFilters, sortBy]);
+
+  useEffect(() => {
+    fetchRepositories();
+  }, [selectedFilters, sortBy, fetchRepositories]);
 
   const toggleFilter = (filterId) => {
     setSelectedFilters((prev) =>
