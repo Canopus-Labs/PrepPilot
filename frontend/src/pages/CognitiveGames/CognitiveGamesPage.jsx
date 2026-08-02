@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import PatternMatrixGame from "../../components/PatternMatrixGame";
 import MemoryMatchGame from "../../components/MemoryMatchGame";
 import { Grid3x3, Gamepad2 } from "lucide-react";
@@ -26,7 +26,7 @@ const gamesData = [
 // ─── CognitiveGamesPage ────────────────────────────────────────────────────────
 const CognitiveGamesPage = () => {
   const [selectedGame, setSelectedGame] = useState(null);
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const navigate = useNavigate();
 
   const handleGameClick = (game) => {

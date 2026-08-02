@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback, memo, useContext } from "react
 
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
-import { UserContext } from "../context/userContext";
+import { useUser } from "../context/userContext";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
 
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
@@ -87,7 +87,7 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
 function SheetDetail() {
   const { id } = useParams();
-  const { sheetProgress: ctxProgress, refreshSheetProgress } = useContext(UserContext);
+  const { sheetProgress: ctxProgress, refreshSheetProgress } = useUser();
   const [sheet, setSheet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [completedTopics, setCompletedTopics] = useState({});

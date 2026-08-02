@@ -23,7 +23,7 @@ import AIHelper from "./components/AIHepler";
 import PracticePage from "./pages/InterviewPrep/components/PracticePage";
 import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
 import { useContext } from "react";
-import { UserContext } from "./context/userContext";
+import { useUser } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
 import { Navigate, Outlet } from "react-router-dom";
 import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
@@ -47,7 +47,7 @@ import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage"
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useContext(UserContext);
+  const { user, loading } = useUser();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
