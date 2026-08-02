@@ -94,6 +94,11 @@ function SheetDetail() {
   const [completedTopics, setCompletedTopics] = useState({});
   const [followed, setFollowed] = useState(false);
 
+  const ctxProgressRef = React.useRef(ctxProgress);
+  useEffect(() => {
+    ctxProgressRef.current = ctxProgress;
+  }, [ctxProgress]);
+
   useEffect(() => {
     fetch(`${BASE_URL}/api/sheets/${id}`)
       .then((res) => res.json())
@@ -101,7 +106,7 @@ function SheetDetail() {
         setSheet(data.sheet);
 
         // 1. Try backend (UserContext) — available immediately after login, works cross-device
-        const backendRecord = (ctxProgress || []).find(p => p.sheetId === id);
+        const backendRecord = (ctxProgressRef.current || []).find(p => p.sheetId === id);
 
         if (backendRecord) {
           setFollowed(backendRecord.followed || false);
@@ -166,7 +171,7 @@ function SheetDetail() {
       }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
-  }, [completedTopics, followed]);
+  }, [completedTopics, followed, totalSubtopics, completedCount, id, refreshSheetProgress]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;
