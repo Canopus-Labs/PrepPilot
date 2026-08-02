@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { User, PlusCircle } from "lucide-react";
 
-
 import SummaryCard from "../../components/Cards/SummaryCard";
 import Modal from "../../components/Loader/Modal";
 import CreateSessionForm from "./CreateSessionForm";
@@ -19,7 +18,10 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const [openDeleteAlert, setOpenDeleteAlert] = useState({ open: false, data: null });
+  const [openDeleteAlert, setOpenDeleteAlert] = useState({
+    open: false,
+    data: null,
+  });
 
   const fetchAllSessions = async () => {
     try {
@@ -32,6 +34,7 @@ const Dashboard = () => {
 
   const deleteSession = async (session) => {
     if (!session?._id) return;
+
     try {
       await axiosInstance.delete(API_PATHS.SESSION.DELETE(session._id));
       toast.success("Session deleted successfully!");
@@ -51,13 +54,25 @@ const Dashboard = () => {
     <>
       <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white md:px-10 relative overflow-hidden transition-colors duration-300">
         <div className="container mx-auto pt-8 pb-16 px-4 md:px-0 relative z-10">
-          <div className="mb-8 md:mb-10">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
-              Your Interview Sessions
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
-              Manage, review, and dynamically create your AI-driven mock interview sessions.
-            </p>
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 md:mb-10 gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
+                Your Interview Sessions
+              </h1>
+
+              <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
+                Manage, review, and dynamically create your AI-driven mock
+                interview sessions.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/daily-challenge")}
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              🔥 Daily Challenge
+            </button>
           </div>
 
           {/* Sessions Grid */}
@@ -72,9 +87,17 @@ const Dashboard = () => {
                   experience={data.experience || "-"}
                   questions={data.questions?.length || "-"}
                   description={data.description || ""}
-                  lastupdated={data.updatedAt ? moment(data.updatedAt).format("Do MMM YYYY") : ""}
-                  onSelect={() => navigate(`/interview-prep/${data._id}`)}
-                  onDelete={() => setOpenDeleteAlert({ open: true, data })}
+                  lastupdated={
+                    data.updatedAt
+                      ? moment(data.updatedAt).format("Do MMM YYYY")
+                      : ""
+                  }
+                  onSelect={() =>
+                    navigate(`/interview-prep/${data._id}`)
+                  }
+                  onDelete={() =>
+                    setOpenDeleteAlert({ open: true, data })
+                  }
                 />
               ))}
             </div>
@@ -83,14 +106,16 @@ const Dashboard = () => {
               <div className="flex items-center justify-center w-16 h-16 mb-5 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-400 dark:text-gray-500 shadow-sm">
                 <User size={28} strokeWidth={1.5} />
               </div>
-              
+
               <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
                 No interview sessions
               </h2>
+
               <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-8 text-sm leading-relaxed">
-                You don't have any mock interview sessions yet. Create your first session to start practicing with our AI interviewer.
+                You don't have any mock interview sessions yet. Create your
+                first session to start practicing with our AI interviewer.
               </p>
-              
+
               <button
                 onClick={() => setOpenCreateModal(true)}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-violet-600 text-white rounded-lg font-medium shadow-sm hover:bg-violet-700 transition-colors duration-200"
@@ -101,27 +126,34 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Add New Floating Button */}
+          {/* Floating Add Button */}
           {sessions.length > 0 && (
             <button
               className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-14 flex items-center gap-2 px-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-1 transition-all duration-300 z-50 ring-2 ring-white/20 dark:ring-transparent"
               onClick={() => setOpenCreateModal(true)}
             >
-              <LuPlus className="text-2xl" /> Add Session
+              <LuPlus className="text-2xl" />
+              Add Session
             </button>
           )}
         </div>
       </div>
 
       {/* Create Session Modal */}
-      <Modal isOpen={openCreateModal} onClose={() => setOpenCreateModal(false)} hideHeader>
+      <Modal
+        isOpen={openCreateModal}
+        onClose={() => setOpenCreateModal(false)}
+        hideHeader
+      >
         <CreateSessionForm />
       </Modal>
 
       {/* Delete Alert Modal */}
       <Modal
         isOpen={openDeleteAlert.open}
-        onClose={() => setOpenDeleteAlert({ open: false, data: null })}
+        onClose={() =>
+          setOpenDeleteAlert({ open: false, data: null })
+        }
         title="Delete Session"
       >
         <DeleteAlertContent
