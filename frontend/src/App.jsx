@@ -44,6 +44,27 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicy = lazy(() => import("./pages/Terms/PrivacyPolicy"));
 const FreeCourses = lazy(() => import("./pages/FreeCourses/FreeCourses"));
 const SpacedRepetitionPage = lazy(() => import("./pages/SpacedRepetition/SpacedRepetitionPage"));
+import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
+import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
+import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
+import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
+import TermsandConditions from "./pages/Terms/TermsandConditions";
+import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
+import RepositoryHive from "./pages/OpenSource/RepositoryHive";
+import OSSBlog from "./pages/OpenSource/OSSBlog";
+import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
+import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import NotesSummarizer from "./pages/NotesSummarizer/NotesSummarizer";
+import JobsForYou from "./pages/Jobs/JobsForYou";
+import HelpSupport from "./pages/Support/HelpSupport";
+import Settings from "./pages/Settings/Settings";
+import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
+import FreeCourses from "./pages/FreeCourses/FreeCourses";
+import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import InterviewReplay from "./pages/InterviewReplay/InterviewReplay";
+import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
+import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -217,6 +238,21 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/interview-replay"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <InterviewReplay />
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Analytics />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/spaced-repetition"
                     element={
                       <ProtectedRoute>
@@ -248,6 +284,16 @@ const App = () => {
                       <PageTransition>
                         <SheetList type="all" />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/daily-challenge"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <DailyCodingChallenge />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
