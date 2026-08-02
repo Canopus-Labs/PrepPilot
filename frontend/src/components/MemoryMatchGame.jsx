@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useMemoryMatch, DIFFICULTY_CONFIGS } from "../hooks/useMemoryMatch";
 import { setMatchAudioMuted, getMatchAudioMuted } from "../utils/matchAudio";
 import {
