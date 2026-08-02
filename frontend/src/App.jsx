@@ -44,6 +44,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -241,6 +242,16 @@ const App = () => {
                       <PageTransition>
                         <SheetList type="all" />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/daily-challenge"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <DailyCodingChallenge />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
