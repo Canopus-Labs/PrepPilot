@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
+
 const { protect } = require("../middlewares/authMiddleware");
+const { generalLimiter } = require("../middlewares/rateLimiter");
+
 const {
   validateCreateRoadmap,
   validateUpdateRoadmap,
   validateToggleTask,
 } = require("../Input_validators/ValidateRoadmap");
+
 const {
   createRoadmap,
   getUserRoadmaps,
@@ -15,7 +19,10 @@ const {
   deleteRoadmap,
 } = require("../controllers/roadmapController");
 
-// All roadmap routes require authentication
+// Apply rate limiting first
+router.use(generalLimiter);
+
+// Then authentication
 router.use(protect);
 
 router.post("/", validateCreateRoadmap, createRoadmap);
