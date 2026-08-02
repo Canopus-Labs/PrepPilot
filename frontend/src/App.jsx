@@ -44,6 +44,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import RevisionPlanner from "./pages/RevisionPlanner/RevisionPlanner";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -215,6 +216,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <SpacedRepetitionPage />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/revision-planner"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <RevisionPlanner />
                         </PageTransition>
                       </ProtectedRoute>
                     }
