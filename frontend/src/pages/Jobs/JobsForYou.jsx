@@ -85,6 +85,7 @@ const JobsForYou = () => {
 
   useEffect(() => {
     fetchJobs(country);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCountryChange = (e) => {

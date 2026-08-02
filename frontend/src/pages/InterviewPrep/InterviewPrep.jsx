@@ -126,6 +126,7 @@ const InterviewPrep = () => {
 
   useEffect(() => {
     if (sessionId) fetchSessionDetailsById();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   return (

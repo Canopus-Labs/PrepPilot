@@ -42,6 +42,7 @@ const RepositoryHive = () => {
 
   useEffect(() => {
     fetchRepositories();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilters, sortBy]);
 
   const fetchRepositories = async () => {
