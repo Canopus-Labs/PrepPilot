@@ -61,4 +61,12 @@ export const API_PATHS = {
         REVIEW: (id) => `/api/flashcards/${id}/review`,
         DELETE: (id) => `/api/flashcards/${id}`,
     },
+    ROADMAP: {
+        CREATE: "/api/roadmaps",
+        GET_ALL: "/api/roadmaps",
+        GET_ONE: (id) => `/api/roadmaps/${id}`,
+        UPDATE: (id) => `/api/roadmaps/${id}`,
+        TOGGLE_TASK: (id) => `/api/roadmaps/${id}/tasks`,
+        DELETE: (id) => `/api/roadmaps/${id}`,
+    },
 };

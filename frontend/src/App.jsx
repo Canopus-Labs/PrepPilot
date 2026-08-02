@@ -32,6 +32,7 @@ import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
 import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
 import TermsandConditions from "./pages/Terms/TermsandConditions";
 import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
+import ProjectRoadmap from "./pages/ProjectRoadmap/ProjectRoadmap";
 import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
@@ -322,6 +323,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <ProjectIdeas />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/project-roadmap"
+                    element={
+                      <PageTransition>
+                        <ProjectRoadmap />
                       </PageTransition>
                     }
                   />
