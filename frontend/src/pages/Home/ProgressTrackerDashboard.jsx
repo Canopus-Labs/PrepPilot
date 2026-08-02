@@ -154,9 +154,11 @@ const ProgressTrackerDashboard = () => {
                 followed: true,
                 completedTopics: raw.completedTopics || {},
                 percentage: raw.percentage || 0,
-              }).catch(() => {});
+              }).catch(err => console.error("Failed to sync offline progress:", err));
             }
-          } catch {}
+          } catch (err) {
+            console.error("Failed to parse local sheet progress:", err);
+          }
         }
 
         const merged = [...backendProgress, ...localExtra]
@@ -164,7 +166,8 @@ const ProgressTrackerDashboard = () => {
           .sort((a, b) => b.percentage - a.percentage);
 
         setSheetProgress(merged);
-      } catch {
+      } catch (err) {
+        console.error("Dashboard data load error:", err);
         toast.error("Failed to load dashboard data.");
       } finally {
         setLoading(false);
