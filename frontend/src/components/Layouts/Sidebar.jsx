@@ -141,8 +141,8 @@ const Sidebar = () => {
   const [expandedSections, setExpandedSections] = useState({});
 
   const userInitial =
-    user?.name?.charAt(0)?.toUpperCase() ||
-    user?.email?.charAt(0)?.toUpperCase() || "U";
+    user?.name?[0]?.toUpperCase() ||
+    user?.email?[0]?.toUpperCase() || "U";
 
   const handleLogout = async () => {
     try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch {}
