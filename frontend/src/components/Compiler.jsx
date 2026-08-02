@@ -52,7 +52,8 @@ int main() {
         }
       );
 
-      const result = await response.json();
+      if (!response.ok) throw new Error("Request failed");
+const result = await response.json();
       const finalOutput =
         result.stdout ||
         result.stderr ||
