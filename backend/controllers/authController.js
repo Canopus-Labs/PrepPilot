@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
-const ACCESS_TOKEN_EXPIRY = "7d";
+const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
@@ -20,16 +20,18 @@ const getRefreshCookieOptions = () => ({
 /**
  * Generate an access token for the authenticated user.
  * @param {string} userId - MongoDB user ID.
+ * @param {number} [tokenVersion=0] - User's current token version; embedded so
+ *   logout / password change can invalidate outstanding access tokens.
  * @returns {string} JWT access token valid for 15 minutes.
  */
-const generateAccessToken = (userId) => {
-    return jwt.sign({ id: userId, tokenType: "access" }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+const generateAccessToken = (userId, tokenVersion = 0) => {
+    return jwt.sign({ id: userId, tokenType: "access", tokenVersion }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
 };
 
 /**
  * Generate a refresh token for the authenticated user.
  * @param {string} userId - MongoDB user ID.
- * @returns {string} JWT refresh token valid for 7 days.
+ * @returns {string} JWT refresh token valid for 30 days.
  */
 const generateRefreshToken = (userId) => {
     return jwt.sign({ id: userId, tokenType: "refresh" }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
@@ -91,7 +93,7 @@ const registerUser = async (req, res) => {
             isEmailVerified: true, // skip email verification until SMTP is configured
         });
 
-        const accessToken = generateAccessToken(user._id);
+        const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
@@ -141,7 +143,7 @@ const loginUser = async (req, res) => {
             });
         }
 
-        const accessToken = generateAccessToken(user._id);
+        const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
@@ -202,7 +204,7 @@ const refreshToken = async (req, res) => {
             return res.status(401).json({ success: false, message: "Refresh token has been revoked. Please log in again." });
         }
 
-        const accessToken = generateAccessToken(user._id);
+        const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const rotatedRefreshToken = generateRefreshToken(user._id);
 
         user.refreshTokenHash = await bcrypt.hash(rotatedRefreshToken, REFRESH_TOKEN_SALT_ROUNDS);
@@ -254,6 +256,8 @@ const logoutUser = async (req, res) => {
 
         user.refreshTokenHash = null;
         user.refreshTokenExpiresAt = null;
+        // Invalidate any access tokens already issued to this user.
+        user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
         res.clearCookie("refreshToken", { path: "/api/auth" });
@@ -485,6 +489,8 @@ const changePassword = async (req, res) => {
 
         // Hash new password
         user.password = newPassword;
+        // Invalidate access tokens issued before the password change.
+        user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
         res.json({ success: true, message: "Password updated successfully" });

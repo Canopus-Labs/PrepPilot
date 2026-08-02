@@ -27,8 +27,8 @@ async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
     company:     j.company?.display_name || "Unknown",
     location:    j.location?.display_name || "Remote",
     salary_min:  j.salary_min || null,
-    salary_max:  j.salary_max || null,
-    description: j.description || "",
+    salary_max:  j.salary_max ?? null,
+    description: j.description ?? "",
     redirect_url: j.redirect_url,
     created:     j.created,
   }));
@@ -72,7 +72,7 @@ exports.getJobs = async (req, res) => {
     return res.json({ jobs, role, source: "api" });
   } catch (err) {
     console.error("[Jobs] getJobs error:", err.message);
-    res.status(500).json({ message: "Failed to fetch jobs", error: err.message });
+    res.status(500).json({ message: "Failed to fetch jobs" });
   }
 };
 

@@ -9,6 +9,26 @@ import ThemeProvider from "./context/themeContext";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
 import MainLayout from "./components/Layouts/MainLayout";
+import { Navigate, Outlet } from "react-router-dom";
+import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
+import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
+import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
+import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
+import TermsandConditions from "./pages/Terms/TermsandConditions";
+import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
+import RepositoryHive from "./pages/OpenSource/RepositoryHive";
+import OSSBlog from "./pages/OpenSource/OSSBlog";
+import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
+import NotesBooks from "./pages/NotesBooks/NotesBooks";
+import NotesSummarizer from "./pages/NotesSummarizer/NotesSummarizer";
+import JobsForYou from "./pages/Jobs/JobsForYou";
+import HelpSupport from "./pages/Support/HelpSupport";
+import Settings from "./pages/Settings/Settings";
+import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
+import FreeCourses from "./pages/FreeCourses/FreeCourses";
+import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import RevisionPlanner from "./pages/RevisionPlanner/RevisionPlanner";
 
 // Route-level code-splitting: each page is fetched only when its route is
 // visited, so heavy libraries (Monaco, PDF, syntax highlighter) stay out of
@@ -226,6 +246,16 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/revision-planner"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <RevisionPlanner />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/ai-insight"
                     element={
                       <PageTransition>
@@ -339,6 +369,16 @@ const App = () => {
                       <PageTransition>
                         <NotesBooks />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/notes-summarizer"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <NotesSummarizer />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route

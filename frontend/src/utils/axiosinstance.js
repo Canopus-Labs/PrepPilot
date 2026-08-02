@@ -8,6 +8,7 @@ const axiosInstance = axios.create({
     headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest", // required by backend CSRF header check on cookie-based auth routes
     },
 });
 
@@ -86,7 +87,10 @@ axiosInstance.interceptors.response.use(
                 const { data } = await axios.post(
                     `${BASE_URL}/api/auth/refresh`,
                     {},
-                    { withCredentials: true }
+                    {
+                        withCredentials: true,
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                    }
                 );
 
                 const newToken = data.accessToken;

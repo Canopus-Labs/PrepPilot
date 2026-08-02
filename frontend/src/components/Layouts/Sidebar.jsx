@@ -10,7 +10,7 @@ import {
   Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
   ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
-  Grid3x3, GraduationCap, Calculator, RotateCcw,
+  Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles,
 } from "lucide-react";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
@@ -115,6 +115,7 @@ const NAV_ITEMS = [
     isHeader: true,
     items: [
       { id: "notes-books-home", title: "Notes & Books", path: "/notes-books", icon: BookMarked },
+      { id: "notes-summarizer", title: "AI Notes Summarizer", path: "/notes-summarizer", icon: Sparkles },
     ],
   },
   {

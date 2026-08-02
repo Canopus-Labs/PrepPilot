@@ -6,7 +6,6 @@ const { protect } = require('../middlewares/authMiddleware');
 // POST /api/sheets/upload
 // Body: { filename: "file.json", data: {...sheet data...} }
 router.post('/upload', protect, async (req, res) => {
-  console.log('Received upload:', req.body.filename);
   const { filename, data } = req.body;
 
   if (!filename || !data) {
