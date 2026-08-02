@@ -282,6 +282,7 @@ export const useMemoryMatch = () => {
         }, 900);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, paused, cards, flippedIndices, moves, combo, difficulty, wrongMoves]);
 
   // ─── Victory Operations ──────────────────────────────────────────────────────
