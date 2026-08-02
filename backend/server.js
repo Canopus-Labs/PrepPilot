@@ -7,6 +7,8 @@ const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
+const logger = require("./utils/logger");
+const { errorHandler } = require("./middlewares/errorMiddleware");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -57,32 +59,43 @@ app.use((req, res, next) => {
     if (!global.__rejectedCors) global.__rejectedCors = new Set();
     if (!global.__rejectedCors.has(origin)) {
       global.__rejectedCors.add(origin);
-      console.warn("[CORS] Rejected origin:", origin);
+      logger.warn(`[CORS] Rejected origin: ${origin}`);
     }
     if (req.method === "OPTIONS") {
       return res.sendStatus(403);
+const corsOptions = {
+  origin: function (origin, callback) {
+    const renderPattern = /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot(?:-backend)?)-[a-z0-9-]+\.onrender\.com$/;
+    const localhostPattern = /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
+    
+    if (!origin || allowedOrigins.has(origin) || renderPattern.test(origin) || localhostPattern.test(origin)) {
+      callback(null, true);
+    } else {
+      if (!global.__rejectedCors) global.__rejectedCors = new Set();
+      if (!global.__rejectedCors.has(origin)) {
+        global.__rejectedCors.add(origin);
+        console.warn(`[CORS] Rejected origin: ${origin}`);
+      }
+      callback(new Error('Not allowed by CORS'));
     }
-  }
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, x-requested-with");
-    return res.sendStatus(200);
-  }
-  next();
-});
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 connectDB()
   .then((success) => {
     if (success) {
-      console.log("MongoDB connected successfully");
+      logger.info("MongoDB connected successfully");
     } else {
-      console.warn(
-        "⚠️ Failed to connect to MongoDB - server will run without database connection",
+      logger.warn(
+        "⚠️ Failed to connect to MongoDB - server will run without database connection"
       );
     }
   })
   .catch((err) => {
-    console.error("Database connection error:", err.message);
+    logger.error(`Database connection error: ${err.message}`);
   });
 
 // middleware
@@ -145,7 +158,10 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use("/uploads", protect, express.static(path.join(__dirname, "uploads"), {}));
+
+// Error handling middleware should be the last middleware before server start
+app.use(errorHandler);
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
@@ -162,25 +178,25 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server connected and running on port ${PORT}`);
+  logger.info(`Server connected and running on port ${PORT}`);
   if (process.env.NODE_ENV === "production") {
-    console.log("Allowed CORS origins (production):");
+    logger.info("Allowed CORS origins (production):");
   } else {
-    console.log("Allowed CORS origins (development):");
+    logger.info("Allowed CORS origins (development):");
   }
   for (const o of allowedOrigins) {
-    console.log("  -", o);
+    logger.info(`  - ${o}`);
   }
 });
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
-    console.error(
-      `Port ${PORT} is already in use. Please free the port or use a different one.`,
+    logger.error(
+      `Port ${PORT} is already in use. Please free the port or use a different one.`
     );
     process.exit(1);
   } else {
-    console.error("Server error:", err);
+    logger.error(`Server error: ${err}`);
   }
 });
 
@@ -194,6 +210,8 @@ process.on("uncaughtException", (err) => {
   } else {
     process.exit(1);
   }
+  logger.error(`Uncaught Exception: ${err}`);
+  process.exit(1);
 });
 
 // Handle unhandled promise rejections
@@ -206,4 +224,6 @@ process.on("unhandledRejection", (reason, promise) => {
   } else {
     process.exit(1);
   }
+  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+  process.exit(1);
 });

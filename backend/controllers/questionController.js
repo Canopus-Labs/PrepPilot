@@ -52,6 +52,9 @@ const addQuestionToSession = async (req, res) => {
     await session.save();
     res.status(201).json(createdQuestions);
   } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(404).json({ success: false, message: "Requested session could not be found" });
+    }
     console.error("Add question error:", error);
     res.status(500).json({ success: false, message: "Internal server error occurred" });
   }
