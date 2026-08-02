@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { usePatternMatrix, DIFFICULTY_CONFIGS } from "../hooks/usePatternMatrix";
 import { setMatrixAudioMuted, getMatrixAudioMuted } from "../utils/matrixAudio";
 import {
