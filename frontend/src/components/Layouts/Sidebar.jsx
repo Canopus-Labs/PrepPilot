@@ -144,7 +144,7 @@ const Sidebar = () => {
     user?.email?.charAt(0)?.toUpperCase() || "U";
 
   const handleLogout = async () => {
-    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch {}
+    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch (err) { /* ignore */ }
     finally {
       localStorage.clear(); sessionStorage.clear();
       clearUser(); navigate("/");

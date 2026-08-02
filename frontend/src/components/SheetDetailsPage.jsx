@@ -114,7 +114,7 @@ function SheetDetail() {
               setFollowed(progressData.followed || false);
               setCompletedTopics(progressData.completedTopics || {});
             }
-          } catch {}
+          } catch (err) { /* ignore parse error */ }
         }
 
         setLoading(false);
