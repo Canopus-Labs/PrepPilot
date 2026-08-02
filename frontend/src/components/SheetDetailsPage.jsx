@@ -93,6 +93,11 @@ function SheetDetail() {
   const [completedTopics, setCompletedTopics] = useState({});
   const [followed, setFollowed] = useState(false);
 
+  const ctxProgressRef = React.useRef(ctxProgress);
+  useEffect(() => {
+    ctxProgressRef.current = ctxProgress;
+  }, [ctxProgress]);
+
   useEffect(() => {
     fetch(`${BASE_URL}/api/sheets/${id}`)
       .then((res) => res.json())
@@ -100,7 +105,7 @@ function SheetDetail() {
         setSheet(data.sheet);
 
         // 1. Try backend (UserContext) — available immediately after login, works cross-device
-        const backendRecord = (ctxProgress || []).find(p => p.sheetId === id);
+        const backendRecord = (ctxProgressRef.current || []).find(p => p.sheetId === id);
 
         if (backendRecord) {
           setFollowed(backendRecord.followed || false);
@@ -114,13 +119,18 @@ function SheetDetail() {
               setFollowed(progressData.followed || false);
               setCompletedTopics(progressData.completedTopics || {});
             }
-          } catch {}
+          } catch (err) {
+            console.error("Failed to parse sheet progress from localStorage:", err);
+          }
         }
 
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      .catch((err) => {
+        console.error("Failed to fetch sheet details:", err);
+        toast.error("Failed to load sheet details. Please try again.");
+        setLoading(false);
+      });
   }, [id]);
 
   const totalSubtopics =
@@ -159,7 +169,7 @@ function SheetDetail() {
       }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
-  }, [completedTopics, followed]);
+  }, [completedTopics, followed, totalSubtopics, completedCount, id, refreshSheetProgress]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;
