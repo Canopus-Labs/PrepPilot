@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const logger = require("./utils/logger");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -55,7 +56,7 @@ app.use((req, res, next) => {
     if (!global.__rejectedCors) global.__rejectedCors = new Set();
     if (!global.__rejectedCors.has(origin)) {
       global.__rejectedCors.add(origin);
-      console.warn("[CORS] Rejected origin:", origin);
+      logger.warn(`[CORS] Rejected origin: ${origin}`);
     }
     if (req.method === "OPTIONS") {
       return res.sendStatus(403);
@@ -72,15 +73,15 @@ app.use((req, res, next) => {
 connectDB()
   .then((success) => {
     if (success) {
-      console.log("MongoDB connected successfully");
+      logger.info("MongoDB connected successfully");
     } else {
-      console.warn(
-        "⚠️ Failed to connect to MongoDB - server will run without database connection",
+      logger.warn(
+        "⚠️ Failed to connect to MongoDB - server will run without database connection"
       );
     }
   })
   .catch((err) => {
-    console.error("Database connection error:", err.message);
+    logger.error(`Database connection error: ${err.message}`);
   });
 
 // middleware
@@ -159,36 +160,36 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server connected and running on port ${PORT}`);
+  logger.info(`Server connected and running on port ${PORT}`);
   if (process.env.NODE_ENV === "production") {
-    console.log("Allowed CORS origins (production):");
+    logger.info("Allowed CORS origins (production):");
   } else {
-    console.log("Allowed CORS origins (development):");
+    logger.info("Allowed CORS origins (development):");
   }
   for (const o of allowedOrigins) {
-    console.log("  -", o);
+    logger.info(`  - ${o}`);
   }
 });
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
-    console.error(
-      `Port ${PORT} is already in use. Please free the port or use a different one.`,
+    logger.error(
+      `Port ${PORT} is already in use. Please free the port or use a different one.`
     );
     process.exit(1);
   } else {
-    console.error("Server error:", err);
+    logger.error(`Server error: ${err}`);
   }
 });
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
+  logger.error(`Uncaught Exception: ${err}`);
   process.exit(1);
 });
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
   process.exit(1);
 });
