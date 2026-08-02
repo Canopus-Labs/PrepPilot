@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const { errorHandler } = require("./middlewares/errorMiddleware");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -131,6 +132,9 @@ app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+
+// Error handling middleware should be the last middleware before server start
+app.use(errorHandler);
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
