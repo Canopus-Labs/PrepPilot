@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
 const logger = require("./utils/logger");
 const { errorHandler } = require("./middlewares/errorMiddleware");
 const {
@@ -26,6 +27,7 @@ const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securit
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(helmet());
 app.use(generalHeaders); 
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
@@ -99,6 +101,7 @@ connectDB()
 // middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use(generalLimiter); // Apply rate limiter globally
 
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
