@@ -55,6 +55,7 @@ const Dashboard = () => {
 
   <div>
     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
       Your Interview Sessions
     </h1>
 
@@ -71,6 +72,31 @@ const Dashboard = () => {
   </button>
 
 </div>
+    onClick={() => navigate("/daily-challenge")}
+    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+  >
+    🔥 Daily Challenge
+  </button>
+
+</div>
+          <div className="flex items-center justify-between mb-8 md:mb-10">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                Your Interview Sessions
+              </h1>
+
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                Manage, review, and dynamically create your AI-driven mock interview sessions.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/analytics")}
+              className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition"
+            >
+              View Analytics
+            </button>
+          </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
               Your Interview Sessions
             </h1>
