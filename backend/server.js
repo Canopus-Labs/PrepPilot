@@ -36,38 +36,26 @@ const originEnvList = [
 
 const allowedOrigins = new Set(originEnvList);
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  const renderPattern =
-    /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot(?:-backend)?)-[a-z0-9-]+\.onrender\.com$/;
-  const localhostPattern =
-    /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
-  if (
-    origin &&
-    (allowedOrigins.has(origin) ||
-      renderPattern.test(origin) ||
-      localhostPattern.test(origin))
-  ) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Vary", "Origin");
-    res.header("Access-Control-Allow-Credentials", "true");
-  } else if (origin) {
-    if (!global.__rejectedCors) global.__rejectedCors = new Set();
-    if (!global.__rejectedCors.has(origin)) {
-      global.__rejectedCors.add(origin);
-      console.warn("[CORS] Rejected origin:", origin);
+const corsOptions = {
+  origin: function (origin, callback) {
+    const renderPattern = /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot(?:-backend)?)-[a-z0-9-]+\.onrender\.com$/;
+    const localhostPattern = /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
+    
+    if (!origin || allowedOrigins.has(origin) || renderPattern.test(origin) || localhostPattern.test(origin)) {
+      callback(null, true);
+    } else {
+      if (!global.__rejectedCors) global.__rejectedCors = new Set();
+      if (!global.__rejectedCors.has(origin)) {
+        global.__rejectedCors.add(origin);
+        console.warn(`[CORS] Rejected origin: ${origin}`);
+      }
+      callback(new Error('Not allowed by CORS'));
     }
-    if (req.method === "OPTIONS") {
-      return res.sendStatus(403);
-    }
-  }
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, x-requested-with");
-    return res.sendStatus(200);
-  }
-  next();
-});
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 connectDB()
   .then((success) => {
