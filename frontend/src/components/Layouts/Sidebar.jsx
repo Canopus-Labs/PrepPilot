@@ -10,7 +10,7 @@ import {
   Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
   ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
-  Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles,
+  Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
 } from "lucide-react";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
@@ -76,6 +76,7 @@ const NAV_ITEMS = [
     isHeader: true,
     items: [
       { id: "project-ideas", title: "Project Ideas", path: "/project-ideas", icon: Lightbulb },
+      { id: "project-roadmap", title: "Roadmap Assistant", path: "/project-roadmap", icon: Map },
     ],
   },
   {
