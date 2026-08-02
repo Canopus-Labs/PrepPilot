@@ -51,7 +51,24 @@ const Dashboard = () => {
     <>
       <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white md:px-10 relative overflow-hidden transition-colors duration-300">
         <div className="container mx-auto pt-8 pb-16 px-4 md:px-0 relative z-10">
-          <div className="mb-8 md:mb-10">
+          <div className="flex items-center justify-between mb-8 md:mb-10">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                Your Interview Sessions
+              </h1>
+
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                Manage, review, and dynamically create your AI-driven mock interview sessions.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/analytics")}
+              className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition"
+            >
+              View Analytics
+            </button>
+          </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
               Your Interview Sessions
             </h1>

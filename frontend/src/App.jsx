@@ -44,6 +44,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -207,6 +208,16 @@ const App = () => {
                       <PageTransition>
                         <Dashboard />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Analytics />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
