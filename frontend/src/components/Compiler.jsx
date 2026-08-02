@@ -45,7 +45,7 @@ int main() {
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
-            language_id: parseInt(language),
+            language_id: parseInt(language, 10),
             source_code: code,
             stdin: "",
           }),

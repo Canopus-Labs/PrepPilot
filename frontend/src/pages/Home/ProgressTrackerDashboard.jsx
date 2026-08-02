@@ -201,7 +201,7 @@ const ProgressTrackerDashboard = () => {
             {/* Avatar */}
             <div className="relative">
               {user?.profileImageUrl ? (
-                <img src={user.profileImageUrl} alt="avatar"
+                <img src={user.profileImageUrl} alt="User profile avatar"
                   className="w-20 h-20 rounded-full object-cover ring-2 ring-violet-500/30" />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-3xl font-bold text-white">
