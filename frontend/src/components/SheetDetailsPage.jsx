@@ -159,7 +159,7 @@ function SheetDetail() {
       }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
-  }, [completedTopics, followed]);
+  }, [completedTopics, followed, completedCount, id, refreshSheetProgress, totalSubtopics]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;
