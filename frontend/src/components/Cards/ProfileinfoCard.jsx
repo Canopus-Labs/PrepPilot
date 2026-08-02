@@ -33,7 +33,7 @@ const ProfileinfoCard = () => {
       ) : (
         <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white 
                         bg-gradient-to-r from-indigo-500 to-purple-500">
-          {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+          {user.name ? user.name[0].toUpperCase() : "U"}
         </div>
       )}
 
