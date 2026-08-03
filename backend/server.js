@@ -21,10 +21,12 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const behavioralRoutes = require("./routes/behavioralRoutes");
 const app = express();
 
 app.set("trust proxy", 1);
 app.use(generalHeaders); 
+app.use("/api/behavioral", behavioralRoutes);
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
