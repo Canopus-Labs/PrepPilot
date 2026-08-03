@@ -2,6 +2,12 @@ require("dotenv").config();
 const validateEnv = require("./config/validateEnv.js");
 validateEnv();
 const express = require("express");
+
+// Global unhandled promise rejection handler
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Promise Rejection:", err);
+  // Optional: in production, you might want to gracefully shutdown or alert monitoring here
+});
 const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/db");
