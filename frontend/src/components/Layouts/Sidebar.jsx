@@ -11,6 +11,7 @@ import {
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
   ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
   Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
+  ClipboardList,
 } from "lucide-react";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
@@ -58,6 +59,7 @@ const NAV_ITEMS = [
       { id: "spaced-repetition",     title: "Spaced Repetition",     path: "/spaced-repetition",      icon: RotateCcw },
       { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
       { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
+      { id: "star-builder",           title: "STAR Answer Builder",    path: "/star-builder",          icon: ClipboardList },
     ],
   },
   {

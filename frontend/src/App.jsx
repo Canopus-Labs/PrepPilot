@@ -48,6 +48,7 @@ import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage"
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
+import StarBuilder from "./pages/StarBuilder/StarBuilder";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -328,6 +329,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <InterviewExperiences />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/star-builder"
+                    element={
+                      <PageTransition>
+                        <StarBuilder />
                       </PageTransition>
                     }
                   />
