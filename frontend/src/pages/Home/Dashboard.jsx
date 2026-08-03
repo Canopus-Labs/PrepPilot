@@ -88,6 +88,18 @@ const Dashboard = () => {
                 Manage, review, and dynamically create your AI-driven mock interview sessions.
               </p>
             </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/analytics")}
+                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition"
+              >
+                View Analytics
+              </button>
+              <button
+                onClick={() => navigate("/daily-challenge")}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                🔥 Daily Challenge
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => navigate("/daily-challenge")}
