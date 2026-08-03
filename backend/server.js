@@ -162,7 +162,7 @@ app.get("/api/test", (req, res) => {
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
   refreshJobCache();
-  clearInterval(window.__interval); window.__interval = setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
+  setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
 
 // Start Server
