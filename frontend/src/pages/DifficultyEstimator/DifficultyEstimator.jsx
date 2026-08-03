@@ -101,9 +101,9 @@ const DifficultyEstimator = () => {
           </button>
 
         </div>
-                {result && (
-
-          <div className="space-y-8">
+        {result && (
+          <>
+            <div className="space-y-8">
 
             {/* Main Analysis */}
 
@@ -394,8 +394,8 @@ const DifficultyEstimator = () => {
               </div>
 
             </div>
-
           </div>
+        </>
         )}
 
       </div>

@@ -1,14 +1,6 @@
-import React, { useState } from "react";
-import {
-  Calendar,
-  User,
-  FileText,
-  Code2,
-  Brain,
-  Trophy,
-  Flame,
-  Filter,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const MilestoneTimeline = () => {
 

@@ -1,8 +1,6 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../../context/userContext";
-import AptitudeQuestionCard from "../../../components/Cards/AptitudeQuestionCard";
-import Loader from "../../../components/Loader/Loader";
 
 import axiosInstance from "../../../utils/axiosinstance";
 import { API_PATHS } from "../../../utils/apiPaths";

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target } from "lucide-react";
+import { useState, useEffect } from "react";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 

@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  LuChevronDown,
   LuFileText,
   LuUser,
   LuTriangleAlert,
   LuShield,
   LuGlobe,
 } from "react-icons/lu";
-import { Link } from "react-router-dom";
-import { LuArrowLeft } from "react-icons/lu"; 
 const sectionsData = [
   { id: "intro",        title: "Introduction",          icon: LuFileText      },
   { id: "acceptance",  title: "Acceptance of Terms",    icon: LuUser          },

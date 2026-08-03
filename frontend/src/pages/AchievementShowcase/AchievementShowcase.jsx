@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  Trophy,
-  Medal,
-  Star,
-  Award,
-  User,
-  Share2,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const AchievementShowcase = () => {
 

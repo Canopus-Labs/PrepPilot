@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 const AptitudeQuestionCard = ({ question, options, answer }) => {
   const [isExpanded, setIsExpanded] = useState(false);

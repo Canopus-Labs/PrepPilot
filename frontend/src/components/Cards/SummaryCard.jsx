@@ -1,5 +1,3 @@
-import React from "react";
-import { Trash } from "lucide-react";
 import { getInitials } from "../../utils/helper";
 
 const SummaryCard = ({

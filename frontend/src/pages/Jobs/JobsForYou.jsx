@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
-import { Briefcase, MapPin, DollarSign, ExternalLink, RefreshCw } from "lucide-react";
+import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";

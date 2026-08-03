@@ -1,8 +1,5 @@
-import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-import { FiTrendingUp, FiBookOpen } from "react-icons/fi";
-import { FiHelpCircle, FiUsers, FiAlertCircle, FiRefreshCw } from "react-icons/fi";
 import { BASE_URL } from "../utils/apiPaths";
 
 function SheetList({ type }) {

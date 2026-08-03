@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const SERVICES = [
   { title: "Role-Based Preparation", description: "Curated questions tailored to your job role" },

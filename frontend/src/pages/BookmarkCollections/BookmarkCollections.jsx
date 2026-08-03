@@ -1,14 +1,6 @@
-import React, { useMemo, useState } from "react";
-import {
-  Bookmark,
-  Folder,
-  Search,
-  Plus,
-  Filter,
-  Download,
-  Share2,
-  StickyNote,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+
+
 
 const BookmarkCollections = () => {
   const [search, setSearch] = useState("");

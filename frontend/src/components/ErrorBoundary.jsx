@@ -1,5 +1,4 @@
-import React, { Component } from "react";
-import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from "lucide-react";
+import { Component } from "react";
 
 class ErrorBoundary extends Component {
   constructor(props) {

@@ -2,7 +2,6 @@
 
 
 
-import { LuSparkles } from "react-icons/lu";
 
 export default function SkillAssessmentComingSoon() {
   return (

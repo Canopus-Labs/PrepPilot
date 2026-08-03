@@ -1,14 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  BookMarked,
-  BookOpen,
-  Download,
-  FolderOpen,
-  RefreshCw,
-  Search,
-  FileText,
-  XCircle,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+
 import { BASE_URL } from "../../utils/apiPaths";
 
 const NotesBooks = () => {

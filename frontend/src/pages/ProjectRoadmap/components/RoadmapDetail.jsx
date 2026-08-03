@@ -1,25 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  ArrowLeft,
   Layers,
   Palette,
   ListChecks,
   Database,
   Rocket,
   ClipboardCheck,
-  ChevronDown,
-  ChevronRight,
-  RefreshCw,
-  Download,
-  FileDown,
-  Trash2,
-  Kanban,
-  Rows3,
-  Pencil,
-  Check,
-  X,
-  StickyNote,
-  Loader2,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────

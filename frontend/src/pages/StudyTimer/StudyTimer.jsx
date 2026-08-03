@@ -1,12 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {
-  Timer,
-  Play,
-  Pause,
-  RotateCcw,
-  Coffee,
-  Brain,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+
+
 
 const StudyTimer = () => {
   const modes = {

@@ -1,14 +1,6 @@
-import React, { useMemo, useState } from "react";
-import {
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  BookOpen,
-  Target,
-  Briefcase,
-  Download,
-  TrendingUp,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+
+
 
 const PreparationCalendar = () => {
   const today = new Date();

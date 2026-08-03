@@ -1,7 +1,4 @@
-import React from "react";
-import Sidebar from "./Sidebar";
 import { useLocation } from "react-router-dom";
-import ErrorBoundary from "../ErrorBoundary";
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
