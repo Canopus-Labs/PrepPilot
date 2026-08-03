@@ -154,9 +154,9 @@ const ProgressTrackerDashboard = () => {
                 followed: true,
                 completedTopics: raw.completedTopics || {},
                 percentage: raw.percentage || 0,
-              }).catch(() => {});
+              }).catch((err) => { /* ignore */ });
             }
-          } catch {}
+          } catch (err) { /* ignore */ }
         }
 
         const merged = [...backendProgress, ...localExtra]

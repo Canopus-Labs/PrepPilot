@@ -5,6 +5,8 @@ const nodemailer = require("nodemailer");
  * Supports "gmail", "ethereal", or any custom SMTP provider.
  * Set EMAIL_SERVICE in .env to switch between providers.
  */
+
+
 const createTransporter = () => {
     const service = process.env.EMAIL_SERVICE?.toLowerCase();
 

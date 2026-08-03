@@ -50,6 +50,7 @@ const getUserRoadmaps = async (req, res) => {
     const userId = req.user._id;
     const roadmaps = await RoadmapProject.find({ userId })
       .sort({ updatedAt: -1 })
+      .limit(50)
       .select(
         "projectIdea overview progressPercent status milestones testingChecklist createdAt updatedAt lastStep"
       );

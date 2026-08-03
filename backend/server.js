@@ -23,6 +23,7 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
 app.set("trust proxy", 1);
@@ -40,15 +41,15 @@ const allowedOrigins = new Set(originEnvList);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const renderPattern =
-    /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot(?:-backend)?)-[a-z0-9-]+\.onrender\.com$/;
+  // Exact-origin allowlist only (FRONTEND_ORIGIN / EXTRA_ORIGINS, plus
+  // localhost in dev). No regex wildcard matching of third-party-registrable
+  // domains like *.onrender.com — anyone can register an attacker subdomain
+  // that would otherwise be granted credentialed CORS access.
   const localhostPattern =
     /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
   if (
     origin &&
-    (allowedOrigins.has(origin) ||
-      renderPattern.test(origin) ||
-      localhostPattern.test(origin))
+    (allowedOrigins.has(origin) || localhostPattern.test(origin))
   ) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Vary", "Origin");
@@ -156,7 +157,7 @@ app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
 app.use("/api/question", generalLimiter, questionRoutes);
 app.use("/api", aiRoutes);
-app.use("/api/questions", generalLimiter, aptitudeQuestionsRoutes);
+app.use("/api/questions", generalLimiter, protect, aptitudeQuestionsRoutes);
 const sheetJsonUpload = require("./routes/sheetJsonUpload");
 app.use("/api/sheets", generalLimiter, sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
@@ -206,7 +207,12 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: uploadsStaticHeaders,
+  })
+);
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {

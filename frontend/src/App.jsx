@@ -149,7 +149,9 @@ const App = () => {
                 <Route
                   element={
                     <MainLayout>
-                      <Outlet />
+                      <ErrorBoundary>
+                        <Outlet />
+                      </ErrorBoundary>
                     </MainLayout>
                   }
                 >
