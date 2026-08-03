@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import moment from "moment";
 import {
   Github, Linkedin, Twitter, Globe, GraduationCap,
   MapPin, BookOpen, Video, FileText, ArrowRight,
   CheckCircle, PlusCircle, Settings, Code2, Star,
+  Download, Upload, DatabaseBackup, Check, X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { UserContext } from "../../context/userContext";
@@ -108,6 +109,10 @@ const ProgressTrackerDashboard = () => {
   const [resumes, setResumes] = useState([]);
   const [sheetProgress, setSheetProgress] = useState([]);
   const [sheetsMap, setSheetsMap] = useState({});
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [importing, setImporting] = useState(false);
+  const [importPreview, setImportPreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -164,13 +169,72 @@ const ProgressTrackerDashboard = () => {
           .sort((a, b) => b.percentage - a.percentage);
 
         setSheetProgress(merged);
+} catch {
+          toast.error("Failed to load dashboard data.");
+        } finally {
+          setLoading(false);
+        }
+      })();
+    }, [refreshKey]);
+
+  const handleExport = async () => {
+    try {
+      const res = await axiosInstance.get("/api/user/sheet-progress/export", {
+        responseType: "blob",
+      });
+      const blob = new Blob([res.data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sheet-progress-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Progress backup downloaded");
+    } catch (err) {
+      toast.error("Export failed");
+    }
+  };
+
+  const handleImportFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        const items = json.items || (Array.isArray(json) ? json : []);
+        setImportPreview(items.length);
+        setImporting(true);
       } catch {
-        toast.error("Failed to load dashboard data.");
-      } finally {
-        setLoading(false);
+        toast.error("Invalid JSON file");
       }
-    })();
-  }, []);
+    };
+    reader.readAsText(file);
+  };
+
+  const confirmImport = async () => {
+    if (!importPreview) return;
+    setImporting(false);
+    setImportPreview(null);
+    try {
+      const res = await axiosInstance.post("/api/user/sheet-progress/import", {
+        items: importPreview,
+      });
+      toast.success(
+        `Imported ${res.data.imported} sheets (${res.data.created} new, ${res.data.updated} updated)`
+      );
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      toast.error("Import failed");
+    } finally {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const cancelImport = () => {
+    setImporting(false);
+    setImportPreview(null);
+    fileInputRef.current.value = "";
+  };
 
   if (loading) {
     return (
@@ -379,9 +443,62 @@ const ProgressTrackerDashboard = () => {
               <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
                 <CheckCircle size={15} className="text-emerald-400" /> Sheet Progress
               </h2>
-              <button onClick={() => navigate("/coding-sheets")}
-                className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">+ Add</button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExport}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Export progress backup"
+                >
+                  <Download size={12} />
+                  <span className="hidden sm:inline">Export</span>
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Import progress backup"
+                >
+                  <Upload size={12} />
+                  <span className="hidden sm:inline">Import</span>
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={(e) => handleImportFile(e.target.files[0])}
+                />
+                <button onClick={() => navigate("/coding-sheets")}
+                  className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">+ Add</button>
+              </div>
             </div>
+            {importing && importPreview !== null && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 w-full max-w-md shadow-xl">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    Import progress backup
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    This will merge <strong>{importPreview}</strong> sheet records
+                    into your account. Existing sheets with the same ID will be
+                    updated; new ones will be created.
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={cancelImport}
+                      className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={confirmImport}
+                      className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
+                    >
+                      Confirm import
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {sheetProgress.length > 0 ? (
               <div className="space-y-3.5">
                 {sheetProgress.slice(0, 5).map(p => (
