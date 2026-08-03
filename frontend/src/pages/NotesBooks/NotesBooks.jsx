@@ -18,6 +18,9 @@ const NotesBooks = () => {
   const [warnings, setWarnings] = useState([]);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchResults, setSearchResults] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   const fetchBooks = async () => {
     try {
@@ -50,6 +53,67 @@ const NotesBooks = () => {
       clearTimeout(handler);
     };
   }, [query]);
+
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (trimmed.length < 2) {
+      setSearchResults(null);
+      setSearchLoading(false);
+      setSearchError(null);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    setSearchLoading(true);
+    setSearchError(null);
+
+    const url = `${BASE_URL}/api/books/search?q=${encodeURIComponent(
+      trimmed
+    )}&limit=24`;
+
+    fetch(url, { signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.message || "Book search failed");
+        }
+        return res.json();
+      })
+      .then((data) => setSearchResults(data))
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          setSearchError(err.message || "Book search failed");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSearchLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [debouncedQuery]);
+
+  const searchActive = debouncedQuery.trim().length >= 2;
+
+  const groupedSearchResults = useMemo(() => {
+    if (!searchResults || !Array.isArray(searchResults.items)) {
+      return [];
+    }
+    const map = new Map();
+    searchResults.items.forEach((item) => {
+      if (!map.has(item.category)) map.set(item.category, []);
+      map.get(item.category).push(item);
+    });
+    return Array.from(map.entries());
+  }, [searchResults]);
+
+  const formatFileSize = (bytes) => {
+    if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes <= 0) {
+      return "—";
+    }
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   const filteredCategories = useMemo(() => {
     const normalize = (value) =>
@@ -86,7 +150,7 @@ const NotesBooks = () => {
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search categories"
+                  placeholder="Search book titles & categories"
                   className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-violet-400/70"
                 />
               </div>
@@ -121,7 +185,7 @@ const NotesBooks = () => {
             </div>
             <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <Search size={16} />
-              <span>Search by category title</span>
+              <span>Search across the whole book library</span>
             </div>
           </div>
         </div>
@@ -155,7 +219,90 @@ const NotesBooks = () => {
           </div>
         )}
 
-        {loading ? (
+        {searchActive ? (
+          searchError ? (
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-200">
+              <XCircle size={18} />
+              <div>
+                <p className="font-semibold">Search unavailable</p>
+                <p className="text-sm">{searchError}</p>
+              </div>
+            </div>
+          ) : !searchResults || searchLoading ? (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((n) => (
+                <div
+                  key={n}
+                  className="animate-pulse bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-5 h-36"
+                />
+              ))}
+            </div>
+          ) : searchResults.items.length === 0 ? (
+            <div className="text-center py-16 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
+              <p className="text-lg font-semibold">No books match</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Nothing matched &ldquo;{debouncedQuery.trim()}&rdquo;. Try a
+                shorter keyword.
+              </p>
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="mt-4 px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium transition-colors"
+              >
+                Clear search
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {searchResults.totalItems} match
+                {searchResults.totalItems === 1 ? "" : "es"} for &ldquo;
+                {debouncedQuery.trim()}&rdquo;
+              </p>
+              {groupedSearchResults.map(([category, items]) => (
+                <div key={category}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <FolderOpen size={15} className="text-violet-500" />
+                    <h2 className="text-sm font-semibold capitalize">
+                      {category}
+                    </h2>
+                    <span className="text-xs text-gray-400">
+                      ({items.length})
+                    </span>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {items.map((item) => (
+                      <div
+                        key={item.path}
+                        className="flex items-center gap-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-3"
+                      >
+                        <div className="w-9 h-9 shrink-0 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center">
+                          <FileText size={16} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            {formatFileSize(item.size)}
+                          </p>
+                        </div>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-500 hover:bg-violet-500/20 text-xs font-medium transition-colors"
+                        >
+                          <Download size={13} /> Open
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : loading ? (
           <div className="grid sm:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((n) => (
               <div

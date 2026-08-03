@@ -130,6 +130,97 @@ async function listFilesRecursive(prefix, page, limit) {
 }
 
 /**
+ * Score a book file against lower-cased query tokens.
+ * Higher is a better match; 0 means no match.
+ * @param {string} name file name including extension
+ * @param {string} category first path segment (category directory)
+ * @param {string[]} tokens lower-cased query tokens
+ * @returns {number}
+ */
+function scoreBookMatch(name, category, tokens) {
+  const fullQuery = tokens.join(" ");
+  const normalizedName = name.toLowerCase();
+
+  if (normalizedName === fullQuery) return 100;
+  if (normalizedName.startsWith(fullQuery)) return 80;
+  if (normalizedName.includes(fullQuery)) return 60;
+
+  let score = 0;
+  for (const token of tokens) {
+    if (normalizedName.includes(token)) score += 10;
+  }
+  if (category && category.toLowerCase().includes(fullQuery)) score += 5;
+  return score;
+}
+
+/**
+ * Search every book in the GitHub mirror repo (from the cached git tree)
+ * and return ranked, paginated matches.
+ * @param {object} options
+ * @param {string} options.q search query
+ * @param {string} [options.category] optional category prefix filter
+ * @param {number} [options.page] 1-based page number
+ * @param {number} [options.limit] page size, capped at 50
+ * @returns {Promise<object>} paginated ranked results
+ */
+async function searchBooks({ q = "", category = "", page, limit }) {
+  const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const requestedPage = Number.isFinite(page) && page >= 1 ? page : 1;
+  const itemsPerPage =
+    Number.isFinite(limit) && limit >= 1 ? Math.min(limit, 50) : 20;
+  const categoryFilter = category.trim().toLowerCase();
+
+  let tree = cachedGitTree;
+  if (!tree) {
+    tree = await getGitTree();
+  }
+
+  if (!tree || !Array.isArray(tree)) {
+    throw new Error("Git tree unavailable for search");
+  }
+
+  const scored = [];
+  for (const entry of tree) {
+    if (entry.type !== "blob") continue;
+    const path = entry.path || "";
+    const segments = path.split("/");
+    const cat = segments.length > 1 ? segments[0] : "";
+    const name = segments.pop() || "";
+
+    if (categoryFilter && cat.toLowerCase() !== categoryFilter) continue;
+
+    const score = scoreBookMatch(name, cat, tokens);
+    if (score <= 0) continue;
+
+    scored.push({
+      path,
+      name,
+      category: cat,
+      size: entry.size,
+      url: buildRawUrl(path),
+      score,
+    });
+  }
+
+  scored.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+
+  const totalItems = scored.length;
+  const startIndex = (requestedPage - 1) * itemsPerPage;
+  const endIndex = requestedPage * itemsPerPage;
+
+  return {
+    query: q.trim(),
+    totalItems,
+    items: scored.slice(startIndex, endIndex),
+    currentPage: requestedPage,
+    pageSize: itemsPerPage,
+    totalPages: Math.max(1, Math.ceil(totalItems / itemsPerPage)),
+    hasNextPage: requestedPage * itemsPerPage < totalItems,
+    hasPreviousPage: requestedPage > 1,
+  };
+}
+
+/**
  * List programming book categories and files sourced from the GitHub repository.
  * @route GET /api/books/
  * @query page optional page number, default 1
@@ -229,6 +320,39 @@ router.get("/", async (_req, res) => {
 });
 
 /**
+ * Search books by title across every category.
+ * @route GET /api/books/search
+ * @query q required, at least 2 characters
+ * @query category optional category prefix filter
+ * @query page optional page number, default 1
+ * @query limit optional page size (max 50), default 20
+ * @example
+ * GET /api/books/search?q=algorithms&limit=10
+ */
+router.get("/search", async (req, res) => {
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  if (q.length < 2) {
+    return res
+      .status(400)
+      .json({ message: "Search query 'q' must be at least 2 characters" });
+  }
+
+  const page = Number.parseInt(req.query.page, 10);
+  const limit = Number.parseInt(req.query.limit, 10);
+  const category = typeof req.query.category === "string" ? req.query.category : "";
+
+  try {
+    const result = await searchBooks({ q, category, page, limit });
+    res.json(result);
+  } catch (err) {
+    console.error("[books] Search failed:", err.message);
+    res
+      .status(503)
+      .json({ message: "Book search is temporarily unavailable." });
+  }
+});
+
+/**
  * Redirect to a GitHub raw file URL for direct download.
  * @route GET /api/books/download
  * @param {import('express').Request} req
@@ -266,3 +390,5 @@ router.get("/download", (req, res) => {
 
 module.exports = router;
 module.exports.listFilesRecursive = listFilesRecursive;
+module.exports.scoreBookMatch = scoreBookMatch;
+module.exports.searchBooks = searchBooks;
