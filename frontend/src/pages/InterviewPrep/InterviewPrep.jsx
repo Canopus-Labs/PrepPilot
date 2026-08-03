@@ -40,7 +40,7 @@ const InterviewPrep = () => {
   };
 
   // fetch session data
-  const fetchSessionDetailsById = async () => {
+  const fetchSessionDetailsById = React.useCallback(async () => {
     try {
       const response = await axiosInstance.get(
         API_PATHS.SESSION.GET_ONE(sessionId)
@@ -51,7 +51,7 @@ const InterviewPrep = () => {
     } catch (error) {
       console.error("Error", error);
     }
-  };
+  }, [sessionId]);
 
   // generate explanation
   const generateConceptExplanation = async (question) => {
@@ -126,8 +126,7 @@ const InterviewPrep = () => {
 
   useEffect(() => {
     if (sessionId) fetchSessionDetailsById();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, fetchSessionDetailsById]);
 
   return (
     <DashboardLayout>

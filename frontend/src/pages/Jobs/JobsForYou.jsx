@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Briefcase, MapPin, DollarSign, ExternalLink, RefreshCw } from "lucide-react";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
@@ -59,15 +59,15 @@ const JobCard = ({ job }) => (
 );
 
 const JobsForYou = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const [jobs, setJobs]       = useState([]);
   const [role, setRole]       = useState("");
   const [country, setCountry] = useState("in");
   const [loading, setLoading] = useState(true);
   const [customRole, setCustomRole] = useState("");
   const [searchError, setSearchError] = useState("");
-
-  const fetchJobs = async (selectedCountry, overrideRole = "") => {
+  
+  const fetchJobs = useCallback(async (selectedCountry, overrideRole = "") => {
     setLoading(true);
     try {
       const params = { country: selectedCountry };
@@ -81,16 +81,19 @@ const JobsForYou = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const customRoleRef = React.useRef(customRole);
+  useEffect(() => {
+    customRoleRef.current = customRole;
+  }, [customRole]);
 
   useEffect(() => {
-    fetchJobs(country);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    fetchJobs(country, customRoleRef.current);
+  }, [country, fetchJobs]);
 
   const handleCountryChange = (e) => {
     setCountry(e.target.value);
-    fetchJobs(e.target.value, customRole);
   };
 
   const handleSearch = (e) => {

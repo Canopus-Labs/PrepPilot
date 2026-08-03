@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import Login from "./Login";
 import SignUp from "./SignUp";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 
 /**
  * Unified auth page that toggles between Login and SignUp.
@@ -11,7 +11,7 @@ import { UserContext } from "../../context/userContext";
  */
 const AuthPage = () => {
   const [page, setPage] = useState("login");
-  const { user, loading } = useContext(UserContext);
+  const { user, loading } = useUser();
   const navigate = useNavigate();
 
   // Already logged in → go to dashboard

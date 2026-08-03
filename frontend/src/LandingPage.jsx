@@ -14,7 +14,7 @@ import Modal from "./components/Loader/Modal";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgotPassword from "./pages/Auth/ForgotPAssword";
-import { UserContext } from "./context/userContext";
+import { useUser } from "./context/userContext";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
@@ -234,7 +234,7 @@ const TestimonialCard = ({ testimonial }) => (
    Main Component
 ───────────────────────────────────────────── */
 const LandingPage = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const navigate = useNavigate();
 
   const [openAuthModal, setOpenAuthModal] = useState(false);

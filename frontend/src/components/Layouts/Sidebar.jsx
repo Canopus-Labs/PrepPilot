@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
 import axiosInstance from "../../utils/axiosinstance";
@@ -131,7 +131,7 @@ const NAV_ITEMS = [
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 const Sidebar = () => {
-  const { user, clearUser } = useContext(UserContext);
+  const { user, clearUser } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
 
