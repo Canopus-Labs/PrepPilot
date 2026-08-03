@@ -1,6 +1,7 @@
 const requiredEnvVars = Object.freeze([
   "MONGO_URI",
   "JWT_SECRET",
+  "CSRF_SESSION_SECRET",
   "GEMINI_API_KEY",
 ]);
 

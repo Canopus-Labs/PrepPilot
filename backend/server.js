@@ -22,11 +22,25 @@ const resumeRoutes = require("./routes/resumeRoutes");
 const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
-const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const { sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const helmet = require("helmet");
 const app = express();
 
 app.set("trust proxy", 1);
-app.use(generalHeaders); 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameSrc: ["'none'"]
+    }
+  }
+})); 
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
@@ -95,7 +109,7 @@ app.use(cookieParser());
 app.use(
   cookieSession({
     name: "csrfSession",
-    keys: [process.env.CSRF_SESSION_SECRET || process.env.JWT_SECRET],
+    keys: [process.env.CSRF_SESSION_SECRET],
     maxAge: 24 * 60 * 60 * 1000, // 24h
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
