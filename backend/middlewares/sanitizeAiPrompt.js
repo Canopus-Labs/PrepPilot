@@ -7,6 +7,10 @@ const sanitizeField = (value) => {
     .trim();
 };
 
+// Exported so history messages and other assembled AI content can be
+// sanitized with the same rules as the prompt field.
+const sanitizePromptText = sanitizeField;
+
 const sanitizeAiPrompt = (req, res, next) => {
   if (req.body) {
     req.body.prompt = sanitizeField(req.body.prompt);
@@ -18,3 +22,4 @@ const sanitizeAiPrompt = (req, res, next) => {
 };
 
 module.exports = sanitizeAiPrompt;
+module.exports.sanitizePromptText = sanitizePromptText;
