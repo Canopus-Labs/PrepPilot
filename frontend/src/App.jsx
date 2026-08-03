@@ -48,6 +48,7 @@ import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage"
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
+import ComplexityCheats from "./pages/ComplexityCheats/ComplexityCheats";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -328,6 +329,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <InterviewExperiences />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/complexity-cheat-sheet"
+                    element={
+                      <PageTransition>
+                        <ComplexityCheats />
                       </PageTransition>
                     }
                   />
