@@ -49,6 +49,7 @@ import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
+import QuestionBank from "./pages/QuestionBank/QuestionBank";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -339,6 +340,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <InterviewExperiences />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/question-bank"
+                    element={
+                      <PageTransition>
+                        <QuestionBank />
                       </PageTransition>
                     }
                   />
