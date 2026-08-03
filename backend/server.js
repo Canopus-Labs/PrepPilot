@@ -7,6 +7,7 @@ const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
+const helmet = require("helmet");
 const lusca = require("lusca");
 const {
   generateInterviewQuestions,
@@ -26,6 +27,7 @@ const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securit
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(helmet());
 app.use(generalHeaders); 
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
