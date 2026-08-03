@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   MessageSquare,
@@ -734,7 +735,7 @@ const CompanyDropdown = ({ value, onChange, options }) => {
 // Main Page
 // ──────────────────────────────────────────────
 const FILTERS = ["All", "Easy", "Medium", "Hard"];
-const COMPANIES = ["All Companies", ...Array.from(new Set(EXPERIENCES.map((e) => e.company))).sort()];
+const COMPANIES = ["All Companies", ...Array.from(new Set(EXPERIENCES.map((e) => e.company))).sort((a, b) => a - b)];
 
 const InterviewExperiences = () => {
   const [selectedExp, setSelectedExp] = useState(null);

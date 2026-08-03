@@ -10,7 +10,6 @@ import {
   Search,
   ChevronDown,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 const MONTH_ORDER = [
   "January",
