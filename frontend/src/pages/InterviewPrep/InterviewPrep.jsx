@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import moment from "moment";
-import { AnimatePresence, motion } from "framer-motion";
+
 import { LuCircleAlert, LuListCollapse, LuDownload } from "react-icons/lu";
 import html2pdf from "html2pdf.js";
 import SpinnerLoader from "../../components/Loader/SpinnerLoader";
@@ -68,7 +68,7 @@ const InterviewPrep = () => {
       if (response.data) {
         setExplanation(response.data);
       }
-    } catch (error) {
+    } catch {
       setExplanation(null);
       setErrorMsg("Failed to generate explanation, try again later.");
     } finally {
@@ -162,14 +162,10 @@ const InterviewPrep = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
           {/* Q&A Section */}
           <div className="col-span-12">
-            <AnimatePresence>
+
               {sessionData?.questions?.map((data, index) => (
-                <motion.div
+                <div
                   key={data._id || index}
-                  initial={{ opacity: 0, y: -15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 15 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
                   className="mb-6"
                 >
                   <QuestionCard
@@ -200,9 +196,9 @@ const InterviewPrep = () => {
                         </button>
                       </div>
                     )}
-                </motion.div>
+                </div>
               ))}
-            </AnimatePresence>
+
           </div>
         </div>
 

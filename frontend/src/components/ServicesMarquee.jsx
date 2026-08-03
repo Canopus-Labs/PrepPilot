@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+
+import React from "react";
 
 const SERVICES = [
   { title: "Role-Based Preparation", description: "Curated questions tailored to your job role" },
@@ -12,14 +12,7 @@ const SERVICES = [
 ];
 
 export default function ServicesMarquee() {
-  const getDuration = () => (typeof window !== "undefined" && window.innerWidth < 640 ? 18 : 45);
-  const [duration, setDuration] = useState(getDuration);
 
-  useEffect(() => {
-    const handleResize = () => setDuration(getDuration());
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const items = [...SERVICES, ...SERVICES, ...SERVICES];
 
@@ -30,10 +23,8 @@ export default function ServicesMarquee() {
       {/* Right fade */}
       <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-gray-950 to-transparent z-10" />
 
-      <motion.div
+      <div
         className="flex gap-4 w-max"
-        animate={{ x: ["0%", "-33.333%"] }}
-        transition={{ repeat: Infinity, repeatType: "loop", duration, ease: "linear" }}
       >
         {items.map((service, idx) => (
           <div
@@ -48,7 +39,7 @@ export default function ServicesMarquee() {
             </p>
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

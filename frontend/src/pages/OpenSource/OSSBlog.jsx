@@ -9,7 +9,6 @@ import {
   ExternalLink,
   Search,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 const OSSBlog = () => {
   const [articles, setArticles] = useState([]);
@@ -123,10 +122,7 @@ const scrollToTop = () => {
     )}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-4">
@@ -143,13 +139,10 @@ const scrollToTop = () => {
             development, contribution tips, and best practices from the
             community.
           </p>
-        </motion.div>
+        </div>
 
         {/* Search Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+        <div
           className="mb-8"
         >
           <div className="relative">
@@ -165,13 +158,11 @@ const scrollToTop = () => {
               className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
-        </motion.div>
+        </div>
 
         {/* Error Message */}
         {error && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
             className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg flex items-start gap-3"
           >
             <AlertCircle
@@ -181,7 +172,7 @@ const scrollToTop = () => {
             <div className="text-red-700 dark:text-red-400 text-sm">
               {error}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Loading State */}
@@ -199,21 +190,15 @@ const scrollToTop = () => {
 
         {/* Articles Grid */}
         {!loading && filteredArticles.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          <div
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {filteredArticles.map((article, index) => (
-              <motion.a
+            {filteredArticles.map((article) => (
+              <a
                 key={article.id}
                 href={article.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
                 className="group relative bg-white dark:bg-[#0f1729] border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 dark:hover:border-white/20 hover:-translate-y-1 flex flex-col h-full"
               >
                 {/* Cover Image */}
@@ -300,16 +285,14 @@ const scrollToTop = () => {
                     <ExternalLink size={16} />
                   </div>
                 </div>
-              </motion.a>
+              </a>
             ))}
-          </motion.div>
+          </div>
         )}
 
         {/* Empty State */}
         {!loading && articles.length === 0 && !error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+          <div
             className="text-center py-12"
           >
             <BookOpen
@@ -319,7 +302,7 @@ const scrollToTop = () => {
             <p className="text-gray-600 dark:text-gray-400 text-lg">
               No articles found. Please try again later.
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* No Search Results */}
@@ -327,9 +310,7 @@ const scrollToTop = () => {
           filteredArticles.length === 0 &&
           searchQuery &&
           articles.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+            <div
               className="text-center py-12"
             >
               <BookOpen
@@ -339,14 +320,12 @@ const scrollToTop = () => {
               <p className="text-gray-600 dark:text-gray-400 text-lg">
                 No articles found for "{searchQuery}". Try a different search.
               </p>
-            </motion.div>
+            </div>
           )}
 
         {/* Results Count */}
         {!loading && filteredArticles.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+          <div
             className="mt-8 text-center text-gray-600 dark:text-gray-400"
           >
             <p>
@@ -354,7 +333,7 @@ const scrollToTop = () => {
               {filteredArticles.length !== 1 ? "s" : ""}
               {searchQuery && ` matching "${searchQuery}"`}
             </p>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>
