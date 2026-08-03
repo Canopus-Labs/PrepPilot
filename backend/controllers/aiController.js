@@ -9,6 +9,20 @@ const Question = require("../models/Question");
 const { generateWithFallback } = require("../utils/geminiHelper");
 
 /**
+ * Safely strips single or nested markdown code block fences (```json, ```)
+ * and leading/trailing whitespace from Gemini AI responses.
+ * @param {string} rawText
+ * @returns {string}
+ */
+const cleanGeminiResponse = (rawText) => {
+  if (!rawText) return "";
+  return rawText
+    .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+    .replace(/(\s*```\s*)+$/i, "")
+    .trim();
+};
+
+/**
  * Generate interview questions and answers using the Gemini AI service.
  * @route POST /api/ai/generate-questions
  * @param {import('express').Request} req
@@ -74,10 +88,7 @@ const generateInterviewQuestions = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = cleanGeminiResponse(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
@@ -144,12 +155,7 @@ const generateConceptExplanation = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
-    let cleanedText = rawText
-      .replace(/^\s*```json\s*/i, "")
-      .replace(/^\s*```\s*/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = cleanGeminiResponse(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
@@ -166,6 +172,7 @@ const generateConceptExplanation = async (req, res) => {
 
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
+      console.error("Gemini returned invalid JSON:", cleanedText);
       res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
@@ -217,10 +224,7 @@ const generateInterviewTips = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = cleanGeminiResponse(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
