@@ -32,7 +32,7 @@ const Analytics = () => {
   const fetchSessions = async () => {
     try {
       const res = await axiosInstance.get(API_PATHS.SESSION.GET_ALL);
-      setSessions(res.data || []);
+      setSessions(res.data.data || []);
     } catch (err) {
       console.error(err);
     }

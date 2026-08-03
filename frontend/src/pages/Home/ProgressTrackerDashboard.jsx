@@ -119,7 +119,7 @@ const ProgressTrackerDashboard = () => {
           axiosInstance.get("/api/user/sheet-progress").catch(() => ({ data: { progressList: [] } })),
           axiosInstance.get("/api/sheets").catch(() => ({ data: { sheets: [] } })),
         ]);
-        setSessions(sRes.data || []);
+        setSessions(sRes.data?.data || []);
         setResumes(rRes.data?.resumes || []);
 
         // Build a sheetId → sheet object lookup
