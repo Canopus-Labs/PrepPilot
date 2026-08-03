@@ -445,13 +445,6 @@ const ResumeEditor = () => {
           </div>
         </Split>
       </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .split-editor-container > .gutter { background-color:#e5e7eb; cursor:col-resize; transition:background-color .2s; }
-        .split-editor-container > .gutter:hover { background-color:#c084fc; }
-        .dark .split-editor-container > .gutter { background-color:#3f3f46; }
-        .dark .split-editor-container > .gutter:hover { background-color:#9333ea; }
-      `}} />
     </div>
   );
 };
