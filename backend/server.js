@@ -157,7 +157,7 @@ app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
 app.use("/api/question", generalLimiter, questionRoutes);
 app.use("/api", aiRoutes);
-app.use("/api/questions", generalLimiter, aptitudeQuestionsRoutes);
+app.use("/api/questions", generalLimiter, protect, aptitudeQuestionsRoutes);
 const sheetJsonUpload = require("./routes/sheetJsonUpload");
 app.use("/api/sheets", generalLimiter, sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
