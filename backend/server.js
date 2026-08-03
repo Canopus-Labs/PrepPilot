@@ -41,15 +41,15 @@ const allowedOrigins = new Set(originEnvList);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const renderPattern =
-    /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot(?:-backend)?)-[a-z0-9-]+\.onrender\.com$/;
+  // Exact-origin allowlist only (FRONTEND_ORIGIN / EXTRA_ORIGINS, plus
+  // localhost in dev). No regex wildcard matching of third-party-registrable
+  // domains like *.onrender.com — anyone can register an attacker subdomain
+  // that would otherwise be granted credentialed CORS access.
   const localhostPattern =
     /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
   if (
     origin &&
-    (allowedOrigins.has(origin) ||
-      renderPattern.test(origin) ||
-      localhostPattern.test(origin))
+    (allowedOrigins.has(origin) || localhostPattern.test(origin))
   ) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Vary", "Origin");
