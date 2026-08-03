@@ -102,7 +102,7 @@ const DifficultyEstimator = () => {
 
         </div>
                 {result && (
-
+          <>
           <div className="space-y-8">
 
             {/* Main Analysis */}
@@ -395,7 +395,8 @@ const DifficultyEstimator = () => {
 
             </div>
 
-          </div>
+
+          </>
         )}
 
       </div>
