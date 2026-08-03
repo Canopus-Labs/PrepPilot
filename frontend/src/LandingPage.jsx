@@ -14,6 +14,8 @@ import Modal from "./components/Loader/Modal";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgotPassword from "./pages/Auth/ForgotPAssword";
+import { UserContext } from "./context/userContext";
+import { AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useUser } from "./context/userContext";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";

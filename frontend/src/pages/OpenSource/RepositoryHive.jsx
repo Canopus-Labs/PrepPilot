@@ -9,7 +9,6 @@ import {
   Loader,
   AlertCircle,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 const FILTER_OPTIONS = [
   {

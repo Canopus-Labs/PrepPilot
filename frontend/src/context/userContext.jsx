@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+import React, { createContext, useState, useEffect } from "react";
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
