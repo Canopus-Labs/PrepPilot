@@ -350,6 +350,7 @@ const ResumeEditor = () => {
                   value={titleDraft}
                   onChange={e => setTitleDraft(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") confirmTitleEdit(); if (e.key === "Escape") setEditingTitle(false); }}
+                  onBlur={confirmTitleEdit}
                   className="text-sm font-semibold bg-white dark:bg-white/10 border border-violet-400 rounded px-2 py-0.5 outline-none w-44"
                 />
                 <button onClick={confirmTitleEdit} className="text-green-500 hover:text-green-400"><Check size={14} /></button>
