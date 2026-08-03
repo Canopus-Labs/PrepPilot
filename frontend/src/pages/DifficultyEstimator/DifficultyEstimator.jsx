@@ -4,28 +4,35 @@ import {
   Sparkles,
   Send,
   BookOpen,
+  Loader,
 } from "lucide-react";
+import axiosInstance from "../../utils/axiosinstance";
+import toast from "react-hot-toast";
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
 
 const DifficultyEstimator = () => {
   const [question, setQuestion] = useState("");
-
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const analyzeQuestion = () => {
-    if (!question.trim()) return;
+  const analyzeQuestion = async () => {
+    if (!question.trim()) {
+      toast.error("Please enter an interview question.");
+      return;
+    }
 
-    // Demo AI Result
-    setResult({
-      difficulty: "Hard",
-      confidence: 94,
-      estimatedTime: "35 Minutes",
-      prerequisites: [
-        "Binary Trees",
-        "Depth First Search",
-        "Recursion",
-        "Dynamic Programming",
-      ],
-    });
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post(`${BASE_URL}/api/ai/estimate-difficulty`, {
+        question: question.trim(),
+      });
+      setResult(res.data);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to analyze question. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -91,12 +98,13 @@ const DifficultyEstimator = () => {
 
           <button
             onClick={analyzeQuestion}
-            className="mt-6 flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-xl font-semibold transition"
+            disabled={loading}
+            className="mt-6 flex items-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition"
           >
 
-            <Send size={18} />
+            {loading ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
 
-            Analyze Question
+            {loading ? "Analyzing..." : "Analyze Question"}
 
           </button>
 

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { generateChatWithFallback } = require('../utils/geminiHelper');
+const { generateChatWithFallback, generateWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
@@ -137,6 +137,94 @@ router.get("/models", async (req, res) => {
   } catch (e) {
     console.error("List models error:", e);
     res.status(500).json({ error: "Failed to list models" });
+  }
+});
+
+/**
+ * Estimate the difficulty of an interview question using Gemini AI.
+ * @route POST /api/ai/estimate-difficulty
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When question is missing or AI generation fails.
+ * @example
+ * POST /api/ai/estimate-difficulty
+ * { "question": "Explain how to find the longest palindromic substring in a string." }
+ * @example
+ * 200 {"difficulty": "Hard", "confidence": 87, "estimatedTime": "45 Minutes", "prerequisites": ["Dynamic Programming", "String Manipulation"]}
+ */
+router.post("/estimate-difficulty", aiLimiter, async (req, res) => {
+  const { question } = req.body;
+
+  if (!question || !question.trim()) {
+    return res.status(400).json({ error: "Question is required." });
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: "GEMINI_API_KEY not configured on server." });
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const modelName = process.env.GEMINI_MODEL || "models/gemini-2.5-flash";
+    const model = genAI.getGenerativeModel({ model: modelName });
+
+    const prompt = `You are an expert technical interviewer. Analyze the following interview question and estimate its difficulty level.
+
+Question: "${question}"
+
+Return ONLY a valid JSON object with this exact structure and nothing else:
+{
+  "difficulty": "Easy" | "Medium" | "Hard" | "Expert",
+  "confidence": <integer 0-100>,
+  "estimatedTime": "<number> Minutes",
+  "prerequisites": [<array of up to 5 prerequisite topic strings>]
+}
+
+Difficulty guidelines:
+- Easy: Simple logic, O(n) or O(1), basic data structures
+- Medium: Moderate complexity, O(n log n), multiple data structures
+- Hard: Complex algorithms, O(n^2) or worse, advanced concepts required
+- Expert: Very complex, optimal solution requires expert-level knowledge
+
+Return ONLY the raw JSON object. Do not wrap in markdown code blocks or any other text.`;
+
+    const { result } = await generateWithFallback(model, [{ text: prompt }]);
+    const rawText = await result.response.text();
+
+    let cleanedText = rawText
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanedText);
+    } catch {
+      // Attempt to extract JSON from partial response
+      const match = cleanedText.match(/\{[\s\S]*\}/);
+      if (match) {
+        parsed = JSON.parse(match[0]);
+      } else {
+        console.error("[DifficultyEstimator] Failed to parse AI response:", rawText);
+        return res.status(502).json({ error: "Failed to parse difficulty estimation from AI. Please try again." });
+      }
+    }
+
+    return res.json({
+      difficulty: parsed.difficulty || "Medium",
+      confidence: parsed.confidence || 80,
+      estimatedTime: parsed.estimatedTime || "30 Minutes",
+      prerequisites: Array.isArray(parsed.prerequisites) ? parsed.prerequisites.slice(0, 5) : [],
+    });
+  } catch (error) {
+    console.error("[DifficultyEstimator] Error:", error);
+    const status = error?.status || error?.code;
+    if (status === 429) {
+      return res.status(429).json({ error: "AI service rate limit reached. Please try again in a moment." });
+    }
+    return res.status(500).json({ error: "Failed to estimate difficulty. Please try again." });
   }
 });
 
