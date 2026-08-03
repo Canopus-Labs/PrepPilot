@@ -206,7 +206,7 @@ Do NOT wrap it inside markdown.
             jsonResult.suggestions ??= [];
         } catch (e) {
             console.error("Failed to parse Gemini JSON:", aiResponse);
-            return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
+            return res.status(500).json({ message: "AI response parsing failed." });
         }
 
         res.status(200).json(jsonResult);
@@ -287,7 +287,7 @@ const saveResume = async (req, res) => {
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
+        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 }).limit(50);
         res.status(200).json({ success: true, resumes });
     } catch (error) {
         console.error("Get Resumes Error:", error);
