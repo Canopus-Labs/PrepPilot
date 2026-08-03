@@ -347,9 +347,7 @@ const BehavioralCoach = () => {
         </div> {/* End Question Card */}
 
       </div> {/* End max-w-6xl */}
-
-    </div> {/* End Page */}
-
+    </div>
   );
 };
 

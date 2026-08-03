@@ -3,12 +3,12 @@ import React, { createContext, useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
+
 import {
     isMockAuthEnabled,
     getMockUser,
     clearMockUser,
 } from "../utils/mockAuth";
-
 
 export const UserContext = createContext();
 

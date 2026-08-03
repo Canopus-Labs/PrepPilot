@@ -1,53 +1,53 @@
-import Compiler from "./components/Compiler";
-import SkillAssessment from "./components/SkillAssessment";
-import DsaSheet from "./components/SheetDetailsPage";
-import SheetList from "./components/SheetList";
+const Compiler = React.lazy(() => import('./components/Compiler'));
+const SkillAssessment = React.lazy(() => import('./components/SkillAssessment'));
+const DsaSheet = React.lazy(() => import('./components/SheetDetailsPage'));
+const SheetList = React.lazy(() => import('./components/SheetList'));
 import UserProvider from "./context/userContext";
 import ThemeProvider from "./context/themeContext";
-import React from "react";
+import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import AuthPage from "./pages/Auth/AuthPage";
-import VerifyEmail from "./pages/Auth/verifyEmail";
+const Login = React.lazy(() => import('./pages/Auth/Login'));
+const SignUp = React.lazy(() => import('./pages/Auth/SignUp'));
+const AuthPage = React.lazy(() => import('./pages/Auth/AuthPage'));
+const VerifyEmail = React.lazy(() => import('./pages/Auth/verifyEmail'));
 import LandingPage from "./LandingPage";
-import Dashboard from "./pages/Home/Dashboard";
-import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
-import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
-import AIHelper from "./components/AIHepler";
-import PracticePage from "./pages/InterviewPrep/components/PracticePage";
-import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
+const Dashboard = React.lazy(() => import('./pages/Home/Dashboard'));
+const ProgressTrackerDashboard = React.lazy(() => import('./pages/Home/ProgressTrackerDashboard'));
+const InterviewPrep = React.lazy(() => import('./pages/InterviewPrep/InterviewPrep'));
+const AIHelper = React.lazy(() => import('./components/AIHepler'));
+const PracticePage = React.lazy(() => import('./pages/InterviewPrep/components/PracticePage'));
+const CognitiveGamesPage = React.lazy(() => import('./pages/CognitiveGames/CognitiveGamesPage'));
 import { useContext } from "react";
 import { UserContext } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
 import { Navigate, Outlet } from "react-router-dom";
-import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
-import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
-import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
-import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
-import TermsandConditions from "./pages/Terms/TermsandConditions";
-import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
-import ProjectRoadmap from "./pages/ProjectRoadmap/ProjectRoadmap";
-import RepositoryHive from "./pages/OpenSource/RepositoryHive";
-import OSSBlog from "./pages/OpenSource/OSSBlog";
-import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
-import NotesBooks from "./pages/NotesBooks/NotesBooks";
-import NotesSummarizer from "./pages/NotesSummarizer/NotesSummarizer";
-import JobsForYou from "./pages/Jobs/JobsForYou";
-import HelpSupport from "./pages/Support/HelpSupport";
-import Settings from "./pages/Settings/Settings";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
-import FreeCourses from "./pages/FreeCourses/FreeCourses";
-import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
-import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
-import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
-import Analytics from "./pages/Analytics";
+const ResumeTemplates = React.lazy(() => import('./pages/ResumeBuilder/ResumeTemplates'));
+const ResumeEditor = React.lazy(() => import('./pages/ResumeBuilder/ResumeEditor'));
+const ResumeAnalyzer = React.lazy(() => import('./pages/ResumeBuilder/ResumeAnalyzer'));
+const InterviewExperiences = React.lazy(() => import('./pages/InterviewExperiences/InterviewExperiences'));
+const TermsandConditions = React.lazy(() => import('./pages/Terms/TermsandConditions'));
+const ProjectIdeas = React.lazy(() => import('./pages/ProjectIdeas/ProjectIdeas'));
+const ProjectRoadmap = React.lazy(() => import('./pages/ProjectRoadmap/ProjectRoadmap'));
+const RepositoryHive = React.lazy(() => import('./pages/OpenSource/RepositoryHive'));
+const OSSBlog = React.lazy(() => import('./pages/OpenSource/OSSBlog'));
+const OpenSourceEvents = React.lazy(() => import('./pages/OpenSource/OpenSourceEvents'));
+const NotesBooks = React.lazy(() => import('./pages/NotesBooks/NotesBooks'));
+const NotesSummarizer = React.lazy(() => import('./pages/NotesSummarizer/NotesSummarizer'));
+const JobsForYou = React.lazy(() => import('./pages/Jobs/JobsForYou'));
+const HelpSupport = React.lazy(() => import('./pages/Support/HelpSupport'));
+const Settings = React.lazy(() => import('./pages/Settings/Settings'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+const PrivacyPolicy = React.lazy(() => import('./pages/Terms/PrivacyPolicy'));
+const FreeCourses = React.lazy(() => import('./pages/FreeCourses/FreeCourses'));
+const SpacedRepetitionPage = React.lazy(() => import('./pages/SpacedRepetition/SpacedRepetitionPage'));
+const BehavioralCoach = React.lazy(() => import('./pages/BehavioralCoach/BehavioralCoach'));
+const DailyCodingChallenge = React.lazy(() => import('./pages/DailyCodingChallenge/DailyCodingChallenge'));
+const Analytics = React.lazy(() => import('./pages/Analytics'));
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -75,7 +75,8 @@ const App = () => {
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
           <Router>
             <AnimatePresence mode="wait">
-              <Routes>
+              <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div></div>}>
+                <Routes>
                 {/* Routes without Sidebar */}
                 <Route
                   path="/"
@@ -453,6 +454,7 @@ const App = () => {
                     }
                  />
               </Routes>
+              </Suspense>
             </AnimatePresence>
           </Router>
           <Toaster
