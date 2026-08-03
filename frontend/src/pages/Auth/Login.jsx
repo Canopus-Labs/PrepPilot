@@ -4,7 +4,7 @@ import Input from "../../components/Inputs/Input";
 import Button from "../../components/Button/Button";
 import { validateEmail } from "../../utils/helper";
 import { API_PATHS } from "../../utils/apiPaths";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import {
   isMockAuthEnabled,
@@ -20,7 +20,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const { updateUser } = useContext(UserContext);
+  const { updateUser } = useUser();
   const navigate = useNavigate();
 
   const clearError = () => {

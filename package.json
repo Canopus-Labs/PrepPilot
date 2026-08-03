@@ -1,5 +1,18 @@
 {
   "dependencies": {
     "csrf-csrf": "^4.0.3"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6"
+  },
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*/*": {
+      "{js,jsx}": "prettier --write"
+    }
   }
 }
