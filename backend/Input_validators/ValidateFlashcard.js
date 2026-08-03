@@ -2,9 +2,9 @@ const { z } = require("zod");
 const { handleValidationError } = require("./ValidateQuestions");
 
 const createFlashcardSchema = z.object({
-  question: z.string().min(1, "Question text is required"),
-  answer: z.string().min(1, "Answer text is required"),
-  category: z.string().optional().default("General"),
+  question: z.string().min(1, "Question text is required").max(5000, "Question text must be 5000 characters or fewer"),
+  answer: z.string().min(1, "Answer text is required").max(10000, "Answer text must be 10000 characters or fewer"),
+  category: z.string().optional().max(100, "Category must be 100 characters or fewer").default("General"),
   sourceId: z.string().optional().nullable(),
 });
 
