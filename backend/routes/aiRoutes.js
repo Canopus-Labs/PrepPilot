@@ -5,6 +5,7 @@ const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
+const { sanitizePromptText } = sanitizeAiPrompt;
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
 const { buildSolverPrompt, parseSolverOutput } = require('../utils/problemSolverParser');
 const problemSolverSchema = require('../validation/problemSolverSchema');
@@ -13,6 +14,53 @@ const NodeCache = require('node-cache');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
+
+// Server-owned system instruction. Never taken from the request body, so a
+// caller cannot override the model's persona/guardrails.
+const SYSTEM_INSTRUCTION = `You are PrepPilot AI Mentor.
+1. Allow friendly greetings and casual onboarding conversation.
+2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
+3. Politely redirect unrelated conversations.
+4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`;
+
+const MAX_HISTORY_MESSAGES = 20;
+// Combined character budget for prompt + history (≈ rough token guard) to stop
+// unbounded per-request token spend through Gemini.
+const MAX_COMBINED_CHARS = 16000;
+
+/**
+ * Sanitize and cap the chat payload (prompt + history) before it reaches the
+ * model. The system instruction is intentionally NOT part of this contract.
+ * @param {string} prompt
+ * @param {unknown} history
+ * @returns {{ ok: true, formattedHistory: Array } | { ok: false, error: string }}
+ */
+const buildChatPayload = (prompt, history) => {
+  if (!Array.isArray(history)) {
+    return { ok: false, error: "history must be an array" };
+  }
+  if (history.length > MAX_HISTORY_MESSAGES) {
+    return { ok: false, error: "Conversation history is too large" };
+  }
+
+  let totalChars = typeof prompt === "string" ? sanitizePromptText(prompt).length : 0;
+  const formattedHistory = [];
+
+  for (const msg of history) {
+    const text = typeof msg?.text === "string" ? sanitizePromptText(msg.text) : "";
+    totalChars += text.length;
+    formattedHistory.push({
+      role: msg?.role === "model" ? "model" : "user",
+      parts: [{ text }],
+    });
+  }
+
+  if (totalChars > MAX_COMBINED_CHARS) {
+    return { ok: false, error: "Prompt and history are too large" };
+  }
+
+  return { ok: true, formattedHistory };
+};
 
 /**
  * Validate a problem-solving payload against the problemSolverSchema.
@@ -116,7 +164,7 @@ async function solveHandler(req, res) {
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt, history = [], systemInstruction } = req.body || {};
+  const { prompt, history = [] } = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
   }
@@ -149,17 +197,14 @@ async function generateHandler(req, res) {
   }
   try {
     const start = Date.now();
-    const systemInstructionText = systemInstruction || `You are PrepPilot AI Mentor.
-1. Allow friendly greetings and casual onboarding conversation.
-2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
-3. Politely redirect unrelated conversations.
-4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`;
 
-    // Format history for Gemini API
-    let formattedHistory = history.map(msg => ({
-      role: msg.role === "model" ? "model" : "user",
-      parts: [{ text: msg.text }]
-    }));
+    // Build the model payload server-side: sanitized history with hard caps.
+    // The system instruction is always the server-owned constant.
+    const built = buildChatPayload(prompt, history);
+    if (!built.ok) {
+      return res.status(400).json({ error: built.error });
+    }
+    const formattedHistory = built.formattedHistory;
 
     // Gemini requires the first message in history to be from the user
     if (formattedHistory.length > 0 && formattedHistory[0].role !== "user") {
@@ -170,7 +215,7 @@ async function generateHandler(req, res) {
       process.env.GEMINI_API_KEY,
       prompt,
       formattedHistory,
-      { systemInstruction: systemInstructionText }
+      { systemInstruction: SYSTEM_INSTRUCTION }
     );
 
     const rawText = await result.response.text();
@@ -229,3 +274,7 @@ router.get("/models", async (req, res) => {
 });
 
 module.exports = router;
+module.exports.buildChatPayload = buildChatPayload;
+module.exports.SYSTEM_INSTRUCTION = SYSTEM_INSTRUCTION;
+module.exports.MAX_HISTORY_MESSAGES = MAX_HISTORY_MESSAGES;
+module.exports.MAX_COMBINED_CHARS = MAX_COMBINED_CHARS;
