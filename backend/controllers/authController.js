@@ -5,6 +5,15 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
+// Models for cascade deletion on account delete
+const Session = require("../models/Session");
+const Question = require("../models/Question");
+const Flashcard = require("../models/Flashcard");
+const Resume = require("../models/Resume");
+const NotesSummary = require("../models/NotesSummary");
+const RoadmapProject = require("../models/RoadmapProject");
+const UserSheetProgress = require("../models/UserSheetProgress");
+
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -501,7 +510,8 @@ const changePassword = async (req, res) => {
 };
 
 /**
- * Permanently delete user account.
+ * Permanently delete user account and all associated data.
+ * Implements cascade deletion to clean up orphaned documents.
  * @route DELETE /api/auth/delete-account
  */
 const deleteUserAccount = async (req, res) => {
@@ -512,8 +522,71 @@ const deleteUserAccount = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
+        // Cascade delete: remove all user-related data
+        const deletePromises = [];
+
+        // Delete user's sessions and their associated questions
+        const sessions = await Session.find({ user: userId });
+        const sessionIds = sessions.map(s => s._id);
+        if (sessionIds.length > 0) {
+            deletePromises.push(
+                Question.deleteMany({ session: { $in: sessionIds } }).then(() => {
+                    console.log(`Deleted ${sessionIds.length} sessions and their questions for user ${userId}`);
+                })
+            );
+        }
+        deletePromises.push(Session.deleteMany({ user: userId }));
+
+        // Delete user's flashcards
+        deletePromises.push(
+            Flashcard.deleteMany({ userId: userId }).then(result => {
+                console.log(`Deleted ${result.deletedCount} flashcards for user ${userId}`);
+            })
+        );
+
+        // Delete user's resumes
+        deletePromises.push(
+            Resume.deleteMany({ user: userId }).then(result => {
+                console.log(`Deleted ${result.deletedCount} resumes for user ${userId}`);
+            })
+        );
+
+        // Delete user's notes summaries
+        deletePromises.push(
+            NotesSummary.deleteMany({ user: userId }).then(result => {
+                console.log(`Deleted ${result.deletedCount} notes summaries for user ${userId}`);
+            })
+        );
+
+        // Delete user's roadmap projects
+        deletePromises.push(
+            RoadmapProject.deleteMany({ userId: userId }).then(result => {
+                console.log(`Deleted ${result.deletedCount} roadmap projects for user ${userId}`);
+            })
+        );
+
+        // Delete user's sheet progress
+        deletePromises.push(
+            UserSheetProgress.deleteMany({ userId: userId }).then(result => {
+                console.log(`Deleted ${result.deletedCount} sheet progress records for user ${userId}`);
+            })
+        );
+
+        // Wait for all deletions to complete
+        await Promise.all(deletePromises);
+
+        // Finally, delete the user account
         await User.findByIdAndDelete(userId);
-        res.json({ success: true, message: "Account deleted successfully" });
+        
+        // Clear auth cookies
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            path: "/api/auth"
+        });
+
+        res.json({ success: true, message: "Account and all associated data deleted successfully" });
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
