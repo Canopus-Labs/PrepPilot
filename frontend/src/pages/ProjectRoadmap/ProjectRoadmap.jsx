@@ -130,7 +130,7 @@ const ProjectRoadmap = () => {
       setActiveRoadmap(res.data.roadmap);
       setIsSaved(true);
       setMode("detail");
-    } catch (err) {
+    } catch {
       toast.error("Failed to load roadmap");
     }
   };
@@ -145,7 +145,7 @@ const ProjectRoadmap = () => {
         setActiveRoadmap(null);
       }
       fetchRoadmaps();
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete roadmap");
     }
   };
@@ -159,7 +159,7 @@ const ProjectRoadmap = () => {
     try {
       const res = await axiosInstance.patch(API_PATHS.ROADMAP.TOGGLE_TASK(activeRoadmap._id), payload);
       setActiveRoadmap(res.data.roadmap);
-    } catch (err) {
+    } catch {
       toast.error("Failed to update progress");
     }
   };
@@ -194,7 +194,7 @@ const ProjectRoadmap = () => {
       });
       setActiveRoadmap(res.data.roadmap);
       toast.success("Milestone updated");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update milestone");
     }
   };
