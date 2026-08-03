@@ -70,7 +70,13 @@ const registerUser = async (req, res) => {
 
         const userExists = await User.findOne({ email });
         if (userExists) {
-            return res.status(400).json({ success: false, message: "A user with this email already exists." });
+            // Do not reveal whether the email is already registered. Respond
+            // with the same generic success shape (no tokens, no user data)
+            // so the endpoint cannot be used for account enumeration.
+            return res.status(201).json({
+                success: true,
+                message: "If this email is not already registered, your account has been created.",
+            });
         }
 
         // Split name into first and last names for defaults
