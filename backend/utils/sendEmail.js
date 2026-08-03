@@ -36,7 +36,10 @@ const createTransporter = () => {
         });
     }
 
-    // Custom SMTP — provider sets EMAIL_HOST, EMAIL_PORT themselves
+    // Custom SMTP — provider sets EMAIL_HOST, EMAIL_PORT themselves.
+    // TLS certificates are verified (nodemailer default); disabling
+    // rejectUnauthorized would allow man-in-the-middle interception of
+    // verification links and credentials.
     return nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: parseInt(process.env.EMAIL_PORT, 10) || 587,
@@ -44,9 +47,6 @@ const createTransporter = () => {
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-            rejectUnauthorized: false,
         },
     });
 };
@@ -83,4 +83,4 @@ const sendVerificationEmail = async (toEmail, verificationUrl) => {
     console.log("SMTP verified");
 };
 
-module.exports = { sendVerificationEmail };
+module.exports = { sendVerificationEmail, createTransporter };
