@@ -48,6 +48,7 @@ import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage"
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
+import SnippetVault from "./pages/Snippets/SnippetVault";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -394,6 +395,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <FreeCourses />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/snippet-vault"
+                    element={
+                      <PageTransition>
+                        <SnippetVault />
                       </PageTransition>
                     }
                   />

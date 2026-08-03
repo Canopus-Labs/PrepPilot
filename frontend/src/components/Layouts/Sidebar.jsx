@@ -58,6 +58,7 @@ const NAV_ITEMS = [
       { id: "spaced-repetition",     title: "Spaced Repetition",     path: "/spaced-repetition",      icon: RotateCcw },
       { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
       { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
+      { id: "snippet-vault",          title: "Snippet Vault",          path: "/snippet-vault",          icon: Code2 },
     ],
   },
   {
