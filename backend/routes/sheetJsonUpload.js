@@ -48,8 +48,19 @@ router.post('/upload', protect, async (req, res) => {
 // GET / - fetch all sheets (for /api/sheets)
 router.get('/', async (req, res) => {
   try {
-    const sheets = await Sheet.find({});
-    res.json({ sheets });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = (page - 1) * limit;
+
+    const sheets = await Sheet.find({}).skip(skip).limit(limit);
+    const total = await Sheet.countDocuments({});
+
+    res.json({ 
+      sheets,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalSheets: total
+    });
   } catch (err) {
     console.error('Error fetching sheets:', err);
     res.status(500).json({ error: 'Failed to fetch sheets.' });
