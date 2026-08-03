@@ -536,46 +536,34 @@ const deleteUserAccount = async (req, res) => {
         const sessionIds = sessions.map(s => s._id);
         if (sessionIds.length > 0) {
             deletePromises.push(
-                Question.deleteMany({ session: { $in: sessionIds } }).then(() => {
-                    console.log(`Deleted ${sessionIds.length} sessions and their questions for user ${userId}`);
-                })
+                Question.deleteMany({ session: { $in: sessionIds } })
             );
         }
         deletePromises.push(Session.deleteMany({ user: userId }));
 
         // Delete user's flashcards
         deletePromises.push(
-            Flashcard.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} flashcards for user ${userId}`);
-            })
+            Flashcard.deleteMany({ userId: userId })
         );
 
         // Delete user's resumes
         deletePromises.push(
-            Resume.deleteMany({ user: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} resumes for user ${userId}`);
-            })
+            Resume.deleteMany({ user: userId })
         );
 
         // Delete user's notes summaries
         deletePromises.push(
-            NotesSummary.deleteMany({ user: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} notes summaries for user ${userId}`);
-            })
+            NotesSummary.deleteMany({ user: userId })
         );
 
         // Delete user's roadmap projects
         deletePromises.push(
-            RoadmapProject.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} roadmap projects for user ${userId}`);
-            })
+            RoadmapProject.deleteMany({ userId: userId })
         );
 
         // Delete user's sheet progress
         deletePromises.push(
-            UserSheetProgress.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} sheet progress records for user ${userId}`);
-            })
+            UserSheetProgress.deleteMany({ userId: userId })
         );
 
         // Wait for all deletions to complete
