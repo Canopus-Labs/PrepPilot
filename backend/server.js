@@ -23,6 +23,7 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
 app.set("trust proxy", 1);
@@ -206,7 +207,12 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: uploadsStaticHeaders,
+  })
+);
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
