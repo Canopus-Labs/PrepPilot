@@ -62,7 +62,7 @@ export const UserProvider = ({ children }) => {
     }
 };
         fetchUser();
-    }, []);
+    }, [user]);
 
     const updateUser = (userData) => {
         setUser(userData);
