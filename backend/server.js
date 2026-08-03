@@ -229,6 +229,15 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   clearInterval(window.__interval); window.__interval = setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled Server Error:", err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
+  });
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
