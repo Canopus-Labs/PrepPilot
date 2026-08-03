@@ -25,12 +25,14 @@ const jobRoutes = require("./routes/jobRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const behavioralRoutes = require("./routes/behavioralRoutes");
 const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
 app.set("trust proxy", 1);
 app.use(helmet());
 app.use(generalHeaders); 
+app.use("/api/behavioral", behavioralRoutes);
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
