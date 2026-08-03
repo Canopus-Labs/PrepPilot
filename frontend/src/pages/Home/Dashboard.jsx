@@ -55,6 +55,7 @@ const Dashboard = () => {
 
   <div>
     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
       Your Interview Sessions
     </h1>
 
@@ -89,6 +90,13 @@ const Dashboard = () => {
               View Analytics
             </button>
           </div>
+    onClick={() => navigate("/revision-planner")}
+    className="inline-flex items-center gap-2 px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold shadow-md transition-all"
+  >
+    📅 Revision Planner
+  </button>
+
+</div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
               Your Interview Sessions
             </h1>
