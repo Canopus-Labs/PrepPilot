@@ -36,7 +36,7 @@ exports.createSession = async (req, res) => {
             const { role, experience, topicsToFocus, description } = req.body;
             const experienceNumber = Number(experience);
  
-            if (!role || role.trim() === "") {
+            if (!role || role.trim().length === 0) {
                 return res.status(400).json({
                     success: false,
                     message: "Role is required.",

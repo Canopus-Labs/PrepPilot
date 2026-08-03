@@ -111,7 +111,7 @@ setTimeout(() => {
 
   console.log(`\nRegistered routes (${registered.length} total):`);
   for (const r of registered) {
-    console.log(`  ${r.method.padEnd(7)} ${r.path}`);
+    console.log(`  ${r.method.padEnd(7, " ")} ${r.path}`);
   }
 
   const missing = [];
@@ -130,7 +130,7 @@ setTimeout(() => {
   } else {
     console.error("\n❌ Documented routes NOT found in the app:");
     for (const m of missing) {
-      console.error(`  ${m.method.padEnd(7)} ${m.path}`);
+      console.error(`  ${m.method.padEnd(7, " ")} ${m.path}`);
     }
     console.error(
       "\nUpdate API_DOCUMENTATION.md or fix the missing route registrations.\n"

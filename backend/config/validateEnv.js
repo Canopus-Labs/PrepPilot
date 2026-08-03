@@ -14,7 +14,7 @@ const validateEnv = () => {
   requiredEnvVars.forEach((envVar) => {
     const value = process.env[envVar];
 
-    if (!value || value.trim() === "") {
+    if (!value || value.trim().length === 0) {
       missingVars.push(envVar);
     }
   });

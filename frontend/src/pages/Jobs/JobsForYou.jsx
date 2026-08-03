@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useContext } from "react";
 import { Briefcase, MapPin, DollarSign, ExternalLink, RefreshCw } from "lucide-react";
 import { UserContext } from "../../context/userContext";

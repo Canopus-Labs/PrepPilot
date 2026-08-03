@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
@@ -15,7 +16,7 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ServicesMarquee from "./components/ServicesMarquee";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
 import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this

@@ -7,7 +7,7 @@ import ThemeProvider from "./context/themeContext";
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from 'framer-motion';
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
 
