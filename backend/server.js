@@ -21,6 +21,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
+const healthRoutes = require("./routes/healthRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
 const app = express();
@@ -207,6 +208,8 @@ app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+
+app.use("/api/health", healthRoutes);
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
