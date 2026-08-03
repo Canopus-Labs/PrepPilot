@@ -46,6 +46,7 @@ const NAV_ITEMS = [
     isHeader: true,
     items: [
       { id: "coding-sheets", title: "DSA Master Sheets", path: "/coding-sheets", icon: Code2 },
+      { id: "problem-solver", title: "AI Problem Solver", path: "/problem-solver", icon: BrainCircuit },
     ],
   },
   {
