@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
@@ -9,8 +10,9 @@ import {
     clearMockUser,
 } from "../utils/mockAuth";
 
+const UserContext = createContext();
 
-export const UserContext = createContext();
+export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);

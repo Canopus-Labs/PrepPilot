@@ -215,6 +215,68 @@ export const useMemoryMatch = () => {
     setPhase("playing");
   }, [difficulty, dailyChallenge]);
 
+  // ─── Victory Operations ──────────────────────────────────────────────────────
+  const triggerVictory = useCallback((finalCards, totalMoves, finalMaxCombo, totalWrong) => {
+    if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
+    playVictorySound();
+    setPhase("victory");
+
+    // 1. Calculate Star rating based on grid efficiency
+    const totalPairs = finalCards.length / 2;
+    // Perfect moves is totalPairs (e.g. 8 moves on easy). We scale star boundaries around that:
+    let finalStars = 1;
+    if (difficulty === "easy") {
+      if (totalMoves <= 11) finalStars = 3;
+      else if (totalMoves <= 16) finalStars = 2;
+    } else if (difficulty === "medium") {
+      if (totalMoves <= 14) finalStars = 3;
+      else if (totalMoves <= 21) finalStars = 2;
+    } else { // Hard or Extreme
+      if (totalMoves <= 26) finalStars = 3;
+      else if (totalMoves <= 36) finalStars = 2;
+    }
+    setStars(finalStars);
+
+    // 2. Score Time Bonus
+    let timeBonus = 0;
+    const timeCap = config.maxExpectedTime;
+    if (timeElapsed < timeCap) {
+      timeBonus = Math.round((timeCap - timeElapsed) * 15 * config.multiplier);
+      setScore((s) => s + timeBonus);
+    }
+
+    // 3. Perfect Game check
+    const isPerfect = totalWrong === 0;
+    setPerfectGame(isPerfect);
+    if (isPerfect) {
+      setScore((s) => s + 500); // 500 bonus points for perfect game
+    }
+
+    // 4. Achievement unlocking checks
+    const unlocked = [];
+    if (isPerfect) {
+      unlocked.push({ id: "perfect", title: "Perfect Recall", desc: "Matched all pairs with zero incorrect moves!" });
+    }
+    if (finalMaxCombo >= 5) {
+      unlocked.push({ id: "combo", title: "Combo Master", desc: "Achieved a combo multiplier of 5x or higher!" });
+    }
+    if (timeElapsed <= config.maxExpectedTime * 0.6) {
+      unlocked.push({ id: "speed", title: "Speed Demon", desc: "Completed the memory board in record time!" });
+    }
+    setAchievements(unlocked);
+
+    // 5. Update and persist High Score
+    setHighScore((prevHigh) => {
+      // Account for score updates (including time bonus and perfect bonus)
+      const finalScore = score + timeBonus + (isPerfect ? 500 : 0);
+      if (finalScore > prevHigh) {
+        localStorage.setItem("memory_match_high_score", finalScore.toString());
+        return finalScore;
+      }
+      return prevHigh;
+    });
+  }, [difficulty, timeElapsed, config, score]);
+
   // ─── Flip Card Selection Logic ────────────────────────────────────────────────
   const flipCard = useCallback((cardIndex) => {
     if (phase !== "playing" || paused) return;
@@ -282,6 +344,7 @@ export const useMemoryMatch = () => {
         }, 900);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, paused, cards, flippedIndices, moves, combo, difficulty, wrongMoves]);
 
   // ─── Victory Operations ──────────────────────────────────────────────────────
@@ -345,6 +408,7 @@ export const useMemoryMatch = () => {
       return prevHigh;
     });
   };
+  }, [phase, paused, cards, flippedIndices, moves, combo, difficulty, wrongMoves, triggerVictory]);
 
   // ─── Pause & Reset controls ──────────────────────────────────────────────────
   const pauseGame = useCallback(() => {
