@@ -27,7 +27,7 @@ const ProfileinfoCard = () => {
       {user.profileImageUrl ? (
         <img
           src={user.profileImageUrl}
-          alt="Profile"
+          alt="User Profile Avatar"
           className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm transition-colors duration-300"
         />
       ) : (

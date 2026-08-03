@@ -79,6 +79,16 @@ const generateInterviewQuestions = async (req, res) => {
     }
   } catch (error) {
     console.error("Gemini API Error:", error);
+
+    if (error.status === 429) {
+      return res.status(429).json({ message: "Gemini API quota exceeded. Please try again later." });
+    }
+    if (error.status === 401 || (error.message && error.message.includes("API key not valid"))) {
+      return res.status(401).json({ message: "Invalid Gemini API Key configured." });
+    }
+    if (error.message && (error.message.includes("timeout") || error.message.includes("network"))) {
+      return res.status(504).json({ message: "Network timeout communicating with AI service." });
+    }
     res.status(500).json({
       message: "Failed to generate questions",
     });

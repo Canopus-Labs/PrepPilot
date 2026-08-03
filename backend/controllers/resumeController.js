@@ -228,7 +228,7 @@ const saveResume = async (req, res) => {
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
+        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 }).limit(50);
         res.status(200).json({ success: true, resumes });
     } catch (error) {
         console.error("Get Resumes Error:", error);
