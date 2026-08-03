@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";

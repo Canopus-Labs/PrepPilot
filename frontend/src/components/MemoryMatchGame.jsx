@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useMemoryMatch, DIFFICULTY_CONFIGS } from "../hooks/useMemoryMatch";

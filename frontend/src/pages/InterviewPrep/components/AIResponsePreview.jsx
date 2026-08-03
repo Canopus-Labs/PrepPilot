@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { LuCopy, LuCheck, LuCode } from "react-icons/lu";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";

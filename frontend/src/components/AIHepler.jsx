@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useRef, useContext } from "react";
 import { UserContext } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
