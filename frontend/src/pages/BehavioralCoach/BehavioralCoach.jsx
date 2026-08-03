@@ -348,7 +348,7 @@ const BehavioralCoach = () => {
 
       </div> {/* End max-w-6xl */}
 
-    </div> {/* End Page */}
+    </div> /* End Page */
 
   );
 };
