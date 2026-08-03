@@ -351,6 +351,7 @@ const BehavioralCoach = () => {
     </div> /* End Page */ 
 
 
+    </div>
 
   );
 };

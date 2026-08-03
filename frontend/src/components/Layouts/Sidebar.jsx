@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
@@ -145,7 +146,7 @@ const Sidebar = () => {
     user?.email?.charAt(0)?.toUpperCase() || "U";
 
   const handleLogout = async () => {
-    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch {}
+    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch (err) { /* ignore */ }
     finally {
       localStorage.clear(); sessionStorage.clear();
       clearUser(); navigate("/");
