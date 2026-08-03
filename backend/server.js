@@ -2,6 +2,12 @@ require("dotenv").config();
 const validateEnv = require("./config/validateEnv.js");
 validateEnv();
 const express = require("express");
+
+// Global unhandled promise rejection handler
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Promise Rejection:", err);
+});
+
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
@@ -150,7 +156,7 @@ app.get("/api/test", (req, res) => {
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
   refreshJobCache();
-  setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
+  clearInterval(window.__interval); window.__interval = setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
 
 // Start Server

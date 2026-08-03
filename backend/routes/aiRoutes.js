@@ -6,10 +6,100 @@ const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { isPrepPilotDomain, isContextualResponse } = require('../utils/domainClassifier');
+const { buildSolverPrompt, parseSolverOutput } = require('../utils/problemSolverParser');
+const problemSolverSchema = require('../validation/problemSolverSchema');
+const { z } = require("zod");
 const NodeCache = require('node-cache');
 
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
+
+/**
+ * Validate a problem-solving payload against the problemSolverSchema.
+ */
+function validateProblemSolve(req, res, next) {
+  try {
+    const parsed = problemSolverSchema.parse(req.body);
+    const clean = (value) =>
+      typeof value === "string"
+        ? value.replace(/<[^>]*>?/gm, "").replace(/[^\x20-\x7E\n]/g, "").trim()
+        : value;
+    req.solveInput = {
+      problem: clean(parsed.problem),
+      language: parsed.language,
+      constraints: clean(parsed.constraints),
+    };
+    next();
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const first = err.issues[0];
+      return res.status(400).json({
+        error: first?.message || "Invalid solve request.",
+        details: err.issues.map((i) => i.message),
+      });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * Structured problem-solving endpoint.
+ * @route POST /api/solve
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @example
+ * POST /api/solve
+ * {
+ *   "problem": "Two Sum...",
+ *   "language": "python",
+ *   "constraints": "1 <= nums.length <= 10^4"
+ * }
+ * @example
+ * 200 {"success":true,"solution":{"approach":"...","steps":"...","complexity":"...","code":"...","language":"python"}}
+ */
+async function solveHandler(req, res) {
+  const { problem, language, constraints } = req.solveInput;
+
+  try {
+    const prompt = buildSolverPrompt({ problem, language, constraints });
+    const { result, usedModel } = await generateChatWithFallback(
+      process.env.GEMINI_API_KEY,
+      prompt,
+      [],
+      {
+        systemInstruction:
+          "You are an expert coding interview tutor. Always answer with the exact markdown structure requested. Never wrap the whole answer in a code fence.",
+      }
+    );
+
+    const rawText = await result.response.text();
+    const parsed = parseSolverOutput(rawText);
+
+    if (!parsed.ok) {
+      return res.json({
+        success: false,
+        solution: null,
+        raw: parsed.raw,
+        model: usedModel,
+      });
+    }
+
+    return res.json({
+      success: true,
+      solution: {
+        approach: parsed.sections.approach,
+        steps: parsed.sections.steps || "",
+        complexity: parsed.sections.complexity || "",
+        code: parsed.sections.code || "",
+        language,
+      },
+      model: usedModel,
+    });
+  } catch (error) {
+    console.error("[AI] Solve failed:", error);
+    return res.status(500).json({ error: "Failed to generate solution" });
+  }
+}
 
 /**
  * Shared handler for text generation using Gemini.
@@ -91,12 +181,7 @@ async function generateHandler(req, res) {
       .replace(/```$/i, "")
       .trim();
 
-    console.log(
-      "[AI] promptLen=%d model=%s ms=%d",
-      prompt.length,
-      usedModel,
-      Date.now() - start,
-    );
+
     return res.json({ text: cleanedText, model: usedModel });
   } catch (error) {
     console.error("[AI] Generation failed:", error);
@@ -110,6 +195,9 @@ async function generateHandler(req, res) {
 router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
 router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+
+// Structured problem-solving route
+router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
 
 // List available models
 /**
