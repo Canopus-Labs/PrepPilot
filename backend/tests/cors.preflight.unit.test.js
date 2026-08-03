@@ -15,16 +15,12 @@ function buildApp(allowedOrigins = new Set(["https://allowed.example.com"])) {
 
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    const renderPattern =
-      /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot-backend)-[a-z0-9-]+\.onrender\.com$/;
     const localhostPattern =
       /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
 
     if (
       origin &&
-      (allowedOrigins.has(origin) ||
-        renderPattern.test(origin) ||
-        localhostPattern.test(origin))
+      (allowedOrigins.has(origin) || localhostPattern.test(origin))
     ) {
       res.header("Access-Control-Allow-Origin", origin);
       res.header("Vary", "Origin");
@@ -95,19 +91,37 @@ describe("CORS preflight — approved origin", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Approved origin — Render dynamic subdomain pattern
+// Attacker-registrable onrender subdomain — must be rejected (issue #921)
 // ---------------------------------------------------------------------------
-describe("CORS preflight — approved Render subdomain", () => {
-  it("returns 200 for a Render preview subdomain", async () => {
+describe("CORS preflight — onrender.com subdomain (attacker-registrable)", () => {
+  it("returns 403 for a preppilot attacker subdomain", async () => {
     const res = await request(app)
       .options("/api/test")
-      .set("Origin", "https://preppilot-backend-abc123.onrender.com")
+      .set("Origin", "https://preppilot-attacker.onrender.com")
       .set("Access-Control-Request-Method", "GET");
 
-    expect(res.status).toBe(200);
-    expect(res.headers["access-control-allow-origin"]).toBe(
-      "https://preppilot-backend-abc123.onrender.com"
-    );
+    expect(res.status).toBe(403);
+    expect(res.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+
+  it("returns 403 for an interview-prep-ai attacker subdomain", async () => {
+    const res = await request(app)
+      .options("/api/test")
+      .set("Origin", "https://interview-prep-ai-evil.onrender.com")
+      .set("Access-Control-Request-Method", "GET");
+
+    expect(res.status).toBe(403);
+    expect(res.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+
+  it("returns 403 for a preppilot-backend attacker subdomain", async () => {
+    const res = await request(app)
+      .options("/api/test")
+      .set("Origin", "https://preppilot-backend-evil.onrender.com")
+      .set("Access-Control-Request-Method", "GET");
+
+    expect(res.status).toBe(403);
+    expect(res.headers["access-control-allow-origin"]).toBeUndefined();
   });
 });
 
