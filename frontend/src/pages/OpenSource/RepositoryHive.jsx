@@ -42,8 +42,9 @@ const RepositoryHive = () => {
 
   const searchQueryRef = React.useRef(searchQuery);
   useEffect(() => {
-    searchQueryRef.current = searchQuery;
-  }, [searchQuery]);
+    fetchRepositories();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFilters, sortBy]);
 
   const fetchRepositories = React.useCallback(async () => {
     setLoading(true);
