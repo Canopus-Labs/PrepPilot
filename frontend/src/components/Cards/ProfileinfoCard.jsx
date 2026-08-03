@@ -3,22 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import { useLogout } from "../../hooks/useLogout";
+import { getUserInitial } from "../../utils/userUtils";
 
 const ProfileinfoCard = () => {
-  const { user, clearUser } = useContext(UserContext);
-  const navigate = useNavigate();
-  const handleLogout = async () => {
-    try {
-      await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
-    } catch (error) {
-      console.error("Logout request failed:", error);
-    } finally {
-      localStorage.clear();
-      sessionStorage.clear();
-      clearUser();
-      navigate("/");
-    }
-  };
+  const { user } = useContext(UserContext);
+  const handleLogout = useLogout();
+
   if (!user) return null;
 
   return (
@@ -33,7 +24,7 @@ const ProfileinfoCard = () => {
       ) : (
         <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white 
                         bg-gradient-to-r from-indigo-500 to-purple-500">
-          {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+          {getUserInitial(user)}
         </div>
       )}
 

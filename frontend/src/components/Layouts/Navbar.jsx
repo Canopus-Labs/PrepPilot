@@ -6,6 +6,8 @@ import { UserContext } from "../../context/userContext";
 import Modal from "../Loader/Modal";
 import Login from "../../pages/Auth/Login";
 import ThemeToggle from "../ThemeToggle";
+import { useLogout } from "../../hooks/useLogout";
+import { getUserInitial } from "../../utils/userUtils";
 
 const Navbar = () => {
   const SERVICES = [
@@ -19,11 +21,7 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [portalNode, setPortalNode] = useState(null);
   const { user } = useContext(UserContext);
-  // Helper for initial letter or fallback
-  const userInitial =
-    user?.name?.charAt(0)?.toUpperCase() ||
-    user?.email?.charAt(0)?.toUpperCase() ||
-    "U";
+  const handleLogout = useLogout();
   const navigate = useNavigate();
   const location = useLocation();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -182,7 +180,7 @@ const Navbar = () => {
                       />
                     ) : (
                       <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-sm">
-                        {userInitial}
+                        {getUserInitial(user)}
                       </div>
                     )
                   ) : (
@@ -196,10 +194,7 @@ const Navbar = () => {
                     </span>
                     {user ? (
                       <button
-                        onClick={() => {
-                          localStorage.clear();
-                          window.location.reload();
-                        }}
+                        onClick={handleLogout}
                         className="text-xs text-red-500 dark:text-red-400 hover:text-red-600 transition font-medium self-start mt-0.5"
                       >
                         Logout

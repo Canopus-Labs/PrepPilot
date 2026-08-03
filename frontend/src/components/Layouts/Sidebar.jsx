@@ -12,6 +12,8 @@ import {
   ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
   Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
 } from "lucide-react";
+import { useLogout } from "../../hooks/useLogout";
+import { getUserInitial } from "../../utils/userUtils";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
 const NAV_ITEMS = [
@@ -132,25 +134,14 @@ const NAV_ITEMS = [
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 const Sidebar = () => {
-  const { user, clearUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
+  const handleLogout = useLogout();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
-
-  const userInitial =
-    user?.name?.charAt(0)?.toUpperCase() ||
-    user?.email?.charAt(0)?.toUpperCase() || "U";
-
-  const handleLogout = async () => {
-    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch {}
-    finally {
-      localStorage.clear(); sessionStorage.clear();
-      clearUser(); navigate("/");
-    }
-  };
 
   const handleServiceClick = (item) => {
     if ((item.title === "Cognitive Builder" || item.title === "Cognitive Games") && !user) {
@@ -295,7 +286,7 @@ const Sidebar = () => {
                   className="w-8 h-8 rounded-full border border-white/10 object-cover shrink-0" />
               ) : (
                 <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-violet-600 to-fuchsia-600 shrink-0 text-sm">
-                  {userInitial}
+                  {getUserInitial(user)}
                 </div>
               )
             ) : (
