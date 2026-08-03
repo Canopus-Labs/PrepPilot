@@ -97,7 +97,7 @@ app.use(cookieParser());
 app.use(
   cookieSession({
     name: "csrfSession",
-    keys: [process.env.CSRF_SESSION_SECRET || process.env.JWT_SECRET],
+    keys: [process.env.CSRF_SESSION_SECRET],
     maxAge: 24 * 60 * 60 * 1000, // 24h
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

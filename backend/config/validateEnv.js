@@ -2,6 +2,7 @@ const requiredEnvVars = Object.freeze([
   "MONGO_URI",
   "JWT_SECRET",
   "GEMINI_API_KEY",
+  "CSRF_SESSION_SECRET",
 ]);
 
 // Documented placeholder values that must never pass validation — copying
