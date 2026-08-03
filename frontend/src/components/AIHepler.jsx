@@ -1,11 +1,11 @@
 import React, { useState, useRef, useContext } from "react";
-import { UserContext } from "../context/userContext";
+import { useUser } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
 import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const [messages, setMessages] = useState([
     { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
   ]);

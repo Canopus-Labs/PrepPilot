@@ -3,10 +3,11 @@ import gfg from "../assets/gfg.svg";
 import leetcode from "../assets/leetcode.svg";
 import youtube from "../assets/youtube.svg";
 import React, { useState, useEffect, useCallback, memo, useContext } from "react";
+import toast from "react-hot-toast";
 
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
-import { UserContext } from "../context/userContext";
+import { useUser } from "../context/userContext";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
 
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
@@ -87,11 +88,16 @@ const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, follow
 
 function SheetDetail() {
   const { id } = useParams();
-  const { sheetProgress: ctxProgress, refreshSheetProgress } = useContext(UserContext);
+  const { sheetProgress: ctxProgress, refreshSheetProgress } = useUser();
   const [sheet, setSheet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [completedTopics, setCompletedTopics] = useState({});
   const [followed, setFollowed] = useState(false);
+
+  const ctxProgressRef = React.useRef(ctxProgress);
+  useEffect(() => {
+    ctxProgressRef.current = ctxProgress;
+  }, [ctxProgress]);
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/sheets/${id}`)
@@ -100,7 +106,7 @@ function SheetDetail() {
         setSheet(data.sheet);
 
         // 1. Try backend (UserContext) — available immediately after login, works cross-device
-        const backendRecord = (ctxProgress || []).find(p => p.sheetId === id);
+        const backendRecord = (ctxProgressRef.current || []).find(p => p.sheetId === id);
 
         if (backendRecord) {
           setFollowed(backendRecord.followed || false);
@@ -114,12 +120,18 @@ function SheetDetail() {
               setFollowed(progressData.followed || false);
               setCompletedTopics(progressData.completedTopics || {});
             }
-          } catch {}
+          } catch (err) {
+            console.error("Failed to parse sheet progress from localStorage:", err);
+          }
         }
 
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Failed to fetch sheet details:", err);
+        toast.error("Failed to load sheet details. Please try again.");
+        setLoading(false);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -159,7 +171,7 @@ function SheetDetail() {
       }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
-  }, [completedTopics, followed]);
+  }, [completedTopics, followed, totalSubtopics, completedCount, id, refreshSheetProgress]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;

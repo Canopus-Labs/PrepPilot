@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../../context/userContext";
+import { useUser } from "../../../context/userContext";
 import AptitudeQuestionCard from "../../../components/Cards/AptitudeQuestionCard";
 import Loader from "../../../components/Loader/Loader";
 
@@ -23,7 +23,7 @@ const PracticePage = () => {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const navigate = useNavigate();
 
   const handleTopicClick = async (topic) => {
