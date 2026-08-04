@@ -239,7 +239,7 @@ const updateQuestionNote = async (req, res) => {
       });
     }
 
-    question.note = note || "";
+    question.note = (note || "").trim();
     await question.save();
 
     res.status(200).json({ success: true, question });
