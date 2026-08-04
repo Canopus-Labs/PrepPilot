@@ -64,6 +64,7 @@ const createFlashcard = async (req, res) => {
   try {
     const { question, answer, category, sourceId } = req.body;
     const userId = req.user._id;
+    const trimmedCategory = (category || "General").trim();
 
     // Check if card with exact sourceId already exists for this user
     if (sourceId) {
@@ -81,7 +82,7 @@ const createFlashcard = async (req, res) => {
       userId,
       question,
       answer,
-      category: category || "General",
+      category: trimmedCategory || "General",
       sourceId: sourceId || null,
       dueDate: new Date(),
     });
