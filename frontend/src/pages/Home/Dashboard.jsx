@@ -40,14 +40,13 @@ const Dashboard = () => {
       toast.success("Session deleted successfully!");
       setOpenDeleteAlert({ open: false, data: null });
       fetchAllSessions();
-    } catch (error) {
+    } catch (err) {
       toast.error("Failed to delete session");
     }
   };
 
   useEffect(() => {
     fetchAllSessions();
-    // eslint-disable-next-line
   }, []);
 
   return (

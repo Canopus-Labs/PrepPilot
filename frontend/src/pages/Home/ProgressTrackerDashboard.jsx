@@ -154,9 +154,11 @@ const ProgressTrackerDashboard = () => {
                 followed: true,
                 completedTopics: raw.completedTopics || {},
                 percentage: raw.percentage || 0,
-              }).catch(() => {});
+              }).catch((err) => { /* ignore */ });
             }
-          } catch {}
+          } catch (err) {
+            console.error("Failed to parse local storage progress", err);
+          }
         }
 
         const merged = [...backendProgress, ...localExtra]

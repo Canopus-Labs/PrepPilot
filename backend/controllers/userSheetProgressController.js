@@ -16,6 +16,7 @@ exports.getAllProgress = async (req, res) => {
     const progressList = await UserSheetProgress.find({ userId })
       .skip(skip)
       .limit(limit);
+    const progressList = await UserSheetProgress.find({ userId }).limit(50);
 
     res.json({
       success: true,
