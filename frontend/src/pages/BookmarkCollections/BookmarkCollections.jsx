@@ -36,7 +36,7 @@ const BookmarkCollections = () => {
     },
   ];
 
-  const bookmarkedQuestions = [
+  const bookmarkedQuestions = useMemo(() => [
     {
       id: 1,
       question: "Explain React Virtual DOM.",
@@ -69,7 +69,7 @@ const BookmarkCollections = () => {
       tags: ["OS"],
       notes: "Mention scheduling.",
     },
-  ];
+  ], []);
 
   const filteredQuestions = useMemo(() => {
     return bookmarkedQuestions.filter((item) => {
