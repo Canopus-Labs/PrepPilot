@@ -22,12 +22,12 @@ exports.saveAchievements = async (req, res) => {
     }
 
     // Reject any ID not in the server-side allowlist
-    const unknown = unlockedAchievements.filter((id) => !VALID_ACHIEVEMENTS.has(id));
+    const unknown = unlockedAchievements.filter((id) => typeof id !== 'string' || !VALID_ACHIEVEMENTS.has(id));
 
     if (unknown.length > 0) {
         return res.status(400).json({
             success: false,
-            error: `Unknown achievement ID(s): ${unknown.join(', ')}`,
+            error: `Invalid achievement ID(s): ${unknown.join(', ')}. Each ID must be a string.`,
         });
     }
 
