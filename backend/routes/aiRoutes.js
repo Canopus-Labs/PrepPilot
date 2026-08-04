@@ -1,4 +1,5 @@
 const express = require("express");
+const { protect } = require("../middlewares/authMiddleware");
 const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
@@ -237,12 +238,12 @@ async function generateHandler(req, res) {
 }
 
 // Primary route used by frontend
-router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/generate', protect, aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
-router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/ai/generate', protect, aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 
 // Structured problem-solving route
-router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
+router.post('/solve', protect, aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
 
 // List available models
 /**
@@ -257,7 +258,7 @@ router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHa
  * @example
  * 200 {"availableModels": ["gemini-2.5-flash"], "configured": "models/gemini-2.5-flash", "note": "..."}
  */
-router.get("/models", async (req, res) => {
+router.get("/models", protect, async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const models = await genAI.listModels();
