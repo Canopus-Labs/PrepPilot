@@ -11,6 +11,9 @@ process.on("unhandledRejection", (err) => {
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
+const helmet = require("helmet");
+const lusca = require("lusca");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -30,7 +33,8 @@ const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
 app.set("trust proxy", 1);
-app.use(generalHeaders);
+app.use(helmet());
+app.use(generalHeaders); 
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
