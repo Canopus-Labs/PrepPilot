@@ -136,7 +136,14 @@ const generateConceptExplanation = async (req, res) => {
   try {
     const { question } = req.body;
 
-    const prompt = conceptExplainPrompt(question);
+    let prompt;
+    try {
+      prompt = conceptExplainPrompt(question);
+    } catch (validationError) {
+      return res.status(400).json({
+        message: validationError.message,
+      });
+    }
 
     const { result, usedModel } = await generateWithFallback(
       process.env.GEMINI_API_KEY,
