@@ -1,5 +1,6 @@
 
 import React from "react";
+import React, { useEffect, useState } from "react";
 
 const SERVICES = [
   { title: "Role-Based Preparation", description: "Curated questions tailored to your job role" },

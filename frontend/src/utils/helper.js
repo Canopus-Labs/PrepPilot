@@ -7,7 +7,7 @@ export const validateEmail = (email) => {
 export const getInitials=(title)=>{
     if(!title) return "";
 
-    const words = title.split(" ");
+    const words = title.trim().split(/\s+/);
     let initials="";
     for(let i=0; i<Math.min(words.length,2);i++){
         if (!words[i]) continue;
