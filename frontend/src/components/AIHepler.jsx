@@ -41,7 +41,8 @@ export default function AIHelper() {
         if (parsed.message) {
           friendlyMessage = parsed.message;
         }
-      } catch {
+      } catch (err) {
+        // ignore json parse error
       }
       throw new Error(friendlyMessage);
     }
@@ -111,7 +112,9 @@ export default function AIHelper() {
         try {
           const parsed = JSON.parse(displayText);
           displayText = parsed.text || displayText;
-        } catch {}
+        } catch (err) {
+          // ignore json parse error
+        }
       }
 
       setMessages((cur) =>

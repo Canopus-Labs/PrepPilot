@@ -37,8 +37,8 @@ function SheetList({ type }) {
   useEffect(() => {
     const checkUpdate = () => {
       const latest = localStorage.getItem("sheet-last-update");
-      if (latest && parseInt(latest) > timestamp) {
-        setTimestamp(parseInt(latest));
+      if (latest && parseInt(latest, 10) > timestamp) {
+        setTimestamp(parseInt(latest, 10));
       }
     };
     const interval = setInterval(checkUpdate, 1000);

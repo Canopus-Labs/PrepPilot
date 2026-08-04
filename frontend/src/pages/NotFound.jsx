@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const NotFound = () => {
+  // Render 404 Not Found Page
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] flex items-center justify-center px-6 transition-colors duration-300">
       <motion.div
