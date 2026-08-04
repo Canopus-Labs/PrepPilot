@@ -18,6 +18,8 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+const PASSWORD_SALT_ROUNDS = 10;
+
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -53,14 +55,39 @@ const generateRefreshToken = (userId) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
+
+        // Early payload presence & type validation to prevent unhandled TypeErrors (#758)
+        if (!name || typeof name !== "string" || !name.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Name is required and must be a non-empty string.",
+            });
+        }
+
+        if (!email || typeof email !== "string" || !email.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required and must be a valid string.",
+            });
+        }
+
+        if (!password || typeof password !== "string") {
+            return res.status(400).json({
+                success: false,
+                message: "Password is required.",
+            });
+        }
+
+        const cleanName = name.trim();
+        const cleanEmail = email.trim().toLowerCase();
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
 
-        if (!emailRegex.test(email)) {
-           return res.status(400).json({
-           success: false,
-           message: "Please enter a valid email address.",
-        });
+        if (!emailRegex.test(cleanEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address.",
+            });
         }
 
         const { valid, errors } = validatePassword(password);
@@ -68,7 +95,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: errors[0] });
         }
 
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) {
             // Do not reveal whether the email is already registered. Respond
             // with the same generic success shape (no tokens, no user data)
@@ -79,19 +106,22 @@ const registerUser = async (req, res) => {
             });
         }
 
+        // Hash raw password with bcrypt before DB creation (#757)
+        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
+
         // Split name into first and last names for defaults
-        const nameParts = name.trim().split(/\s+/);
+        const nameParts = cleanName.split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
         // Generate default unique PrepPilot ID
-        const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
+        const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
         // Auto-verify user — email verification temporarily disabled
         const user = await User.create({
-            name,
-            email,
-            password: password,
+            name: cleanName,
+            email: cleanEmail,
+            password: hashedPassword,
             profileImageUrl,
             firstName,
             lastName,
@@ -119,7 +149,6 @@ const registerUser = async (req, res) => {
             success: true,
             message: "Account created successfully. You can now log in.",
             accessToken,
-            
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -139,7 +168,11 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: "Email and password are required." });
+        }
+
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
         if (!user) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
@@ -172,7 +205,6 @@ const loginUser = async (req, res) => {
             email: user.email,
             profileImageUrl: user.profileImageUrl,
             accessToken,
-
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -231,7 +263,6 @@ const refreshToken = async (req, res) => {
             success: true,
             message: "Token refreshed successfully.",
             accessToken,
-        
         });
     } catch (error) {
         console.error("Refresh token error:", error);
@@ -333,7 +364,7 @@ const resendVerificationEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email is required." });
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
 
         // Return success even if user not found — avoids exposing which emails are registered
         if (!user) {
@@ -367,11 +398,11 @@ const resendVerificationEmail = async (req, res) => {
 const getUserProfile = async (req, res) => {
     try {
         const user = req.user;
-        if(!user){
+        if (!user) {
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
         res.json(user);
-    }catch(error){
+    } catch (error) {
         console.error("Get profile error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
@@ -464,7 +495,7 @@ const updateUserProfile = async (req, res) => {
 
         await user.save();
 
-        // return updated user, excluding password
+        // Return updated user, excluding password
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
@@ -502,12 +533,17 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password
-        user.password = newPassword;
-        // Invalidate access tokens issued before the password change.
+        // Hash new password before saving (#757)
+        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+
+        // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
         user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
+        // Fix #759: Clear refresh cookie on client response
+        res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         console.error("Change password error:", error);
@@ -599,4 +635,15 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+module.exports = {
+    registerUser,
+    loginUser,
+    refreshToken,
+    logoutUser,
+    verifyEmail,
+    resendVerificationEmail,
+    getUserProfile,
+    updateUserProfile,
+    changePassword,
+    deleteUserAccount,
+};
