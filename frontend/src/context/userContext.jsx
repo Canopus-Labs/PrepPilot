@@ -80,7 +80,7 @@ export const UserProvider = ({ children }) => {
         try {
             const progressRes = await axiosInstance.get("/api/user/sheet-progress");
             setSheetProgress(progressRes.data.progressList || []);
-        } catch (error) {
+        } catch {
     toast.error("Unable to refresh progress. Please try again.");
 }
     };
