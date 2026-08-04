@@ -1,17 +1,14 @@
 import React from "react";
+
+
 import { pageVariants, pageTransition } from "../../utils/animations";
 
 const PageTransition = ({ children }) => {
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-      transition={pageTransition}
+    <div
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 

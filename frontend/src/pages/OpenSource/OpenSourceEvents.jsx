@@ -306,10 +306,7 @@ const OpenSourceEvents = () => {
       </button>
     )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="mb-8 flex flex-col gap-3"
         >
           <div className="flex items-center gap-3">
@@ -344,14 +341,11 @@ const OpenSourceEvents = () => {
               </a>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+            <div
               className="bg-white dark:bg-[#0f1729] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-4 sm:p-5 overflow-visible"
             >
               <div className="flex flex-col gap-4">
@@ -384,12 +378,10 @@ const OpenSourceEvents = () => {
                   />
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
+              <div
                 className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl flex items-start gap-3"
               >
                 <AlertCircle
@@ -399,7 +391,7 @@ const OpenSourceEvents = () => {
                 <p className="text-red-700 dark:text-red-300 text-sm">
                   {error}
                 </p>
-              </motion.div>
+              </div>
             )}
 
             {loading && (
@@ -415,9 +407,7 @@ const OpenSourceEvents = () => {
             )}
 
             {!loading && groupedEvents.size === 0 && !error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+              <div
                 className="text-center py-12 bg-white dark:bg-[#0f1729] border border-dashed border-gray-200 dark:border-white/10 rounded-xl"
               >
                 <CalendarDays
@@ -430,18 +420,15 @@ const OpenSourceEvents = () => {
                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                   Try clearing the search or changing the filters.
                 </p>
-              </motion.div>
+              </div>
             )}
 
             {!loading && groupedEvents.size > 0 && (
               <div className="space-y-6">
                 {Array.from(groupedEvents.entries()).map(
                   ([month, monthEvents]) => (
-                    <motion.div
+                    <div
                       key={month}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
                       className="space-y-3"
                     >
                       <div className="flex items-center gap-2">
@@ -499,7 +486,7 @@ const OpenSourceEvents = () => {
                           </a>
                         ))}
                       </div>
-                    </motion.div>
+                    </div>
                   ),
                 )}
               </div>
@@ -507,10 +494,7 @@ const OpenSourceEvents = () => {
           </div>
 
           <div className="lg:col-span-1 space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+            <div
               className="bg-white dark:bg-[#0f1729] border border-gray-200 dark:border-white/10 rounded-xl p-4 shadow-sm"
             >
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
@@ -536,12 +520,9 @@ const OpenSourceEvents = () => {
                   Contribute events
                 </a>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.05 }}
+            <div
               className="bg-white dark:bg-[#0f1729] border border-gray-200 dark:border-white/10 rounded-xl p-4 shadow-sm"
             >
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
@@ -553,7 +534,7 @@ const OpenSourceEvents = () => {
                 {modeFilter !== "all" ? ` | Mode: ${modeFilter}` : ""}
                 {searchQuery ? ` | Search: ${searchQuery}` : ""}.
               </p>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

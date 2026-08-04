@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
 
+
 const NotFound = () => {
   // Render 404 Not Found Page
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] flex items-center justify-center px-6 transition-colors duration-300">
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+      <div
         className="text-center"
       >
         <h1 className="text-7xl font-bold mb-4">404</h1>
@@ -26,7 +24,7 @@ const NotFound = () => {
         >
           Go Back Home
         </Link>
-      </motion.div>
+      </div>
     </div>
   );
 };
