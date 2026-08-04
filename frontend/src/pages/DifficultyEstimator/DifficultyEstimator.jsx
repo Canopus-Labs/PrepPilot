@@ -331,7 +331,7 @@ const DifficultyEstimator = () => {
 
             </div>
 
-                      {/* AI Recommendation */}
+          </div>
 
             <div className="bg-white dark:bg-[#111827] rounded-3xl shadow border border-gray-200 dark:border-white/10 p-8">
 
