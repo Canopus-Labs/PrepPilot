@@ -102,7 +102,7 @@ const DifficultyEstimator = () => {
 
         </div>
                 {result && (
-
+                  <>
           <div className="space-y-8">
 
             {/* Main Analysis */}
@@ -332,6 +332,7 @@ const DifficultyEstimator = () => {
             </div>
 
           </div>
+                      {/* AI Recommendation */}
 
             <div className="bg-white dark:bg-[#111827] rounded-3xl shadow border border-gray-200 dark:border-white/10 p-8">
 
@@ -395,6 +396,7 @@ const DifficultyEstimator = () => {
             </div>
 
           </div>
+          </>
         )}
 
       </div>
