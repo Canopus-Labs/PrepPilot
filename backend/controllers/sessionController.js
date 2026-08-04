@@ -156,6 +156,10 @@ exports.getMySessions = async (req, res) => {
  */
 exports.getSessionById = async (req, res) => {
     try {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid session ID" });
+  }
+
   const session = await Session.findById(req.params.id)
   .populate({
     path: "questions",
