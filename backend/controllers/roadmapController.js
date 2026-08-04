@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const RoadmapProject = require("../models/RoadmapProject");
 
 const MAX_SAVED_ROADMAPS_PER_USER = 30;
@@ -91,6 +92,10 @@ const getRoadmapById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid roadmap ID" });
+    }
 
     const roadmap = await RoadmapProject.findOne({ _id: id, userId });
     if (!roadmap) {
