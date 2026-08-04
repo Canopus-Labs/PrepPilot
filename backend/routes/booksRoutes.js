@@ -266,3 +266,6 @@ router.get("/download", (req, res) => {
 
 module.exports = router;
 module.exports.listFilesRecursive = listFilesRecursive;
+
+.catch(err => console.error("Promise.all failed:", err));
+module.exports.listFilesRecursive = listFilesRecursive;

@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const router = require("../routes/authRoutes");
 const { protect } = require("../middlewares/authMiddleware");
 const {
+  loginLimiter,
   authLimiter,
   generalLimiter,
   sensitiveAuthLimiter,
@@ -34,12 +35,11 @@ test("POST /register keeps authLimiter only", () => {
   assert.equal(stack.includes(generalLimiter), false);
 });
 
-test("POST /login keeps authLimiter only", () => {
+test("POST /login mounts loginLimiter (strict brute-force protection)", () => {
   const stack = getRouteStack("POST", "/login");
 
   assert.ok(stack);
-  assert.equal(stack.includes(authLimiter), true);
-  assert.equal(stack.includes(generalLimiter), false);
+  assert.equal(stack.includes(loginLimiter), true);
 });
 
 test("GET /profile includes protect and generalLimiter in order", () => {

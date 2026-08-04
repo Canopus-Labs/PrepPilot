@@ -2,6 +2,7 @@ const requiredEnvVars = Object.freeze([
   "MONGO_URI",
   "JWT_SECRET",
   "GEMINI_API_KEY",
+  "CSRF_SESSION_SECRET",
 ]);
 
 // Optional integrations — the server boots fine without these, but the
