@@ -89,7 +89,7 @@ const BookmarkCollections = () => {
         difficultyMatch
       );
     });
-  }, [search, company, difficulty]);
+  }, [search, company, difficulty, bookmarkedQuestions]);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] px-6 py-10">
