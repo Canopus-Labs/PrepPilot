@@ -9,6 +9,8 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+const PASSWORD_SALT_ROUNDS = 10;
+
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -64,6 +66,9 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "A user with this email already exists." });
         }
 
+        // Hash raw user password before saving to database
+        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
+
         // Split name into first and last names for defaults
         const nameParts = name.trim().split(/\s+/);
         const firstName = nameParts[0] || "";
@@ -76,7 +81,7 @@ const registerUser = async (req, res) => {
         const user = await User.create({
             name,
             email,
-            password: password,
+            password: hashedPassword,
             profileImageUrl,
             firstName,
             lastName,
@@ -487,8 +492,9 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password
-        user.password = newPassword;
+        // Hash new password before assignment
+        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+
         // Invalidate access tokens issued before the password change.
         user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
