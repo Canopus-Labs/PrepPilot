@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 
 const NotFound = () => {
   // Render 404 Not Found Page

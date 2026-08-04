@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import moment from "moment";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from 'framer-motion';
 import { LuCircleAlert, LuListCollapse, LuDownload } from "react-icons/lu";
 import html2pdf from "html2pdf.js";
 import SpinnerLoader from "../../components/Loader/SpinnerLoader";
@@ -40,7 +41,7 @@ const InterviewPrep = () => {
   };
 
   // fetch session data
-  const fetchSessionDetailsById = async () => {
+  const fetchSessionDetailsById = React.useCallback(async () => {
     try {
       const response = await axiosInstance.get(
         API_PATHS.SESSION.GET_ONE(sessionId)
@@ -51,7 +52,7 @@ const InterviewPrep = () => {
     } catch (error) {
       console.error("Error", error);
     }
-  };
+  }, [sessionId]);
 
   // generate explanation
   const generateConceptExplanation = async (question) => {
@@ -126,7 +127,7 @@ const InterviewPrep = () => {
 
   useEffect(() => {
     if (sessionId) fetchSessionDetailsById();
-  }, [sessionId]);
+  }, [sessionId, fetchSessionDetailsById]);
 
   return (
     <DashboardLayout>

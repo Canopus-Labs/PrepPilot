@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
 const ProfileinfoCard = () => {
-  const { user, clearUser } = useContext(UserContext);
+  const { user, clearUser } = useUser();
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {

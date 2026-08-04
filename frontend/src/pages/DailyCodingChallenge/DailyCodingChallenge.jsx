@@ -3,6 +3,7 @@ import ChallengeCard from "../DailyChallenge/ChallengeCard";
 import StreakCard from "../DailyChallenge/StreakCard";
 import WeeklyProgress from "../DailyChallenge/WeeklyProgress";
 import BadgeCard from "../DailyChallenge/BadgeCard";
+
 const challenge = {
   title: "Two Sum",
   difficulty: "Easy",

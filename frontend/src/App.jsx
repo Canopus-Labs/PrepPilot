@@ -1,31 +1,49 @@
-import Compiler from "./components/Compiler";
-import SkillAssessment from "./components/SkillAssessment";
-import DsaSheet from "./components/SheetDetailsPage";
-import SheetList from "./components/SheetList";
+const Compiler = lazy(() => import("./components/Compiler"));
+const SkillAssessment = lazy(() => import("./components/SkillAssessment"));
+const DsaSheet = lazy(() => import("./components/SheetDetailsPage"));
+const SheetList = lazy(() => import("./components/SheetList"));
 import UserProvider from "./context/userContext";
 import ThemeProvider from "./context/themeContext";
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from 'framer-motion';
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import AuthPage from "./pages/Auth/AuthPage";
-import VerifyEmail from "./pages/Auth/verifyEmail";
+const Login = lazy(() => import("./pages/Auth/Login"));
+const SignUp = lazy(() => import("./pages/Auth/SignUp"));
+const AuthPage = lazy(() => import("./pages/Auth/AuthPage"));
+const VerifyEmail = lazy(() => import("./pages/Auth/verifyEmail"));
 import LandingPage from "./LandingPage";
-import Dashboard from "./pages/Home/Dashboard";
-import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
-import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
-import AIHelper from "./components/AIHepler";
-import PracticePage from "./pages/InterviewPrep/components/PracticePage";
-import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
+const Dashboard = lazy(() => import("./pages/Home/Dashboard"));
+const ProgressTrackerDashboard = lazy(() => import("./pages/Home/ProgressTrackerDashboard"));
+const InterviewPrep = lazy(() => import("./pages/InterviewPrep/InterviewPrep"));
+const AIHelper = lazy(() => import("./components/AIHepler"));
+const PracticePage = lazy(() => import("./pages/InterviewPrep/components/PracticePage"));
+const CognitiveGamesPage = lazy(() => import("./pages/CognitiveGames/CognitiveGamesPage"));
 import { useContext } from "react";
-import { UserContext } from "./context/userContext";
+import { useUser } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
 import { Navigate, Outlet } from "react-router-dom";
+const ResumeTemplates = lazy(() => import("./pages/ResumeBuilder/ResumeTemplates"));
+const ResumeEditor = lazy(() => import("./pages/ResumeBuilder/ResumeEditor"));
+const ResumeAnalyzer = lazy(() => import("./pages/ResumeBuilder/ResumeAnalyzer"));
+const InterviewExperiences = lazy(() => import("./pages/InterviewExperiences/InterviewExperiences"));
+const TermsandConditions = lazy(() => import("./pages/Terms/TermsandConditions"));
+const ProjectIdeas = lazy(() => import("./pages/ProjectIdeas/ProjectIdeas"));
+const RepositoryHive = lazy(() => import("./pages/OpenSource/RepositoryHive"));
+const OSSBlog = lazy(() => import("./pages/OpenSource/OSSBlog"));
+const OpenSourceEvents = lazy(() => import("./pages/OpenSource/OpenSourceEvents"));
+const NotesBooks = lazy(() => import("./pages/NotesBooks/NotesBooks"));
+const NotesSummarizer = lazy(() => import("./pages/NotesSummarizer/NotesSummarizer"));
+const JobsForYou = lazy(() => import("./pages/Jobs/JobsForYou"));
+const HelpSupport = lazy(() => import("./pages/Support/HelpSupport"));
+const Settings = lazy(() => import("./pages/Settings/Settings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/Terms/PrivacyPolicy"));
+const FreeCourses = lazy(() => import("./pages/FreeCourses/FreeCourses"));
+const SpacedRepetitionPage = lazy(() => import("./pages/SpacedRepetition/SpacedRepetitionPage"));
 import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
 import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
 import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
@@ -46,10 +64,11 @@ import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
+import InterviewReplay from "./pages/InterviewReplay/InterviewReplay";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useContext(UserContext);
+  const { user, loading } = useUser();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
@@ -67,6 +86,13 @@ const BuggyComponent = () => {
   throw new Error("This is a simulated crash to test the Error Boundary component!");
 };
 
+
+const SuspenseFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600" />
+  </div>
+);
+
 const App = () => {
   return (
     <ThemeProvider>
@@ -75,7 +101,7 @@ const App = () => {
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
           <Router>
             <AnimatePresence mode="wait">
-              <Routes>
+              <Suspense fallback={<SuspenseFallback />}><Routes>
                 {/* Routes without Sidebar */}
                 <Route
                   path="/"
@@ -224,6 +250,11 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/interview-replay"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <InterviewReplay />
                     path="/analytics"
                     element={
                       <ProtectedRoute>
@@ -452,7 +483,7 @@ const App = () => {
                       </PageTransition>
                     }
                  />
-              </Routes>
+              </Routes></Suspense>
             </AnimatePresence>
           </Router>
           <Toaster

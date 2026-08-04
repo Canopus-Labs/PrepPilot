@@ -6,7 +6,7 @@ import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { UserContext } from "../../context/userContext";
+import { useUser } from "../../context/userContext";
 import uploadImage from "../../utils/uploadimage";
 import { LuArrowRight } from "react-icons/lu";
 
@@ -23,7 +23,7 @@ const SignUp = ({ setCurrentPage }) => {
   const [resendError, setResendError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  const { updateUser } = useContext(UserContext);
+  const { updateUser } = useUser();
   const navigate = useNavigate();
 
   // Computed inside the component so they react to `password` state
