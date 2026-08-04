@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";

@@ -1,11 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  BookOpen,
-  ExternalLink,
-  GraduationCap,
-  Search,
-  Tag,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+
 import rawCourses from "../../data/allcourses.json";
 
 // ── Colour helpers ────────────────────────────────────────────────────────────

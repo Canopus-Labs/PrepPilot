@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  Brain,
-  MessageSquare,
-  Target,
-  CheckCircle2,
-  AlertTriangle,
-  Sparkles,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -348,8 +342,7 @@ const BehavioralCoach = () => {
 
       </div> {/* End max-w-6xl */}
 
-    </div> {/* End Page */}
-
+    </div>
   );
 };
 

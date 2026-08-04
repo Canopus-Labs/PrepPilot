@@ -1,14 +1,6 @@
-import React, { useMemo, useState } from "react";
-import {
-  Bookmark,
-  Folder,
-  Search,
-  Plus,
-  Filter,
-  Download,
-  Share2,
-  StickyNote,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+
+
 
 const BookmarkCollections = () => {
   const [search, setSearch] = useState("");
@@ -36,7 +28,7 @@ const BookmarkCollections = () => {
     },
   ];
 
-  const bookmarkedQuestions = [
+  const bookmarkedQuestions = useMemo(() => [
     {
       id: 1,
       question: "Explain React Virtual DOM.",
@@ -69,7 +61,7 @@ const BookmarkCollections = () => {
       tags: ["OS"],
       notes: "Mention scheduling.",
     },
-  ];
+  ], []);
 
   const filteredQuestions = useMemo(() => {
     return bookmarkedQuestions.filter((item) => {
@@ -89,7 +81,7 @@ const BookmarkCollections = () => {
         difficultyMatch
       );
     });
-  }, [search, company, difficulty]);
+  }, [search, company, difficulty, bookmarkedQuestions]);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] px-6 py-10">

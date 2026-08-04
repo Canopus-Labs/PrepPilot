@@ -1,10 +1,7 @@
-import React, { useState } from "react";
-import Input from "../../components/Inputs/Input";
-import Button from "../../components/Button/Button";
+import { useState } from "react";
 import { validateEmail } from "../../utils/helper";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosinstance";
-import { LuArrowRight, LuArrowLeft } from "react-icons/lu";
 
 const ForgotPassword = ({ setCurrentPage }) => {
   const [email, setEmail] = useState("");

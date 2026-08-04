@@ -1,27 +1,4 @@
-import Compiler from "./components/Compiler";
-import SkillAssessment from "./components/SkillAssessment";
-import DsaSheet from "./components/SheetDetailsPage";
-import SheetList from "./components/SheetList";
-import UserProvider from "./context/userContext";
-import ThemeProvider from "./context/themeContext";
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import { AnimatePresence } from "framer-motion";
-import PageTransition from "./components/animations/PageTransition";
-import ErrorBoundary from "./components/ErrorBoundary";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import AuthPage from "./pages/Auth/AuthPage";
-import VerifyEmail from "./pages/Auth/verifyEmail";
-import LandingPage from "./LandingPage";
-import Dashboard from "./pages/Home/Dashboard";
-import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
-import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
-import AIHelper from "./components/AIHepler";
-import PracticePage from "./pages/InterviewPrep/components/PracticePage";
-import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
 import { useContext } from "react";
 import { UserContext } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
@@ -48,6 +25,7 @@ import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage"
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
+import ComplexityCheats from "./pages/ComplexityCheats/ComplexityCheats";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -149,7 +127,9 @@ const App = () => {
                 <Route
                   element={
                     <MainLayout>
-                      <Outlet />
+                      <ErrorBoundary>
+                        <Outlet />
+                      </ErrorBoundary>
                     </MainLayout>
                   }
                 >
@@ -326,6 +306,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <InterviewExperiences />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/complexity-cheat-sheet"
+                    element={
+                      <PageTransition>
+                        <ComplexityCheats />
                       </PageTransition>
                     }
                   />

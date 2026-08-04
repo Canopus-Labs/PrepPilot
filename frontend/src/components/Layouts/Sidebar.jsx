@@ -1,16 +1,13 @@
-import React, { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import Modal from "../Loader/Modal";
-import Login from "../../pages/Auth/Login";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
-  LayoutDashboard, Bot, BrainCircuit, Briefcase, BriefcaseBusiness,
-  Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
-  Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
-  ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
+  LayoutDashboard, Bot, Briefcase, BriefcaseBusiness,
+  Code2, Target, Settings, HelpCircle, FileText, Zap, MessageSquare, Lightbulb, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
   Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
+  Gauge,
 } from "lucide-react";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
@@ -58,6 +55,7 @@ const NAV_ITEMS = [
       { id: "spaced-repetition",     title: "Spaced Repetition",     path: "/spaced-repetition",      icon: RotateCcw },
       { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
       { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
+      { id: "complexity-cheats",      title: "Complexity Cheat Sheet", path: "/complexity-cheat-sheet", icon: Gauge },
     ],
   },
   {
@@ -145,7 +143,7 @@ const Sidebar = () => {
     user?.email?.charAt(0)?.toUpperCase() || "U";
 
   const handleLogout = async () => {
-    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch {}
+    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch (err) { /* ignore */ }
     finally {
       localStorage.clear(); sessionStorage.clear();
       clearUser(); navigate("/");

@@ -1,14 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { LuPlus } from "react-icons/lu";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { User, PlusCircle } from "lucide-react";
 
-import SummaryCard from "../../components/Cards/SummaryCard";
-import Modal from "../../components/Loader/Modal";
-import CreateSessionForm from "./CreateSessionForm";
-import DeleteAlertContent from "../../components/DeleteAlertContent";
 
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -26,7 +20,7 @@ const Dashboard = () => {
   const fetchAllSessions = async () => {
     try {
       const response = await axiosInstance.get(API_PATHS.SESSION.GET_ALL);
-      setSessions(response.data);
+      setSessions(response.data.data || []);
     } catch (error) {
       console.error("Error fetching sessions:", error);
     }
@@ -40,14 +34,14 @@ const Dashboard = () => {
       toast.success("Session deleted successfully!");
       setOpenDeleteAlert({ open: false, data: null });
       fetchAllSessions();
-    } catch (error) {
+    } catch (err) {
       toast.error("Failed to delete session");
     }
   };
 
   useEffect(() => {
     fetchAllSessions();
-    // eslint-disable-next-line
+     
   }, []);
 
   return (

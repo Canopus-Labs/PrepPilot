@@ -1,5 +1,3 @@
-import React from "react";
-import { Trophy, Lock } from "lucide-react";
 
 const AchievementBadge = ({ title, description, unlocked }) => {
   return (

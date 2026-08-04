@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
+
+
 
 const COLORS = [
   "#8B5CF6",
@@ -32,7 +22,7 @@ const Analytics = () => {
   const fetchSessions = async () => {
     try {
       const res = await axiosInstance.get(API_PATHS.SESSION.GET_ALL);
-      setSessions(res.data || []);
+      setSessions(res.data.data || []);
     } catch (err) {
       console.error(err);
     }

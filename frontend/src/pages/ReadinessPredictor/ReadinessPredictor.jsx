@@ -1,10 +1,5 @@
-import React from "react";
-import {
-  Brain,
-  Target,
-  Trophy,
-  CheckCircle2,
-} from "lucide-react";
+
+
 
 const ReadinessPredictor = () => {
   const readinessScore = 82;

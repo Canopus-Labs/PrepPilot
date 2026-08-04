@@ -1,25 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  ArrowLeft,
   Layers,
   Palette,
   ListChecks,
   Database,
   Rocket,
   ClipboardCheck,
-  ChevronDown,
-  ChevronRight,
-  RefreshCw,
-  Download,
-  FileDown,
-  Trash2,
-  Kanban,
-  Rows3,
-  Pencil,
-  Check,
-  X,
-  StickyNote,
-  Loader2,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────
@@ -332,6 +318,7 @@ const RoadmapDetail = ({
   onExportMarkdown,
   onExportPDF,
   onDelete,
+  isDeleting,
 }) => {
   const [view, setView] = useState("checklist");
 
@@ -372,9 +359,11 @@ const RoadmapDetail = ({
             </button>
             <button
               onClick={onDelete}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+              disabled={isDeleting}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${isDeleting ? "bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed" : "border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"}`}
             >
-              <Trash2 size={14} strokeWidth={1.5} /> Delete
+              {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} strokeWidth={1.5} />} 
+              {isDeleting ? "Deleting..." : "Delete"}
             </button>
           </div>
         </div>

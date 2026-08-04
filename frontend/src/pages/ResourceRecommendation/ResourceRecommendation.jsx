@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  Brain,
-  Search,
-  Filter,
-  BookOpen,
-  Star,
-  Bookmark,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const ResourceRecommendation = () => {
   const [search, setSearch] = useState("");

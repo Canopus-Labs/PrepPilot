@@ -1,15 +1,6 @@
-import React, { useState } from "react";
-import {
-  Award,
-  BadgeCheck,
-  Trophy,
-  Calendar,
-  Target,
-  Star,
-  QrCode,
-  Download,
-  Share2,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const AchievementCertificates = () => {
   const [certificates] = useState([

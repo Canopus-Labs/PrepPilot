@@ -131,10 +131,26 @@ await createdSession[0].save({
 exports.getMySessions = async (req, res) => {
     try {
       const userId = req.user._id;
-      const session = await Session.find({ user: userId })
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await Session.countDocuments({ user: userId });
+      const sessions = await Session.find({ user: userId })
         .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
         .populate("questions");
-      res.status(200).json(session);
+
+      res.status(200).json({
+        data: sessions,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit)
+        }
+      });
     } catch (error) {
       console.error("Error in getMySessions:", error);
       res.status(500).json({ success: false, message: "Server Error" });

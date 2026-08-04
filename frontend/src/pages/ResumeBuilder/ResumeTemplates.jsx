@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Clock, Trash2, Pencil } from "lucide-react";
 import moment from "moment";
 import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosinstance";

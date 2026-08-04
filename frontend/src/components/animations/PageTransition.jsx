@@ -1,5 +1,3 @@
-import React from "react";
-import { motion } from "framer-motion";
 import { pageVariants, pageTransition } from "../../utils/animations";
 
 const PageTransition = ({ children }) => {

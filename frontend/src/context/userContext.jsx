@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
@@ -62,6 +62,7 @@ export const UserProvider = ({ children }) => {
     }
 };
         fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const updateUser = (userData) => {
