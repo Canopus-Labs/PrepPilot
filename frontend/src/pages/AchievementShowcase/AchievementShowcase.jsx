@@ -1,16 +1,38 @@
-import { useState } from "react";
-
-
+import React, { useState, useEffect, useContext } from "react";
+import {
+  Trophy,
+  Medal,
+  Star,
+  Award,
+  User,
+  Share2,
+} from "lucide-react";
+import { UserContext } from "../../context/userContext";
+import axiosInstance from "../../utils/axiosinstance";
+import Loader from "../../components/Loader/Loader";
 
 const AchievementShowcase = () => {
+  const { user: authUser } = useContext(UserContext);
+  const [achievements, setAchievements] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [user] = useState({
-    name: "John Doe",
-    level: "Interview Ready",
-    badges: 18,
-    points: 2840,
-    rank: "#127",
-  });
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      try {
+        const res = await axiosInstance.get("/api/user/achievements");
+        if (res.data.success) {
+          setAchievements(res.data.unlockedAchievements || []);
+        }
+      } catch (err) {
+        console.error("Failed to load achievements:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAchievements();
+  }, []);
+
+  const badgeCount = achievements.length;
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] px-6 py-10">
@@ -64,96 +86,102 @@ const AchievementShowcase = () => {
 
         <div className="bg-white dark:bg-[#111827] rounded-3xl shadow border border-gray-200 dark:border-white/10 p-8 mb-10">
 
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader />
+            </div>
+          ) : (
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
 
-            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6">
 
-              <div className="w-24 h-24 rounded-full bg-violet-600 flex items-center justify-center text-white">
+                <div className="w-24 h-24 rounded-full bg-violet-600 flex items-center justify-center text-white">
 
-                <User size={42} />
+                  <User size={42} />
+
+                </div>
+
+                <div>
+
+                  <h2 className="text-3xl font-bold">
+
+                    {authUser?.name || "Guest"}
+
+                  </h2>
+
+                  <p className="text-violet-600 font-semibold mt-2">
+
+                    Interview Ready
+
+                  </p>
+
+                </div>
 
               </div>
 
-              <div>
+              <div className="grid grid-cols-3 gap-8">
 
-                <h2 className="text-3xl font-bold">
+                <div className="text-center">
 
-                  {user.name}
+                  <Award
+                    className="mx-auto text-yellow-500 mb-2"
+                    size={28}
+                  />
 
-                </h2>
+                  <p className="text-3xl font-black">
 
-                <p className="text-violet-600 font-semibold mt-2">
+                    {badgeCount}
 
-                  {user.level}
+                  </p>
 
-                </p>
+                  <p className="text-gray-500">
+                    Badges
+                  </p>
+
+                </div>
+
+                <div className="text-center">
+
+                  <Star
+                    className="mx-auto text-violet-600 mb-2"
+                    size={28}
+                  />
+
+                  <p className="text-3xl font-black">
+
+                    --
+
+                  </p>
+
+                  <p className="text-gray-500">
+                    Points
+                  </p>
+
+                </div>
+
+                <div className="text-center">
+
+                  <Medal
+                    className="mx-auto text-green-600 mb-2"
+                    size={28}
+                  />
+
+                  <p className="text-3xl font-black">
+
+                    --
+
+                  </p>
+
+                  <p className="text-gray-500">
+                    Global Rank
+                  </p>
+
+                </div>
 
               </div>
 
             </div>
-
-            <div className="grid grid-cols-3 gap-8">
-
-              <div className="text-center">
-
-                <Award
-                  className="mx-auto text-yellow-500 mb-2"
-                  size={28}
-                />
-
-                <p className="text-3xl font-black">
-
-                  {user.badges}
-
-                </p>
-
-                <p className="text-gray-500">
-                  Badges
-                </p>
-
-              </div>
-
-              <div className="text-center">
-
-                <Star
-                  className="mx-auto text-violet-600 mb-2"
-                  size={28}
-                />
-
-                <p className="text-3xl font-black">
-
-                  {user.points}
-
-                </p>
-
-                <p className="text-gray-500">
-                  Points
-                </p>
-
-              </div>
-
-              <div className="text-center">
-
-                <Medal
-                  className="mx-auto text-green-600 mb-2"
-                  size={28}
-                />
-
-                <p className="text-3xl font-black">
-
-                  {user.rank}
-
-                </p>
-
-                <p className="text-gray-500">
-                  Global Rank
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
+          )}
 
         </div>
                 {/* Earned Badges */}

@@ -117,7 +117,7 @@ const ProgressTrackerDashboard = () => {
           axiosInstance.get("/api/user/sheet-progress").catch(() => ({ data: { progressList: [] } })),
           axiosInstance.get("/api/sheets").catch(() => ({ data: { sheets: [] } })),
         ]);
-        setSessions(sRes.data || []);
+        setSessions(sRes.data?.data || []);
         setResumes(rRes.data?.resumes || []);
 
         // Build a sheetId → sheet object lookup
@@ -152,10 +152,10 @@ const ProgressTrackerDashboard = () => {
                 followed: true,
                 completedTopics: raw.completedTopics || {},
                 percentage: raw.percentage || 0,
-              }).catch(() => {});
+              }).catch((err) => { /* ignore */ });
             }
-          } catch {
-            // ignore error
+          } catch (err) {
+            console.error("Failed to parse local storage progress", err);
           }
         }
 

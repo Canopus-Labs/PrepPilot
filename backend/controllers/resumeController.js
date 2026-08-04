@@ -102,23 +102,75 @@ const analyzeResume = async (req, res) => {
         const targetRole = req.body.targetRole || "General Professional";
 
         // 2. Prompt Engineering
-        const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
-Analyze the attached PDF resume against the target role: "${targetRole}".
+        const prompt = `
+You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
 
-Return the analysis STRICTLY as a JSON object with the following exact keys and structure:
+Analyze the attached PDF resume for the target role:
+
+"${targetRole}"
+
+Return ONLY valid JSON.
+
 {
-  "resumeScore": (number between 0 and 100),
-  "roleMatch": (number between 0 and 100),
-  "missingSkills": [array of short strings, max 5],
-  "missingProjects": [array of short strings, max 3],
+  "resumeScore": 85,
+  "roleMatch": 90,
+
   "atsCompatibility": {
-    "status": "Good" | "Average" | "Poor",
-    "remarks": "short sentence explaining ATS parsing issues visually observed"
+    "status":"Good",
+    "remarks":"Resume is ATS friendly."
   },
-  "suggestions": [array of short actionable sentences, max 5]
+
+  "missingSkills":[
+    "Docker",
+    "Redis"
+  ],
+
+  "missingKeywords":[
+    "REST API",
+    "CI/CD",
+    "AWS"
+  ],
+
+  "actionVerbs":[
+    "Developed",
+    "Implemented",
+    "Optimized",
+    "Designed",
+    "Built"
+  ],
+
+  "formattingIssues":[
+    "Use consistent font sizes.",
+    "Avoid tables.",
+    "Reduce excessive colors."
+  ],
+
+  "sections":{
+    "Education":true,
+    "Experience":true,
+    "Projects":true,
+    "Skills":true,
+    "Achievements":false,
+    "Certifications":false
+  },
+
+  "missingProjects":[
+    "Open Source Contribution",
+    "Cloud Deployment Project"
+  ],
+
+  "suggestions":[
+    "Add measurable achievements.",
+    "Improve project descriptions.",
+    "Include more ATS keywords.",
+    "Use stronger action verbs.",
+    "Add certifications."
+  ]
 }
 
-DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw JSON object.`;
+Return ONLY the JSON.
+Do NOT wrap it inside markdown.
+`;
 
         // 3. Fallback Engine (Mirroring aiController robustness)
         const { result } = await generateWithFallback(
@@ -145,9 +197,16 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
         let jsonResult;
         try {
             jsonResult = JSON.parse(aiResponse);
+            jsonResult.missingKeywords ??= [];
+            jsonResult.actionVerbs ??= [];
+            jsonResult.formattingIssues ??= [];
+            jsonResult.sections ??= {};
+            jsonResult.missingSkills ??= [];
+            jsonResult.missingProjects ??= [];
+            jsonResult.suggestions ??= [];
         } catch (e) {
             console.error("Failed to parse Gemini JSON:", aiResponse);
-            return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
+            return res.status(500).json({ message: "AI response parsing failed." });
         }
 
         res.status(200).json(jsonResult);
@@ -228,7 +287,7 @@ const saveResume = async (req, res) => {
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
+        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 }).limit(50);
         res.status(200).json({ success: true, resumes });
     } catch (error) {
         console.error("Get Resumes Error:", error);

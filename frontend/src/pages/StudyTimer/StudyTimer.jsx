@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 
 
 
+const modes = {
+  study: 25 * 60,
+  short: 5 * 60,
+  long: 15 * 60,
+};
+
 const StudyTimer = () => {
-  const modes = {
-    study: 25 * 60,
-    short: 5 * 60,
-    long: 15 * 60,
-  };
 
   const [mode, setMode] = useState("study");
   const [seconds, setSeconds] = useState(modes.study);

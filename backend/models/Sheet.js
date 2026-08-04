@@ -37,14 +37,29 @@ const SectionSchema = new mongoose.Schema({
 
 // Sheet Schema
 const SheetSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
+  // Sheets are scoped to the user who uploaded them. The id field alone is no
+  // longer unique so that different users may each have their own copy of a
+  // shared sheet id; ownership is enforced via the compound index below.
+  id: { type: String, required: true },
   title: { type: String, required: true },
   description: { type: String, default: "" },
   followers: { type: Number, default: 0 },
   questions: { type: Number, default: 0 },
   category: { type: String, default: "general" },
   sections: [SectionSchema],
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    index: true,
+    required: true,
+  },
   uploadedAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Sheet', SheetSchema);
+// Each user may own at most one sheet per id; a user can never overwrite (or
+// read) another user's sheet.
+SheetSchema.index({ id: 1, owner: 1 }, { unique: true });
+
+// Guard against recompiling when the same model is loaded through both CJS and
+// ESM module graphs in the test runner.
+module.exports = mongoose.models.Sheet || mongoose.model('Sheet', SheetSchema);

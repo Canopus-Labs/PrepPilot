@@ -119,7 +119,7 @@ const summarizeNotes = async (req, res) => {
         buffer = await fetchRemotePdf(sourceUrl);
       } catch (err) {
         if (err instanceof PdfIntegrityError) {
-          return res.status(400).json({ success: false, message: err.message });
+          return res.status(400).json({ success: false, message: "Invalid PDF content" });
         }
         throw err;
       }
@@ -130,7 +130,7 @@ const summarizeNotes = async (req, res) => {
       pdfStats = await inspectPdfBuffer(buffer);
     } catch (err) {
       if (err instanceof PdfIntegrityError) {
-        return res.status(400).json({ success: false, message: err.message });
+        return res.status(400).json({ success: false, message: "Invalid PDF format" });
       }
       throw err;
     }
@@ -217,7 +217,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
   } catch (error) {
     console.error("Notes Summary Error:", error);
     if (error instanceof PdfIntegrityError) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({ success: false, message: "Invalid or corrupted PDF file." });
     }
 
     const geminiStatus = error?.status || error?.code;
@@ -361,12 +361,28 @@ const saveSummary = async (req, res) => {
  */
 const getMySummaries = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await NotesSummary.countDocuments({ user: req.user._id });
+    const summaries = await NotesSummary.find({ user: req.user._id })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
     const summaries = await NotesSummary.find({ user: req.user._id }).sort({
       updatedAt: -1,
-    });
+    }).limit(50);
     res.status(200).json({
       success: true,
       summaries: summaries.map((s) => s.toSafeObject()),
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     console.error("Get Notes Summaries Error:", error);
