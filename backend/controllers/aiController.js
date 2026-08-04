@@ -75,8 +75,8 @@ const generateInterviewQuestions = async (req, res) => {
 
     const rawText = await result.response.text();
     let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
+      .replace(/^[\s\S]*?^\s*```(?:json)?/im, "")
+      .replace(/^\s*```[\s\S]*$/im, "")
       .trim();
 
     try {
@@ -156,9 +156,8 @@ const generateConceptExplanation = async (req, res) => {
     const rawText = await result.response.text();
     // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
     let cleanedText = rawText
-      .replace(/^\s*```json\s*/i, "")
-      .replace(/^\s*```\s*/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
+      .replace(/^[\s\S]*?^\s*```(?:json)?/im, "")
+      .replace(/^\s*```[\s\S]*$/im, "")
       .trim();
 
     try {
@@ -238,8 +237,8 @@ const generateInterviewTips = async (req, res) => {
 
     const rawText = await result.response.text();
     let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
+      .replace(/^[\s\S]*?^\s*```(?:json)?/im, "")
+      .replace(/^\s*```[\s\S]*$/im, "")
       .trim();
 
     try {
