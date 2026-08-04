@@ -47,7 +47,7 @@ const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
 
-        // Fix #758: Early payload presence & type validation to prevent unhandled TypeErrors
+        // Early payload presence & type validation to prevent unhandled TypeErrors (#758)
         if (!name || typeof name !== "string" || !name.trim()) {
             return res.status(400).json({
                 success: false,
@@ -91,7 +91,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "A user with this email already exists." });
         }
 
-        // Fix #757: Hash raw password with bcrypt before DB creation
+        // Hash raw password with bcrypt before DB creation (#757)
         const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
 
         // Split name into first and last names for defaults
@@ -518,13 +518,17 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Fix #757: Hash new password before saving
+        // Hash new password before saving (#757)
         user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
 
-        // Invalidate access tokens issued before the password change.
+        // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
         user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
+        // Fix #759: Clear refresh cookie on client response
+        res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         console.error("Change password error:", error);
