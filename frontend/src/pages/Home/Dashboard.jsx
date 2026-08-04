@@ -47,7 +47,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchAllSessions();
-    // eslint-disable-next-line
   }, []);
 
   return (
