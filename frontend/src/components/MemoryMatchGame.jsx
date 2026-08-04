@@ -1,29 +1,15 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { useMemoryMatch, DIFFICULTY_CONFIGS } from "../hooks/useMemoryMatch";
 import { setMatchAudioMuted, getMatchAudioMuted } from "../utils/matchAudio";
 import {
-  Volume2,
-  VolumeX,
-  RotateCcw,
-  X,
   Trophy,
   Flame,
   ShieldCheck,
   Timer,
   Gamepad2,
-  HelpCircle,
   Activity,
-  Award,
-  PlayCircle,
-  Play,
-  Info,
-  Pause,
-  Star,
-  Zap,
-  Calendar,
   Sparkles,
-  Lock,
   // Card Icons Map
   Brain,
   Cpu,
@@ -39,7 +25,6 @@ import {
   Palette,
   Infinity as InfinityIcon,
   Shield,
-  HelpCircle as QuestionIcon,
 } from "lucide-react";
 
 // List of 18 unique, beautiful icons corresponding to iconIndex from hook

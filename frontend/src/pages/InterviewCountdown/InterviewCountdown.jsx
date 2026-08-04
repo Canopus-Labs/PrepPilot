@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  Clock3,
-  Calendar,
-  Building2,
-  Briefcase,
-  MapPin,
-  Bell,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const InterviewCountdown = () => {
   const [company, setCompany] = useState("Google");

@@ -1,8 +1,6 @@
-import React, { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import { UserContext } from "../context/userContext";
-import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
-import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
   const { user } = useContext(UserContext);

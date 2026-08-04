@@ -1,22 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BASE_URL } from "../../utils/apiPaths";
 import {
-  Lightbulb,
   Layers,
   Cpu,
   Coffee,
   Globe,
   Server,
   Rocket,
-  Sparkles,
-  Github,
-  ChevronRight,
-  RefreshCw,
-  Code2,
-  BookOpen,
-  Star,
-  Zap,
-  X,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────

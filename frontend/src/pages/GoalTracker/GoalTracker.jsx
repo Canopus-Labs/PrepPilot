@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  Target,
-  Trophy,
-  Calendar,
-  PlusCircle,
-  CheckCircle2,
-  Flame,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const GoalTracker = () => {
   const [goals] = useState([

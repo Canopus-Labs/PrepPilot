@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useId } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useId } from "react";
 import { modalVariants, backdropVariants } from "../../utils/animations";
 
 const FOCUSABLE_SELECTORS = [

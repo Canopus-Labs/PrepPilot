@@ -1,13 +1,6 @@
-import React, { useState } from "react";
-import {
-  Brain,
-  Calendar,
-  Target,
-  Code2,
-  BookOpen,
-  Trophy,
-  Flame,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const WeeklySummary = () => {
   const [summary] = useState({

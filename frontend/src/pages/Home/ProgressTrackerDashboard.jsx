@@ -1,10 +1,8 @@
-import React, { useEffect, useState, useContext } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import {
-  Github, Linkedin, Twitter, Globe, GraduationCap,
-  MapPin, BookOpen, Video, FileText, ArrowRight,
-  CheckCircle, PlusCircle, Settings, Code2, Star,
+import { Video, FileText,
+  CheckCircle, Code2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { UserContext } from "../../context/userContext";

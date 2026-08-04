@@ -1,5 +1,3 @@
-import React from "react";
-import { Flame, Trophy } from "lucide-react";
 
 const StreakCard = ({ streak }) => {
   return (

@@ -1,14 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { LuPlus } from "react-icons/lu";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { User, PlusCircle } from "lucide-react";
 
-import SummaryCard from "../../components/Cards/SummaryCard";
-import Modal from "../../components/Loader/Modal";
-import CreateSessionForm from "./CreateSessionForm";
-import DeleteAlertContent from "../../components/DeleteAlertContent";
 
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -47,6 +41,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchAllSessions();
+     
   }, []);
 
   return (

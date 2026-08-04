@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { Target, Briefcase, Code2, FileText, Sparkles } from "lucide-react";
+import { Target, Briefcase, Code2, FileText } from "lucide-react";
 
 const MAX_EXPERIENCE = 50;
 

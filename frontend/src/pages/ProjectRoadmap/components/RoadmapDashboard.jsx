@@ -1,5 +1,3 @@
-import React from "react";
-import { Plus, Map, Trash2, ChevronRight, CircleCheckBig, Circle } from "lucide-react";
 
 const StatusBadge = ({ status }) => {
   const map = {

@@ -1,5 +1,3 @@
-import React from "react";
-import { Code2, Clock, ArrowRight } from "lucide-react";
 
 const difficultyColors = {
   Easy: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",

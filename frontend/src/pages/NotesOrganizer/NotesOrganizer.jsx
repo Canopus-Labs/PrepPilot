@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  NotebookPen,
-  Search,
-  Plus,
-  Pin,
-  Folder,
-  Save,
-} from "lucide-react";
+import { useState } from "react";
+
+
 
 const NotesOrganizer = () => {
   const [search, setSearch] = useState("");

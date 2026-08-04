@@ -1,15 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Github,
-  Star,
-  GitFork,
-  Eye,
-  Code,
-  Loader,
-  AlertCircle,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+
+
 
 const FILTER_OPTIONS = [
   {

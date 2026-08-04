@@ -1,15 +1,11 @@
-import React, { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import Modal from "../Loader/Modal";
-import Login from "../../pages/Auth/Login";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
-  LayoutDashboard, Bot, BrainCircuit, Briefcase, BriefcaseBusiness,
-  Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
-  Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
-  ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
+  LayoutDashboard, Bot, Briefcase, BriefcaseBusiness,
+  Code2, Target, Settings, HelpCircle, FileText, Zap, MessageSquare, Lightbulb, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
   Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
   Gauge,
 } from "lucide-react";

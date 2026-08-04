@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Bot, ArrowLeft, ArrowRight, Sparkles, SkipForward } from "lucide-react";
+import { useState } from "react";
 import { QUESTIONS } from "../utils/roadmapAi";
 
 // step 0 = idea entry, steps 1..N = QUESTIONS[step-1]

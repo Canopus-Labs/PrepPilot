@@ -1,13 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { Map, Sparkles, Save, RefreshCw, X, LogIn } from "lucide-react";
 import { BASE_URL, API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosinstance";
 import { UserContext } from "../../context/userContext";
 
-import RoadmapQuestionnaire from "./components/RoadmapQuestionnaire";
-import RoadmapDashboard from "./components/RoadmapDashboard";
-import RoadmapDetail from "./components/RoadmapDetail";
 import {
   buildRoadmapPrompt,
   buildRegeneratePrompt,

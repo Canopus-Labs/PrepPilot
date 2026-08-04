@@ -1,7 +1,5 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Input from "../../components/Inputs/Input";
-import Button from "../../components/Button/Button";
 import { validateEmail } from "../../utils/helper";
 import { API_PATHS } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
@@ -11,7 +9,6 @@ import {
   mockLogin,
   saveMockUser,
 } from "../../utils/mockAuth";
-import { LuArrowRight } from "react-icons/lu";
 
 const Login = ({ setCurrentPage, onLoginSuccess }) => {
   const [email, setEmail] = useState("");

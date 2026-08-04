@@ -1,24 +1,12 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { usePatternMatrix, DIFFICULTY_CONFIGS } from "../hooks/usePatternMatrix";
 import { setMatrixAudioMuted, getMatrixAudioMuted } from "../utils/matrixAudio";
 import {
-  Volume2,
-  VolumeX,
-  RotateCcw,
-  X,
   Trophy,
   Flame,
   ShieldCheck,
   Timer,
-  Grid,
-  HelpCircle,
-  Activity,
-  Award,
-  Play,
-  PlayCircle,
-  Info,
-  Pause,
 } from "lucide-react";
 
 const PatternMatrixGame = () => {

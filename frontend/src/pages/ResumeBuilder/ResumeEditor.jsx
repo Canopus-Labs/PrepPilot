@@ -1,8 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Split from "react-split";
-import Editor from "@monaco-editor/react";
-import { ArrowLeft, Download, Play, RefreshCw, FileText, Save, Pencil, Check, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 import axiosInstance from "../../utils/axiosinstance";
