@@ -49,7 +49,6 @@ export const UserProvider = ({ children }) => {
         if (status === 401 || status === 403) {
             clearUser();
         }
-        setLoading(false);
         return;
     } finally {
         setLoading(false);
@@ -62,7 +61,8 @@ export const UserProvider = ({ children }) => {
     }
 };
         fetchUser();
-    }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const updateUser = (userData) => {
         setUser(userData);

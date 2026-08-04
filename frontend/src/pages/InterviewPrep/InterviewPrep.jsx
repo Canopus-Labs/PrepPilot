@@ -68,7 +68,7 @@ const InterviewPrep = () => {
       if (response.data) {
         setExplanation(response.data);
       }
-    } catch (error) {
+    } catch (err) {
       setExplanation(null);
       setErrorMsg("Failed to generate explanation, try again later.");
     } finally {
