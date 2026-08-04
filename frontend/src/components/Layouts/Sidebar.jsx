@@ -6,6 +6,10 @@ import Login from "../../pages/Auth/Login";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
+  Settings, HelpCircle, User as UserIcon, LogOut,
+  Menu, X, ChevronUp, ChevronDown, ScrollText,
+} from "lucide-react";
+import NAV_ITEMS from "../../data/navItems";
   LayoutDashboard, Bot, BrainCircuit, Briefcase, BriefcaseBusiness,
   Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
