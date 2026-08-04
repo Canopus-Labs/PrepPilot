@@ -147,7 +147,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
             jsonResult = JSON.parse(aiResponse);
         } catch (e) {
             console.error("Failed to parse Gemini JSON:", aiResponse);
-            return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
+            return res.status(500).json({ message: "AI response parsing failed." });
         }
 
         res.status(200).json(jsonResult);

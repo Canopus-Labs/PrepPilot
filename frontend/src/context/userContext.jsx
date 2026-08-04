@@ -49,7 +49,6 @@ export const UserProvider = ({ children }) => {
         if (status === 401 || status === 403) {
             clearUser();
         }
-        setLoading(false);
         return;
     } finally {
         setLoading(false);
@@ -81,7 +80,7 @@ export const UserProvider = ({ children }) => {
         try {
             const progressRes = await axiosInstance.get("/api/user/sheet-progress");
             setSheetProgress(progressRes.data.progressList || []);
-        } catch (error) {
+        } catch {
     toast.error("Unable to refresh progress. Please try again.");
 }
     };
