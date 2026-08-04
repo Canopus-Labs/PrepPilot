@@ -114,7 +114,9 @@ function SheetDetail() {
               setFollowed(progressData.followed || false);
               setCompletedTopics(progressData.completedTopics || {});
             }
-          } catch (err) { /* ignore parse error */ }
+          } catch (err) {
+            console.error("Failed to parse progress from local storage", err);
+          }
         }
 
         setLoading(false);
