@@ -33,7 +33,11 @@ exports.createSession = async (req, res) => {
     try {
         await mongoSession.withTransaction(async () => {
             const userId = req.user._id;
-            const { role, experience, topicsToFocus, description } = req.body;
+            const { role, experience, description } = req.body;
+            // Normalize topicsToFocus to always be an array to prevent type errors downstream
+            const topicsToFocus = Array.isArray(req.body.topicsToFocus)
+                ? req.body.topicsToFocus
+                : [];
             const experienceNumber = Number(experience);
  
             if (!role || role.trim() === "") {
