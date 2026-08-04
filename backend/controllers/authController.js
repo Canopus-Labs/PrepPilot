@@ -5,21 +5,10 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
-// Models for cascade deletion on account delete
-const Session = require("../models/Session");
-const Question = require("../models/Question");
-const Flashcard = require("../models/Flashcard");
-const Resume = require("../models/Resume");
-const NotesSummary = require("../models/NotesSummary");
-const RoadmapProject = require("../models/RoadmapProject");
-const UserSheetProgress = require("../models/UserSheetProgress");
-
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
-const PASSWORD_SALT_ROUNDS = 10;
-
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -55,39 +44,14 @@ const generateRefreshToken = (userId) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
-
-        // Early payload presence & type validation to prevent unhandled TypeErrors (#758)
-        if (!name || typeof name !== "string" || !name.trim()) {
-            return res.status(400).json({
-                success: false,
-                message: "Name is required and must be a non-empty string.",
-            });
-        }
-
-        if (!email || typeof email !== "string" || !email.trim()) {
-            return res.status(400).json({
-                success: false,
-                message: "Email is required and must be a valid string.",
-            });
-        }
-
-        if (!password || typeof password !== "string") {
-            return res.status(400).json({
-                success: false,
-                message: "Password is required.",
-            });
-        }
-
-        const cleanName = name.trim();
-        const cleanEmail = email.trim().toLowerCase();
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
 
-        if (!emailRegex.test(cleanEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid email address.",
-            });
+        if (!emailRegex.test(email)) {
+           return res.status(400).json({
+           success: false,
+           message: "Please enter a valid email address.",
+        });
         }
 
         const { valid, errors } = validatePassword(password);
@@ -95,33 +59,24 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: errors[0] });
         }
 
-        const userExists = await User.findOne({ email: cleanEmail });
+        const userExists = await User.findOne({ email });
         if (userExists) {
-            // Do not reveal whether the email is already registered. Respond
-            // with the same generic success shape (no tokens, no user data)
-            // so the endpoint cannot be used for account enumeration.
-            return res.status(201).json({
-                success: true,
-                message: "If this email is not already registered, your account has been created.",
-            });
+            return res.status(400).json({ success: false, message: "A user with this email already exists." });
         }
 
-        // Hash raw password with bcrypt before DB creation (#757)
-        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
-
         // Split name into first and last names for defaults
-        const nameParts = cleanName.split(/\s+/);
+        const nameParts = name.trim().split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
         // Generate default unique PrepPilot ID
-        const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
+        const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
         // Auto-verify user — email verification temporarily disabled
         const user = await User.create({
-            name: cleanName,
-            email: cleanEmail,
-            password: hashedPassword,
+            name,
+            email,
+            password: password,
             profileImageUrl,
             firstName,
             lastName,
@@ -149,6 +104,7 @@ const registerUser = async (req, res) => {
             success: true,
             message: "Account created successfully. You can now log in.",
             accessToken,
+            
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -168,11 +124,7 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: "Email and password are required." });
-        }
-
-        const user = await User.findOne({ email: email.trim().toLowerCase() });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
@@ -205,6 +157,7 @@ const loginUser = async (req, res) => {
             email: user.email,
             profileImageUrl: user.profileImageUrl,
             accessToken,
+
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -263,6 +216,7 @@ const refreshToken = async (req, res) => {
             success: true,
             message: "Token refreshed successfully.",
             accessToken,
+        
         });
     } catch (error) {
         console.error("Refresh token error:", error);
@@ -364,19 +318,13 @@ const resendVerificationEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email is required." });
         }
 
-        const user = await User.findOne({ email: email.trim().toLowerCase() });
+        const genericMessage = "If this email is registered and unverified, a verification link has been sent.";
+        const user = await User.findOne({ email });
 
-        // Return success even if user not found — avoids exposing which emails are registered
-        if (!user) {
-            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
+        if (!user || user.isEmailVerified) {
+            return res.json({ success: true, message: genericMessage });
         }
 
-        // If already verified, no need to resend
-        if (user.isEmailVerified) {
-            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
-        }
-
-        // Generate a fresh token and reset expiry to 24 hours from now
         user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
         user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await user.save();
@@ -384,7 +332,7 @@ const resendVerificationEmail = async (req, res) => {
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
         await sendVerificationEmail(user.email, verificationUrl);
 
-        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+        res.json({ success: true, message: genericMessage });
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
@@ -398,11 +346,11 @@ const resendVerificationEmail = async (req, res) => {
 const getUserProfile = async (req, res) => {
     try {
         const user = req.user;
-        if (!user) {
+        if(!user){
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
         res.json(user);
-    } catch (error) {
+    }catch(error){
         console.error("Get profile error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
@@ -495,7 +443,7 @@ const updateUserProfile = async (req, res) => {
 
         await user.save();
 
-        // Return updated user, excluding password
+        // return updated user, excluding password
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
@@ -533,17 +481,12 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password before saving (#757)
-        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
-
-        // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
-        user.refreshTokenHash = null;
-        user.refreshTokenExpiresAt = null;
+        // Hash new password
+        user.password = newPassword;
+        // Invalidate access tokens issued before the password change.
         user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
-        // Fix #759: Clear refresh cookie on client response
-        res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         console.error("Change password error:", error);
@@ -552,8 +495,7 @@ const changePassword = async (req, res) => {
 };
 
 /**
- * Permanently delete user account and all associated data.
- * Implements cascade deletion to clean up orphaned documents.
+ * Permanently delete user account.
  * @route DELETE /api/auth/delete-account
  */
 const deleteUserAccount = async (req, res) => {
@@ -564,86 +506,12 @@ const deleteUserAccount = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Cascade delete: remove all user-related data
-        const deletePromises = [];
-
-        // Delete user's sessions and their associated questions
-        const sessions = await Session.find({ user: userId });
-        const sessionIds = sessions.map(s => s._id);
-        if (sessionIds.length > 0) {
-            deletePromises.push(
-                Question.deleteMany({ session: { $in: sessionIds } }).then(() => {
-                    console.log(`Deleted ${sessionIds.length} sessions and their questions for user ${userId}`);
-                })
-            );
-        }
-        deletePromises.push(Session.deleteMany({ user: userId }));
-
-        // Delete user's flashcards
-        deletePromises.push(
-            Flashcard.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} flashcards for user ${userId}`);
-            })
-        );
-
-        // Delete user's resumes
-        deletePromises.push(
-            Resume.deleteMany({ user: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} resumes for user ${userId}`);
-            })
-        );
-
-        // Delete user's notes summaries
-        deletePromises.push(
-            NotesSummary.deleteMany({ user: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} notes summaries for user ${userId}`);
-            })
-        );
-
-        // Delete user's roadmap projects
-        deletePromises.push(
-            RoadmapProject.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} roadmap projects for user ${userId}`);
-            })
-        );
-
-        // Delete user's sheet progress
-        deletePromises.push(
-            UserSheetProgress.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} sheet progress records for user ${userId}`);
-            })
-        );
-
-        // Wait for all deletions to complete
-        await Promise.all(deletePromises);
-
-        // Finally, delete the user account
         await User.findByIdAndDelete(userId);
-        
-        // Clear auth cookies
-        res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-            path: "/api/auth"
-        });
-
-        res.json({ success: true, message: "Account and all associated data deleted successfully" });
+        res.json({ success: true, message: "Account deleted successfully" });
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
-module.exports = {
-    registerUser,
-    loginUser,
-    refreshToken,
-    logoutUser,
-    verifyEmail,
-    resendVerificationEmail,
-    getUserProfile,
-    updateUserProfile,
-    changePassword,
-    deleteUserAccount,
-};
+module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
