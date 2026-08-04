@@ -1,15 +1,18 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable no-unused-vars */
 import React, { createContext, useState, useEffect } from "react";
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
+
 import {
     isMockAuthEnabled,
     getMockUser,
     clearMockUser,
 } from "../utils/mockAuth";
 
+export const UserContext = createContext();
 const UserContext = createContext();
 
 export const useUser = () => useContext(UserContext);

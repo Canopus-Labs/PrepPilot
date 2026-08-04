@@ -50,6 +50,7 @@ import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
 import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
 import TermsandConditions from "./pages/Terms/TermsandConditions";
 import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
+import ProjectRoadmap from "./pages/ProjectRoadmap/ProjectRoadmap";
 import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
@@ -62,6 +63,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import InterviewReplay from "./pages/InterviewReplay/InterviewReplay";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import Analytics from "./pages/Analytics";
@@ -177,6 +179,16 @@ const App = () => {
                     </MainLayout>
                   }
                 >
+                  <Route
+                    path="/behavioral-coach"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <BehavioralCoach />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/dashboard"
                     element={
@@ -353,6 +365,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <ProjectIdeas />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/project-roadmap"
+                    element={
+                      <PageTransition>
+                        <ProjectRoadmap />
                       </PageTransition>
                     }
                   />

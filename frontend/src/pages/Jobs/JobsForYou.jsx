@@ -86,6 +86,8 @@ const JobsForYou = () => {
 
   const customRoleRef = React.useRef(customRole);
   useEffect(() => {
+    fetchJobs(country);
+  }, [country]);
     customRoleRef.current = customRole;
   }, [customRole]);
 
