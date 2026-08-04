@@ -49,7 +49,6 @@ export const UserProvider = ({ children }) => {
         if (status === 401 || status === 403) {
             clearUser();
         }
-        setLoading(false);
         return;
     } finally {
         setLoading(false);

@@ -6,11 +6,16 @@ import Login from "../../pages/Auth/Login";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
+  Settings, HelpCircle, User as UserIcon, LogOut,
+  Menu, X, ChevronUp, ChevronDown, ScrollText,
+} from "lucide-react";
+import NAV_ITEMS from "../../data/navItems";
   LayoutDashboard, Bot, BrainCircuit, Briefcase, BriefcaseBusiness,
   Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
   ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
   Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
+  Brain,
 } from "lucide-react";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
@@ -46,6 +51,7 @@ const NAV_ITEMS = [
     isHeader: true,
     items: [
       { id: "coding-sheets", title: "DSA Master Sheets", path: "/coding-sheets", icon: Code2 },
+      { id: "problem-solver", title: "AI Problem Solver", path: "/problem-solver", icon: BrainCircuit },
     ],
   },
   {
@@ -57,6 +63,7 @@ const NAV_ITEMS = [
       { id: "role-prep",              title: "Role-Specific Prep",    path: "/role-prep",              icon: Briefcase },
       { id: "spaced-repetition",     title: "Spaced Repetition",     path: "/spaced-repetition",      icon: RotateCcw },
       { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
+      { id: "question-bank",          title: "Question Bank",          path: "/question-bank",          icon: Brain },
       { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
       { id: "snippet-vault",          title: "Snippet Vault",          path: "/snippet-vault",          icon: Code2 },
     ],

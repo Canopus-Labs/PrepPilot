@@ -2,11 +2,17 @@ require("dotenv").config();
 const validateEnv = require("./config/validateEnv.js");
 validateEnv();
 const express = require("express");
-const cors = require("cors");
+
+// Global unhandled promise rejection handler
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Promise Rejection:", err);
+});
+
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
+const helmet = require("helmet");
 const lusca = require("lusca");
 const {
   generateInterviewQuestions,
@@ -23,9 +29,11 @@ const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
+const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(helmet());
 app.use(generalHeaders); 
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
@@ -40,15 +48,15 @@ const allowedOrigins = new Set(originEnvList);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const renderPattern =
-    /^https:\/\/(?:interview-prep(?:aration)?-ai|preppilot(?:-backend)?)-[a-z0-9-]+\.onrender\.com$/;
+  // Exact-origin allowlist only (FRONTEND_ORIGIN / EXTRA_ORIGINS, plus
+  // localhost in dev). No regex wildcard matching of third-party-registrable
+  // domains like *.onrender.com — anyone can register an attacker subdomain
+  // that would otherwise be granted credentialed CORS access.
   const localhostPattern =
     /^http:\/\/(localhost|127\.0\.0\.1):(5\d{3}|3\d{3})$/;
   if (
     origin &&
-    (allowedOrigins.has(origin) ||
-      renderPattern.test(origin) ||
-      localhostPattern.test(origin))
+    (allowedOrigins.has(origin) || localhostPattern.test(origin))
   ) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Vary", "Origin");
@@ -64,8 +72,8 @@ app.use((req, res, next) => {
     }
   }
   if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with");
     return res.sendStatus(200);
   }
   next();
@@ -76,16 +84,14 @@ connectDB()
     if (success) {
       console.log("MongoDB connected successfully");
     } else {
-      console.warn(
-        "⚠️ Failed to connect to MongoDB - server will run without database connection",
-      );
+      console.warn("⚠️ Failed to connect to MongoDB - server will run without database connection");
     }
   })
   .catch((err) => {
     console.error("Database connection error:", err.message);
   });
 
-// middleware
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 
@@ -95,7 +101,7 @@ app.use(cookieParser());
 app.use(
   cookieSession({
     name: "csrfSession",
-    keys: [process.env.CSRF_SESSION_SECRET || process.env.JWT_SECRET],
+    keys: [process.env.CSRF_SESSION_SECRET],
     maxAge: 24 * 60 * 60 * 1000, // 24h
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -206,7 +212,12 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: uploadsStaticHeaders,
+  })
+);
 
 // Debug route to verify backend is working
 app.get("/api/test", (req, res) => {
@@ -217,8 +228,17 @@ app.get("/api/test", (req, res) => {
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
   refreshJobCache();
-  setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
+  clearInterval(window.__interval); window.__interval = setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled Server Error:", err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
+  });
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;
