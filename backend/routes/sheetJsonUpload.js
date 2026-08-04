@@ -55,6 +55,24 @@ router.post('/upload', protect, async (req, res) => {
 // GET / - fetch the authenticated user's sheets
 router.get('/', protect, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+
+    const total = await Sheet.countDocuments({});
+    const sheets = await Sheet.find({})
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      sheets,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
     const sheets = await Sheet.find({ owner: req.user._id });
     res.json({ sheets });
   } catch (err) {

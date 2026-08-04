@@ -361,12 +361,28 @@ const saveSummary = async (req, res) => {
  */
 const getMySummaries = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await NotesSummary.countDocuments({ user: req.user._id });
+    const summaries = await NotesSummary.find({ user: req.user._id })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
     const summaries = await NotesSummary.find({ user: req.user._id }).sort({
       updatedAt: -1,
     }).limit(50);
     res.status(200).json({
       success: true,
       summaries: summaries.map((s) => s.toSafeObject()),
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     console.error("Get Notes Summaries Error:", error);
