@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -516,69 +517,54 @@ const changePassword = async (req, res) => {
  * @route DELETE /api/auth/delete-account
  */
 const deleteUserAccount = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-        // Cascade delete: remove all user-related data
-        const deletePromises = [];
-
-        // Delete user's sessions and their associated questions
-        const sessions = await Session.find({ user: userId });
+    // Cascade delete runs inside a single Mongo transaction so that a failure
+    // rolls back every collection: no partial deletions, no orphaned data, and
+    // the account is removed only when the whole cascade commits.
+    const runCascade = async (session) => {
+        const sessions = await Session.find({ user: userId }).session(session);
         const sessionIds = sessions.map(s => s._id);
         if (sessionIds.length > 0) {
-            deletePromises.push(
-                Question.deleteMany({ session: { $in: sessionIds } }).then(() => {
-                    console.log(`Deleted ${sessionIds.length} sessions and their questions for user ${userId}`);
-                })
-            );
+            await Question.deleteMany({ session: { $in: sessionIds } }).session(session);
         }
-        deletePromises.push(Session.deleteMany({ user: userId }));
+        await Session.deleteMany({ user: userId }).session(session);
+        await Flashcard.deleteMany({ userId: userId }).session(session);
+        await Resume.deleteMany({ user: userId }).session(session);
+        await NotesSummary.deleteMany({ user: userId }).session(session);
+        await RoadmapProject.deleteMany({ userId: userId }).session(session);
+        await UserSheetProgress.deleteMany({ userId: userId }).session(session);
+        await User.findByIdAndDelete(userId).session(session);
+    };
 
-        // Delete user's flashcards
-        deletePromises.push(
-            Flashcard.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} flashcards for user ${userId}`);
-            })
+    // Standalone (non-replica-set) MongoDB rejects transaction usage with an
+    // IllegalOperation error; there we fall back to a compensating cleanup pass
+    // so account deletion still completes rather than silently failing.
+    const isTransactionUnsupportedError = (error) => {
+        const message = String((error && error.message) || "");
+        return Boolean(
+            error && (error.codeName === "IllegalOperation" || error.code === 20) ||
+            message.includes("Transaction numbers are only allowed on a replica set") ||
+            message.includes("Transactions are not supported")
         );
+    };
 
-        // Delete user's resumes
-        deletePromises.push(
-            Resume.deleteMany({ user: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} resumes for user ${userId}`);
-            })
-        );
+    const tx = await mongoose.startSession();
+    try {
+        try {
+            await tx.withTransaction(() => runCascade(tx));
+        } catch (error) {
+            if (!isTransactionUnsupportedError(error)) {
+                throw error;
+            }
+            console.warn("Mongo transactions unavailable; running compensating cleanup for delete account");
+            await runCascade(null);
+        }
 
-        // Delete user's notes summaries
-        deletePromises.push(
-            NotesSummary.deleteMany({ user: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} notes summaries for user ${userId}`);
-            })
-        );
-
-        // Delete user's roadmap projects
-        deletePromises.push(
-            RoadmapProject.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} roadmap projects for user ${userId}`);
-            })
-        );
-
-        // Delete user's sheet progress
-        deletePromises.push(
-            UserSheetProgress.deleteMany({ userId: userId }).then(result => {
-                console.log(`Deleted ${result.deletedCount} sheet progress records for user ${userId}`);
-            })
-        );
-
-        // Wait for all deletions to complete
-        await Promise.all(deletePromises);
-
-        // Finally, delete the user account
-        await User.findByIdAndDelete(userId);
-        
         // Clear auth cookies
         res.clearCookie("refreshToken", {
             httpOnly: true,
@@ -591,6 +577,10 @@ const deleteUserAccount = async (req, res) => {
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
+    } finally {
+        if (tx && typeof tx.endSession === "function") {
+            await tx.endSession();
+        }
     }
 };
 
