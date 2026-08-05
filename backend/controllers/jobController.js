@@ -4,11 +4,15 @@ const JobCache = require("../models/JobCache");
 
 const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID;
 const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
-const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in";
+const ADZUNA_COUNTRY = (process.env.ADZUNA_COUNTRY || "in").toLowerCase();
 const CACHE_TTL_MS   = 24 * 60 * 60 * 1000;
 
-// The Jobs feature is optional: without Adzuna credentials it stays dormant
-// instead of crashing the server or spamming failed API calls.
+// Supported Adzuna country codes
+const SUPPORTED_COUNTRIES = new Set([
+  "gb", "us", "in", "ca", "au", "de", "fr", "br", "za", 
+  "at", "be", "ch", "es", "it", "nl", "nz", "pl", "ru", "sg"
+]);
+
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
 
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
@@ -70,6 +74,14 @@ exports.getJobs = async (req, res) => {
       });
     }
 
+    // Validate country parameter if explicitly provided
+    let country = req.query.country ? String(req.query.country).toLowerCase() : ADZUNA_COUNTRY;
+    if (!SUPPORTED_COUNTRIES.has(country)) {
+      return res.status(400).json({
+        message: `Invalid or unsupported country code: "${req.query.country}". Supported codes are: ${Array.from(SUPPORTED_COUNTRIES).join(", ")}`,
+      });
+    }
+
     const userId = req.user._id;
 
     const latestSession = await Session.findOne({ user: userId })
@@ -77,7 +89,6 @@ exports.getJobs = async (req, res) => {
       .select("role");
 
     const role    = req.query.role || latestSession?.role || "software engineer";
-    const country = req.query.country   || ADZUNA_COUNTRY;
     const cacheKey = `${role.toLowerCase()}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
@@ -98,6 +109,9 @@ exports.getJobs = async (req, res) => {
 
 exports.refreshJobCache = async () => {
   if (!isAdzunaConfigured()) return;
+
+  const targetCountry = SUPPORTED_COUNTRIES.has(ADZUNA_COUNTRY) ? ADZUNA_COUNTRY : "in";
+
   try {
     const roles = await Session.distinct("role", {
       createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
@@ -105,8 +119,8 @@ exports.refreshJobCache = async () => {
 
     for (const role of roles) {
       try {
-        const cacheKey = `${role.toLowerCase()}|${ADZUNA_COUNTRY}`;
-        const jobs = await fetchFromAdzuna(role);
+        const cacheKey = `${role.toLowerCase()}|${targetCountry}`;
+        const jobs = await fetchFromAdzuna(role, targetCountry);
         await upsertJobCache(cacheKey, jobs);
         console.log(`[JobCron] Refreshed cache for: ${role}`);
       } catch (roleErr) {
