@@ -62,8 +62,16 @@ const getMyQuestions = async (req, res) => {
       ];
     }
 
-    const pageNum = Math.max(1, parseInt(page, 10));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    // Defensive coercion: NaN (non-numeric input) must never reach
+    // .skip()/.limit() and become a 500. Invalid values fall back to safe
+    // defaults (page 1, limit 20) — the route layer rejects them with 400.
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
+    const pageNum =
+      Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
+    const limitNum = Number.isFinite(parsedLimit)
+      ? Math.min(100, Math.max(1, Math.floor(parsedLimit)))
+      : 20;
     const skip = (pageNum - 1) * limitNum;
 
     const [questions, totalItems] = await Promise.all([
