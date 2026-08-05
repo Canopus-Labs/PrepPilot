@@ -77,12 +77,18 @@ const GridMemoryGame = () => {
     if (cell.clicked) return;
     setGrid((g) => g.map((c, idx) => idx === i ? { ...c, clicked: true, state: c.colored ? "correct" : "wrong" } : c));
     if (cell.colored) {
-      const nr = remaining - 1; const ns = score + 10;
-      setRemaining(nr); setScore(ns);
-      if (nr === 0) { clearTimers(); setPhase("won"); }
+      setScore((s) => s + 10);
+      setRemaining((r) => {
+        const newR = r - 1;
+        if (newR === 0) { clearTimers(); setPhase("won"); }
+        return newR;
+      });
     } else {
-      const nm = mistakes + 1; setMistakes(nm);
-      if (nm >= 3) { clearTimers(); setPhase("lost"); }
+      setMistakes((m) => {
+        const newM = m + 1;
+        if (newM >= 3) { clearTimers(); setPhase("lost"); }
+        return newM;
+      });
     }
   };
 
