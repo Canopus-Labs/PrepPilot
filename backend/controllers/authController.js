@@ -18,6 +18,9 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+// Single generic message used by BOTH registration branches so the response
+// body can never reveal whether an email is already registered.
+const REGISTRATION_GENERIC_MESSAGE = "If this email is not already registered, your account has been created.";
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -75,7 +78,7 @@ const registerUser = async (req, res) => {
             // so the endpoint cannot be used for account enumeration.
             return res.status(201).json({
                 success: true,
-                message: "If this email is not already registered, your account has been created.",
+                message: REGISTRATION_GENERIC_MESSAGE,
             });
         }
 
@@ -108,22 +111,18 @@ const registerUser = async (req, res) => {
             isEmailVerified: true, // skip email verification until SMTP is configured
         });
 
-        const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
+
+        // Identical generic shape for fresh and already-registered emails (no
+        // accessToken, no user fields, no auth cookie) so the response cannot
+        // be used to enumerate accounts. Tokens are issued at login/refresh.
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            profileImageUrl: user.profileImageUrl,
+            message: REGISTRATION_GENERIC_MESSAGE,
         });
     } catch (error) {
         console.error("Register error:", error);
@@ -335,25 +334,21 @@ const resendVerificationEmail = async (req, res) => {
 
         const user = await User.findOne({ email });
 
-        // Return success even if user not found — avoids exposing which emails are registered
-        if (!user) {
-            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
+        // Always respond with the same generic success shape regardless of
+        // whether the email exists or is already verified, so the endpoint
+        // cannot be used to enumerate registered addresses. The email is sent
+        // only when a matching unverified user actually exists.
+        if (user && !user.isEmailVerified) {
+            // Generate a fresh token and reset expiry to 24 hours from now
+            user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+            user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await user.save();
+
+            const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+            await sendVerificationEmail(user.email, verificationUrl);
         }
 
-        // If already verified, no need to resend
-        if (user.isEmailVerified) {
-            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
-        }
-
-        // Generate a fresh token and reset expiry to 24 hours from now
-        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
-        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await user.save();
-
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
-        await sendVerificationEmail(user.email, verificationUrl);
-
-        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+        res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });

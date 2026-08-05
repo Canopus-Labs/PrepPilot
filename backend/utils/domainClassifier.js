@@ -36,7 +36,13 @@ const escapeRegExp = (string) => {
 };
 
 const escapedKeywords = domainKeywords.map(escapeRegExp);
-const keywordRegex = new RegExp(`\\b(${escapedKeywords.join('|')})\\b`, 'i');
+// Anchor keywords as prefixes: keep the leading word boundary but drop the
+// trailing one. A trailing \b made prefix keywords (scal, load balanc,
+// negotiat, probab, math, quant) and keywords ending in non-word characters
+// (c++, c#) never match — "probability", "load balancing", "C++?" etc. were
+// misclassified as off-topic. Prefix matching over-routes a few extra words
+// (e.g. "google" matching "go"), which is acceptable for an AI mentor router.
+const keywordRegex = new RegExp(`\\b(${escapedKeywords.join('|')})`, 'i');
 
 const conversationalRegex = /^(hi|hello|hey|yo|ok|thanks|thank you|who are you|what should i call you|good morning|good evening|\?)$/i;
 

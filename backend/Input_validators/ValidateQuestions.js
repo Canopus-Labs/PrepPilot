@@ -23,6 +23,9 @@ const updateQuestionNoteSchema = z.object({
 
 // Schema for query params of getMyQuestions. q is length-capped so the
 // regex built from it can never grow without bound.
+// Schema for query params of getMyQuestions. page/limit are coerced and must
+// be positive integers (limit capped at 100) so NaN never reaches the
+// controller; q is length-capped so the regex built from it stays bounded.
 const getMyQuestionsQuerySchema = z.object({
   q: z.string().max(200).optional(),
   page: z.coerce.number().int().min(1).optional(),

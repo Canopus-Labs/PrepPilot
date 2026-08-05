@@ -9,6 +9,20 @@ const Question = require("../models/Question");
 const { generateWithFallback } = require("../utils/geminiHelper");
 
 /**
+ * Safely strips single or nested markdown code block fences (```json, ```)
+ * and leading/trailing whitespace from Gemini AI responses.
+ * @param {string} rawText
+ * @returns {string}
+ */
+const cleanGeminiResponse = (rawText) => {
+  if (!rawText) return "";
+  return rawText
+    .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+    .replace(/(\s*```\s*)+$/i, "")
+    .trim();
+};
+
+/**
  * Generate interview questions and answers using the Gemini AI service.
  * @route POST /api/ai/generate-questions
  * @param {import('express').Request} req
@@ -27,7 +41,7 @@ const { generateWithFallback } = require("../utils/geminiHelper");
  * @example
  * 200 {
  *   "model": "models/gemini-2.5-flash",
- *   "question": [
+ *   "questions": [
  *     {"question": "Explain the virtual DOM.", "answer": "..."},
  *     ...
  *   ]
@@ -37,11 +51,18 @@ const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
 
-    // Fetch questions the user has already seen for this role + topic
+    // Build topic query: use $in if topics array is non-empty to check set containment,
+    // otherwise fallback to matching topicsToFocus if provided
+    const topicQuery =
+      Array.isArray(topicsToFocus) && topicsToFocus.length > 0
+        ? { topicsToFocus: { $in: topicsToFocus } }
+        : {};
+
+    // Fetch questions the user has already seen for this role + any matching topics
     const pastSessions = await Session.find({
       user: req.user._id,
       role,
-      topicsToFocus,
+      ...topicQuery,
     }).select("questions");
 
     const pastQuestionIds = pastSessions.flatMap((s) => s.questions);
@@ -74,13 +95,13 @@ const generateInterviewQuestions = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = cleanGeminiResponse(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
+
+      // Extract raw question array regardless of root-level array vs wrapper object
+      const questionList = Array.isArray(data) ? data : data.questions;
 
       // Validate Gemini response structure
       const questionsSchema = z.array(
@@ -89,19 +110,44 @@ const generateInterviewQuestions = async (req, res) => {
           answer: z.string(),
         })
       );
-      const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
+      const parsed = questionsSchema.safeParse(questionList);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
+      const validatedQuestions = parsed.data;
+
+      // Persist newly generated questions to MongoDB
+      const createdQuestions = await Question.insertMany(
+        validatedQuestions.map((q) => ({
+          user: req.user._id,
+          role,
+          topic: Array.isArray(topicsToFocus) ? topicsToFocus[0] : topicsToFocus,
+          question: q.question,
+          answer: q.answer,
+        }))
+      );
+
+      // Save new session reference in MongoDB
+      const questionIds = createdQuestions.map((q) => q._id);
+      await Session.create({
+        user: req.user._id,
+        role,
+        topicsToFocus,
+        questions: questionIds,
+      });
+
+      // Standardize response payload key to `questions`
+      return res.status(200).json({
+        model: usedModel,
+        questions: validatedQuestions,
+      });
     } catch (err) {
       console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
+      return res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
     }
@@ -146,7 +192,14 @@ const generateConceptExplanation = async (req, res) => {
   try {
     const { question } = req.body;
 
-    const prompt = conceptExplainPrompt(question);
+    let prompt;
+    try {
+      prompt = conceptExplainPrompt(question);
+    } catch (validationError) {
+      return res.status(400).json({
+        message: validationError.message,
+      });
+    }
 
     const { result, usedModel } = await generateWithFallback(
       process.env.GEMINI_API_KEY,
@@ -154,12 +207,7 @@ const generateConceptExplanation = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
-    let cleanedText = rawText
-      .replace(/^\s*```json\s*/i, "")
-      .replace(/^\s*```\s*/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = cleanGeminiResponse(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
@@ -171,11 +219,13 @@ const generateConceptExplanation = async (req, res) => {
       });
       const parsed = explanationSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        console.error("Invalid AI response format:", parsed.error.issues[0]?.message);
+        return res.status(500).json({ message: "Invalid AI response format" });
       }
 
       res.status(200).json({ model: usedModel, ...data });
     } catch (err) {
+      console.error("Gemini returned invalid JSON:", cleanedText);
       res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
@@ -237,10 +287,7 @@ const generateInterviewTips = async (req, res) => {
     );
 
     const rawText = await result.response.text();
-    let cleanedText = rawText
-      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
-      .replace(/(\s*```\s*)+$/i, "")
-      .trim();
+    const cleanedText = cleanGeminiResponse(rawText);
 
     try {
       const data = JSON.parse(cleanedText);
@@ -251,7 +298,8 @@ const generateInterviewTips = async (req, res) => {
       });
       const parsed = tipsSchema.safeParse(data);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        console.error("Invalid AI response format:", parsed.error.issues[0]?.message);
+        return res.status(500).json({ message: "Invalid AI response format" });
       }
 
       res.status(200).json({ model: usedModel, ...data });

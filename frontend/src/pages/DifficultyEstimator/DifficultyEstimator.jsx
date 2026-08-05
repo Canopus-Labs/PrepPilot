@@ -6,26 +6,34 @@ import {
   BookOpen,
 } from "lucide-react";
 
+const DEMO_AI_RESULT = {
+  difficulty: "Hard",
+  confidence: 94,
+  estimatedTime: "35 Minutes",
+  prerequisites: [
+    "Binary Trees",
+    "Depth First Search",
+    "Recursion",
+    "Dynamic Programming",
+  ],
+};
+
+const DIFFICULTY_DISTRIBUTION = [
+  { level: "Easy", value: 20, color: "bg-green-500" },
+  { level: "Medium", value: 35, color: "bg-yellow-500" },
+  { level: "Hard", value: 75, color: "bg-red-500" },
+  { level: "Expert", value: 45, color: "bg-purple-600" },
+];
+
 const DifficultyEstimator = () => {
   const [question, setQuestion] = useState("");
-
   const [result, setResult] = useState(null);
 
   const analyzeQuestion = () => {
     if (!question.trim()) return;
 
     // Demo AI Result
-    setResult({
-      difficulty: "Hard",
-      confidence: 94,
-      estimatedTime: "35 Minutes",
-      prerequisites: [
-        "Binary Trees",
-        "Depth First Search",
-        "Recursion",
-        "Dynamic Programming",
-      ],
-    });
+    setResult(DEMO_AI_RESULT);
   };
 
   return (
@@ -235,28 +243,7 @@ const DifficultyEstimator = () => {
 
               <div className="space-y-6">
 
-                {[
-                  {
-                    level: "Easy",
-                    value: 20,
-                    color: "bg-green-500",
-                  },
-                  {
-                    level: "Medium",
-                    value: 35,
-                    color: "bg-yellow-500",
-                  },
-                  {
-                    level: "Hard",
-                    value: 75,
-                    color: "bg-red-500",
-                  },
-                  {
-                    level: "Expert",
-                    value: 45,
-                    color: "bg-purple-600",
-                  },
-                ].map((item, index) => (
+                {DIFFICULTY_DISTRIBUTION.map((item, index) => (
 
                   <div key={index}>
 
