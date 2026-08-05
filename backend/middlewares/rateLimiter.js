@@ -7,7 +7,7 @@ const loginLimiter = rateLimit({
     message: { error: 'Too many login attempts. Your account is temporarily locked. Please try again after 15 minutes.' },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    skip: (req) => req.method !== 'POST' || req.path !== '/login', // Only apply to POST /login
+    skip: (req) => req.method !== 'POST' || req.path !== '/api/auth/login', // Only apply to POST /api/auth/login
 });
 
 // Authentication endpoints: 50 register/refresh/logout attempts per 15 minutes
@@ -17,7 +17,7 @@ const authLimiter = rateLimit({
     message: { error: 'Too many registration or authentication attempts, please try again after 15 minutes.' },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    skip: (req) => req.method === 'POST' && req.path === '/login', // Skip login, use loginLimiter instead
+    skip: (req) => req.method === 'POST' && req.path === '/api/auth/login', // Skip login, use loginLimiter instead
 });
 
 // AI generation endpoints: 20 requests per hour (to control costs)
