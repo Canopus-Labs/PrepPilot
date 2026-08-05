@@ -32,6 +32,19 @@ const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securit
 const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
+// Trust X-Forwarded-For only when it comes from a known reverse proxy. The
+// previous blanket `trust proxy: 1` let any client spoof the header and rotate
+// their IP on every request, defeating every rate limiter. With no CIDR
+// configured the header is ignored entirely and req.ip is the direct socket
+// address, so it cannot be reset by the caller.
+const reverseProxyCidrs = (process.env.REVERSE_PROXY_CIDR || "")
+  .split(",")
+  .map((cidr) => cidr.trim())
+  .filter(Boolean);
+if (reverseProxyCidrs.length > 0) {
+  app.set("trust proxy", reverseProxyCidrs);
+}
+app.use(generalHeaders);
 app.set("trust proxy", 1);
 app.use(helmet());
 app.use(generalHeaders); 
