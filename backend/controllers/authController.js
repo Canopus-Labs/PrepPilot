@@ -106,9 +106,6 @@ const registerUser = async (req, res) => {
             });
         }
 
-        // Hash raw password with bcrypt before DB creation (#757)
-        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
-
         // Split name into first and last names for defaults
         const nameParts = cleanName.split(/\s+/);
         const firstName = nameParts[0] || "";
@@ -118,10 +115,11 @@ const registerUser = async (req, res) => {
         const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
         // Auto-verify user — email verification temporarily disabled
+        // Password hashing is handled by the User model's pre-save hook (once, not twice).
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
-            password: hashedPassword,
+            password: password,
             profileImageUrl,
             firstName,
             lastName,
