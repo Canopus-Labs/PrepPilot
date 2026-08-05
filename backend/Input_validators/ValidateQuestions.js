@@ -18,7 +18,7 @@ const togglePinQuestionSchema = z.object({
 
 // Schema for updating note
 const updateQuestionNoteSchema = z.object({
-  note: z.string(),
+  note: z.string().min(1, "Note text is required").max(5000, "Note must be under 5000 characters"),
 });
 
 

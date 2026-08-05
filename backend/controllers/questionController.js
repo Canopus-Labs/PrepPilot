@@ -239,7 +239,12 @@ const updateQuestionNote = async (req, res) => {
       });
     }
 
-    question.note = note || "";
+    // Skip DB write if note has not changed
+    if (question.note === note) {
+      return res.status(200).json({ success: true, question });
+    }
+
+    question.note = note;
     await question.save();
 
     res.status(200).json({ success: true, question });
