@@ -15,23 +15,47 @@ async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
   const { data } = await axios.get(url, {
     params: {
-      app_id:   ADZUNA_APP_ID,
-      app_key:  ADZUNA_API_KEY,
-      what:     role,
+      app_id:           ADZUNA_APP_ID,
+      app_key:          ADZUNA_API_KEY,
+      what:             role,
       results_per_page: 10,
     },
   });
   return (data.results || []).map((j) => ({
-    id:          j.id,
-    title:       j.title,
-    company:     j.company?.display_name || "Unknown",
-    location:    j.location?.display_name || "Remote",
-    salary_min:  j.salary_min || null,
-    salary_max:  j.salary_max ?? null,
-    description: j.description ?? "",
+    id:           j.id,
+    title:        j.title,
+    company:      j.company?.display_name || "Unknown",
+    location:     j.location?.display_name || "Remote",
+    salary_min:   j.salary_min || null,
+    salary_max:   j.salary_max ?? null,
+    description:  j.description ?? "",
     redirect_url: j.redirect_url,
-    created:     j.created,
+    created:      j.created,
   }));
+}
+
+/**
+ * Handles concurrent upserts safely by catching E11000 duplicate key errors
+ * and falling back to a standard update.
+ */
+async function upsertJobCache(cacheKey, jobs) {
+  const updateData = { jobs, fetchedAt: new Date() };
+  try {
+    return await JobCache.findOneAndUpdate(
+      { cacheKey },
+      updateData,
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    if (err.code === 11000) {
+      return await JobCache.findOneAndUpdate(
+        { cacheKey },
+        updateData,
+        { new: true }
+      );
+    }
+    throw err;
+  }
 }
 
 exports.getJobs = async (req, res) => {
@@ -63,11 +87,7 @@ exports.getJobs = async (req, res) => {
 
     const jobs = await fetchFromAdzuna(role, country);
 
-    await JobCache.findOneAndUpdate(
-      { cacheKey },
-      { jobs, fetchedAt: new Date() },
-      { upsert: true, new: true }
-    );
+    await upsertJobCache(cacheKey, jobs);
 
     return res.json({ jobs, role, source: "api" });
   } catch (err) {
@@ -84,14 +104,14 @@ exports.refreshJobCache = async () => {
     });
 
     for (const role of roles) {
-      const cacheKey = `${role.toLowerCase()}|${ADZUNA_COUNTRY}`;
-      const jobs = await fetchFromAdzuna(role);
-      await JobCache.findOneAndUpdate(
-        { cacheKey },
-        { jobs, fetchedAt: new Date() },
-        { upsert: true, new: true }
-      );
-      console.log(`[JobCron] Refreshed cache for: ${role}`);
+      try {
+        const cacheKey = `${role.toLowerCase()}|${ADZUNA_COUNTRY}`;
+        const jobs = await fetchFromAdzuna(role);
+        await upsertJobCache(cacheKey, jobs);
+        console.log(`[JobCron] Refreshed cache for: ${role}`);
+      } catch (roleErr) {
+        console.error(`[JobCron] Failed to refresh role "${role}":`, roleErr.message);
+      }
     }
   } catch (err) {
     console.error("[JobCron] Refresh failed:", err.message);
