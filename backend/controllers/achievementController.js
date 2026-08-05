@@ -78,6 +78,8 @@ exports.saveAchievements = async (req, res) => {
         const user = await User.findByIdAndUpdate(
             req.user._id,
             { $addToSet: { unlockedAchievements: { $each: earnedAchievements } } },
+            req.user._id,
+            { $addToSet: { unlockedAchievements: { $each: earnedAchievements } } },
         // $addToSet is idempotent and additive-only — it never removes
         // achievements the user already earned, and never duplicates.
         const user = await User.findByIdAndUpdate(

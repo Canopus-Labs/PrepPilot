@@ -37,11 +37,18 @@ const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
 
-    // Fetch questions the user has already seen for this role + topic
+    // Build topic query: use $in if topics array is non-empty to check set containment,
+    // otherwise fallback to matching topicsToFocus if provided
+    const topicQuery =
+      Array.isArray(topicsToFocus) && topicsToFocus.length > 0
+        ? { topicsToFocus: { $in: topicsToFocus } }
+        : {};
+
+    // Fetch questions the user has already seen for this role + any matching topics
     const pastSessions = await Session.find({
       user: req.user._id,
       role,
-      topicsToFocus,
+      ...topicQuery,
     }).select("questions");
 
     const pastQuestionIds = pastSessions.flatMap((s) => s.questions);
