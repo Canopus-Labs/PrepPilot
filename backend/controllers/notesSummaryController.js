@@ -6,7 +6,7 @@ const {
   computeReadingTime,
   PdfIntegrityError,
 } = require("../utils/pdfIntegrity");
-const { aiOutputSchema } = require("../Input_validators/ValidateNotesSummary");
+const { aiOutputSchema, saveNotesSummarySchema } = require("../Input_validators/ValidateNotesSummary");
 const { NOTES_MAX_FILE_SIZE } = require("../middlewares/uploadMiddleware");
 const NotesSummary = require("../models/NotesSummary");
 
@@ -247,8 +247,17 @@ const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Validation is handled by the Zod middleware (validateSaveNotesSummary) on the route.
-    // The req.body has already been validated and normalized by Zod before reaching here.
+    // Explicitly validate with Zod to satisfy CodeQL taint analysis.
+    // (The route middleware already validates via validateSaveNotesSummary, but
+    // re-parsing here makes the data-flow contract unambiguous for static analysis.)
+    const validated = saveNotesSummarySchema.safeParse(req.body);
+    if (!validated.success) {
+      return res.status(400).json({
+        success: false,
+        message: validated.error.issues.map((e) => e.message),
+      });
+    }
+
     const {
       fileName,
       sourceType,
@@ -262,7 +271,7 @@ const saveSummary = async (req, res) => {
       difficulty,
       readingTime,
       learningOutcomes,
-    } = req.body;
+    } = validated.data;
 
     const savedSummary = await NotesSummary.findOneAndUpdate(
       {
