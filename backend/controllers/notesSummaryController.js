@@ -9,7 +9,6 @@ const {
 const { aiOutputSchema } = require("../Input_validators/ValidateNotesSummary");
 const { NOTES_MAX_FILE_SIZE } = require("../middlewares/uploadMiddleware");
 const NotesSummary = require("../models/NotesSummary");
-const Joi = require("joi");
 
 const ALLOWED_REMOTE_HOSTS = new Set(["raw.githubusercontent.com"]);
 const MAX_SAVED_SUMMARIES_PER_USER = 30;
@@ -240,32 +239,6 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
 };
 
 
-const saveSummarySchema = Joi.object({
-  fileName: Joi.string().trim().max(255).required(),
-
-  sourceType: Joi.string().trim().required(),
-
-  sourceUrl: Joi.string().uri().allow("", null),
-
-  pageCount: Joi.number().integer().min(0).required(),
-
-  wordCount: Joi.number().integer().min(0).required(),
-
-  contentHash: Joi.string().required(),
-
-  summary: Joi.string().required(),
-
-  topics: Joi.array().items(Joi.string()).required(),
-
-  prerequisites: Joi.array().items(Joi.string()).required(),
-
-  difficulty: Joi.string().required(),
-
-  readingTime: Joi.number().min(0).required(),
-
-  learningOutcomes: Joi.array().items(Joi.string()).required(),
-});
-
 /**
  * @route POST /api/notes-summary/save
  * @access Private
@@ -274,18 +247,8 @@ const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const { error, value } = saveSummarySchema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details.map((d) => d.message),
-      });
-    }
-
+    // Validation is handled by the Zod middleware (validateSaveNotesSummary) on the route.
+    // The req.body has already been validated and normalized by Zod before reaching here.
     const {
       fileName,
       sourceType,
@@ -299,7 +262,7 @@ const saveSummary = async (req, res) => {
       difficulty,
       readingTime,
       learningOutcomes,
-    } = value;
+    } = req.body;
 
     const savedSummary = await NotesSummary.findOneAndUpdate(
       {
