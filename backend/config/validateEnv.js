@@ -24,15 +24,22 @@ const optionalEnvGroups = Object.freeze([
   },
 ]);
 
+// Optional integrations mapping missing keys to dependent features
+const optionalEnvGroups = Object.freeze([
+  {
+    feature: "Jobs for You",
+    keys: ["ADZUNA_APP_ID", "ADZUNA_API_KEY"],
+  },
+]);
+
 // Helper function to safely check if an env variable value is empty/invalid
-// Helper function to safely check if an env variable value is empty or missing
 const isEmptyValue = (val) => {
   if (val === undefined || val === null) return true;
   return String(val).trim() === "";
 };
 
 const validateEnv = () => {
-  // Guarantee dotenv is loaded in case validateEnv is called standalone
+  // Ensure dotenv is loaded before inspecting process.env
   require("dotenv").config();
 
   const missingVars = [];
@@ -109,7 +116,6 @@ const validateEnv = () => {
   }
 
   // 2. Check optional environment variables safely and warn if missing
-  // 2. Check optional environment variables and warn if missing
   optionalEnvGroups.forEach(({ feature, keys }) => {
     const missingKeys = keys.filter((key) => {
       const val = process.env[key];
