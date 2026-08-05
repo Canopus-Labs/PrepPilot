@@ -363,7 +363,7 @@ const getMySummaries = async (req, res) => {
   try {
     const summaries = await NotesSummary.find({ user: req.user._id }).sort({
       updatedAt: -1,
-    });
+    }).limit(50);
     res.status(200).json({
       success: true,
       summaries: summaries.map((s) => s.toSafeObject()),

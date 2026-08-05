@@ -55,11 +55,22 @@ export const API_PATHS = {
     COURSES: {
         GET_ALL: "/api/courses", // GET all free courses
     },
+    BEHAVIORAL: {
+    ANALYZE: "/api/behavioral/analyze",
+    },
     FLASHCARD: {
         CREATE: "/api/flashcards",
         GET_ALL: "/api/flashcards",
         GET_STATS: "/api/flashcards/stats",
         REVIEW: (id) => `/api/flashcards/${id}/review`,
         DELETE: (id) => `/api/flashcards/${id}`,
+    },
+    ROADMAP: {
+        CREATE: "/api/roadmaps",
+        GET_ALL: "/api/roadmaps",
+        GET_ONE: (id) => `/api/roadmaps/${id}`,
+        UPDATE: (id) => `/api/roadmaps/${id}`,
+        TOGGLE_TASK: (id) => `/api/roadmaps/${id}/tasks`,
+        DELETE: (id) => `/api/roadmaps/${id}`,
     },
 };
