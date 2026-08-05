@@ -81,6 +81,9 @@ export const usePatternMatrix = () => {
   const [correctClicks, setCorrectClicks] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
 
+  // Score ref to avoid stale closure reads in setHighScore callback
+  const scoreRef = useRef(0);
+
   // Timer reference stores
   const displayTimerRef = useRef(null);
   const countdownIntervalRef = useRef(null);
@@ -243,7 +246,7 @@ export const usePatternMatrix = () => {
     
     setDifficulty(selectedDiff);
     setPaused(false);
-    setScore(0);
+    scoreRef.current = 0; setScore(0);
     setLevel(1);
     setStreak(0);
     setMaxStreak(0);
@@ -281,7 +284,7 @@ export const usePatternMatrix = () => {
         // Success calculations
         const diffMultiplier = DIFFICULTY_CONFIGS[difficulty].multiplier;
         const ptsEarned = Math.round((50 * level * diffMultiplier) + (10 * targets.size));
-        setScore((s) => s + ptsEarned);
+        setScore((s) => { const ns = s + ptsEarned; scoreRef.current = ns; return ns; });
         
         const nextStreak = streak + 1;
         setStreak(nextStreak);
@@ -327,9 +330,10 @@ export const usePatternMatrix = () => {
         transitionTimeoutRef.current = setTimeout(() => {
           setPhase("gameover");
           setHighScore((prevHigh) => {
-            if (score > prevHigh) {
-              localStorage.setItem("matrix_high_score", score.toString());
-              return score;
+            const finalScore = scoreRef.current;
+            if (finalScore > prevHigh) {
+              localStorage.setItem("matrix_high_score", finalScore.toString());
+              return finalScore;
             }
             return prevHigh;
           });
@@ -342,7 +346,7 @@ export const usePatternMatrix = () => {
         }, 1500);
       }
     }
-  }, [phase, paused, selected, wrongClicks, targets, gridSize, difficulty, level, streak, lives, score, startCountdown]);
+  }, [phase, paused, selected, wrongClicks, targets, gridSize, difficulty, level, streak, lives, scoreRef, startCountdown]);
 
   // ─── Pause & Resume Utilities ────────────────────────────────────────────────
   const pauseGame = useCallback(() => {
