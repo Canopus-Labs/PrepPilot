@@ -28,42 +28,50 @@ const MAX_EXPERIENCE = 50;
  */
 
 exports.createSession = async (req, res) => {
-    const mongoSession = await mongoose.startSession();
-
+    let mongoSession;
     try {
-        await mongoSession.withTransaction(async () => {
-            const userId = req.user._id;
-            const { role, experience, topicsToFocus, description } = req.body;
-            const experienceNumber = Number(experience);
- 
-            if (!role || role.trim() === "") {
-                return res.status(400).json({
-                    success: false,
-                    message: "Role is required.",
-                });
-            }
+        const userId = req.user._id;
+        const { role, experience, topicsToFocus, description } = req.body;
+        const experienceNumber = Number(experience);
 
-            if (isNaN(experienceNumber)) {
-              return res.status(400).json({
-                    success: false,
-                    message: "Years of experience must be a valid number.",
-           });
-         }
+        // Validate before opening the transaction so 4xx responses are sent
+        // from the outer handler, never from inside the transaction callback
+        // (returning inside withTransaction resolves it and commits).
+        if (!role || role.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Role is required.",
+            });
+        }
 
-          if (experienceNumber < 0 || experienceNumber > MAX_EXPERIENCE) {
-             return res.status(400).json({
-                   success: false,
-                   message: `Years of experience must be between 0 and ${MAX_EXPERIENCE}.`,
-             });
-            }
-            const sessionCount = await Session.countDocuments({
-                user: userId,
-            }).session(mongoSession);
+        if (Number.isNaN(experienceNumber)) {
+            return res.status(400).json({
+                success: false,
+                message: "Years of experience must be a valid number.",
+            });
+        }
 
-            if (sessionCount >= MAX_SESSIONS) {
-                throw new Error("SESSION_LIMIT_REACHED");
-            }
+        if (experienceNumber < 0 || experienceNumber > MAX_EXPERIENCE) {
+            return res.status(400).json({
+                success: false,
+                message: `Years of experience must be between 0 and ${MAX_EXPERIENCE}.`,
+            });
+        }
 
+        const sessionCount = await Session.countDocuments({
+            user: userId,
+        });
+
+        if (sessionCount >= MAX_SESSIONS) {
+            return res.status(400).json({
+                success: false,
+                message: `Maximum of ${MAX_SESSIONS} sessions reached.`,
+            });
+        }
+
+        mongoSession = await mongoose.startSession();
+
+        const created = await mongoSession.withTransaction(async () => {
             const createdSession = await Session.create(
                 [
                     {
@@ -92,26 +100,24 @@ await createdSession[0].save({
   session: mongoSession,
 });
 
-            res.status(201).json({
-                success: true,
-                session: createdSession[0],
-            });
+            return createdSession[0];
+        });
+
+        // Respond only after the transaction has committed.
+        res.status(201).json({
+            success: true,
+            session: created,
         });
     } catch (err) {
-        if (err.message === "SESSION_LIMIT_REACHED") {
-            return res.status(400).json({
-                success: false,
-                message: `Maximum of ${MAX_SESSIONS} sessions reached.`,
-            });
-        }
-
         console.error("Create session error:", err);
         return res.status(500).json({
             success: false,
             message: "Internal server error occurred",
         });
     } finally {
-        await mongoSession.endSession();
+        if (mongoSession) {
+            await mongoSession.endSession();
+        }
     }
 };
 
