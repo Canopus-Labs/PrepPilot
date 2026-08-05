@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import { useTheme } from "../../context/themeContext";
@@ -7,42 +7,13 @@ import { API_PATHS } from "../../utils/apiPaths";
 import uploadImage from "../../utils/uploadimage";
 import toast from "react-hot-toast";
 import { getPasswordStrength } from "../../utils/passwordStrength";
-import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   User,
-  FileText,
-  Sliders,
-  Lock,
-  Shield,
-  ArrowLeft,
-  Pencil,
-  Trash2,
-  Eye,
-  EyeOff,
-  Check,
-  X,
-  Globe,
   Briefcase,
   GraduationCap,
   Award,
   Share2,
-  Bold,
-  Italic,
-  Underline,
-  Code,
-  List,
-  ListOrdered,
-  Link2,
-  Image as ImageIcon,
-  Quote,
-  Undo2,
-  Redo2,
-  Maximize2,
-  Eye as PreviewIcon,
-  ChevronRight,
-  Sun,
-  Moon,
 } from "lucide-react";
 const Settings = () => {
   const navigate = useNavigate();

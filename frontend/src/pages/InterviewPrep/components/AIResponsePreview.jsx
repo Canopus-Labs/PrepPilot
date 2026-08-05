@@ -1,9 +1,6 @@
-import { LuCopy, LuCheck, LuCode } from "react-icons/lu";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { useState } from 'react';
 
 const AIResponsePreview = ({ content }) => {
     const [copied, setCopied] = useState(false);

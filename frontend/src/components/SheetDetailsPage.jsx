@@ -2,12 +2,11 @@ import { useParams } from "react-router-dom";
 import gfg from "../assets/gfg.svg";
 import leetcode from "../assets/leetcode.svg";
 import youtube from "../assets/youtube.svg";
-import React, { useState, useEffect, useCallback, memo, useContext } from "react";
+import { useState, useEffect, useCallback, memo, useContext } from "react";
 
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
 import { UserContext } from "../context/userContext";
-import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
 
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
   let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
@@ -114,7 +113,9 @@ function SheetDetail() {
               setFollowed(progressData.followed || false);
               setCompletedTopics(progressData.completedTopics || {});
             }
-          } catch {}
+          } catch (err) {
+            console.error("Failed to parse progress from local storage", err);
+          }
         }
 
         setLoading(false);
@@ -159,7 +160,7 @@ function SheetDetail() {
       }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
 
     return () => clearTimeout(saveToStorage);
-  }, [completedTopics, followed]);
+  }, [completedTopics, followed, completedCount, id, refreshSheetProgress, totalSubtopics]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;

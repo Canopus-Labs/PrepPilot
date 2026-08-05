@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  BookOpen,
-  Loader,
-  AlertCircle,
-  Heart,
-  MessageCircle,
-  Share2,
-  ExternalLink,
-  Search,
-} from "lucide-react";
-import { motion } from "framer-motion";
+
+
 
 const OSSBlog = () => {
   const [articles, setArticles] = useState([]);

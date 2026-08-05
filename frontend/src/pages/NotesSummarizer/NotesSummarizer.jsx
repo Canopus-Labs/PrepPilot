@@ -1,29 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
-  UploadCloud,
-  FileText,
-  X,
-  Search,
-  Copy,
-  Download,
-  Bookmark,
-  BookmarkCheck,
-  RotateCcw,
   Clock,
   Layers,
-  ListChecks,
   GraduationCap,
   BookOpen,
-  Tag,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  FolderOpen,
-  Trash2,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { BASE_URL, API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosinstance";

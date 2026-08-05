@@ -26,10 +26,12 @@ router.post('/upload', protect, async (req, res) => {
         continue;
       }
 
-      // Insert or update sheet by id
+      // Insert or update the sheet scoped to the authenticated owner. The
+      // filter uses { id, owner }, so a user can never overwrite another
+      // user's sheet even when ids collide.
       const sheet = await Sheet.findOneAndUpdate(
-        { id: sheetObj.id },
-        sheetObj,
+        { id: sheetObj.id, owner: req.user._id },
+        { ...sheetObj, owner: req.user._id },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
 
@@ -38,6 +40,11 @@ router.post('/upload', protect, async (req, res) => {
 
     res.status(201).json({ uploaded: results.length, results });
   } catch (err) {
+    if (err.code === 11000) {
+      // The compound { id, owner } index rejected the upsert — e.g. a legacy
+      // sheet without an owner already holds this id. Surface it clearly.
+      return res.status(409).json({ error: 'A sheet with this id already exists.' });
+    }
     console.error('Error saving to MongoDB:', err);
     res.status(500).json({ error: 'Failed to save sheet to database.' });
   }
@@ -45,10 +52,28 @@ router.post('/upload', protect, async (req, res) => {
 
 
 
-// GET / - fetch all sheets (for /api/sheets)
-router.get('/', async (req, res) => {
+// GET / - fetch the authenticated user's sheets
+router.get('/', protect, async (req, res) => {
   try {
-    const sheets = await Sheet.find({});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+
+    const total = await Sheet.countDocuments({});
+    const sheets = await Sheet.find({})
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      sheets,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+    const sheets = await Sheet.find({ owner: req.user._id });
     res.json({ sheets });
   } catch (err) {
     console.error('Error fetching sheets:', err);
@@ -57,11 +82,11 @@ router.get('/', async (req, res) => {
 });
 
 
-// GET /:id - fetch single sheet by id (for /api/sheets/:id)
-router.get('/:id', async (req, res) => {
+// GET /:id - fetch a single sheet owned by the authenticated user
+router.get('/:id', protect, async (req, res) => {
   try {
-    // Always find by custom id field (string)
-    const sheet = await Sheet.findOne({ id: req.params.id });
+    // Always find by custom id field (string) scoped to the owner
+    const sheet = await Sheet.findOne({ id: req.params.id, owner: req.user._id });
     if (!sheet) {
       return res.status(404).json({ error: 'Sheet not found.' });
     }

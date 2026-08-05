@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { Target, Briefcase, Code2, FileText, Sparkles } from "lucide-react";
+import { Target, Briefcase, Code2, FileText } from "lucide-react";
 
 const MAX_EXPERIENCE = 50;
 
 const CreateSessionForm = () => {
   const [formData, setFormData] = useState({
     role: "",
+    company: "",
     experience: "",
     topicsToFocus: "",
     description: "",
@@ -33,9 +33,9 @@ const CreateSessionForm = () => {
 
   const handleCreateSession = async (e) => {
     e.preventDefault();
-    const { role, experience, topicsToFocus } = formData;
+    const { role, company, experience, topicsToFocus } = formData;
 
-    if (!role || !experience || !topicsToFocus) {
+    if (!role || !company || !experience || !topicsToFocus) {
       setError("Please fill all the required fields.");
       return;
     }
@@ -63,6 +63,7 @@ if (experienceValue > MAX_EXPERIENCE) {
       const aiResponse = await axiosInstance.post(
         API_PATHS.AI.GENERATE_QUESTIONS, {
           role,
+          company,
           experience,
           topicsToFocus: topicsArray,
           numberOfQuestions: 10,
@@ -91,6 +92,21 @@ if (experienceValue > MAX_EXPERIENCE) {
     }
   };
 
+  const companies = [
+    "Google",
+    "Microsoft",
+    "Amazon",
+    "Meta",
+    "Adobe",
+    "Atlassian",
+    "Netflix",
+    "Apple",
+    "Oracle",
+    "Uber",
+    "Flipkart",
+    "Walmart",
+  ];
+
   const inputConfig = [
     {
       id: "role",
@@ -98,6 +114,13 @@ if (experienceValue > MAX_EXPERIENCE) {
       label: "Target Role",
       placeholder: "e.g., Frontend Developer, UI/UX Designer",
       type: "text"
+    },
+    {
+      id: "company",
+      icon: Briefcase,
+      label: "Target Company",
+      placeholder: "Google, Microsoft, Amazon...",
+      type: "select",
     },
     {
       id: "experience",
@@ -147,26 +170,41 @@ if (experienceValue > MAX_EXPERIENCE) {
                   <div className="absolute left-3 text-gray-400 dark:text-gray-500 group-focus-within:text-violet-500 transition-colors pointer-events-none">
                     <Icon size={18} />
                   </div>
-                  
-                  {field.type === "textarea" ? (
-                    <textarea
-                      value={formData[field.id]}
-                      onChange={({ target }) => handleChange(field.id, target.value)}
-                      placeholder={field.placeholder}
-                      rows={3}
-                      className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm resize-none scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10"
-                    />
-                  ) : (
-                    <input
-                      type={field.type}
-                      min={field.type === "number" ? 0 : undefined}
-                      max={field.type === "number" ? MAX_EXPERIENCE : undefined}
-                      value={formData[field.id]}
-                      onChange={({ target }) => handleChange(field.id, target.value)}
-                      placeholder={field.placeholder}
-                      className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm"
-                    />
-                  )}
+                  {field.type === "select" ? (
+  <select
+    value={formData[field.id]}
+    onChange={({ target }) => handleChange(field.id, target.value)}
+    className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm"
+  >
+    <option value="">Select Company</option>
+
+    {companies.map((company) => (
+      <option key={company} value={company}>
+        {company}
+      </option>
+    ))}
+  </select>
+) : field.type === "textarea" ? (
+  <textarea
+    value={formData[field.id]}
+    onChange={({ target }) => handleChange(field.id, target.value)}
+    placeholder={field.placeholder}
+    rows={3}
+    className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm resize-none"
+  />
+) : (
+  <input
+    type={field.type}
+    min={field.type === "number" ? 0 : undefined}
+    max={field.type === "number" ? MAX_EXPERIENCE : undefined}
+    value={formData[field.id]}
+    onChange={({ target }) => handleChange(field.id, target.value)}
+    placeholder={field.placeholder}
+    className="w-full min-w-0 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all shadow-sm"
+  />
+)}
+
+
                 </div>
               </div>
             );

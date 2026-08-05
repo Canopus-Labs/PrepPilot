@@ -1,8 +1,6 @@
-import React, { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import { UserContext } from "../context/userContext";
-import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
 import { BASE_URL } from "../utils/apiPaths";
-import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
   const { user } = useContext(UserContext);
@@ -41,7 +39,8 @@ export default function AIHelper() {
         if (parsed.message) {
           friendlyMessage = parsed.message;
         }
-      } catch {
+      } catch (err) {
+        // ignore json parse error
       }
       throw new Error(friendlyMessage);
     }
@@ -111,7 +110,9 @@ export default function AIHelper() {
         try {
           const parsed = JSON.parse(displayText);
           displayText = parsed.text || displayText;
-        } catch {}
+        } catch (err) {
+          // ignore json parse error
+        }
       }
 
       setMessages((cur) =>

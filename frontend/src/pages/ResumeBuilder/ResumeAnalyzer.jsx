@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target } from "lucide-react";
+import { useState, useEffect } from "react";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
@@ -259,7 +258,7 @@ const ResumeAnalyzer = () => {
                  <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -ml-20 -mb-20 pointer-events-none"></div>
                  
-                 {renderScoreRing(result.resumeScore, "Overall Score", "Based on deep analysis")}
+                 {renderScoreRing(result.resumeScore, "ATS Compatibility Score", "Based on deep analysis")}
                  
                  <div className="hidden sm:block w-px h-32 bg-gradient-to-b from-transparent via-gray-200 dark:via-white/10 to-transparent mx-8"></div>
                  <div className="sm:hidden h-px w-full max-w-xs bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent my-8"></div>
@@ -318,6 +317,46 @@ const ResumeAnalyzer = () => {
                    )}
                  </div>
 
+                 <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm">
+  <h3 className="text-lg font-bold mb-5">
+    Missing Keywords
+  </h3>
+
+  <div className="flex flex-wrap gap-2">
+    {(result.missingKeywords || []).map((item, index) => (
+      <span
+        key={index}
+        className="px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700 font-semibold"
+      >
+        {item}
+      </span>
+    ))}
+  </div>
+</div>
+<div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8">
+    <h3 className="font-bold mb-5">
+        Suggested Action Verbs
+    </h3>
+
+    <ul>
+        {(result.actionVerbs || []).map((verb,index)=>(
+            <li key={index}>
+                • {verb}
+            </li>
+        ))}
+    </ul>
+</div>
+<div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8">
+<h3>Formatting Issues</h3>
+
+{result.formattingIssues?.map((issue,index)=>(
+<div key={index}>
+⚠️ {issue}
+</div>
+))}
+
+</div>
+
                  {/* Missing Projects */}
                  <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm">
                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
@@ -335,6 +374,29 @@ const ResumeAnalyzer = () => {
                    </ul>
                  </div>
                </div>
+
+               <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm">
+  <h3 className="text-lg font-bold mb-5">
+    Resume Sections
+  </h3>
+
+  {Object.entries(result.sections || {}).map(([section, value]) => (
+    <div
+      key={section}
+      className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-white/10"
+    >
+      <span>{section}</span>
+
+      <span
+        className={`font-semibold ${
+          value ? "text-green-500" : "text-red-500"
+        }`}
+      >
+        {value ? "✔ Present" : "✖ Missing"}
+      </span>
+    </div>
+  ))}
+</div>
 
                {/* Suggestions List */}
                <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm flex flex-col h-full">
@@ -360,6 +422,11 @@ const ResumeAnalyzer = () => {
                  >
                    Analyze Another Resume
                  </button>
+                 <button
+                  className="mt-4 w-full py-4 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition"
+                >
+                  Download Improvement Report
+                </button>
                </div>
                
             </div>

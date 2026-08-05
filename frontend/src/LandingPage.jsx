@@ -1,24 +1,12 @@
-import ProfileInfoCard from "./components/Cards/ProfileinfoCard";
-import React, { useContext, useState, useEffect, useRef } from "react";
-import { APP_FEATURES, STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
-import { useNavigate, Link } from "react-router-dom";
-import {
-  LuSparkles,
-  LuChevronRight,
-  LuArrowRight,
-  LuArrowUp,
-  LuUsers,
-} from "react-icons/lu";
-import { VscGitMerge } from "react-icons/vsc";
-import Modal from "./components/Loader/Modal";
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import ForgotPassword from "./pages/Auth/ForgotPAssword";
+import { useContext, useState, useEffect, useRef } from "react";
+import { STATS, HOW_IT_WORKS_STEPS } from "./utils/data";
+import { useNavigate } from "react-router-dom";
+
+
 import { UserContext } from "./context/userContext";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
-import ServicesMarquee from "./components/ServicesMarquee";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
-import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
+import { useMotionValue, useSpring, useTransform } from "framer-motion";
+// Import icons for testimonials
+// ← Add this
 
 
 /* ─────────────────────────────────────────────

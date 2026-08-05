@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -43,7 +43,7 @@ const VerifyEmail = () => {
         };
 
         verify();
-    }, []);
+    }, [navigate, searchParams]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-[#0a0a0f] px-4">

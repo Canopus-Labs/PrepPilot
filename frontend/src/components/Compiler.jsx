@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { Play } from "lucide-react"; // icon for Run button
-import DashboardLayout from "./Layouts/DashboardLayout";
+import { useState } from "react";
+// icon for Run button
 
 const RAPIDAPI_KEY = import.meta.env.VITE_REACT_APP_RAPIDAPI_KEY;
 
@@ -45,14 +44,15 @@ int main() {
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
-            language_id: parseInt(language),
+            language_id: parseInt(language, 10),
             source_code: code,
             stdin: "",
           }),
         }
       );
 
-      const result = await response.json();
+      if (!response.ok) throw new Error("Request failed");
+const result = await response.json();
       const finalOutput =
         result.stdout ||
         result.stderr ||
