@@ -437,7 +437,13 @@ const updateUserProfile = async (req, res) => {
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (bio !== undefined) user.bio = bio;
-        if (country !== undefined) user.country = country;
+        if (country !== undefined) {
+            const trimmedCountry = typeof country === "string" ? country.trim() : "";
+            if (!/^[a-zA-Z\s\-'.]+$/.test(trimmedCountry)) {
+                return res.status(400).json({ success: false, message: "Country must be a valid alphabetic string" });
+            }
+            user.country = trimmedCountry;
+        }
         if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
         if (visibility !== undefined) user.visibility = visibility;
 
