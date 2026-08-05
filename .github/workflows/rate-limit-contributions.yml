@@ -52,7 +52,7 @@ jobs:
             ];
 
             const CLOSE_MESSAGE =
-              `Thank you for your contribution! 🙏\n\n` +
+              `Thank you for your contribution!\n\n` +
               `To keep reviews manageable and maintain repository quality, ` +
               `contributors may have a maximum of **${MAX_OPEN_ISSUES} open Issues** ` +
               `and **${MAX_OPEN_PRS} open Pull Requests** at any given time.\n\n` +
@@ -74,7 +74,13 @@ jobs:
               return;
             }
 
-            // ── 1. Exempt repo owner, admins and collaborators ──────────────
+            // ── 1. Exempt specific contributors, repo owner, admins and collaborators ──
+            const EXEMPT_USERS = ["jainiksha"]; // add more usernames here if needed
+            if (EXEMPT_USERS.map(u => u.toLowerCase()).includes(actor.toLowerCase())) {
+              core.info(`${actor} is in the exempt list — skipping rate limit.`);
+              return;
+            }
+
             try {
               const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
                 owner, repo, username: actor,

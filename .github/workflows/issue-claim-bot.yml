@@ -1,0 +1,167 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# issue-claim-bot.yml
+#
+# PURPOSE:
+#   • Posts a welcome comment when a new Issue is opened, inviting contributors
+#     to claim it with /claim.
+#   • Handles /claim comments: assigns the issue, adds a label, and replies.
+#   • Prevents duplicate claims and handles all edge cases gracefully.
+#
+# CUSTOMISATION:
+#   CLAIMED_LABEL  — label added when an issue is claimed (created if missing)
+#   EXEMPT_USERS   — comma-separated GitHub usernames who are always allowed
+# ─────────────────────────────────────────────────────────────────────────────
+name: Issue Claim Bot
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]   # only new comments; ignore edits/deletions
+
+permissions:
+  issues: write
+  contents: read
+
+env:
+  CLAIMED_LABEL: "claimed"
+
+jobs:
+  # ── JOB 1: Welcome message when a new issue is opened ──────────────────────
+  welcome:
+    name: Post welcome comment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+
+    steps:
+      - name: Comment welcome message
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const issueNumber     = context.payload.issue.number;
+
+            await github.rest.issues.createComment({
+              owner, repo,
+              issue_number: issueNumber,
+              body:
+                `Thanks for creating this issue!\n\n` +
+                `If you'd like to work on it, simply comment:\n\n` +
+                `> /claim\n\n` +
+                `The **first** person to claim the issue will be assigned automatically.\n\n` +
+                `Happy contributing!`,
+            });
+            core.info(`Welcome comment posted on #${issueNumber}`);
+
+  # ── JOB 2: Handle /claim comments ─────────────────────────────────────────
+  handle-claim:
+    name: Handle /claim
+    runs-on: ubuntu-latest
+    # Only run on issue_comment events (not issue opened)
+    if: github.event_name == 'issue_comment' && github.event.action == 'created'
+
+    steps:
+      - name: Process /claim command
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const comment  = context.payload.comment;
+            const issue    = context.payload.issue;
+            const actor    = comment.user.login;
+            const LABEL    = process.env.CLAIMED_LABEL;
+
+            // ── Guard: case-insensitive /claim check (trim whitespace) ───────
+            const body = comment.body.trim().toLowerCase();
+            if (body !== "/claim") {
+              core.info("Comment is not '/claim' — ignoring.");
+              return;
+            }
+
+            core.info(`/claim received on #${issue.number} from @${actor}`);
+
+            // ── Guard: skip bots ──────────────────────────────────────────────
+            if (comment.user.type === "Bot" || actor.endsWith("[bot]")) {
+              core.info("Commenter is a bot — ignoring.");
+              return;
+            }
+
+            // ── Guard: skip if this is a PR (issue_comment fires on PRs too) ─
+            if (issue.pull_request) {
+              core.info("This is a PR comment, not an issue — ignoring.");
+              return;
+            }
+
+            // ── Guard: skip closed issues ────────────────────────────────────
+            if (issue.state === "closed") {
+              await github.rest.issues.createComment({
+                owner, repo,
+                issue_number: issue.number,
+                body: `⚠️ @${actor} — This issue is already **closed** and cannot be claimed.`,
+              });
+              return;
+            }
+
+            // ── Check existing assignees ──────────────────────────────────────
+            const assignees = (issue.assignees || []).map(a => a.login);
+
+            if (assignees.length > 0) {
+              // Already claimed — inform the commenter
+              const claimedBy = assignees[0];
+              await github.rest.issues.createComment({
+                owner, repo,
+                issue_number: issue.number,
+                body:
+                  `❌ This issue has already been claimed by **@${claimedBy}**.\n\n` +
+                  `Please look for another open issue or create a new one to contribute.\n\n` +
+                  `Thank you for your interest!`,
+              });
+              core.info(`Issue #${issue.number} already assigned to @${claimedBy} — notified @${actor}.`);
+              return;
+            }
+
+            // ── Assign issue to the claimant ─────────────────────────────────
+            await github.rest.issues.addAssignees({
+              owner, repo,
+              issue_number: issue.number,
+              assignees: [actor],
+            });
+
+            // ── Ensure 'claimed' label exists (create if missing) ─────────────
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: LABEL });
+            } catch (err) {
+              if (err.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner, repo,
+                  name: LABEL,
+                  color: "0075ca",   // blue
+                  description: "This issue has been claimed by a contributor",
+                });
+                core.info(`Created label '${LABEL}'`);
+              } else {
+                throw err;
+              }
+            }
+
+            // ── Add 'claimed' label ───────────────────────────────────────────
+            await github.rest.issues.addLabels({
+              owner, repo,
+              issue_number: issue.number,
+              labels: [LABEL],
+            });
+
+            // ── Post success comment ──────────────────────────────────────────
+            await github.rest.issues.createComment({
+              owner, repo,
+              issue_number: issue.number,
+              body:
+                `✅ **@${actor}** has successfully claimed this issue!\n\n` +
+                `You've been assigned. Happy coding!\n\n` +
+                `> **Tip:** Please open a Pull Request linked to this issue when you're ready.\n` +
+                `> Add \`Closes #${issue.number}\` in your PR description.`,
+            });
+
+            core.info(`Issue #${issue.number} successfully claimed by @${actor}.`);
