@@ -1,0 +1,174 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# rate-limit-contributions.yml
+#
+# PURPOSE:
+#   Prevents repository spam by auto-closing any new Issue or Pull Request
+#   from a contributor who already has 3 or more open submissions of that type.
+#
+# CUSTOMISATION:
+#   Change the MAX_OPEN_ISSUES and MAX_OPEN_PRS env vars below to adjust limits.
+#   Admins / maintainers / collaborators are always exempt.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Rate-limit contributions
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:        # use pull_request_target so GITHUB_TOKEN has write perms on forks
+    types: [opened]
+
+# Minimal, scoped permissions
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+env:
+  # ── Tune these values to change the limits ──────────────────────────────────
+  MAX_OPEN_ISSUES: 3          # max simultaneous open Issues per contributor
+  MAX_OPEN_PRS: 3             # max simultaneous open PRs per contributor
+  RATE_LIMITED_LABEL: "rate-limited"
+
+jobs:
+  check-rate-limit:
+    runs-on: ubuntu-latest
+    # Skip the check entirely for bots (dependabot, renovate, etc.)
+    if: ${{ !contains(github.actor, '[bot]') }}
+
+    steps:
+      - name: Enforce contribution rate limit
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // ── Config ─────────────────────────────────────────────────────
+            const MAX_OPEN_ISSUES = parseInt(process.env.MAX_OPEN_ISSUES, 10);
+            const MAX_OPEN_PRS    = parseInt(process.env.MAX_OPEN_PRS,    10);
+            const LABEL           = process.env.RATE_LIMITED_LABEL;
+
+            // ── Excluded contributors (always exempt, regardless of role) ───
+            const EXCLUDED_USERS = [
+              "jainiksha",   // project lead / trusted contributor
+            ];
+
+            const CLOSE_MESSAGE =
+              `Thank you for your contribution!\n\n` +
+              `To keep reviews manageable and maintain repository quality, ` +
+              `contributors may have a maximum of **${MAX_OPEN_ISSUES} open Issues** ` +
+              `and **${MAX_OPEN_PRS} open Pull Requests** at any given time.\n\n` +
+              `Please wait until one of your existing submissions is reviewed or ` +
+              `closed before opening additional ones.\n\n` +
+              `If you believe this was closed by mistake, feel free to contact the maintainers.`;
+
+            const { repo: { owner, repo }, actor } = context;
+            const isIssue = context.eventName === "issues";
+            const itemNumber = isIssue
+              ? context.payload.issue.number
+              : context.payload.pull_request.number;
+
+            core.info(`Event: ${context.eventName}  |  Author: ${actor}  |  #${itemNumber}`);
+
+            // ── 0. Exempt explicitly excluded users ─────────────────────────
+            if (EXCLUDED_USERS.map(u => u.toLowerCase()).includes(actor.toLowerCase())) {
+              core.info(`${actor} is in the exclusion list — skipping rate limit.`);
+              return;
+            }
+
+            // ── 1. Exempt specific contributors, repo owner, admins and collaborators ──
+            const EXEMPT_USERS = ["jainiksha"]; // add more usernames here if needed
+            if (EXEMPT_USERS.map(u => u.toLowerCase()).includes(actor.toLowerCase())) {
+              core.info(`${actor} is in the exempt list — skipping rate limit.`);
+              return;
+            }
+
+            try {
+              const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner, repo, username: actor,
+              });
+              // permission levels: admin | maintain | write | triage | read
+              if (["admin", "maintain", "write"].includes(perm.permission)) {
+                core.info(`${actor} has '${perm.permission}' permission — skipping rate limit.`);
+                return;
+              }
+            } catch (err) {
+              // 404 = not a collaborator; any other error → log but continue
+              if (err.status !== 404) core.warning(`Permission check failed: ${err.message}`);
+            }
+
+            // ── 2. Count open Issues / PRs by this author ───────────────────
+            //    GitHub search API: one request for issues, one for PRs.
+            //    We exclude the newly created item from each count so the
+            //    threshold is "already had N open BEFORE this one".
+
+            async function countOpen(type) {
+              // type = "issue" or "pr"
+              const qualifier = type === "issue" ? "is:issue" : "is:pr";
+              const { data } = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:open ${qualifier} author:${actor}`,
+                per_page: 100,   // max per page; enough for any sane contributor
+              });
+              // Subtract 1 for the item we just opened (it's already in the index)
+              return Math.max(0, data.total_count - 1);
+            }
+
+            const openIssues = isIssue ? await countOpen("issue") : null;
+            const openPRs    = isIssue ? null : await countOpen("pr");
+
+            core.info(`Open issues by ${actor} (excl. current): ${openIssues ?? "n/a"}`);
+            core.info(`Open PRs     by ${actor} (excl. current): ${openPRs    ?? "n/a"}`);
+
+            // ── 3. Decide whether to close ──────────────────────────────────
+            const shouldClose = isIssue
+              ? openIssues >= MAX_OPEN_ISSUES
+              : openPRs   >= MAX_OPEN_PRS;
+
+            if (!shouldClose) {
+              core.info("Within limit — no action needed.");
+              return;
+            }
+
+            core.info(`Limit exceeded — closing #${itemNumber} and adding label '${LABEL}'.`);
+
+            // ── 4. Ensure the label exists (create it if needed) ─────────────
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: LABEL });
+            } catch {
+              await github.rest.issues.createLabel({
+                owner, repo,
+                name: LABEL,
+                color: "e11d48",   // red-600
+                description: "Closed automatically: contributor rate limit reached",
+              });
+            }
+
+            // ── 5. Add label ─────────────────────────────────────────────────
+            await github.rest.issues.addLabels({
+              owner, repo,
+              issue_number: itemNumber,
+              labels: [LABEL],
+            });
+
+            // ── 6. Post comment ───────────────────────────────────────────────
+            await github.rest.issues.createComment({
+              owner, repo,
+              issue_number: itemNumber,
+              body: CLOSE_MESSAGE,
+            });
+
+            // ── 7. Close the item ─────────────────────────────────────────────
+            if (isIssue) {
+              await github.rest.issues.update({
+                owner, repo,
+                issue_number: itemNumber,
+                state: "closed",
+                state_reason: "not_planned",
+              });
+            } else {
+              await github.rest.pulls.update({
+                owner, repo,
+                pull_number: itemNumber,
+                state: "closed",
+              });
+            }
+
+            core.info(`#${itemNumber} closed successfully.`);

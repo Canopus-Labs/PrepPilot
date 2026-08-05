@@ -45,14 +45,15 @@ int main() {
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
-            language_id: parseInt(language),
+            language_id: parseInt(language, 10),
             source_code: code,
             stdin: "",
           }),
         }
       );
 
-      const result = await response.json();
+      if (!response.ok) throw new Error("Request failed");
+const result = await response.json();
       const finalOutput =
         result.stdout ||
         result.stderr ||

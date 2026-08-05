@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
  * Supports "gmail", "ethereal", or any custom SMTP provider.
  * Set EMAIL_SERVICE in .env to switch between providers.
  */
-console.log("EMAIL_SERVICE:", process.env.EMAIL_SERVICE);
+
 
 const createTransporter = () => {
     const service = process.env.EMAIL_SERVICE?.toLowerCase();
@@ -39,7 +39,7 @@ const createTransporter = () => {
     // Custom SMTP — provider sets EMAIL_HOST, EMAIL_PORT themselves
     return nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
-        port: parseInt(process.env.EMAIL_PORT) || 587,
+        port: parseInt(process.env.EMAIL_PORT, 10) || 587,
         secure: process.env.EMAIL_SECURE === "true",
         auth: {
             user: process.env.EMAIL_USER,
@@ -59,7 +59,6 @@ const transporter = createTransporter();
  * @param {string} verificationUrl - Full URL with token for email verification.
  */
 const sendVerificationEmail = async (toEmail, verificationUrl) => {
-    console.log("Attempting SMTP connection...");
     await transporter.sendMail({
         from: `"PrepPilot" <${process.env.EMAIL_USER}>`,
         to: toEmail,
@@ -80,7 +79,6 @@ const sendVerificationEmail = async (toEmail, verificationUrl) => {
             </div>
         `,
     });
-    console.log("SMTP verified");
 };
 
 module.exports = { sendVerificationEmail };
