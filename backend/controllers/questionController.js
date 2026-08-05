@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 const Question = require("../models/Question");
 const Session = require("../models/Session");
 
+// Escape regex special characters to prevent injection from user-supplied search input
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
  * Get all questions for the authenticated user across their sessions.
  * @route GET /api/questions/my-questions
@@ -54,7 +57,7 @@ const getMyQuestions = async (req, res) => {
     }
 
     if (typeof q === "string" && q.trim().length > 0) {
-      const searchRegex = new RegExp(q.trim(), "i");
+      const searchRegex = new RegExp(escapeRegex(q.trim()), "i");
       filter.$or = [
         { question: searchRegex },
         { answer: searchRegex },
