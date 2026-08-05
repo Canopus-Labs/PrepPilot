@@ -7,6 +7,33 @@ const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
 const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in";
 const CACHE_TTL_MS   = 24 * 60 * 60 * 1000;
 
+// Valid country codes for Adzuna API (Issue #1301)
+const VALID_ADZUNA_COUNTRIES = [
+  "au", // Australia
+  "at", // Austria
+  "be", // Belgium
+  "br", // Brazil
+  "ca", // Canada
+  "de", // Germany
+  "es", // Spain
+  "fr", // France
+  "gb", // United Kingdom
+  "in", // India
+  "it", // Italy
+  "mx", // Mexico
+  "nl", // Netherlands
+  "nz", // New Zealand
+  "pl", // Poland
+  "ru", // Russia
+  "sg", // Singapore
+  "us", // United States
+  "za", // South Africa
+];
+
+const isValidCountry = (country) => {
+  return VALID_ADZUNA_COUNTRIES.includes(country.toLowerCase());
+};
+
 // The Jobs feature is optional: without Adzuna credentials it stays dormant
 // instead of crashing the server or spamming failed API calls.
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
@@ -53,7 +80,16 @@ exports.getJobs = async (req, res) => {
       .select("role");
 
     const role    = req.query.role || latestSession?.role || "software engineer";
-    const country = req.query.country   || ADZUNA_COUNTRY;
+    const countryParam = req.query.country || ADZUNA_COUNTRY;
+    
+    // Validate country parameter (Issue #1301)
+    if (!isValidCountry(countryParam)) {
+      return res.status(400).json({
+        message: `Invalid country code. Valid codes are: ${VALID_ADZUNA_COUNTRIES.join(", ")}`,
+      });
+    }
+    
+    const country = countryParam.toLowerCase();
     const cacheKey = `${role.toLowerCase()}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
