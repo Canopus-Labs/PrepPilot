@@ -42,7 +42,7 @@ const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) =
   const q = score;
   newEFactor = newEFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
   if (newEFactor < 1.3) newEFactor = 1.3;
-  newEFactor = Math.round(newEFactor * 100) / 100;
+  newEFactor = Math.round(newEFactor * 100 + Number.EPSILON) / 100;
 
   const now = new Date();
   const nextDueDate = new Date(now.getTime() + newInterval * 24 * 60 * 60 * 1000);
