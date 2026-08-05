@@ -197,7 +197,14 @@ Errors:
 - `DELETE /api/auth/delete-account`
 - Private
 
-Permanently deletes the authenticated user's account. This action is irreversible.
+Permanently deletes the authenticated user's account and all associated data. This action is irreversible and performs cascade deletion of:
+
+- Interview sessions and their associated questions
+- Flashcards (SRS deck)
+- Resumes
+- Notes summaries
+- Roadmap projects
+- DSA sheet progress records
 
 Headers:
 ```
@@ -207,7 +214,7 @@ Response `200`:
 ```json
 {
   "success": true,
-  "message": "Account deleted successfully"
+  "message": "Account and all associated data deleted successfully"
 }
 ```
 Errors:
