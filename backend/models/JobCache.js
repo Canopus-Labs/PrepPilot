@@ -18,4 +18,7 @@ const JobCacheSchema = new mongoose.Schema({
   fetchedAt: { type: Date, default: Date.now },
 });
 
+// Stale cache entries are purged automatically instead of accumulating forever.
+JobCacheSchema.index({ fetchedAt: 1 }, { expireAfterSeconds: 86400 });
+
 module.exports = mongoose.model("JobCache", JobCacheSchema);
