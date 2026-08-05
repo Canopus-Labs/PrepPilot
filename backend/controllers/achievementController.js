@@ -21,13 +21,15 @@ exports.saveAchievements = async (req, res) => {
         });
     }
 
-    // Reject any ID not in the server-side allowlist
-    const unknown = unlockedAchievements.filter((id) => !VALID_ACHIEVEMENTS.has(id));
+    // Reject any item that is not strictly a non-empty string or not in the server-side allowlist
+    const invalidItems = unlockedAchievements.filter(
+        (id) => typeof id !== 'string' || id.trim() === '' || !VALID_ACHIEVEMENTS.has(id)
+    );
 
-    if (unknown.length > 0) {
+    if (invalidItems.length > 0) {
         return res.status(400).json({
             success: false,
-            error: `Unknown achievement ID(s): ${unknown.join(', ')}`,
+            error: "Invalid or unknown achievement ID(s) provided",
         });
     }
 
@@ -35,14 +37,20 @@ exports.saveAchievements = async (req, res) => {
         // $addToSet is idempotent and additive-only — it never removes
         // achievements the user already earned, and never duplicates.
         const user = await User.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             req.user._id,
             { $addToSet: { unlockedAchievements: { $each: unlockedAchievements } } },
+            { new: true }
         );
 
         if (!user) {
             return res.status(404).json({
                 success: false,
                 error: 'User not found'
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found"
             });
         }
 

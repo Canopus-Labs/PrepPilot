@@ -85,7 +85,7 @@ const JobsForYou = () => {
 
   useEffect(() => {
     fetchJobs(country);
-  }, []);
+  }, [country]);
 
   const handleCountryChange = (e) => {
     setCountry(e.target.value);

@@ -1,5 +1,107 @@
+const mongoose = require("mongoose");
 const Question = require("../models/Question");
 const Session = require("../models/Session");
+
+/**
+ * Get all questions for the authenticated user across their sessions.
+ * @route GET /api/questions/my-questions
+ * @query pinned=true|false (optional)
+ * @query sessionId=<ObjectId> (optional)
+ * @query q=<string> (optional, text search on question/answer)
+ * @query page=<number> (default 1)
+ * @query limit=<number> (default 20, max 100)
+ * @returns { success, questions, pagination }
+ */
+const getMyQuestions = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // First get the user's session IDs
+    const sessions = await Session.find({ user: userId }).select("_id").lean();
+    const sessionIds = sessions.map((s) => s._id);
+
+    if (sessionIds.length === 0) {
+      return res.json({
+        success: true,
+        questions: [],
+        pagination: { totalItems: 0, totalPages: 0, page: 1, pageSize: 20, hasNextPage: false },
+      });
+    }
+
+    const {
+      pinned,
+      sessionId,
+      q,
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    const filter = { session: { $in: sessionIds } };
+
+    if (pinned === "true" || pinned === "false") {
+      filter.isPinned = pinned === "true";
+    }
+
+    if (sessionId) {
+      if (!mongoose.isValidObjectId(sessionId)) {
+        return res.status(400).json({ success: false, message: "Invalid sessionId" });
+      }
+      // Ensure the session belongs to the user
+      if (!sessionIds.some((id) => id.toString() === sessionId)) {
+        return res.status(403).json({ success: false, message: "Session does not belong to user" });
+      }
+      filter.session = sessionId;
+    }
+
+    if (typeof q === "string" && q.trim().length > 0) {
+      const searchRegex = new RegExp(q.trim(), "i");
+      filter.$or = [
+        { question: searchRegex },
+        { answer: searchRegex },
+        { note: searchRegex },
+      ];
+    }
+
+    // Defensive coercion: NaN (non-numeric input) must never reach
+    // .skip()/.limit() and become a 500. Invalid values fall back to safe
+    // defaults (page 1, limit 20) — the route layer rejects them with 400.
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
+    const pageNum =
+      Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
+    const limitNum = Number.isFinite(parsedLimit)
+      ? Math.min(100, Math.max(1, Math.floor(parsedLimit)))
+      : 20;
+    const skip = (pageNum - 1) * limitNum;
+
+    const [questions, totalItems] = await Promise.all([
+      Question.find(filter)
+        .sort({ isPinned: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .populate("session", "role topicsToFocus description")
+        .lean(),
+      Question.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limitNum);
+
+    res.json({
+      success: true,
+      questions,
+      pagination: {
+        totalItems,
+        totalPages,
+        page: pageNum,
+        pageSize: limitNum,
+        hasNextPage: pageNum < totalPages,
+      },
+    });
+  } catch (err) {
+    console.error("Get my questions error:", err);
+    res.status(500).json({ success: false, message: "Internal server error occurred" });
+  }
+};
 
 /**
  * Add additional questions to an existing session.
@@ -159,4 +261,5 @@ module.exports = {
   addQuestionToSession,
   togglePinQuestion,
   updateQuestionNote,
+  getMyQuestions,
 };
