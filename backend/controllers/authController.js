@@ -18,7 +18,6 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
-const PASSWORD_SALT_ROUNDS = 10;
 
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
@@ -106,9 +105,6 @@ const registerUser = async (req, res) => {
             });
         }
 
-        // Hash raw password with bcrypt before DB creation (#757)
-        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
-
         // Split name into first and last names for defaults
         const nameParts = cleanName.split(/\s+/);
         const firstName = nameParts[0] || "";
@@ -121,7 +117,7 @@ const registerUser = async (req, res) => {
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
-            password: hashedPassword,
+            password: password,
             profileImageUrl,
             firstName,
             lastName,
@@ -533,8 +529,9 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password before saving (#757)
-        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+        // Assign the new password — the User schema's pre('save') hook hashes
+        // it exactly once, so bcrypt.compare(newPassword, storedHash) succeeds.
+        user.password = newPassword;
 
         // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
         user.refreshTokenHash = null;

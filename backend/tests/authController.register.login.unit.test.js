@@ -53,10 +53,10 @@ beforeEach(async () => {
   loginUser = ctrl.loginUser ?? ctrl.default?.loginUser;
 
   const UserModule = await import("../models/User.js");
-  User = UserModule.default ?? UserModule;
+  User = UserModule;
 
   const bcryptModule = await import("bcryptjs");
-  bcrypt = bcryptModule.default ?? bcryptModule;
+  bcrypt = bcryptModule;
 
   const policyModule = await import("../utils/passwordPolicy.js");
   validatePassword = policyModule.validatePassword ?? policyModule.default?.validatePassword;
@@ -66,7 +66,7 @@ beforeEach(async () => {
 
 /** Build a minimal Express-style res mock with chainable .status() */
 const makeRes = () => {
-  const res = { status: vi.fn(), json: vi.fn() };
+  const res = { status: vi.fn(), json: vi.fn(), cookie: vi.fn() };
   res.status.mockReturnValue(res);
   return res;
 };
@@ -148,8 +148,14 @@ describe("registerUser", () => {
 
     await registerUser(req, res);
 
-    // Password must be hashed before storing
-    expect(bcrypt.genSalt).toHaveBeenCalledWith(10);
+    // The raw plaintext password must be passed to User.create — the model's
+    // pre('save') hook is responsible for hashing it exactly once. Pre-hashing
+    // in the controller would cause a double hash and break login (#1263).
+    expect(User.create).toHaveBeenCalledWith(
+      expect.objectContaining({ password: "StrongPass1!" })
+    );
+
+    // Refresh token is still hashed by the controller before it is persisted
     expect(bcrypt.hash).toHaveBeenCalled();
 
     // User document must be persisted after setting the refresh token hash
