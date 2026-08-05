@@ -350,6 +350,7 @@ const ResumeEditor = () => {
                   value={titleDraft}
                   onChange={e => setTitleDraft(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") confirmTitleEdit(); if (e.key === "Escape") setEditingTitle(false); }}
+                  onBlur={confirmTitleEdit}
                   className="text-sm font-semibold bg-white dark:bg-white/10 border border-violet-400 rounded px-2 py-0.5 outline-none w-44"
                 />
                 <button onClick={confirmTitleEdit} className="text-green-500 hover:text-green-400"><Check size={14} /></button>
@@ -446,12 +447,12 @@ const ResumeEditor = () => {
         </Split>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style>{`
         .split-editor-container > .gutter { background-color:#e5e7eb; cursor:col-resize; transition:background-color .2s; }
         .split-editor-container > .gutter:hover { background-color:#c084fc; }
         .dark .split-editor-container > .gutter { background-color:#3f3f46; }
         .dark .split-editor-container > .gutter:hover { background-color:#9333ea; }
-      `}} />
+      `}</style>
     </div>
   );
 };

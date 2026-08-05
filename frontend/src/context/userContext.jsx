@@ -1,13 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import toast from "react-hot-toast";
+
 import {
     isMockAuthEnabled,
     getMockUser,
     clearMockUser,
 } from "../utils/mockAuth";
-
 
 export const UserContext = createContext();
 
@@ -48,7 +49,6 @@ export const UserProvider = ({ children }) => {
         if (status === 401 || status === 403) {
             clearUser();
         }
-        setLoading(false);
         return;
     } finally {
         setLoading(false);
@@ -61,6 +61,7 @@ export const UserProvider = ({ children }) => {
     }
 };
         fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const updateUser = (userData) => {
@@ -79,7 +80,7 @@ export const UserProvider = ({ children }) => {
         try {
             const progressRes = await axiosInstance.get("/api/user/sheet-progress");
             setSheetProgress(progressRes.data.progressList || []);
-        } catch (error) {
+        } catch {
     toast.error("Unable to refresh progress. Please try again.");
 }
     };

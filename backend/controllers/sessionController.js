@@ -43,7 +43,7 @@ exports.createSession = async (req, res) => {
                 });
             }
 
-            if (isNaN(experienceNumber)) {
+            if (Number.isNaN(experienceNumber)) {
               return res.status(400).json({
                     success: false,
                     message: "Years of experience must be a valid number.",

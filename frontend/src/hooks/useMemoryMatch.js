@@ -6,6 +6,7 @@ import {
   playVictorySound,
   initAudioContext,
 } from "../utils/matchAudio";
+import { getDailySeed } from "../utils/dailySeed";
 
 // ─── Game Difficulty Specifications ─────────────────────────────────────────────
 export const DIFFICULTY_CONFIGS = {
@@ -178,7 +179,7 @@ export const useMemoryMatch = () => {
         { r: 6, c: 6, p: 18 },
       ];
       // If daily challenge is enabled, choose seed-based layout, else random
-      const dateInt = new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate();
+      const dateInt = getDailySeed();
       const index = challengeMode ? (dateInt % options.length) : Math.floor(Math.random() * options.length);
       
       rows = options[index].r;
@@ -197,7 +198,7 @@ export const useMemoryMatch = () => {
     let shuffledDeck = [];
     if (challengeMode) {
       // Create seed based on calendar date (YYYYMMDD)
-      const dateSeed = new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate();
+      const dateSeed = getDailySeed();
       shuffledDeck = seedShuffle(deckPool, dateSeed);
     } else {
       shuffledDeck = randomShuffle(deckPool);

@@ -13,9 +13,13 @@ const uploadImage = async (imageFile) => {
             },
         });
         return response.data; // Return response data
-    } catch (error) {
-        console.error('Error uploading the image:', error);
-        throw error; // Rethrow error for handling
+    }  catch (error) {
+        console.error("Image upload failed:", {
+            status: error.response?.status,
+            message: error.response?.data?.message || error.message,
+        });
+
+        throw error;
     }
 };
 
