@@ -28,6 +28,7 @@ const validateEnv = () => {
 
   const missingVars = [];
 
+  // 1. Check required environment variables
   // 1. Check required environment variables safely
   requiredEnvVars.forEach((envVar) => {
     const value = process.env[envVar];
@@ -45,7 +46,7 @@ const validateEnv = () => {
     });
 
     console.error(
-      "\n⚠️ Please add the missing environment variables to your .env file.\n",
+      "\n Please add the missing environment variables to your .env file.\n",
     );
 
     process.exit(1);
@@ -55,6 +56,7 @@ const validateEnv = () => {
   optionalEnvGroups.forEach(({ feature, keys }) => {
     const missingKeys = keys.filter((key) => {
       const val = process.env[key];
+      return !val || val.trim() === "";
       return isEmptyValue(val);
     });
 
@@ -65,6 +67,7 @@ const validateEnv = () => {
     }
   });
 
+  console.log(" Environment variables validated successfully\n");
   console.log("✅ Environment variables validated successfully\n");
 };
 
