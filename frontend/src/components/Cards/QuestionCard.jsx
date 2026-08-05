@@ -1,14 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
-import {
-  LuChevronDown,
-  LuPin,
-  LuPinOff,
-  LuSparkles,
-  LuCopy,
-  LuBrainCircuit,
-} from "react-icons/lu";
-import AIResponsePreview from '../../pages/InterviewPrep/components/AIResponsePreview';
+
+
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 

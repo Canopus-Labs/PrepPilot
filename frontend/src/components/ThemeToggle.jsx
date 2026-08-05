@@ -1,5 +1,3 @@
-import React from "react";
-import { LuSun, LuMoon } from "react-icons/lu";
 import { useTheme } from "../context/themeContext";
 
 const ThemeToggle = () => {

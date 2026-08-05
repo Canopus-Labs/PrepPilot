@@ -8,11 +8,25 @@ exports.getAllProgress = async (req, res) => {
   const userId = req.user._id;
 
   try {
-    const progressList = await UserSheetProgress.find({ userId });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const total = await UserSheetProgress.countDocuments({ userId });
+    const progressList = await UserSheetProgress.find({ userId })
+      .skip(skip)
+      .limit(limit);
+    const progressList = await UserSheetProgress.find({ userId }).limit(50);
 
     res.json({
       success: true,
       progressList,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (err) {
     res.status(500).json({

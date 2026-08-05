@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { LuArrowLeft } from "react-icons/lu"; 
+import { useState, useEffect } from "react";
 import {
-  LuChevronDown,
   LuFileText,
   LuUser,
   LuTriangleAlert,

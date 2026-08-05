@@ -1,7 +1,5 @@
-import React, { useState, useContext } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
-import Login from "./Login";
-import SignUp from "./SignUp";
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 
 /**

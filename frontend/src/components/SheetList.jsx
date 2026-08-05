@@ -1,8 +1,5 @@
-import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-import { FiTrendingUp, FiBookOpen } from "react-icons/fi";
-import { FiHelpCircle, FiUsers, FiAlertCircle, FiRefreshCw } from "react-icons/fi";
 import { BASE_URL } from "../utils/apiPaths";
 
 function SheetList({ type }) {
@@ -37,8 +34,8 @@ function SheetList({ type }) {
   useEffect(() => {
     const checkUpdate = () => {
       const latest = localStorage.getItem("sheet-last-update");
-      if (latest && parseInt(latest) > timestamp) {
-        setTimestamp(parseInt(latest));
+      if (latest && parseInt(latest, 10) > timestamp) {
+        setTimestamp(parseInt(latest, 10));
       }
     };
     const interval = setInterval(checkUpdate, 1000);
