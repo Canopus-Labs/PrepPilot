@@ -1,3 +1,38 @@
+const { z } = require("zod");
+const {
+  conceptExplainPrompt,
+  questionAnswerPrompt,
+  interviewTipsPrompt,
+} = require("../utils/prompts");
+const Session = require("../models/Session");
+const Question = require("../models/Question");
+const { generateWithFallback } = require("../utils/geminiHelper");
+
+/**
+ * Generate interview questions and answers using the Gemini AI service.
+ * @route POST /api/ai/generate-questions
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required request fields are missing or Gemini fails.
+ * @example
+ * POST /api/ai/generate-questions
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "role": "Frontend Engineer",
+ *   "experience": "2 years",
+ *   "topicsToFocus": ["React", "JavaScript"],
+ *   "numberOfQuestions": 5
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "questions": [
+ *     {"question": "Explain the virtual DOM.", "answer": "..."},
+ *     ...
+ *   ]
+ * }
+ */
 const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
@@ -54,6 +89,9 @@ const generateInterviewQuestions = async (req, res) => {
     try {
       const data = JSON.parse(cleanedText);
 
+      // Extract raw question array regardless of root-level array vs wrapper object
+      const questionList = Array.isArray(data) ? data : data.questions;
+
       // Validate Gemini response structure
       const questionsSchema = z.array(
         z.object({
@@ -61,19 +99,44 @@ const generateInterviewQuestions = async (req, res) => {
           answer: z.string(),
         })
       );
-      const parsed = questionsSchema.safeParse(Array.isArray(data) ? data : data.questions);
+      const parsed = questionsSchema.safeParse(questionList);
       if (!parsed.success) {
-        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+        return res.status(500).json({
+          message: "Invalid AI response format",
+          details: parsed.error.issues[0]?.message,
+        });
       }
 
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
+      const validatedQuestions = parsed.data;
+
+      // Persist newly generated questions to MongoDB
+      const createdQuestions = await Question.insertMany(
+        validatedQuestions.map((q) => ({
+          user: req.user._id,
+          role,
+          topic: Array.isArray(topicsToFocus) ? topicsToFocus[0] : topicsToFocus,
+          question: q.question,
+          answer: q.answer,
+        }))
+      );
+
+      // Save new session reference in MongoDB
+      const questionIds = createdQuestions.map((q) => q._id);
+      await Session.create({
+        user: req.user._id,
+        role,
+        topicsToFocus,
+        questions: questionIds,
+      });
+
+      // Standardize response payload key to `questions`
+      return res.status(200).json({
+        model: usedModel,
+        questions: validatedQuestions,
+      });
     } catch (err) {
       console.error("Gemini returned invalid JSON:", cleanedText);
-      res.status(500).json({
+      return res.status(500).json({
         message: "Gemini returned invalid JSON",
       });
     }
@@ -94,3 +157,169 @@ const generateInterviewQuestions = async (req, res) => {
     });
   }
 };
+
+/**
+ * Generate an explanation for a technical concept or question.
+ * @route POST /api/ai/generate-explanation
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When the request is invalid or Gemini generation fails.
+ * @example
+ * POST /api/ai/generate-explanation
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "question": "What is a closure in JavaScript?"
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "explanation": "..."
+ * }
+ */
+const generateConceptExplanation = async (req, res) => {
+  try {
+    const { question } = req.body;
+
+    let prompt;
+    try {
+      prompt = conceptExplainPrompt(question);
+    } catch (validationError) {
+      return res.status(400).json({
+        message: validationError.message,
+      });
+    }
+
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
+
+    const rawText = await result.response.text();
+    // Clean: remove all leading/trailing code block markers (```json, ```), even if repeated, and trim
+    let cleanedText = rawText
+      .replace(/^\s*```json\s*/i, "")
+      .replace(/^\s*```\s*/i, "")
+      .replace(/(\s*```\s*)+$/i, "")
+      .trim();
+
+    try {
+      const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const explanationSchema = z.object({
+        title: z.string(),
+        explanation: z.string(),
+      });
+      const parsed = explanationSchema.safeParse(data);
+      if (!parsed.success) {
+        console.error("Invalid AI response format:", parsed.error.issues[0]?.message);
+        return res.status(500).json({ message: "Invalid AI response format" });
+      }
+
+      res.status(200).json({ model: usedModel, ...data });
+    } catch (err) {
+      res.status(500).json({
+        message: "Gemini returned invalid JSON",
+      });
+    }
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+
+    if (error.status === 429) {
+      return res.status(429).json({ message: "Gemini API quota exceeded. Please try again later." });
+    }
+    if (error.status === 401 || (error.message && error.message.includes("API key not valid"))) {
+      return res.status(401).json({ message: "Invalid Gemini API Key configured." });
+    }
+    if (error.message && (error.message.includes("timeout") || error.message.includes("network"))) {
+      return res.status(504).json({ message: "Network timeout communicating with AI service." });
+    }
+    res.status(500).json({
+      message: "Failed to generate explanation",
+    });
+  }
+};
+
+/**
+ * Generate interview preparation tips using the Gemini AI service.
+ * @route POST /api/ai/generate-tips
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When required request fields are missing or Gemini fails.
+ * @example
+ * POST /api/ai/generate-tips
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "role": "Frontend Engineer",
+ *   "experience": "2 years"
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "tips": ["Focus on React hooks.", "Practice system design basics.", ...]
+ * }
+ */
+const generateInterviewTips = async (req, res) => {
+  try {
+    const { role, experience } = req.body;
+
+    let prompt;
+    try {
+      prompt = interviewTipsPrompt({ role, experience });
+    } catch (validationError) {
+      return res.status(400).json({
+        message: validationError.message,
+      });
+    }
+
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
+
+    const rawText = await result.response.text();
+    let cleanedText = rawText
+      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+      .replace(/(\s*```\s*)+$/i, "")
+      .trim();
+
+    try {
+      const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const tipsSchema = z.object({
+        tips: z.array(z.string()),
+      });
+      const parsed = tipsSchema.safeParse(data);
+      if (!parsed.success) {
+        console.error("Invalid AI response format:", parsed.error.issues[0]?.message);
+        return res.status(500).json({ message: "Invalid AI response format" });
+      }
+
+      res.status(200).json({ model: usedModel, ...data });
+    } catch (err) {
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      res.status(500).json({
+        message: "Gemini returned invalid JSON",
+      });
+    }
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    if (error.status === 429) {
+      return res.status(429).json({ message: "Gemini API quota exceeded. Please try again later." });
+    }
+    if (error.status === 401 || (error.message && error.message.includes("API key not valid"))) {
+      return res.status(401).json({ message: "Invalid Gemini API Key configured." });
+    }
+    if (error.message && (error.message.includes("timeout") || error.message.includes("network"))) {
+      return res.status(504).json({ message: "Network timeout communicating with AI service." });
+    }
+    res.status(500).json({
+      message: "Failed to generate interview tips",
+    });
+  }
+};
+
+module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips };

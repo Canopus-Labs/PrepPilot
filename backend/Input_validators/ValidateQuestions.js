@@ -21,6 +21,17 @@ const updateQuestionNoteSchema = z.object({
   note: z.string(),
 });
 
+// Schema for query params of getMyQuestions. page/limit are coerced and must
+// be positive integers (limit capped at 100) so NaN never reaches the
+// controller; q is length-capped so the regex built from it stays bounded.
+const getMyQuestionsQuerySchema = z.object({
+  q: z.string().max(200).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  sessionId: z.string().optional(),
+  pinned: z.enum(["true", "false"]).optional(),
+});
+
 
 // Helper for consistent error responses
 const handleValidationError = (res, error) => {
@@ -64,9 +75,20 @@ const validateUpdateQuestionNote = (req, res, next) => {
   }
 };
 
+// Middleware for getMyQuestions query params
+const validateGetMyQuestions = (req, res, next) => {
+  try {
+    getMyQuestionsQuerySchema.parse(req.query);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateAddQuestionToSession,
   validateTogglePinQuestion,
   validateUpdateQuestionNote,
+  validateGetMyQuestions,
   handleValidationError
 };

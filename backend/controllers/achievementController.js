@@ -46,6 +46,7 @@ exports.saveAchievements = async (req, res) => {
     const { action, payload } = req.body;
 
     if (!action || typeof action !== 'string') {
+    if (!unlockedAchievements || !Array.isArray(unlockedAchievements)) {
         return res.status(400).json({
             success: false,
             error: 'A valid action event string is required'
@@ -61,6 +62,15 @@ exports.saveAchievements = async (req, res) => {
             success: true,
             message: 'Action recorded. No new achievements unlocked.',
             newlyUnlocked: []
+    // Reject any item that is not strictly a non-empty string or not in the server-side allowlist
+    const invalidItems = unlockedAchievements.filter(
+        (id) => typeof id !== 'string' || id.trim() === '' || !VALID_ACHIEVEMENTS.has(id)
+    );
+
+    if (invalidItems.length > 0) {
+        return res.status(400).json({
+            success: false,
+            error: "Invalid or unknown achievement ID(s) provided",
         });
     }
 
@@ -68,6 +78,14 @@ exports.saveAchievements = async (req, res) => {
         const user = await User.findByIdAndUpdate(
             req.user._id,
             { $addToSet: { unlockedAchievements: { $each: earnedAchievements } } },
+            req.user._id,
+            { $addToSet: { unlockedAchievements: { $each: earnedAchievements } } },
+        // $addToSet is idempotent and additive-only — it never removes
+        // achievements the user already earned, and never duplicates.
+        const user = await User.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { $addToSet: { unlockedAchievements: { $each: unlockedAchievements } } },
             { new: true }
         );
 
@@ -82,6 +100,14 @@ exports.saveAchievements = async (req, res) => {
             success: true,
             newlyUnlocked: earnedAchievements
         });
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found"
+            });
+        }
+
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false, error: 'A server error occurred' });
     }
