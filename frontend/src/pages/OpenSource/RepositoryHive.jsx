@@ -8,29 +8,15 @@ import {
   Code,
   Loader,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const FILTER_OPTIONS = [
-  {
-    id: "good-first-issue",
-    label: "Good First Issue",
-    topic: "good-first-issue",
-  },
-  {
-    id: "beginner-friendly",
-    label: "Beginner Friendly",
-    topic: "beginner-friendly",
-  },
-  { id: "documentation", label: "Documentation", topic: "documentation" },
-  { id: "bug-fix", label: "Bug Fix", topic: "bug-fix" },
-  { id: "feature", label: "Feature Request", topic: "feature" },
-  { id: "open-source", label: "Open Source", topic: "open-source" },
-  { id: "hacktoberfest", label: "Hacktoberfest", topic: "hacktoberfest" },
-  { id: "python", label: "Python", topic: "language:python" },
-  { id: "javascript", label: "JavaScript", topic: "language:javascript" },
-  { id: "java", label: "Java", topic: "language:java" },
-];
+import {
+  FILTER_OPTIONS,
+  buildGitHubSearchUrl,
+  normalizeSearchResponse,
+  usesIssueLabelSearch,
+} from "../../utils/repositoryHiveSearch";
 
 const RepositoryHive = () => {
   const [selectedFilters, setSelectedFilters] = useState(["good-first-issue"]);
@@ -49,34 +35,17 @@ const RepositoryHive = () => {
     setError("");
 
     try {
-      let queryParams = [];
-
-      // Build query with selected filters
-      selectedFilters.forEach((filter) => {
-        const option = FILTER_OPTIONS.find((f) => f.id === filter);
-        if (option) {
-          queryParams.push(option.topic);
-        }
+      const url = buildGitHubSearchUrl({
+        selectedFilters,
+        searchQuery,
+        sortBy,
       });
 
-      if (searchQuery.trim()) {
-        queryParams.push(searchQuery.trim());
-      }
-
-      const query = queryParams.join(" ").trim();
-      if (!query) {
+      if (!url) {
         setRepositories([]);
         setLoading(false);
         return;
       }
-
-      const sortMap = {
-        stars: "sort=stars&order=desc",
-        recent: "sort=updated&order=desc",
-        forks: "sort=forks&order=desc",
-      };
-
-      const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sortMap[sortBy]}&per_page=30`;
 
       const response = await fetch(url, {
         headers: {
@@ -89,7 +58,7 @@ const RepositoryHive = () => {
       }
 
       const data = await response.json();
-      setRepositories(data.items || []);
+      setRepositories(normalizeSearchResponse(selectedFilters, data));
     } catch (err) {
       setError(
         err.message || "Failed to fetch repositories. Please try again later.",
@@ -117,6 +86,8 @@ const RepositoryHive = () => {
       fetchRepositories();
     }
   };
+
+  const showingIssueBackedResults = usesIssueLabelSearch(selectedFilters);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a]">
@@ -158,7 +129,7 @@ const RepositoryHive = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Search repositories (e.g., react, django, kubernetes)..."
+                placeholder="Search repositories (e.g., react, django, tensorflow)..."
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
@@ -251,7 +222,9 @@ const RepositoryHive = () => {
               className="text-violet-600 dark:text-violet-400 animate-spin mb-4"
             />
             <p className="text-gray-600 dark:text-gray-400">
-              Loading repositories...
+              {showingIssueBackedResults
+                ? "Looking for open labelled issues..."
+                : "Loading repositories..."}
             </p>
           </div>
         )}
@@ -265,11 +238,8 @@ const RepositoryHive = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {repositories.map((repo, index) => (
-              <motion.a
+              <motion.div
                 key={repo.id}
-                href={repo.html_url}
-                target="_blank"
-                rel="noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -283,9 +253,14 @@ const RepositoryHive = () => {
                       className="text-violet-600 dark:text-violet-400 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <a
+                        href={repo.html_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors block"
+                      >
                         {repo.name}
-                      </h3>
+                      </a>
                       <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                         {repo.owner.login}
                       </p>
@@ -295,6 +270,31 @@ const RepositoryHive = () => {
                     {repo.description || "No description available"}
                   </p>
                 </div>
+
+                {repo.matchingIssue && (
+                  <a
+                    href={repo.matchingIssue.html_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mb-4 block rounded-lg border border-violet-500/30 bg-violet-500/5 px-3 py-2 hover:bg-violet-500/10 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-violet-500 mb-1">
+                          Open starter issue
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
+                          #{repo.matchingIssue.number} {repo.matchingIssue.title}
+                        </p>
+                      </div>
+                      <ExternalLink
+                        size={14}
+                        className="text-violet-500 flex-shrink-0 mt-1"
+                      />
+                    </div>
+                  </a>
+                )}
 
                 {/* Language & Topics */}
                 <div className="mb-4 flex-1">
@@ -351,7 +351,7 @@ const RepositoryHive = () => {
                     {repo.open_issues_count} issues
                   </div>
                 </div>
-              </motion.a>
+              </motion.div>
             ))}
           </motion.div>
         )}
@@ -368,7 +368,9 @@ const RepositoryHive = () => {
               className="mx-auto text-gray-400 dark:text-gray-600 mb-4"
             />
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              No repositories found. Try adjusting your filters or search query.
+              {showingIssueBackedResults
+                ? "No open issues found for the selected labels. Try another filter or search term."
+                : "No repositories found. Try adjusting your filters or search query."}
             </p>
           </motion.div>
         )}
@@ -380,7 +382,12 @@ const RepositoryHive = () => {
             animate={{ opacity: 1 }}
             className="mt-8 text-center text-gray-600 dark:text-gray-400"
           >
-            <p>Showing {repositories.length} repositories</p>
+            <p>
+              Showing {repositories.length}{" "}
+              {showingIssueBackedResults
+                ? "repositories with open labelled issues"
+                : "repositories"}
+            </p>
           </motion.div>
         )}
       </div>
