@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import PatternMatrixGame from "../../components/PatternMatrixGame";
 import MemoryMatchGame from "../../components/MemoryMatchGame";
-import { Grid3x3, Gamepad2 } from "lucide-react";
+import TypingSpeedGame from "../../components/TypingSpeedGame";
+import { Grid3x3, Gamepad2, Keyboard } from "lucide-react";
 
 // ─── Games data ────────────────────────────────────────────────────────────────
 // Add more brain-training games here in the future — each just needs a
@@ -20,6 +21,12 @@ const gamesData = [
     icon: Gamepad2,
     desc: "Train visual working memory and association by matching card pairs in 3D.",
     component: MemoryMatchGame,
+  },
+  {
+    name: "Typing Speed",
+    icon: Keyboard,
+    desc: "Sharpen typing speed and accuracy with timed challenges across three difficulty levels.",
+    component: TypingSpeedGame,
   },
 ];
 
