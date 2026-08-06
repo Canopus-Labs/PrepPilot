@@ -1,5 +1,6 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
+const SessionCount = require("../models/SessionCount");
 const mongoose = require("mongoose");
 
 
@@ -56,12 +57,39 @@ exports.createSession = async (req, res) => {
                    message: `Years of experience must be between 0 and ${MAX_EXPERIENCE}.`,
              });
             }
-            const sessionCount = await Session.countDocuments({
-                user: userId,
-            }).session(mongoSession);
+            // Atomic per-user limit check. The conditional increment on the
+            // shared SessionCount document is the serialization point: under
+            // concurrent createSession requests, the loser hits a write
+            // conflict, the transaction retries, and the re-run sees the
+            // counter at the limit and aborts — unlike a plain countDocuments
+            // pre-check, which both requests would pass on the same snapshot.
+            const countDoc = await SessionCount.findOneAndUpdate(
+                { _id: userId, count: { $lt: MAX_SESSIONS } },
+                { $inc: { count: 1 } },
+                { new: true, session: mongoSession }
+            );
 
-            if (sessionCount >= MAX_SESSIONS) {
-                throw new Error("SESSION_LIMIT_REACHED");
+            if (!countDoc) {
+                // No counter yet (pre-existing account) or the limit is hit.
+                // For the missing-counter case, seed it from the user's real
+                // session count so legacy accounts are enforced correctly.
+                const actualCount = await Session.countDocuments({
+                    user: userId,
+                }).session(mongoSession);
+
+                if (actualCount >= MAX_SESSIONS) {
+                    throw new Error("SESSION_LIMIT_REACHED");
+                }
+
+                const seeded = await SessionCount.findOneAndUpdate(
+                    { _id: userId },
+                    { $setOnInsert: { count: actualCount }, $inc: { count: 1 } },
+                    { upsert: true, new: true, session: mongoSession }
+                );
+
+                if (seeded.count > MAX_SESSIONS) {
+                    throw new Error("SESSION_LIMIT_REACHED");
+                }
             }
 
             const createdSession = await Session.create(
@@ -216,6 +244,12 @@ exports.deleteSession = async (req, res) => {
 
             await Session.deleteOne(
                 { _id: session._id },
+                { session: transaction }
+            );
+
+            await SessionCount.updateOne(
+                { _id: userId },
+                { $inc: { count: -1 } },
                 { session: transaction }
             );
         });

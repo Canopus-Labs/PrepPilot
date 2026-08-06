@@ -13,6 +13,7 @@ const Resume = require("../models/Resume");
 const NotesSummary = require("../models/NotesSummary");
 const RoadmapProject = require("../models/RoadmapProject");
 const UserSheetProgress = require("../models/UserSheetProgress");
+const SessionCount = require("../models/SessionCount");
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
@@ -576,6 +577,11 @@ const deleteUserAccount = async (req, res) => {
             );
         }
         deletePromises.push(Session.deleteMany({ user: userId }));
+
+        // Delete user's session-count counter
+        deletePromises.push(
+            SessionCount.deleteOne({ _id: userId })
+        );
 
         // Delete user's flashcards
         deletePromises.push(
