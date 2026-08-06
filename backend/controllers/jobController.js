@@ -7,9 +7,23 @@ const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
 const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in";
 const CACHE_TTL_MS   = 24 * 60 * 60 * 1000;
 
+// Whitelist of valid country codes supported by Adzuna API
+const ALLOWED_COUNTRIES = new Set(["in", "us", "gb", "au", "ca", "de", "fr", "nl", "be", "at", "pl", "es", "it", "ch", "sg"]);
+
 // The Jobs feature is optional: without Adzuna credentials it stays dormant
 // instead of crashing the server or spamming failed API calls.
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
+
+/**
+ * Validates and returns a safe country code.
+ * Falls back to default if invalid.
+ */
+function getValidCountry(country) {
+  if (country && ALLOWED_COUNTRIES.has(country.toLowerCase())) {
+    return country.toLowerCase();
+  }
+  return ADZUNA_COUNTRY;
+}
 
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
@@ -53,7 +67,7 @@ exports.getJobs = async (req, res) => {
       .select("role");
 
     const role    = req.query.role || latestSession?.role || "software engineer";
-    const country = req.query.country   || ADZUNA_COUNTRY;
+    const country = getValidCountry(req.query.country);
     const cacheKey = `${role.toLowerCase()}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
