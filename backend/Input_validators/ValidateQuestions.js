@@ -5,8 +5,8 @@ const addQuestionToSessionSchema = z.object({
   sessionId: z.string().min(1, "Session ID is required"),
   questions: z.array(
     z.object({
-      question: z.string().min(1, "Question text is required"),
-      answer: z.string().min(1, "Answer text is required"),
+      question: z.string().min(1, "Question text is required").max(5000, "Question text must be at most 5000 characters"),
+      answer: z.string().min(1, "Answer text is required").max(10000, "Answer text must be at most 10000 characters"),
     })
   ).min(1, "At least one question is required"),
 });
