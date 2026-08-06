@@ -58,6 +58,14 @@ export const parseEventsFromMarkdown = (markdown) => {
       continue;
     }
 
+    const isMonthContextBoundary =
+      /^##\s+/.test(line) ||
+      /<h2[\s>]/i.test(line) ||
+      /<\/?details\b[^>]*>/i.test(line);
+    if (isMonthContextBoundary) {
+      currentMonth = "";
+    }
+
     const eventMatch = line.match(/^[-*]\s+\[([^\]]+)\]\(([^)]+)\)/);
     if (!eventMatch) continue;
 

@@ -77,6 +77,33 @@ describe("parseEventsFromMarkdown", () => {
     expect(events[1]).toMatchObject({ name: "Known Event", month: "May" });
   });
 
+
+  it("clears month context after an unrecognized section boundary", () => {
+    const markdown = `
+## May
+
+- [May Event](https://example.com/may)
+  > Date: 1st May || Mode: In-person || Location: Berlin
+
+## Community Notes
+
+- [Misplaced Event](https://example.com/notes)
+  > Date: TBD || Mode: Virtual || Location: Global
+
+<summary><h2> Subscribe to the Calendar </h2></summary>
+
+- [Also Misplaced](https://example.com/calendar)
+  > Date: TBD || Mode: Virtual || Location: Global
+`;
+
+    const events = parseEventsFromMarkdown(markdown);
+
+    expect(events).toHaveLength(3);
+    expect(events[0]).toMatchObject({ name: "May Event", month: "May" });
+    expect(events[1]).toMatchObject({ name: "Misplaced Event", month: "TBA" });
+    expect(events[2]).toMatchObject({ name: "Also Misplaced", month: "TBA" });
+  });
+
   it("ignores malformed sections and preserves event order within a month", () => {
     const markdown = `
 <details>
