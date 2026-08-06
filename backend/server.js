@@ -29,7 +29,8 @@ const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securit
 const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
-app.set("trust proxy", 1);
+
+
 app.use(generalHeaders);
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
