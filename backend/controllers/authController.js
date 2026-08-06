@@ -144,6 +144,15 @@ const registerUser = async (req, res) => {
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
+
+        if (res.locals._csrf) {
+            res.cookie("csrfToken", res.locals._csrf, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+            });
+        }
+
         res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
@@ -197,6 +206,15 @@ const loginUser = async (req, res) => {
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
+
+        if (res.locals._csrf) {
+            res.cookie("csrfToken", res.locals._csrf, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+            });
+        }
+
         res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         res.json({
             success: true,
