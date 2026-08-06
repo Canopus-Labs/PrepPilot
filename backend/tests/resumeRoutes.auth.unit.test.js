@@ -11,18 +11,23 @@ let compileResume;
 let analyzeResume;
 
 beforeAll(async () => {
-  // Dynamic import keeps this file runnable without a live DB/env.
-  // The router module only wires Express — it doesn't connect Mongoose.
-  const routerMod = await import("../routes/resumeRoutes.js");
+  // Use CJS require to stay in the same module-cache namespace as the
+  // routes file — import() creates a separate ESM namespace in vitest,
+  // causing function-reference comparisons (toContain) to fail.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const routerMod = require("../routes/resumeRoutes.js");
   router = routerMod.default ?? routerMod;
 
-  const authMod = await import("../middlewares/authMiddleware.js");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const authMod = require("../middlewares/authMiddleware.js");
   protect = authMod.protect;
 
-  const limiterMod = await import("../middlewares/rateLimiter.js");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const limiterMod = require("../middlewares/rateLimiter.js");
   aiLimiter = limiterMod.aiLimiter;
 
-  const ctrlMod = await import("../controllers/resumeController.js");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const ctrlMod = require("../controllers/resumeController.js");
   compileResume = ctrlMod.compileResume;
   analyzeResume = ctrlMod.analyzeResume;
 });
@@ -39,7 +44,11 @@ function getLayerStack(router, method, path) {
       l.route.methods[method.toLowerCase()]
   );
   if (!layer) return null;
-  return layer.route.stack.map((s) => s.handle);
+  // Prepend router-level middleware so global guards appear in the route's effective stack.
+  const routerLevel = router.stack
+    .filter((l) => !l.route)
+    .map((l) => l.handle);
+  return [...routerLevel, ...layer.route.stack.map((s) => s.handle)];
 }
 
 // ---------------------------------------------------------------------------
