@@ -134,8 +134,7 @@ const registerUser = async (req, res) => {
                 workExperience: "",
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
-            platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // skip email verification until SMTP is configured
+            platformPreferences: { theme: "light", notificationsEnabled: true }
         });
 
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
@@ -143,7 +142,19 @@ const registerUser = async (req, res) => {
 
         user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
+        
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+        user.emailVerificationToken = crypto
+            .createHash("sha256")
+            .update(verificationToken)
+            .digest("hex");
+        user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+        
         await user.save();
+
+        const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl).catch(err => console.error("Email error:", err));
+
         res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
