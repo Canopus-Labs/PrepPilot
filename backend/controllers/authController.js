@@ -428,6 +428,13 @@ const updateUserProfile = async (req, res) => {
             profileImageUrl
         } = req.body;
 
+        if (country !== undefined && country !== "") {
+            const countryRegex = /^[a-zA-Z\s\-]+$/;
+            if (!countryRegex.test(country)) {
+                return res.status(400).json({ success: false, message: "Invalid country name provided" });
+            }
+        }
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
