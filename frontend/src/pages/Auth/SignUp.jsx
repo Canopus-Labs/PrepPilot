@@ -84,6 +84,11 @@ const SignUp = ({ setCurrentPage }) => {
           sessionStorage.setItem("token", authToken);
           updateUser(response.data);
           navigate("/dashboard");
+        } else {
+          // The register endpoint intentionally returns a uniform generic
+          // response (no token/user fields) so it cannot be used to enumerate
+          // accounts. Direct the user to log in with their new credentials.
+          setSuccessMessage("Your account has been created. Please sign in.");
         }
       }
     } catch (error) {
