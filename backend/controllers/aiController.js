@@ -37,14 +37,17 @@ const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
 
-    // Fetch questions the user has already seen for this role + topic
+    // Fetch questions the user has already seen for this role + topic.
+    // $all + $size matches topicsToFocus order-independently, so a past
+    // session is found even when the topics are requested in a different
+    // order or the list differs by additions/removals.
     const pastSessions = await Session.find({
       user: req.user._id,
       role,
-      topicsToFocus,
+      topicsToFocus: { $all: topicsToFocus, $size: topicsToFocus.length },
     }).select("questions");
 
-    const pastQuestionIds = pastSessions.flatMap((s) => s.questions);
+    const pastQuestionIds = pastSessions.flatMap((s) => s.questions || []);
 
     const pastQuestions = await Question.find({
       _id: { $in: pastQuestionIds },
