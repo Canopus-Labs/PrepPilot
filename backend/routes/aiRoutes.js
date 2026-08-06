@@ -3,6 +3,7 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
+const { protect } = require('../middlewares/authMiddleware');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { sanitizePromptText } = sanitizeAiPrompt;
@@ -243,6 +244,11 @@ router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, gener
 
 // Structured problem-solving route
 router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
+
+// AI Interview Question Similarity Detector (issue #1306)
+const { detectSimilarQuestions } = require('../controllers/aiSimilarityController');
+const { validateDetectSimilarity } = require('../Input_validators/ValidateAi');
+router.post('/detect-similarity', aiLimiter, protect, validateDetectSimilarity, detectSimilarQuestions);
 
 // List available models
 /**
