@@ -72,4 +72,10 @@ export const API_PATHS = {
         TOGGLE_TASK: (id) => `/api/roadmaps/${id}/tasks`,
         DELETE: (id) => `/api/roadmaps/${id}`,
     },
+    INTERVIEW_EXPERIENCES: {
+        CREATE: "/api/interview-experiences",
+        APPROVED: "/api/interview-experiences/approved",
+        MINE: "/api/interview-experiences/mine",
+        UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
+    },
 };
