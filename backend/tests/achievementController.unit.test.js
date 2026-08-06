@@ -1,69 +1,105 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import Module from 'module';
 
 // ---------------------------------------------------------------------------
-// Inline mocks — no live DB needed.
+// CJS controllers load their deps via require(), which vi.mock cannot
+// intercept. We stub the models at the require level with a Module._load
+// shim instead, so no live DB is needed.
 // ---------------------------------------------------------------------------
+
+const modelMocks = {};
+
+const originalLoad = Module._load;
+Module._load = function (request, parent, isMain) {
+  if (request in modelMocks) return modelMocks[request];
+  return originalLoad.apply(this, arguments);
+};
 
 const mockFindById = vi.fn();
 const mockFindByIdAndUpdate = vi.fn();
+const mockSessionCount = vi.fn();
+const mockResumeCount = vi.fn();
+const mockSheetCount = vi.fn();
 
-vi.mock('../models/User.js', () => ({
-    default: {
-        findById: (...args) => mockFindById(...args),
-        findByIdAndUpdate: (...args) => mockFindByIdAndUpdate(...args),
-    },
-}));
+modelMocks['../models/User'] = {
+  findById: (...args) => mockFindById(...args),
+  findByIdAndUpdate: (...args) => mockFindByIdAndUpdate(...args),
+};
+modelMocks['../models/Session'] = {
+  countDocuments: (...args) => mockSessionCount(...args),
+};
+modelMocks['../models/Resume'] = {
+  countDocuments: (...args) => mockResumeCount(...args),
+};
+modelMocks['../models/UserSheetProgress'] = {
+  countDocuments: (...args) => mockSheetCount(...args),
+};
 
-// Re-import after mocks are in place
-const { getAchievements, saveAchievements } = await import('../controllers/achievementController.js');
+const { getAchievements, saveAchievements } = require('../controllers/achievementController');
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function makeReq(body = {}, userId = 'user-123') {
-    return { body, user: { _id: userId } };
+  return { body, user: { _id: userId } };
 }
 
 function makeRes() {
-    const res = {};
-    res.status = vi.fn().mockReturnValue(res);
-    res.json = vi.fn().mockReturnValue(res);
-    return res;
+  const res = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  return res;
 }
+
+const ALL_IDS = [
+  'First Interview',
+  'Interview Pro',
+  'Interview Master',
+  'Resume Builder',
+  'Resume Expert',
+  'DSA Beginner',
+  'DSA Master',
+];
+
+beforeEach(() => {
+  mockFindById.mockReset();
+  mockFindByIdAndUpdate.mockReset();
+  mockSessionCount.mockReset();
+  mockResumeCount.mockReset();
+  mockSheetCount.mockReset();
+});
 
 // ---------------------------------------------------------------------------
 // getAchievements
 // ---------------------------------------------------------------------------
 
 describe('getAchievements', () => {
-    beforeEach(() => vi.clearAllMocks());
-
-    it('returns the user unlockedAchievements on success', async () => {
-        mockFindById.mockReturnValue({
-            select: vi.fn().mockResolvedValue({ unlockedAchievements: ['First Interview'] }),
-        });
-        const res = makeRes();
-        await getAchievements(makeReq(), res);
-        expect(res.json).toHaveBeenCalledWith({
-            success: true,
-            unlockedAchievements: ['First Interview'],
-        });
+  it('returns the user unlockedAchievements on success', async () => {
+    mockFindById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ unlockedAchievements: ['First Interview'] }),
     });
-
-    it('returns 404 when user is not found', async () => {
-        mockFindById.mockReturnValue({ select: vi.fn().mockResolvedValue(null) });
-        const res = makeRes();
-        await getAchievements(makeReq(), res);
-        expect(res.status).toHaveBeenCalledWith(404);
+    const res = makeRes();
+    await getAchievements(makeReq(), res);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      unlockedAchievements: ['First Interview'],
     });
+  });
 
-    it('returns 500 on a database error', async () => {
-        mockFindById.mockReturnValue({ select: vi.fn().mockRejectedValue(new Error('DB down')) });
-        const res = makeRes();
-        await getAchievements(makeReq(), res);
-        expect(res.status).toHaveBeenCalledWith(500);
-    });
+  it('returns 404 when user is not found', async () => {
+    mockFindById.mockReturnValue({ select: vi.fn().mockResolvedValue(null) });
+    const res = makeRes();
+    await getAchievements(makeReq(), res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('returns 500 on a database error', async () => {
+    mockFindById.mockReturnValue({ select: vi.fn().mockRejectedValue(new Error('DB down')) });
+    const res = makeRes();
+    await getAchievements(makeReq(), res);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -71,82 +107,127 @@ describe('getAchievements', () => {
 // ---------------------------------------------------------------------------
 
 describe('saveAchievements — input validation', () => {
-    beforeEach(() => vi.clearAllMocks());
+  it('returns 400 when unlockedAchievements is missing', async () => {
+    const res = makeRes();
+    await saveAchievements(makeReq({}), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false }),
+    );
+  });
 
-    it('returns 400 when unlockedAchievements is missing', async () => {
-        const res = makeRes();
-        await saveAchievements(makeReq({}), res);
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ success: false }),
-        );
-    });
+  it('returns 400 when unlockedAchievements is not an array', async () => {
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: 'First Interview' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
 
-    it('returns 400 when unlockedAchievements is not an array', async () => {
-        const res = makeRes();
-        await saveAchievements(makeReq({ unlockedAchievements: 'First Interview' }), res);
-        expect(res.status).toHaveBeenCalledWith(400);
-    });
+  it('returns 400 when an unknown achievement ID is submitted', async () => {
+    const res = makeRes();
+    await saveAchievements(
+      makeReq({ unlockedAchievements: ['First Interview', 'FAKE_ACHIEVEMENT'] }),
+      res,
+    );
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: expect.stringContaining('FAKE_ACHIEVEMENT') }),
+    );
+  });
 
-    it('returns 400 when an unknown achievement ID is submitted', async () => {
-        const res = makeRes();
-        await saveAchievements(
-            makeReq({ unlockedAchievements: ['First Interview', 'FAKE_ACHIEVEMENT'] }),
-            res,
-        );
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ success: false, error: expect.stringContaining('FAKE_ACHIEVEMENT') }),
-        );
-    });
-
-    it('returns 400 when every achievement ID in the system is force-submitted', async () => {
-        // Simulates the exact exploit described in the issue
-        const allIds = [
-            'First Interview', 'Interview Pro', 'Interview Master',
-            'Resume Builder', 'Resume Expert', 'DSA Beginner', 'DSA Master',
-            'INJECTED_SUPER_BADGE',
-        ];
-        const res = makeRes();
-        await saveAchievements(makeReq({ unlockedAchievements: allIds }), res);
-        expect(res.status).toHaveBeenCalledWith(400);
-    });
+  it('returns 400 when every achievement ID plus an injected badge is force-submitted', async () => {
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: [...ALL_IDS, 'INJECTED_SUPER_BADGE'] }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
 });
 
 // ---------------------------------------------------------------------------
-// saveAchievements — additive-only semantics
+// saveAchievements — server-side earn-condition verification
 // ---------------------------------------------------------------------------
 
-describe('saveAchievements — additive-only semantics', () => {
-    beforeEach(() => vi.clearAllMocks());
+describe('saveAchievements — server-side verification', () => {
+  it('grants only achievements whose earn condition is met by real data', async () => {
+    // 1 interview session, no resumes, no followed sheets
+    mockSessionCount.mockResolvedValue(1);
+    mockResumeCount.mockResolvedValue(0);
+    mockSheetCount.mockResolvedValue(0);
 
-    it('uses $addToSet so existing achievements are never removed', async () => {
-        mockFindByIdAndUpdate.mockResolvedValue({});
-        const res = makeRes();
-        await saveAchievements(
-            makeReq({ unlockedAchievements: ['First Interview'] }),
-            res,
-        );
-        const [, update] = mockFindByIdAndUpdate.mock.calls[0];
-        expect(update).toHaveProperty('$addToSet');
-        expect(update).not.toHaveProperty('unlockedAchievements'); // no wholesale replace
-        expect(res.json).toHaveBeenCalledWith({ success: true });
-    });
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: ALL_IDS }), res);
 
-    it('succeeds with an empty array without touching the DB', async () => {
-        const res = makeRes();
-        await saveAchievements(makeReq({ unlockedAchievements: [] }), res);
-        // No unknown IDs, but nothing to add — still resolves successfully
-        expect(res.json).toHaveBeenCalledWith({ success: true });
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      granted: ['First Interview'],
+      rejected: ALL_IDS.filter((id) => id !== 'First Interview'),
     });
+    expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
+      'user-123',
+      { $addToSet: { unlockedAchievements: { $each: ['First Interview'] } } },
+    );
+  });
 
-    it('returns 500 on a database error', async () => {
-        mockFindByIdAndUpdate.mockRejectedValue(new Error('DB error'));
-        const res = makeRes();
-        await saveAchievements(
-            makeReq({ unlockedAchievements: ['First Interview'] }),
-            res,
-        );
-        expect(res.status).toHaveBeenCalledWith(500);
+  it('persists nothing when no claimed achievement is earned', async () => {
+    mockSessionCount.mockResolvedValue(0);
+    mockResumeCount.mockResolvedValue(0);
+    mockSheetCount.mockResolvedValue(0);
+
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: ['DSA Master'] }), res);
+
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      granted: [],
+      rejected: ['DSA Master'],
     });
+    expect(mockFindByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  it('grants the full set at the threshold boundary', async () => {
+    mockSessionCount.mockResolvedValue(25);
+    mockResumeCount.mockResolvedValue(5);
+    mockSheetCount.mockResolvedValue(5);
+
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: ALL_IDS }), res);
+
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      granted: ALL_IDS,
+      rejected: [],
+    });
+  });
+
+  it('uses $addToSet so existing achievements are never removed', async () => {
+    mockSessionCount.mockResolvedValue(1);
+    mockResumeCount.mockResolvedValue(0);
+    mockSheetCount.mockResolvedValue(0);
+
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: ['First Interview'] }), res);
+
+    const [, update] = mockFindByIdAndUpdate.mock.calls[0];
+    expect(update).toHaveProperty('$addToSet');
+    expect(update).not.toHaveProperty('unlockedAchievements');
+  });
+
+  it('succeeds with an empty array without touching the DB', async () => {
+    mockSessionCount.mockResolvedValue(0);
+    mockResumeCount.mockResolvedValue(0);
+    mockSheetCount.mockResolvedValue(0);
+
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: [] }), res);
+
+    expect(mockFindByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ success: true, granted: [], rejected: [] });
+  });
+
+  it('returns 500 on a database error', async () => {
+    mockSessionCount.mockRejectedValue(new Error('DB error'));
+
+    const res = makeRes();
+    await saveAchievements(makeReq({ unlockedAchievements: ['First Interview'] }), res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
 });
