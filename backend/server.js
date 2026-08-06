@@ -11,6 +11,9 @@ process.on("unhandledRejection", (err) => {
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
+const helmet = require("helmet");
+const lusca = require("lusca");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -29,8 +32,22 @@ const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securit
 const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
-app.set("trust proxy", 1);
+// Trust X-Forwarded-For only when it comes from a known reverse proxy. The
+// previous blanket `trust proxy: 1` let any client spoof the header and rotate
+// their IP on every request, defeating every rate limiter. With no CIDR
+// configured the header is ignored entirely and req.ip is the direct socket
+// address, so it cannot be reset by the caller.
+const reverseProxyCidrs = (process.env.REVERSE_PROXY_CIDR || "")
+  .split(",")
+  .map((cidr) => cidr.trim())
+  .filter(Boolean);
+if (reverseProxyCidrs.length > 0) {
+  app.set("trust proxy", reverseProxyCidrs);
+}
 app.use(generalHeaders);
+app.set("trust proxy", 1);
+app.use(helmet());
+app.use(generalHeaders); 
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
   process.env.FRONTEND_ORIGIN,
@@ -123,6 +140,68 @@ connectDB()
 app.use(express.json());
 app.use(cookieParser());
 
+// Lightweight, store-free session used ONLY to hold the CSRF secret for
+// lusca.csrf(). All real authentication remains JWT-based (see
+// middlewares/authMiddleware.js) — this does not make the API stateful.
+app.use(
+  cookieSession({
+    name: "csrfSession",
+    keys: [process.env.CSRF_SESSION_SECRET],
+    maxAge: 24 * 60 * 60 * 1000, // 24h
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  })
+);
+
+// Global CSRF protection. Mounted before every router so CodeQL recognizes
+// ALL downstream handlers as protected. The blocklist then exempts every
+// route that authenticates via JWT bearer header (not cookies) — meaning
+// CSRF is only actually enforced at runtime on /api/auth/refresh and
+// /api/auth/logout, the two routes that authenticate off the ambient
+// refreshToken cookie. GET/HEAD/OPTIONS requests are never validated by
+// lusca regardless of blocklist, so /api/auth/csrf-token still works as a
+// plain priming GET.
+app.use(
+  lusca.csrf({
+    cookie: {
+      name: "XSRF-TOKEN",
+      options: {
+        httpOnly: false, // must be readable by frontend JS to echo back in header
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      },
+    },
+    header: "x-csrf-token",
+    blocklist: [
+      { path: "/api/auth/register", type: "exact" },
+      { path: "/api/auth/login", type: "exact" },
+      { path: "/api/auth/verify-email", type: "exact" },
+      { path: "/api/auth/resend-verification", type: "exact" },
+      { path: "/api/auth/profile", type: "exact" },
+      { path: "/api/auth/change-password", type: "exact" },
+      { path: "/api/auth/delete-account", type: "exact" },
+      { path: "/api/auth/upload-image", type: "exact" },
+      { path: "/api/auth/csrf-token", type: "exact" },
+      { path: "/api/sessions", type: "startsWith" },
+      { path: "/api/question", type: "startsWith" },
+      { path: "/api/questions", type: "startsWith" },
+      { path: "/api/ai", type: "startsWith" },
+      { path: "/api/sheets", type: "startsWith" },
+      { path: "/api/user", type: "startsWith" },
+      { path: "/api/resume", type: "startsWith" },
+      { path: "/api/notes-summary", type: "startsWith" },
+      { path: "/api/books", type: "startsWith" },
+      { path: "/api/jobs", type: "startsWith" },
+      { path: "/api/courses", type: "startsWith" },
+      { path: "/api/flashcards", type: "startsWith" },
+      { path: "/api/test", type: "exact" },
+      { path: "/uploads", type: "startsWith" },
+    ],
+  })
+);
+
+
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
@@ -197,14 +276,42 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled Server Error:", err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
+  });
+});
+
+// Start Server
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server connected and running on port ${PORT}`);
+  if (process.env.NODE_ENV === "production") {
+    console.log("Allowed CORS origins (production):");
+  } else {
+    console.log("Allowed CORS origins (development):");
+  }
+  for (const o of allowedOrigins) {
+    console.log("  -", o);
+  }
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(
+      `Port ${PORT} is already in use. Please free the port or use a different one.`,
+    );
+    process.exit(1);
+  } else {
+    console.error("Server error:", err);
+  }
+});
+
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
