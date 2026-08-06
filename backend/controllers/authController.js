@@ -604,6 +604,17 @@ const resetPassword = async (req, res) => {
             return res.status(400).json({ success: false, message: errors[0] });
         }
 
+        // The reset token is a server-generated 64-character hex string. Reject
+        // anything else before it reaches the database so a malicious payload
+        // (e.g. a Mongo operator object such as { $ne: ... }) can never be used
+        // to build an injection query.
+        if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) {
+            return res.status(400).json({
+                success: false,
+                message: "This reset link is invalid or has expired. Please request a new one.",
+            });
+        }
+
         const user = await User.findOne({
             passwordResetToken: token,
             passwordResetExpires: { $gt: new Date() },

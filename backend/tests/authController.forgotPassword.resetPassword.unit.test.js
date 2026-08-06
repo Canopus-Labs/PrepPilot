@@ -76,6 +76,8 @@ afterAll(() => {
   Module._load = originalLoad;
 });
 
+const VALID_TOKEN = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
 const mockRes = () => {
   const res = { statusCode: 200, body: null };
   res.status = (code) => {
@@ -174,16 +176,28 @@ describe("resetPassword", () => {
     userMock.findOne.mockResolvedValue(null);
 
     const res = mockRes();
-    await resetPassword({ body: { token: "stale-token", newPassword: "StrongPass123!" } }, res);
+    await resetPassword({ body: { token: VALID_TOKEN, newPassword: "StrongPass123!" } }, res);
 
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toContain("invalid or has expired");
   });
 
+  it("rejects a malicious (non-string / Mongo operator) token payload", async () => {
+    const res = mockRes();
+    await resetPassword(
+      { body: { token: { $ne: null }, newPassword: "StrongPass123!" } },
+      res
+    );
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(userMock.findOne).not.toHaveBeenCalled();
+  });
+
   it("sets the raw password, clears reset + session tokens, and bumps tokenVersion", async () => {
     const fakeUser = {
       password: "old-hash",
-      passwordResetToken: "valid-token",
+      passwordResetToken: VALID_TOKEN,
       passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
       refreshTokenHash: "old-refresh-hash",
       refreshTokenExpiresAt: new Date(Date.now() + 10000),
@@ -195,10 +209,10 @@ describe("resetPassword", () => {
     userMock.findOne.mockResolvedValue(fakeUser);
 
     const res = mockRes();
-    await resetPassword({ body: { token: "valid-token", newPassword: "StrongPass123!" } }, res);
+    await resetPassword({ body: { token: VALID_TOKEN, newPassword: "StrongPass123!" } }, res);
 
     expect(userMock.findOne).toHaveBeenCalledWith({
-      passwordResetToken: "valid-token",
+      passwordResetToken: VALID_TOKEN,
       passwordResetExpires: { $gt: expect.any(Date) },
     });
     expect(fakeUser.password).toBe("StrongPass123!");
@@ -219,7 +233,7 @@ describe("resetPassword", () => {
     userMock.findOne.mockRejectedValue(new Error("Database connection lost"));
 
     const res = mockRes();
-    await resetPassword({ body: { token: "abc", newPassword: "StrongPass123!" } }, res);
+    await resetPassword({ body: { token: VALID_TOKEN, newPassword: "StrongPass123!" } }, res);
 
     expect(res.statusCode).toBe(500);
     expect(res.body.success).toBe(false);
