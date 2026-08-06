@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Search,
   Github,
@@ -10,6 +10,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { formatRetryMessage } from "../../utils/repositoryHiveRateLimit";
 
 const FILTER_OPTIONS = [
   {
@@ -32,73 +35,124 @@ const FILTER_OPTIONS = [
   { id: "java", label: "Java", topic: "language:java" },
 ];
 
+const SORT_QUERY = {
+  stars: { sort: "stars", order: "desc" },
+  recent: { sort: "updated", order: "desc" },
+  forks: { sort: "forks", order: "desc" },
+};
+
+const DEBOUNCE_MS = 400;
+
 const RepositoryHive = () => {
   const [selectedFilters, setSelectedFilters] = useState(["good-first-issue"]);
   const [repositories, setRepositories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("stars");
 
-  useEffect(() => {
-    fetchRepositories();
-  }, [selectedFilters, sortBy]);
+  const abortRef = useRef(null);
+  const requestSeqRef = useRef(0);
+  const debounceRef = useRef(null);
 
-  const fetchRepositories = async () => {
+  const fetchRepositories = useCallback(async () => {
+    const queryParams = [];
+
+    selectedFilters.forEach((filter) => {
+      const option = FILTER_OPTIONS.find((f) => f.id === filter);
+      if (option) queryParams.push(option.topic);
+    });
+
+    if (searchQuery.trim()) {
+      queryParams.push(searchQuery.trim());
+    }
+
+    const query = queryParams.join(" ").trim();
+    if (!query) {
+      setRepositories([]);
+      setError("");
+      setWarning("");
+      setLoading(false);
+      return;
+    }
+
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const requestSeq = ++requestSeqRef.current;
+
     setLoading(true);
     setError("");
+    setWarning("");
 
     try {
-      let queryParams = [];
-
-      // Build query with selected filters
-      selectedFilters.forEach((filter) => {
-        const option = FILTER_OPTIONS.find((f) => f.id === filter);
-        if (option) {
-          queryParams.push(option.topic);
-        }
+      const sortConfig = SORT_QUERY[sortBy] || SORT_QUERY.stars;
+      const response = await axiosInstance.get(API_PATHS.GITHUB.SEARCH, {
+        params: {
+          type: "repositories",
+          q: query,
+          sort: sortConfig.sort,
+          order: sortConfig.order,
+          per_page: 30,
+        },
+        signal: controller.signal,
       });
 
-      if (searchQuery.trim()) {
-        queryParams.push(searchQuery.trim());
-      }
+      if (requestSeq !== requestSeqRef.current) return;
 
-      const query = queryParams.join(" ").trim();
-      if (!query) {
-        setRepositories([]);
-        setLoading(false);
+      const data = response.data || {};
+      setRepositories(data.items || []);
+
+      if (data.stale && data.warning) {
+        const retryHint = formatRetryMessage(
+          data.rateLimit?.retryAfterSeconds,
+          data.rateLimit?.resetAt,
+        );
+        setWarning(`${data.warning} ${retryHint}`);
+      } else {
+        setWarning("");
+      }
+    } catch (err) {
+      if (
+        err?.code === "ERR_CANCELED" ||
+        err?.name === "CanceledError" ||
+        err?.name === "AbortError"
+      ) {
         return;
       }
+      if (requestSeq !== requestSeqRef.current) return;
 
-      const sortMap = {
-        stars: "sort=stars&order=desc",
-        recent: "sort=updated&order=desc",
-        forks: "sort=forks&order=desc",
-      };
-
-      const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sortMap[sortBy]}&per_page=30`;
-
-      const response = await fetch(url, {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setRepositories(data.items || []);
-    } catch (err) {
-      setError(
-        err.message || "Failed to fetch repositories. Please try again later.",
+      const payload = err?.response?.data;
+      const retryHint = formatRetryMessage(
+        payload?.retryAfterSeconds ?? payload?.rateLimit?.retryAfterSeconds,
+        payload?.rateLimit?.resetAt,
       );
-      setRepositories([]);
+
+      setError(
+        `${payload?.message || err.message || "Failed to fetch repositories."} ${retryHint}`,
+      );
+      // Keep the last successful cards visible on recoverable refresh failures.
     } finally {
-      setLoading(false);
+      if (requestSeq === requestSeqRef.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, [selectedFilters, searchQuery, sortBy]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchRepositories();
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [fetchRepositories]);
 
   const toggleFilter = (filterId) => {
     setSelectedFilters((prev) =>
@@ -113,9 +167,7 @@ const RepositoryHive = () => {
   };
 
   const handleSearch = () => {
-    if (repositories.length > 0 || searchQuery) {
-      fetchRepositories();
-    }
+    fetchRepositories();
   };
 
   return (
@@ -158,7 +210,7 @@ const RepositoryHive = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Search repositories (e.g., react, django, kubernetes)..."
+                placeholder="Search repositories (e.g., react, django, tensorflow)..."
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
@@ -239,12 +291,33 @@ const RepositoryHive = () => {
             />
             <div className="text-red-700 dark:text-red-400 text-sm">
               {error}
+              {repositories.length > 0 && (
+                <p className="mt-1 text-red-600/80 dark:text-red-300/80">
+                  Showing your last successful results meanwhile.
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {warning && !error && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg flex items-start gap-3"
+          >
+            <AlertCircle
+              size={20}
+              className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"
+            />
+            <div className="text-amber-800 dark:text-amber-300 text-sm">
+              {warning}
             </div>
           </motion.div>
         )}
 
         {/* Loading State */}
-        {loading && (
+        {loading && repositories.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader
               size={40}
@@ -256,8 +329,15 @@ const RepositoryHive = () => {
           </div>
         )}
 
+        {loading && repositories.length > 0 && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Loader size={16} className="animate-spin text-violet-500" />
+            Refreshing results...
+          </div>
+        )}
+
         {/* Repositories Grid */}
-        {!loading && repositories.length > 0 && (
+        {repositories.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -287,7 +367,7 @@ const RepositoryHive = () => {
                         {repo.name}
                       </h3>
                       <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                        {repo.owner.login}
+                        {repo.owner?.login}
                       </p>
                     </div>
                   </div>
@@ -374,7 +454,7 @@ const RepositoryHive = () => {
         )}
 
         {/* Results Count */}
-        {!loading && repositories.length > 0 && (
+        {repositories.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
