@@ -1,36 +1,46 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import Module from "module";
 
 // ---------------------------------------------------------------------------
-// Unit tests for addQuestionToSession — ownership guard
+// CJS controller mocks via Module._load shim (vi.mock cannot intercept the
+// require() calls inside the CJS controller).
 // ---------------------------------------------------------------------------
 
-// Mock Mongoose models before importing the controller
-vi.mock("../models/Session.js", () => ({
-  default: { findById: vi.fn() },
-}));
-vi.mock("../models/Question.js", () => ({
-  default: { insertMany: vi.fn() },
-}));
+const moduleMocks = {};
 
-let addQuestionToSession;
-let Session;
-let Question;
+const originalLoad = Module._load;
+Module._load = function (request, parent, isMain) {
+  if (request in moduleMocks) return moduleMocks[request];
+  return originalLoad.apply(this, arguments);
+};
 
-beforeEach(async () => {
-  vi.resetModules();
-  vi.clearAllMocks();
+const mockStartSession = vi.fn();
+const mockSessionFindById = vi.fn();
+const mockSessionUpdateOne = vi.fn();
+const mockQuestionInsertMany = vi.fn();
 
-  // Re-import after reset so mocks are fresh each suite
-  const ctrl = await import("../controllers/questionController.js");
-  addQuestionToSession = ctrl.addQuestionToSession;
+function makeFakeMongoSession() {
+  return {
+    withTransaction: async (fn) => fn(),
+    endSession: vi.fn().mockResolvedValue(),
+  };
+}
 
-  Session = (await import("../models/Session.js")).default;
-  Question = (await import("../models/Question.js")).default;
-});
+moduleMocks["mongoose"] = {
+  startSession: (...args) => mockStartSession(...args),
+};
 
-// ---------------------------------------------------------------------------
-// Helper: build minimal req / res stubs
-// ---------------------------------------------------------------------------
+moduleMocks["../models/Session"] = {
+  findById: (...args) => mockSessionFindById(...args),
+  updateOne: (...args) => mockSessionUpdateOne(...args),
+};
+
+moduleMocks["../models/Question"] = {
+  insertMany: (...args) => mockQuestionInsertMany(...args),
+};
+
+const { addQuestionToSession } = require("../controllers/questionController");
+
 function makeReq({ sessionId, questions, userId }) {
   return {
     body: { sessionId, questions },
@@ -45,18 +55,24 @@ function makeRes() {
   return res;
 }
 
-// ---------------------------------------------------------------------------
-// 403 — User B tries to write into User A's session
-// ---------------------------------------------------------------------------
+beforeEach(() => {
+  mockStartSession.mockReset();
+  mockSessionFindById.mockReset();
+  mockSessionUpdateOne.mockReset();
+  mockQuestionInsertMany.mockReset();
+
+  mockStartSession.mockResolvedValue(makeFakeMongoSession());
+});
+
 describe("addQuestionToSession — cross-user write (issue #212)", () => {
   it("returns 403 when req.user does not own the session", async () => {
     const ownerUserId = "aaaaaaaaaaaaaaaaaaaaaaaa";
     const attackerUserId = "bbbbbbbbbbbbbbbbbbbbbbbb";
 
-    Session.findById.mockResolvedValue({
-      user: { toString: () => ownerUserId },
-      questions: [],
-      save: vi.fn(),
+    mockSessionFindById.mockReturnValue({
+      session: vi.fn().mockResolvedValue({
+        user: { toString: () => ownerUserId },
+      }),
     });
 
     const req = makeReq({
@@ -72,31 +88,28 @@ describe("addQuestionToSession — cross-user write (issue #212)", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, message: "Unauthorized access" })
     );
-    // Critical: no questions must have been written
-    expect(Question.insertMany).not.toHaveBeenCalled();
+    expect(mockQuestionInsertMany).not.toHaveBeenCalled();
+    expect(mockSessionUpdateOne).not.toHaveBeenCalled();
   });
 });
 
-// ---------------------------------------------------------------------------
-// 201 — Owner adds questions to their own session (happy path)
-// ---------------------------------------------------------------------------
 describe("addQuestionToSession — owner adds questions", () => {
-  it("returns 201 and persists questions when the caller owns the session", async () => {
+  it("returns 201, inserts questions, and links them atomically", async () => {
     const userId = "aaaaaaaaaaaaaaaaaaaaaaaa";
     const sessionId = "sessionid123";
 
-    const mockSession = {
-      user: { toString: () => userId },
-      questions: [],
-      save: vi.fn().mockResolvedValue(true),
-    };
+    mockSessionFindById.mockReturnValue({
+      session: vi.fn().mockResolvedValue({
+        user: { toString: () => userId },
+      }),
+    });
 
     const mockCreated = [
       { _id: "q1", session: sessionId, question: "What is closure?", answer: "A function…" },
     ];
 
-    Session.findById.mockResolvedValue(mockSession);
-    Question.insertMany.mockResolvedValue(mockCreated);
+    mockQuestionInsertMany.mockResolvedValue(mockCreated);
+    mockSessionUpdateOne.mockResolvedValue({ modifiedCount: 1 });
 
     const req = makeReq({
       sessionId,
@@ -107,19 +120,54 @@ describe("addQuestionToSession — owner adds questions", () => {
 
     await addQuestionToSession(req, res);
 
-    expect(Question.insertMany).toHaveBeenCalledOnce();
-    expect(mockSession.save).toHaveBeenCalledOnce();
+    expect(mockQuestionInsertMany).toHaveBeenCalledOnce();
+    expect(mockQuestionInsertMany).toHaveBeenCalledWith(
+      [{ session: sessionId, question: "What is closure?", answer: "A function…" }],
+      expect.objectContaining({ session: expect.anything() }),
+    );
+    // Atomic $push linkage (no read-modify-write) so concurrent adds don't
+    // lose a batch; the session's questions array is never saved wholesale.
+    expect(mockSessionUpdateOne).toHaveBeenCalledWith(
+      { _id: sessionId },
+      { $push: { questions: { $each: ["q1"] } } },
+      expect.objectContaining({ session: expect.anything() }),
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockCreated);
   });
+
+  it("returns 500 and rolls back when the session linkage update fails (no orphans)", async () => {
+    const userId = "aaaaaaaaaaaaaaaaaaaaaaaa";
+    const sessionId = "sessionid123";
+
+    mockSessionFindById.mockReturnValue({
+      session: vi.fn().mockResolvedValue({ user: { toString: () => userId } }),
+    });
+    mockQuestionInsertMany.mockResolvedValue([{ _id: "q1" }]);
+    mockSessionUpdateOne.mockRejectedValue(new Error("DB down"));
+
+    const res = makeRes();
+    await addQuestionToSession(
+      makeReq({
+        sessionId,
+        questions: [{ question: "Q", answer: "A" }],
+        userId,
+      }),
+      res,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    // The insert and linkage run in one transaction (withTransaction), so a
+    // failure here aborts the whole operation rather than orphaning questions.
+    expect(mockQuestionInsertMany).toHaveBeenCalled();
+  });
 });
 
-// ---------------------------------------------------------------------------
-// 404 — session not found still returns 404 (regression)
-// ---------------------------------------------------------------------------
 describe("addQuestionToSession — session not found", () => {
   it("returns 404 when session does not exist", async () => {
-    Session.findById.mockResolvedValue(null);
+    mockSessionFindById.mockReturnValue({
+      session: vi.fn().mockResolvedValue(null),
+    });
 
     const req = makeReq({
       sessionId: "nonexistent",
@@ -131,13 +179,10 @@ describe("addQuestionToSession — session not found", () => {
     await addQuestionToSession(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(Question.insertMany).not.toHaveBeenCalled();
+    expect(mockQuestionInsertMany).not.toHaveBeenCalled();
   });
 });
 
-// ---------------------------------------------------------------------------
-// 400 — missing / invalid body (regression)
-// ---------------------------------------------------------------------------
 describe("addQuestionToSession — bad input", () => {
   it("returns 400 when questions is not an array", async () => {
     const req = makeReq({ sessionId: "s1", questions: "bad", userId: "u1" });

@@ -8,7 +8,9 @@ const addQuestionToSessionSchema = z.object({
       question: z.string().min(1, "Question text is required"),
       answer: z.string().min(1, "Answer text is required"),
     })
-  ).min(1, "At least one question is required"),
+  )
+    .min(1, "At least one question is required")
+    .max(50, "At most 50 questions per request"),
 });
 
 // Schema for toggling pin (params only)

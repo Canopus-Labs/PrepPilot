@@ -115,39 +115,66 @@ const getMyQuestions = async (req, res) => {
  * 201 [{"_id":"...","session":"...","question":"...","answer":"..."}]
  */
 const addQuestionToSession = async (req, res) => {
-  try {
-    const { sessionId, questions } = req.body;
+  const mongoSession = await mongoose.startSession();
 
-    if (!sessionId || !Array.isArray(questions) || questions.length === 0) {
+  try {
+    let createdQuestions;
+
+    await mongoSession.withTransaction(async () => {
+      const { sessionId, questions } = req.body;
+
+      if (!sessionId || !Array.isArray(questions) || questions.length === 0) {
+        throw new Error("INVALID_INPUT");
+      }
+
+      const session = await Session.findById(sessionId).session(mongoSession);
+
+      if (!session) {
+        throw new Error("SESSION_NOT_FOUND");
+      }
+
+      if (!session.user || session.user.toString() !== req.user._id.toString()) {
+        throw new Error("FORBIDDEN");
+      }
+
+      createdQuestions = await Question.insertMany(
+        questions.map((q) => ({
+          session: sessionId,
+          question: q.question,
+          answer: q.answer,
+        })),
+        { session: mongoSession }
+      );
+
+      // Atomic linkage: $push on the session document (no read-modify-write),
+      // so concurrent adds both persist without losing a batch. The insert and
+      // this update commit or roll back together inside the transaction, so a
+      // failed session update can never leave orphaned questions.
+      await Session.updateOne(
+        { _id: sessionId },
+        { $push: { questions: { $each: createdQuestions.map((q) => q._id) } } },
+        { session: mongoSession }
+      );
+    });
+
+    res.status(201).json(createdQuestions);
+  } catch (error) {
+    if (error.message === "INVALID_INPUT") {
       return res.status(400).json({
         success: false,
         message: "Valid sessionId and non-empty questions array are required.",
       });
     }
-
-    const session = await Session.findById(sessionId);
-
-    if (!session) {
+    if (error.message === "SESSION_NOT_FOUND") {
       return res.status(404).json({ success: false, message: "Requested session could not be found" });
     }
-
-    if (!session.user || session.user.toString() !== req.user._id.toString()) {
+    if (error.message === "FORBIDDEN") {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
-    const createdQuestions = await Question.insertMany(
-      questions.map((q) => ({
-        session: sessionId,
-        question: q.question,
-        answer: q.answer,
-      }))
-    );
-    //update session to include new question IDs
-    session.questions.push(...createdQuestions.map((q) => q._id));
-    await session.save();
-    res.status(201).json(createdQuestions);
-  } catch (error) {
     console.error("Add question error:", error);
-    res.status(500).json({ success: false, message: "Internal server error occurred" });
+    return res.status(500).json({ success: false, message: "Internal server error occurred" });
+  } finally {
+    await mongoSession.endSession();
   }
 };
 
