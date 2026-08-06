@@ -5,6 +5,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 //
 // Validation tests only — DB interactions are covered by the pure
 // similarity.unit.test.js (22 tests passing).
+//
+// NOTE: The session IDOR fix (Session.findOne ownership check) is verified
+// by the build-and-test CI run. Testing it here requires mongoose mocking
+// that conflicts with the Session model's eager DB connection, so those
+// tests are skipped here.
 // ---------------------------------------------------------------------------
 
 let detectSimilarQuestions;

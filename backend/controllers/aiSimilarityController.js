@@ -28,9 +28,17 @@ const detectSimilarQuestions = async (req, res) => {
       });
     }
 
-    // Build the question corpus: either from a specific session or all accessible sessions
+    // Build the question corpus: either from a verified session or all accessible sessions
     let query = {};
     if (sessionId) {
+      // Validate sessionId belongs to current user before using in query (prevents IDOR)
+      const session = await Session.findOne({ _id: sessionId, user: req.user._id });
+      if (!session) {
+        return res.status(403).json({
+          success: false,
+          message: "Session not found or access denied.",
+        });
+      }
       query.session = sessionId;
     } else {
       // Fetch all sessions for the current user
