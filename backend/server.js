@@ -92,16 +92,48 @@ app.use((req, res, next) => {
   next();
 });
 
+// Start Server — wait for DB connection first so the server never accepts
+// requests while MongoDB is unreachable (issue #1303).
+const PORT = process.env.PORT || 5000;
+
+function startServer() {
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server connected and running on port ${PORT}`);
+    if (process.env.NODE_ENV === "production") {
+      console.log("Allowed CORS origins (production):");
+    } else {
+      console.log("Allowed CORS origins (development):");
+    }
+    for (const o of allowedOrigins) {
+      console.log("  -", o);
+    }
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(
+        `Port ${PORT} is already in use. Please free the port or use a different one.`,
+      );
+      process.exit(1);
+    } else {
+      console.error("Server error:", err);
+    }
+  });
+}
+
 connectDB()
   .then((success) => {
     if (success) {
       console.log("MongoDB connected successfully");
+      startServer();
     } else {
-      console.warn("⚠️ Failed to connect to MongoDB - server will run without database connection");
+      console.error("MongoDB connection failed — refusing to start server without database.");
+      process.exit(1);
     }
   })
   .catch((err) => {
     console.error("Database connection error:", err.message);
+    process.exit(1);
   });
 
 // Middleware
