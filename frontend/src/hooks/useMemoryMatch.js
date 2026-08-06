@@ -308,42 +308,34 @@ export const useMemoryMatch = () => {
     setStars(finalStars);
 
     // 2. Score Time Bonus
-    let timeBonus = 0;
-    const timeCap = config.maxExpectedTime;
-    if (timeElapsed < timeCap) {
-      timeBonus = Math.round((timeCap - timeElapsed) * 15 * config.multiplier);
-      setScore((s) => s + timeBonus);
-    }
+    const timeBonus = Math.max(0, Math.round((config.maxExpectedTime - timeElapsed) * 10 * config.multiplier));
 
     // 3. Perfect Game check
     const isPerfect = totalWrong === 0;
     setPerfectGame(isPerfect);
-    if (isPerfect) {
-      setScore((s) => s + 500); // 500 bonus points for perfect game
-    }
 
     // 4. Achievement unlocking checks
     const unlocked = [];
-    if (isPerfect) {
-      unlocked.push({ id: "perfect", title: "Perfect Recall", desc: "Matched all pairs with zero incorrect moves!" });
-    }
-    if (finalMaxCombo >= 5) {
-      unlocked.push({ id: "combo", title: "Combo Master", desc: "Achieved a combo multiplier of 5x or higher!" });
-    }
-    if (timeElapsed <= config.maxExpectedTime * 0.6) {
-      unlocked.push({ id: "speed", title: "Speed Demon", desc: "Completed the memory board in record time!" });
-    }
+    if (isPerfect) unlocked.push({ id: "perfect", title: "Perfect Recall", desc: "Matched all pairs with zero incorrect moves!" });
+    if (finalMaxCombo >= 5) unlocked.push({ id: "combo", title: "Combo Master", desc: "Achieved a combo multiplier of 5x or higher!" });
+    if (timeElapsed <= config.maxExpectedTime * 0.6) unlocked.push({ id: "speed", title: "Speed Demon", desc: "Completed the memory board in record time!" });
     setAchievements(unlocked);
 
-    // 5. Update and persist High Score
-    setHighScore((prevHigh) => {
-      // Account for score updates (including time bonus and perfect bonus)
-      const finalScore = score + timeBonus + (isPerfect ? 500 : 0);
-      if (finalScore > prevHigh) {
-        localStorage.setItem("memory_match_high_score", finalScore.toString());
-        return finalScore;
-      }
-      return prevHigh;
+    // Apply the final bonuses to score and calculate high score accurately using functional update
+    setScore((prevScore) => {
+      let finalScore = prevScore;
+      if (timeElapsed < config.maxExpectedTime) finalScore += timeBonus;
+      if (isPerfect) finalScore += 500;
+      
+      setHighScore((prevHigh) => {
+        if (finalScore > prevHigh) {
+          localStorage.setItem("memory_match_high_score", finalScore.toString());
+          return finalScore;
+        }
+        return prevHigh;
+      });
+      
+      return finalScore;
     });
   };
 
