@@ -3,21 +3,21 @@ const { handleValidationError } = require("./ValidateQuestions");
 
 // Schema for interview questions request
 const generateInterviewQuestionsSchema = z.object({
-  role: z.string().min(1, "Role is required"),
-  experience: z.string().min(1, "Experience is required"),
-  topicsToFocus: z.array(z.string()).min(1, "At least one topic is required"),
+  role: z.string().min(1, "Role is required").max(200, "Role must be at most 200 characters"),
+  experience: z.string().min(1, "Experience is required").max(50, "Experience must be at most 50 characters"),
+  topicsToFocus: z.array(z.string().min(1).max(100, "Each topic must be at most 100 characters")).min(1, "At least one topic is required"),
   numberOfQuestions: z.number().int().positive("Number of questions must be positive"),
 });
 
 // Schema for concept explanation request
 const generateConceptExplanationSchema = z.object({
-  question: z.string().min(1, "Question is required"),
+  question: z.string().min(1, "Question is required").max(10000, "Question must be at most 10000 characters"),
 });
 
 // Schema for interview tips request
 const generateInterviewTipsSchema = z.object({
-  role: z.string().min(1, "Role is required"),
-  experience: z.string().min(1, "Experience is required"),
+  role: z.string().min(1, "Role is required").max(200, "Role must be at most 200 characters"),
+  experience: z.string().min(1, "Experience is required").max(50, "Experience must be at most 50 characters"),
 });
 
 
