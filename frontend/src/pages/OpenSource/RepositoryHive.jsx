@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
   Github,
@@ -9,14 +9,23 @@ import {
   Loader,
   AlertCircle,
   ExternalLink,
+  MessageCircle,
+  ThumbsUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   FILTER_OPTIONS,
+  REPOSITORY_SORT_OPTIONS,
+  ISSUE_SORT_OPTIONS,
   buildGitHubSearchUrl,
   normalizeSearchResponse,
   usesIssueLabelSearch,
+  getSearchPageInfo,
 } from "../../utils/repositoryHiveSearch";
+
+const PER_PAGE = 30;
 
 const RepositoryHive = () => {
   const [selectedFilters, setSelectedFilters] = useState(["good-first-issue"]);
@@ -25,12 +34,21 @@ const RepositoryHive = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("stars");
+  const [page, setPage] = useState(1);
+  const [pageInfo, setPageInfo] = useState({
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
 
-  useEffect(() => {
-    fetchRepositories();
-  }, [selectedFilters, sortBy]);
+  const showingIssueBackedResults = usesIssueLabelSearch(selectedFilters);
+  const sortOptions = showingIssueBackedResults
+    ? ISSUE_SORT_OPTIONS
+    : REPOSITORY_SORT_OPTIONS;
 
-  const fetchRepositories = async () => {
+  const fetchRepositories = useCallback(async () => {
     setLoading(true);
     setError("");
 
@@ -39,10 +57,19 @@ const RepositoryHive = () => {
         selectedFilters,
         searchQuery,
         sortBy,
+        perPage: PER_PAGE,
+        page,
       });
 
       if (!url) {
         setRepositories([]);
+        setPageInfo({
+          totalCount: 0,
+          currentPage: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false,
+        });
         setLoading(false);
         return;
       }
@@ -59,6 +86,7 @@ const RepositoryHive = () => {
 
       const data = await response.json();
       setRepositories(normalizeSearchResponse(selectedFilters, data));
+      setPageInfo(getSearchPageInfo(data, page, PER_PAGE));
     } catch (err) {
       setError(
         err.message || "Failed to fetch repositories. Please try again later.",
@@ -67,9 +95,17 @@ const RepositoryHive = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedFilters, searchQuery, sortBy, page]);
+
+  // Auto-fetch on filter/sort/page; search text applies only via Search / Enter.
+  useEffect(() => {
+    fetchRepositories();
+    // intentionally omit searchQuery — typing should not hit GitHub until Search
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFilters, sortBy, page]);
 
   const toggleFilter = (filterId) => {
+    setPage(1);
     setSelectedFilters((prev) =>
       prev.includes(filterId)
         ? prev.filter((f) => f !== filterId)
@@ -82,12 +118,17 @@ const RepositoryHive = () => {
   };
 
   const handleSearch = () => {
-    if (repositories.length > 0 || searchQuery) {
-      fetchRepositories();
+    if (page !== 1) {
+      setPage(1);
+      return;
     }
+    fetchRepositories();
   };
 
-  const showingIssueBackedResults = usesIssueLabelSearch(selectedFilters);
+  const handleSortChange = (nextSort) => {
+    setPage(1);
+    setSortBy(nextSort);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0f172a]">
@@ -144,19 +185,15 @@ const RepositoryHive = () => {
           </div>
 
           {/* Sort Options */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-6 flex-wrap">
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
               Sort by:
             </span>
-            <div className="flex gap-2">
-              {[
-                { id: "stars", label: "⭐ Most Stars" },
-                { id: "recent", label: "📅 Recently Updated" },
-                { id: "forks", label: "🔀 Most Forks" },
-              ].map((option) => (
+            <div className="flex gap-2 flex-wrap">
+              {sortOptions.map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setSortBy(option.id)}
+                  onClick={() => handleSortChange(option.id)}
                   className={`px-4 py-2 rounded-lg border transition-all font-medium text-sm ${
                     sortBy === option.id
                       ? "bg-violet-600 text-white border-violet-600"
@@ -329,27 +366,54 @@ const RepositoryHive = () => {
                   )}
                 </div>
 
-                {/* Stats */}
+                {/* Stats — issue metrics vs repository metrics */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/10 text-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Star size={14} />
-                      <span className="font-medium">
-                        {repo.stargazers_count}
-                      </span>
+                  {repo.metricsMode === "issue" ? (
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="flex items-center gap-1 text-gray-600 dark:text-gray-400"
+                        title="Issue reactions"
+                      >
+                        <ThumbsUp size={14} />
+                        <span className="font-medium">
+                          {repo.reactions_count ?? 0}
+                        </span>
+                      </div>
+                      <div
+                        className="flex items-center gap-1 text-gray-600 dark:text-gray-400"
+                        title="Issue comments"
+                      >
+                        <MessageCircle size={14} />
+                        <span className="font-medium">
+                          {repo.comments_count ?? 0}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <GitFork size={14} />
-                      <span className="font-medium">{repo.forks_count}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Eye size={14} />
-                      <span className="font-medium">{repo.watchers_count}</span>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {repo.open_issues_count} issues
-                  </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <Star size={14} />
+                          <span className="font-medium">
+                            {repo.stargazers_count}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <GitFork size={14} />
+                          <span className="font-medium">{repo.forks_count}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <Eye size={14} />
+                          <span className="font-medium">
+                            {repo.watchers_count}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        {repo.open_issues_count} issues
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -375,19 +439,44 @@ const RepositoryHive = () => {
           </motion.div>
         )}
 
-        {/* Results Count */}
+        {/* Results Count + Pagination */}
         {!loading && repositories.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-8 text-center text-gray-600 dark:text-gray-400"
+            className="mt-8 flex flex-col items-center gap-4 text-gray-600 dark:text-gray-400"
           >
             <p>
               Showing {repositories.length}{" "}
               {showingIssueBackedResults
                 ? "repositories with open labelled issues"
                 : "repositories"}
+              {pageInfo.totalCount > 0
+                ? ` · page ${pageInfo.currentPage} of ${pageInfo.totalPages}`
+                : ""}
             </p>
+            {(pageInfo.hasPrevPage || pageInfo.hasNextPage) && (
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={!pageInfo.hasPrevPage || loading}
+                  className="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-white/10 text-sm font-medium disabled:opacity-40 hover:border-violet-400"
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!pageInfo.hasNextPage || loading}
+                  className="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-white/10 text-sm font-medium disabled:opacity-40 hover:border-violet-400"
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </div>

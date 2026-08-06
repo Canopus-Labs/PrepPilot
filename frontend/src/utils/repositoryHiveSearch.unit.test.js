@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildGitHubSearchUrl,
   buildIssueSearchQuery,
+  getSearchPageInfo,
   groupIssuesByRepository,
   normalizeSearchResponse,
   usesIssueLabelSearch,
@@ -20,6 +21,23 @@ describe("repositoryHiveSearch", () => {
     expect(decodeURIComponent(url)).toContain('label:"good first issue"');
     expect(decodeURIComponent(url)).toContain("is:open");
     expect(decodeURIComponent(url)).toContain("is:issue");
+    expect(url).toContain("page=1");
+  });
+
+  it("includes page in issue and repository search URLs", () => {
+    const issueUrl = buildGitHubSearchUrl({
+      selectedFilters: ["good-first-issue"],
+      page: 3,
+      perPage: 30,
+    });
+    expect(issueUrl).toContain("page=3");
+    expect(issueUrl).toContain("per_page=30");
+
+    const repoUrl = buildGitHubSearchUrl({
+      selectedFilters: ["python"],
+      page: 2,
+    });
+    expect(repoUrl).toContain("page=2");
   });
 
   it("keeps non-label filters on the repositories search API", () => {
@@ -44,6 +62,7 @@ describe("repositoryHiveSearch", () => {
         state: "open",
         labels: [{ name: "good first issue" }],
         reactions: { total_count: 3 },
+        comments: 7,
       },
       {
         id: 2,
@@ -67,6 +86,10 @@ describe("repositoryHiveSearch", () => {
 
     expect(grouped).toHaveLength(1);
     expect(grouped[0].full_name).toBe("acme/alpha");
+    expect(grouped[0].metricsMode).toBe("issue");
+    expect(grouped[0].reactions_count).toBe(3);
+    expect(grouped[0].comments_count).toBe(7);
+    expect(grouped[0].stargazers_count).toBeUndefined();
     expect(grouped[0].matchingIssue).toEqual(
       expect.objectContaining({
         number: 10,
@@ -102,5 +125,45 @@ describe("repositoryHiveSearch", () => {
     expect(normalizeSearchResponse(["good-first-issue"], { items: [] })).toEqual(
       [],
     );
+  });
+
+  it("computes pagination for later pages and duplicate-repo grouping", () => {
+    const pageInfo = getSearchPageInfo({ total_count: 95 }, 2, 30);
+    expect(pageInfo).toMatchObject({
+      totalCount: 95,
+      currentPage: 2,
+      totalPages: 4,
+      hasNextPage: true,
+      hasPrevPage: true,
+    });
+
+    // Two issues on the same repo collapse to one card for that page.
+    const pageItems = groupIssuesByRepository([
+      {
+        id: 1,
+        number: 1,
+        title: "First",
+        html_url: "https://github.com/acme/one/issues/1",
+        state: "open",
+        labels: [{ name: "good first issue" }],
+      },
+      {
+        id: 2,
+        number: 2,
+        title: "Second same repo",
+        html_url: "https://github.com/acme/one/issues/2",
+        state: "open",
+        labels: [{ name: "good first issue" }],
+      },
+      {
+        id: 3,
+        number: 3,
+        title: "Other repo",
+        html_url: "https://github.com/acme/two/issues/3",
+        state: "open",
+        labels: [{ name: "good first issue" }],
+      },
+    ]);
+    expect(pageItems).toHaveLength(2);
   });
 });

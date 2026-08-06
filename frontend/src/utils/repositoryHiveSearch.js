@@ -47,6 +47,18 @@ const ISSUE_SORT_MAP = {
   forks: "sort=comments&order=desc",
 };
 
+export const REPOSITORY_SORT_OPTIONS = [
+  { id: "stars", label: "Most Stars" },
+  { id: "recent", label: "Recently Updated" },
+  { id: "forks", label: "Most Forks" },
+];
+
+export const ISSUE_SORT_OPTIONS = [
+  { id: "stars", label: "Most Reactions" },
+  { id: "recent", label: "Recently Updated" },
+  { id: "forks", label: "Most Comments" },
+];
+
 export const usesIssueLabelSearch = (selectedFilters = []) =>
   selectedFilters.some((id) => Boolean(ISSUE_LABEL_FILTERS[id]));
 
@@ -111,7 +123,7 @@ export const parseRepoFromIssue = (issue) => {
 
 /**
  * Group open labelled issues by repository and keep the first match per repo.
- * Metadata-only repo hits are excluded because every card comes from a real open issue.
+ * Cards expose issue metrics (reactions/comments), not fake repository stats.
  */
 export const groupIssuesByRepository = (issues = []) => {
   const repos = new Map();
@@ -129,6 +141,9 @@ export const groupIssuesByRepository = (issues = []) => {
       .map((label) => (typeof label === "string" ? label : label?.name))
       .filter(Boolean);
 
+    const reactions = issue.reactions?.total_count ?? 0;
+    const comments = issue.comments ?? 0;
+
     repos.set(parsed.fullName, {
       id: `${parsed.fullName}-${issue.id}`,
       name: parsed.name,
@@ -140,16 +155,18 @@ export const groupIssuesByRepository = (issues = []) => {
       owner: { login: parsed.owner },
       language: null,
       topics: labels.slice(0, 5),
-      stargazers_count: issue.reactions?.total_count ?? 0,
-      forks_count: 0,
-      watchers_count: 0,
-      open_issues_count: 1,
+      // Issue-backed metrics — UI must not label these as repo stars/forks.
+      metricsMode: "issue",
+      reactions_count: reactions,
+      comments_count: comments,
       matchingIssue: {
         id: issue.id,
         number: issue.number,
         title: issue.title,
         html_url: issue.html_url,
         labels,
+        reactions_count: reactions,
+        comments_count: comments,
       },
       updated_at: issue.updated_at,
     });
@@ -163,23 +180,43 @@ export const buildGitHubSearchUrl = ({
   searchQuery = "",
   sortBy = "stars",
   perPage = 30,
+  page = 1,
 } = {}) => {
+  const safePage = Math.max(1, Number(page) || 1);
+
   if (usesIssueLabelSearch(selectedFilters)) {
     const query = buildIssueSearchQuery(selectedFilters, searchQuery);
     if (!query) return null;
     const sort = ISSUE_SORT_MAP[sortBy] || ISSUE_SORT_MAP.recent;
-    return `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&${sort}&per_page=${perPage}`;
+    return `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&${sort}&per_page=${perPage}&page=${safePage}`;
   }
 
   const query = buildRepositorySearchQuery(selectedFilters, searchQuery);
   if (!query) return null;
   const sort = SORT_MAP[sortBy] || SORT_MAP.stars;
-  return `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sort}&per_page=${perPage}`;
+  return `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sort}&per_page=${perPage}&page=${safePage}`;
 };
 
 export const normalizeSearchResponse = (selectedFilters, data) => {
   if (usesIssueLabelSearch(selectedFilters)) {
     return groupIssuesByRepository(data?.items || []);
   }
-  return data?.items || [];
+  return (data?.items || []).map((repo) => ({
+    ...repo,
+    metricsMode: "repository",
+  }));
+};
+
+/** GitHub search caps total_count reporting at 1000 results. */
+export const getSearchPageInfo = (data, page = 1, perPage = 30) => {
+  const totalCount = Math.min(Number(data?.total_count) || 0, 1000);
+  const currentPage = Math.max(1, Number(page) || 1);
+  const totalPages = Math.max(1, Math.ceil(totalCount / perPage) || 1);
+  return {
+    totalCount,
+    currentPage,
+    totalPages,
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1,
+  };
 };
