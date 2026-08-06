@@ -1,7 +1,11 @@
+// Ensure .env variables are loaded into memory before validation runs
+require("dotenv").config();
+
 const requiredEnvVars = Object.freeze([
   "MONGO_URI",
   "JWT_SECRET",
   "GEMINI_API_KEY",
+  "CSRF_SESSION_SECRET",
 ]);
 
 // Optional integrations mapping missing keys to dependent features
@@ -12,14 +16,24 @@ const optionalEnvGroups = Object.freeze([
   },
 ]);
 
+// Helper function to safely check if an env variable value is empty or missing
+const isEmptyValue = (val) => {
+  if (val === undefined || val === null) return true;
+  return String(val).trim() === "";
+};
+
 const validateEnv = () => {
+  // Guarantee dotenv is loaded in case validateEnv is called standalone
+  require("dotenv").config();
+
   const missingVars = [];
 
   // 1. Check required environment variables
+  // 1. Check required environment variables safely
   requiredEnvVars.forEach((envVar) => {
     const value = process.env[envVar];
 
-    if (!value || value.trim() === "") {
+    if (isEmptyValue(value)) {
       missingVars.push(envVar);
     }
   });
@@ -43,6 +57,7 @@ const validateEnv = () => {
     const missingKeys = keys.filter((key) => {
       const val = process.env[key];
       return !val || val.trim() === "";
+      return isEmptyValue(val);
     });
 
     if (missingKeys.length > 0) {
@@ -53,6 +68,7 @@ const validateEnv = () => {
   });
 
   console.log(" Environment variables validated successfully\n");
+  console.log("✅ Environment variables validated successfully\n");
 };
 
 module.exports = validateEnv;

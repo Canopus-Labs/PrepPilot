@@ -75,7 +75,7 @@ const mockRes = () => {
     res.body = body;
     return res;
   };
-  res.cookie = () => res;
+  res.cookie = vi.fn(() => res);
   return res;
 };
 
@@ -85,6 +85,8 @@ const req = (overrides = {}) => ({
 });
 
 describe("registerUser — account enumeration", () => {
+  const REGISTRATION_MESSAGE = "If this email is not already registered, your account has been created.";
+
   it("returns a generic 201 for an already-registered email (no tokens, no user data)", async () => {
     userMock.findOne.mockResolvedValue({ _id: "existing-id" });
 
@@ -92,14 +94,11 @@ describe("registerUser — account enumeration", () => {
     await registerUser(req(), res);
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.message).toContain("already registered");
-    expect(res.body.accessToken).toBeUndefined();
-    expect(res.body._id).toBeUndefined();
+    expect(res.body).toEqual({ success: true, message: REGISTRATION_MESSAGE });
     expect(userMock.create).not.toHaveBeenCalled();
   });
 
-  it("returns 201 with tokens for a brand-new email", async () => {
+  it("returns the identical generic 201 for a brand-new email (no tokens, no user data, no cookie)", async () => {
     userMock.findOne.mockResolvedValue(null);
     const fakeUser = {
       _id: "new-id",
@@ -119,7 +118,40 @@ describe("registerUser — account enumeration", () => {
     await registerUser(req(), res);
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.accessToken).toBeTruthy();
+    expect(res.body).toEqual({ success: true, message: REGISTRATION_MESSAGE });
+    expect(res.cookie).not.toHaveBeenCalled();
+  });
+
+  it("produces responses indistinguishable in shape for fresh vs already-registered emails", async () => {
+    // Fresh email path
+    userMock.findOne.mockResolvedValue(null);
+    const fakeUser = {
+      _id: "new-id",
+      tokenVersion: 0,
+      name: "Test User",
+      email: "new@example.com",
+      profileImageUrl: null,
+      refreshTokenHash: null,
+      refreshTokenExpiresAt: null,
+      save: vi.fn(async function () {
+        return this;
+      }),
+    };
+    userMock.create.mockResolvedValue(fakeUser);
+
+    const freshRes = mockRes();
+    await registerUser(req(), freshRes);
+
+    // Already-registered email path
+    userMock.create.mockClear();
+    userMock.findOne.mockResolvedValue({ _id: "existing-id" });
+
+    const existingRes = mockRes();
+    await registerUser(req(), existingRes);
+
+    expect(freshRes.statusCode).toBe(201);
+    expect(existingRes.statusCode).toBe(201);
+    expect(Object.keys(freshRes.body).sort()).toEqual(Object.keys(existingRes.body).sort());
+    expect(freshRes.body).toEqual(existingRes.body);
   });
 });

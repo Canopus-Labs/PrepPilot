@@ -6,6 +6,10 @@ import Login from "../../pages/Auth/Login";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
+  Settings, HelpCircle, User as UserIcon, LogOut,
+  Menu, X, ChevronUp, ChevronDown, ScrollText,
+} from "lucide-react";
+import NAV_ITEMS from "../../data/navItems";
   LayoutDashboard, Bot, BrainCircuit, Briefcase, BriefcaseBusiness,
   Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
@@ -61,6 +65,7 @@ const NAV_ITEMS = [
       { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
       { id: "question-bank",          title: "Question Bank",          path: "/question-bank",          icon: Brain },
       { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
+      { id: "snippet-vault",          title: "Snippet Vault",          path: "/snippet-vault",          icon: Code2 },
     ],
   },
   {
