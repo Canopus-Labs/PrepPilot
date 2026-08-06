@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Search,
   Github,
@@ -26,6 +26,13 @@ import {
 } from "../../utils/repositoryHiveSearch";
 
 const PER_PAGE = 30;
+const EMPTY_PAGE_INFO = {
+  totalCount: 0,
+  currentPage: 1,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPrevPage: false,
+};
 
 const RepositoryHive = () => {
   const [selectedFilters, setSelectedFilters] = useState(["good-first-issue"]);
@@ -35,13 +42,8 @@ const RepositoryHive = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("stars");
   const [page, setPage] = useState(1);
-  const [pageInfo, setPageInfo] = useState({
-    totalCount: 0,
-    currentPage: 1,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPrevPage: false,
-  });
+  const [pageInfo, setPageInfo] = useState(EMPTY_PAGE_INFO);
+  const abortRef = useRef(null);
 
   const showingIssueBackedResults = usesIssueLabelSearch(selectedFilters);
   const sortOptions = showingIssueBackedResults
@@ -49,6 +51,10 @@ const RepositoryHive = () => {
     : REPOSITORY_SORT_OPTIONS;
 
   const fetchRepositories = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError("");
 
@@ -62,14 +68,9 @@ const RepositoryHive = () => {
       });
 
       if (!url) {
+        if (controller.signal.aborted) return;
         setRepositories([]);
-        setPageInfo({
-          totalCount: 0,
-          currentPage: 1,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPrevPage: false,
-        });
+        setPageInfo(EMPTY_PAGE_INFO);
         setLoading(false);
         return;
       }
@@ -78,6 +79,7 @@ const RepositoryHive = () => {
         headers: {
           Accept: "application/vnd.github.v3+json",
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -85,21 +87,30 @@ const RepositoryHive = () => {
       }
 
       const data = await response.json();
+      if (controller.signal.aborted) return;
+
       setRepositories(normalizeSearchResponse(selectedFilters, data));
       setPageInfo(getSearchPageInfo(data, page, PER_PAGE));
     } catch (err) {
+      if (err?.name === "AbortError" || controller.signal.aborted) return;
       setError(
         err.message || "Failed to fetch repositories. Please try again later.",
       );
       setRepositories([]);
+      setPageInfo(EMPTY_PAGE_INFO);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, [selectedFilters, searchQuery, sortBy, page]);
 
   // Auto-fetch on filter/sort/page; search text applies only via Search / Enter.
   useEffect(() => {
     fetchRepositories();
+    return () => {
+      abortRef.current?.abort();
+    };
     // intentionally omit searchQuery — typing should not hit GitHub until Search
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilters, sortBy, page]);
