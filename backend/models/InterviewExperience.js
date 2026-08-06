@@ -84,8 +84,25 @@ const interviewExperienceSchema = new mongoose.Schema(
       index: true,
       maxlength: 64,
     },
+    // One key per modal submission so lost-response retries do not duplicate.
+    idempotencyKey: {
+      type: String,
+      trim: true,
+      default: null,
+      maxlength: 64,
+    },
   },
   { timestamps: true },
+);
+
+interviewExperienceSchema.index(
+  { idempotencyKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      idempotencyKey: { $type: "string", $gt: "" },
+    },
+  },
 );
 
 module.exports = mongoose.model("InterviewExperience", interviewExperienceSchema);

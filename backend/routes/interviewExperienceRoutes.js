@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { protect, optionalProtect } = require("../middlewares/authMiddleware");
+const {
+  protect,
+  optionalProtect,
+  requireModerator,
+} = require("../middlewares/authMiddleware");
 const {
   validateCreateInterviewExperience,
   validateUpdateInterviewExperienceStatus,
@@ -23,6 +27,7 @@ router.post(
 router.patch(
   "/:id/status",
   protect,
+  requireModerator,
   validateUpdateInterviewExperienceStatus,
   updateInterviewExperienceStatus,
 );

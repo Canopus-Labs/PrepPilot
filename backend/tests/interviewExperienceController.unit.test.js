@@ -94,6 +94,36 @@ describe("createInterviewExperience", () => {
       expect.objectContaining({ success: false }),
     );
   });
+
+  it("returns the existing submission when the same idempotency key is retried", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(sampleDoc);
+    InterviewExperience.create = vi.fn();
+
+    const req = makeReq({
+      company: "Google",
+      role: "SDE-2",
+      summary: "Tough but fair process",
+      clientKey: "client-key-123456",
+      idempotencyKey: "submit-key-abc12345",
+    });
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.findOne).toHaveBeenCalledWith({
+      idempotencyKey: "submit-key-abc12345",
+    });
+    expect(InterviewExperience.create).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        experience: expect.objectContaining({
+          id: "507f1f77bcf86cd799439011",
+        }),
+      }),
+    );
+  });
 });
 
 describe("getMyInterviewExperiences", () => {

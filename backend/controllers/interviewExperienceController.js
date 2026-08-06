@@ -36,6 +36,19 @@ const createInterviewExperience = async (req, res) => {
       payload.color = `hsl(${(payload.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`;
     }
 
+    if (payload.idempotencyKey) {
+      const existing = await InterviewExperience.findOne({
+        idempotencyKey: payload.idempotencyKey,
+      });
+      if (existing) {
+        return res.status(200).json({
+          success: true,
+          message: "Interview experience already submitted",
+          experience: toClientShape(existing),
+        });
+      }
+    }
+
     const experience = await InterviewExperience.create(payload);
 
     return res.status(201).json({
@@ -44,6 +57,24 @@ const createInterviewExperience = async (req, res) => {
       experience: toClientShape(experience),
     });
   } catch (error) {
+    // Concurrent retry won the unique index race — return the first write.
+    if (error?.code === 11000 && req.body?.idempotencyKey) {
+      try {
+        const existing = await InterviewExperience.findOne({
+          idempotencyKey: req.body.idempotencyKey,
+        });
+        if (existing) {
+          return res.status(200).json({
+            success: true,
+            message: "Interview experience already submitted",
+            experience: toClientShape(existing),
+          });
+        }
+      } catch {
+        // fall through to generic 500
+      }
+    }
+
     return res.status(500).json({
       success: false,
       message: "Failed to submit interview experience",
