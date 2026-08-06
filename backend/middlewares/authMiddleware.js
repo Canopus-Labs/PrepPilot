@@ -94,4 +94,24 @@ const optionalProtect = async (req, res, next) => {
   return next();
 };
 
-module.exports = { protect, requireAdmin, optionalProtect };
+const parseModeratorEmails = () =>
+  String(process.env.MODERATOR_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+// Restrict moderation endpoints to emails listed in MODERATOR_EMAILS.
+const requireModerator = (req, res, next) => {
+  const email = req.user?.email?.trim().toLowerCase();
+  const moderators = parseModeratorEmails();
+
+  if (!email || moderators.length === 0 || !moderators.includes(email)) {
+    return res.status(403).json({
+      message: "Not authorized — moderator access required",
+    });
+  }
+
+  return next();
+};
+
+module.exports = { protect, requireAdmin, optionalProtect, requireModerator };

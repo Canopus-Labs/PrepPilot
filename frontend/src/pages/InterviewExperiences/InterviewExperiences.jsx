@@ -501,6 +501,11 @@ const DetailModal = ({ exp, onClose }) => {
 // ──────────────────────────────────────────────
 // Submit Experience Modal
 // ──────────────────────────────────────────────
+const createIdempotencyKey = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `submit-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 const SubmitModal = ({ onClose, onAdd, clientKey }) => {
   const [form, setForm] = useState({
     company: "", role: "", experience: "", difficulty: "Medium",
@@ -509,6 +514,8 @@ const SubmitModal = ({ onClose, onAdd, clientKey }) => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  // Stable for the life of this modal so retries do not create duplicates.
+  const idempotencyKeyRef = useRef(createIdempotencyKey());
 
   const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
@@ -538,6 +545,7 @@ const SubmitModal = ({ onClose, onAdd, clientKey }) => {
       tags: [form.difficulty, form.role.trim().split(" ")[0]].filter(Boolean),
       color: `hsl(${(form.company.trim().charCodeAt(0) * 37) % 360}, 55%, 50%)`,
       clientKey,
+      idempotencyKey: idempotencyKeyRef.current,
     };
 
     try {
@@ -797,7 +805,6 @@ const CompanyDropdown = ({ value, onChange, options }) => {
 // Main Page
 // ──────────────────────────────────────────────
 const FILTERS = ["All", "Easy", "Medium", "Hard"];
-const COMPANIES = ["All Companies", ...Array.from(new Set(EXPERIENCES.map((e) => e.company))).sort((a, b) => a - b)];
 
 const InterviewExperiences = () => {
   const [selectedExp, setSelectedExp] = useState(null);
@@ -807,6 +814,7 @@ const InterviewExperiences = () => {
   const [search, setSearch]           = useState("");
   const [activeTab, setActiveTab]     = useState("Common"); // "Common" | "User"
   const [userExperiences, setUserExperiences] = useState([]);
+  const [approvedExperiences, setApprovedExperiences] = useState([]);
   const [loadError, setLoadError] = useState("");
   const [loadingMine, setLoadingMine] = useState(true);
   const clientKey = useMemo(() => getOrCreateClientKey(), []);
@@ -830,17 +838,52 @@ const InterviewExperiences = () => {
     }
   }, [clientKey]);
 
+  const loadApprovedExperiences = useCallback(async () => {
+    try {
+      const { data } = await axiosInstance.get(
+        API_PATHS.INTERVIEW_EXPERIENCES.APPROVED,
+      );
+      setApprovedExperiences(data?.experiences || []);
+    } catch {
+      // Keep static samples if the approved feed is unreachable.
+      setApprovedExperiences([]);
+    }
+  }, []);
+
   useEffect(() => {
     loadMyExperiences();
   }, [loadMyExperiences]);
+
+  useEffect(() => {
+    loadApprovedExperiences();
+  }, [loadApprovedExperiences]);
 
   const handleAddExperience = (exp) => {
     setUserExperiences((prev) => [exp, ...prev.filter((item) => item.id !== exp.id)]);
     setActiveTab("User");
   };
 
+  // Approved API results first; static samples fill gaps until moderation has content.
+  const commonExperiences = useMemo(() => {
+    const approvedIds = new Set(approvedExperiences.map((e) => String(e.id)));
+    return [
+      ...approvedExperiences,
+      ...EXPERIENCES.filter((e) => !approvedIds.has(String(e.id))),
+    ];
+  }, [approvedExperiences]);
+
+  const companies = useMemo(
+    () => [
+      "All Companies",
+      ...Array.from(new Set(commonExperiences.map((e) => e.company))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    ],
+    [commonExperiences],
+  );
+
   // Source array based on active tab
-  const sourceData = activeTab === "Common" ? EXPERIENCES : userExperiences;
+  const sourceData = activeTab === "Common" ? commonExperiences : userExperiences;
 
   const filtered = useMemo(() => {
     return sourceData.filter((e) => {
@@ -857,10 +900,10 @@ const InterviewExperiences = () => {
   }, [sourceData, diffFilter, companyFilter, search]);
 
   const stats = useMemo(() => ({
-    total: EXPERIENCES.length,
-    withOffer: EXPERIENCES.filter((e) => e.offerReceived).length,
-    companies: new Set(EXPERIENCES.map((e) => e.company)).size,
-  }), []);
+    total: commonExperiences.length,
+    withOffer: commonExperiences.filter((e) => e.offerReceived).length,
+    companies: new Set(commonExperiences.map((e) => e.company)).size,
+  }), [commonExperiences]);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] px-5 py-10 md:px-10 transition-colors duration-300">
@@ -947,7 +990,7 @@ const InterviewExperiences = () => {
           <CompanyDropdown
             value={companyFilter}
             onChange={setCompanyFilter}
-            options={COMPANIES}
+            options={companies}
           />
         </div>
 
@@ -956,7 +999,7 @@ const InterviewExperiences = () => {
           {/* Tab toggle pill */}
           <div className="flex items-center gap-1 p-1 bg-white dark:bg-[#151c2f] border border-gray-200 dark:border-white/5 rounded-xl">
             {["Common", "User"].map((tab) => {
-              const count = tab === "Common" ? EXPERIENCES.length : userExperiences.length;
+              const count = tab === "Common" ? commonExperiences.length : userExperiences.length;
               const isActive = activeTab === tab;
               return (
                 <button
