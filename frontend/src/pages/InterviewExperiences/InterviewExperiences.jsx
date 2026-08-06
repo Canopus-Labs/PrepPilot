@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   MessageSquare,
   Building2,
@@ -19,7 +19,27 @@ import {
   Briefcase,
   Brain,
   Send,
+  AlertCircle,
 } from "lucide-react";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
+
+const CLIENT_KEY_STORAGE = "preppilot_interview_experience_client_key";
+
+const getOrCreateClientKey = () => {
+  try {
+    const existing = localStorage.getItem(CLIENT_KEY_STORAGE);
+    if (existing) return existing;
+    const created =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `anon-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(CLIENT_KEY_STORAGE, created);
+    return created;
+  } catch {
+    return `anon-${Date.now()}`;
+  }
+};
 
 // ──────────────────────────────────────────────
 // Static Sample Data
@@ -304,6 +324,22 @@ const DifficultyBadge = ({ difficulty }) => {
   );
 };
 
+const STATUS_CONFIG = {
+  pending:  { label: "Pending review", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
+  approved: { label: "Approved",       color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+  rejected: { label: "Rejected",       color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
+};
+
+const StatusBadge = ({ status }) => {
+  if (!status) return null;
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  return (
+    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${cfg.color} ${cfg.bg}`}>
+      {cfg.label}
+    </span>
+  );
+};
+
 const ExperienceCard = ({ exp, onClick }) => (
   <div
     onClick={() => onClick(exp)}
@@ -319,6 +355,7 @@ const ExperienceCard = ({ exp, onClick }) => (
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">{exp.company}</h3>
           <DifficultyBadge difficulty={exp.difficulty} />
+          <StatusBadge status={exp.status} />
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{exp.role}</p>
       </div>
@@ -332,7 +369,7 @@ const ExperienceCard = ({ exp, onClick }) => (
       </span>
       <span className="flex items-center gap-1">
         <Layers size={11} />
-        {exp.rounds.length} Rounds
+        {(exp.rounds || []).length} Rounds
       </span>
       <span className={`flex items-center gap-1 ${exp.offerReceived ? "text-emerald-500" : "text-red-400"}`}>
         <Trophy size={11} />
@@ -347,7 +384,7 @@ const ExperienceCard = ({ exp, onClick }) => (
 
     {/* Tags */}
     <div className="flex flex-wrap gap-1.5">
-      {exp.tags.slice(0, 3).map((tag) => (
+      {(exp.tags || []).slice(0, 3).map((tag) => (
         <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 dark:text-violet-300">
           {tag}
         </span>
@@ -464,47 +501,64 @@ const DetailModal = ({ exp, onClose }) => {
 // ──────────────────────────────────────────────
 // Submit Experience Modal
 // ──────────────────────────────────────────────
-const SubmitModal = ({ onClose, onAdd }) => {
+const SubmitModal = ({ onClose, onAdd, clientKey }) => {
   const [form, setForm] = useState({
     company: "", role: "", experience: "", difficulty: "Medium",
     offerReceived: "Yes", rounds: "", summary: "", tips: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    // Simulate brief submission delay for UX feedback
-    setTimeout(() => {
-      const newExp = {
-        id: Date.now(),
-        company: form.company.trim(),
-        role: form.role.trim(),
-        experience: form.experience || "N/A",
-        difficulty: form.difficulty,
-        offerReceived: form.offerReceived === "Yes",
-        date: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
-        rounds: form.rounds
-          ? form.rounds.split("\n").filter(Boolean).map((r, i) => ({
-              name: `Round ${i + 1}`,
-              type: "Coding",
-              description: r,
-            }))
-          : [],
-        summary: form.summary.trim(),
-        tips: form.tips
-          ? form.tips.split("\n").filter(Boolean)
-          : [],
-        tags: [form.difficulty, form.role.split(" ")[0]].filter(Boolean),
-        color: `hsl(${(form.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`,
-      };
-      onAdd(newExp);
-      setSubmitting(false);
+    setSubmitError("");
+
+    const payload = {
+      company: form.company.trim(),
+      role: form.role.trim(),
+      experience: form.experience.trim() || "N/A",
+      difficulty: form.difficulty,
+      offerReceived: form.offerReceived === "Yes",
+      date: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
+      rounds: form.rounds
+        ? form.rounds.split("\n").filter(Boolean).map((r, i) => ({
+            name: `Round ${i + 1}`,
+            type: "Coding",
+            description: r,
+          }))
+        : [],
+      summary: form.summary.trim(),
+      tips: form.tips
+        ? form.tips.split("\n").filter(Boolean)
+        : [],
+      tags: [form.difficulty, form.role.trim().split(" ")[0]].filter(Boolean),
+      color: `hsl(${(form.company.trim().charCodeAt(0) * 37) % 360}, 55%, 50%)`,
+      clientKey,
+    };
+
+    try {
+      const { data } = await axiosInstance.post(
+        API_PATHS.INTERVIEW_EXPERIENCES.CREATE,
+        payload,
+      );
+      if (!data?.success || !data?.experience) {
+        throw new Error(data?.message || "Submission failed");
+      }
+      onAdd(data.experience);
       setSubmitted(true);
-    }, 600);
+    } catch (err) {
+      setSubmitError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Could not save your experience. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputCls =
@@ -538,7 +592,7 @@ const SubmitModal = ({ onClose, onAdd }) => {
               </div>
               <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">Thank you!</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                Your interview experience has been submitted for review. It'll appear on the board once approved.
+                Your interview experience has been saved and submitted for review. It'll appear on the board once approved.
               </p>
               <button
                 onClick={onClose}
@@ -549,6 +603,15 @@ const SubmitModal = ({ onClose, onAdd }) => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {submitError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-sm text-red-400">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p>{submitError}</p>
+                    <p className="text-xs text-red-300/80 mt-1">Fix any issues and submit again to retry.</p>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Company *</label>
@@ -744,9 +807,36 @@ const InterviewExperiences = () => {
   const [search, setSearch]           = useState("");
   const [activeTab, setActiveTab]     = useState("Common"); // "Common" | "User"
   const [userExperiences, setUserExperiences] = useState([]);
+  const [loadError, setLoadError] = useState("");
+  const [loadingMine, setLoadingMine] = useState(true);
+  const clientKey = useMemo(() => getOrCreateClientKey(), []);
+
+  const loadMyExperiences = useCallback(async () => {
+    setLoadingMine(true);
+    setLoadError("");
+    try {
+      const { data } = await axiosInstance.get(
+        API_PATHS.INTERVIEW_EXPERIENCES.MINE,
+        { params: { clientKey } },
+      );
+      setUserExperiences(data?.experiences || []);
+    } catch (err) {
+      setLoadError(
+        err?.response?.data?.message ||
+          "Could not load your submissions. Refresh to retry.",
+      );
+    } finally {
+      setLoadingMine(false);
+    }
+  }, [clientKey]);
+
+  useEffect(() => {
+    loadMyExperiences();
+  }, [loadMyExperiences]);
 
   const handleAddExperience = (exp) => {
-    setUserExperiences((prev) => [exp, ...prev]);
+    setUserExperiences((prev) => [exp, ...prev.filter((item) => item.id !== exp.id)]);
+    setActiveTab("User");
   };
 
   // Source array based on active tab
@@ -761,7 +851,7 @@ const InterviewExperiences = () => {
         !q ||
         e.company.toLowerCase().includes(q) ||
         e.role.toLowerCase().includes(q) ||
-        e.tags.some((t) => t.toLowerCase().includes(q));
+        (e.tags || []).some((t) => t.toLowerCase().includes(q));
       return matchDiff && matchCompany && matchSearch;
     });
   }, [sourceData, diffFilter, companyFilter, search]);
@@ -909,7 +999,22 @@ const InterviewExperiences = () => {
         </div>
 
         {/* ── Cards Grid ── */}
-        {activeTab === "User" && userExperiences.length === 0 ? (
+        {activeTab === "User" && loadError ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-red-500/20 rounded-2xl bg-red-500/5">
+            <AlertCircle size={24} className="text-red-400 mb-3" />
+            <p className="text-sm text-red-400 mb-4">{loadError}</p>
+            <button
+              onClick={loadMyExperiences}
+              className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold transition-all"
+            >
+              Retry
+            </button>
+          </div>
+        ) : activeTab === "User" && loadingMine ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Loading your submissions...</p>
+          </div>
+        ) : activeTab === "User" && userExperiences.length === 0 ? (
           // Empty state specifically for User tab with no submissions yet
           <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-violet-500/20 rounded-2xl bg-violet-500/5 dark:bg-violet-900/5">
             <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
@@ -953,7 +1058,13 @@ const InterviewExperiences = () => {
 
       {/* ── Modals ── */}
       {selectedExp && <DetailModal exp={selectedExp} onClose={() => setSelectedExp(null)} />}
-      {showSubmit  && <SubmitModal onClose={() => setShowSubmit(false)} onAdd={handleAddExperience} />}
+      {showSubmit  && (
+        <SubmitModal
+          onClose={() => setShowSubmit(false)}
+          onAdd={handleAddExperience}
+          clientKey={clientKey}
+        />
+      )}
     </div>
   );
 };

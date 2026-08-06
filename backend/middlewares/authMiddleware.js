@@ -64,4 +64,34 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { protect, requireAdmin };
+// Attach req.user when a valid token is present; continue anonymously otherwise.
+const optionalProtect = async (req, res, next) => {
+  try {
+    let token = req.headers.authorization;
+
+    if (!token || !token.toLowerCase().startsWith("bearer")) {
+      return next();
+    }
+
+    token = token.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.tokenType && decoded.tokenType !== "access") {
+      return next();
+    }
+
+    const user = await User.findById(decoded.id).select("-password");
+    if (
+      user &&
+      (decoded.tokenVersion ?? 0) === (user.tokenVersion ?? 0)
+    ) {
+      req.user = user;
+    }
+  } catch (error) {
+    // Ignore invalid tokens for optional auth paths.
+  }
+
+  return next();
+};
+
+module.exports = { protect, requireAdmin, optionalProtect };
