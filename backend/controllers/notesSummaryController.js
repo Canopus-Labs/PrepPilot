@@ -6,7 +6,10 @@ const {
   computeReadingTime,
   PdfIntegrityError,
 } = require("../utils/pdfIntegrity");
-const { aiOutputSchema } = require("../Input_validators/ValidateNotesSummary");
+const {
+  aiOutputSchema,
+  saveNotesSummarySchema,
+} = require("../Input_validators/ValidateNotesSummary");
 const { NOTES_MAX_FILE_SIZE } = require("../middlewares/uploadMiddleware");
 const NotesSummary = require("../models/NotesSummary");
 
@@ -246,6 +249,14 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
 const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
+    const validation = saveNotesSummarySchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: validation.error.issues.map((issue) => issue.message),
+      });
+    }
 
     const {
       fileName,
@@ -260,7 +271,7 @@ const saveSummary = async (req, res) => {
       difficulty,
       readingTime,
       learningOutcomes,
-    } = req.body;
+    } = validation.data;
 
     const savedSummary = await NotesSummary.findOneAndUpdate(
       {
