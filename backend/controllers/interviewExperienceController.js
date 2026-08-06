@@ -28,6 +28,20 @@ const toClientShape = (doc) => {
 const createInterviewExperience = async (req, res) => {
   try {
     const payload = { ...req.body, status: "pending" };
+    const idempotencyKey =
+      typeof payload.idempotencyKey === "string"
+        ? payload.idempotencyKey.trim()
+        : "";
+
+    if (!idempotencyKey) {
+      return res.status(400).json({
+        success: false,
+        message: "idempotencyKey is required",
+      });
+    }
+
+    payload.idempotencyKey = idempotencyKey;
+
     if (req.user?._id) {
       payload.userId = req.user._id;
     }
@@ -36,17 +50,13 @@ const createInterviewExperience = async (req, res) => {
       payload.color = `hsl(${(payload.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`;
     }
 
-    if (payload.idempotencyKey) {
-      const existing = await InterviewExperience.findOne({
-        idempotencyKey: payload.idempotencyKey,
+    const existing = await InterviewExperience.findOne({ idempotencyKey });
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Interview experience already submitted",
+        experience: toClientShape(existing),
       });
-      if (existing) {
-        return res.status(200).json({
-          success: true,
-          message: "Interview experience already submitted",
-          experience: toClientShape(existing),
-        });
-      }
     }
 
     const experience = await InterviewExperience.create(payload);
