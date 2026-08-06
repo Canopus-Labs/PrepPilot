@@ -43,11 +43,9 @@ const CustomCursor = () => {
     };
   }, [isVisible, cursorStyle]);
 
-  if (!isVisible) return null;
-
   return (
     <>
-      {/* Selection Dropdown UI Panel */}
+      {/* Selection Dropdown UI Panel (Always mounted so users can select options immediately) */}
       <div className="fixed bottom-6 right-6 z-[9999] font-sans">
         <div className="relative">
           <button
@@ -83,55 +81,67 @@ const CustomCursor = () => {
         </div>
       </div>
 
-      {/* Render Active Cursor Styles (Default returns null to show normal system cursor arrow) */}
-      {cursorStyle === "Glow" && (
-        <div
-          className="fixed pointer-events-none z-[9998] rounded-full transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-cyan-400/30 blur-md transition-all duration-75"
-          style={{ left: `${position.x}px`, top: `${position.y}px` }}
-        />
-      )}
-
-      {cursorStyle === "Trail" && (
+      {/* Render Active Cursor Styles Only When Visible */}
+      {isVisible && (
         <>
-          <div
-            className="fixed pointer-events-none z-[9998] w-3 h-3 bg-violet-500 rounded-full transform -translate-x-1/2 -translate-y-1/2"
-            style={{ left: `${position.x}px`, top: `${position.y}px` }}
-          />
-          {trail.map((pt, index) => (
+          {cursorStyle === "Glow" && (
             <div
-              key={pt.id}
-              className="fixed pointer-events-none z-[9997] w-2 h-2 bg-violet-400/40 rounded-full transform -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${pt.x}px`,
-                top: `${pt.y}px`,
-                opacity: index / trail.length,
-              }}
+              className={`fixed pointer-events-none z-[9998] rounded-full transform -translate-x-1/2 -translate-y-1/2 bg-cyan-400/30 blur-md transition-all duration-75 ${
+                isPointer ? "w-16 h-16 scale-125 bg-cyan-400/50" : "w-12 h-12"
+              }`}
+              style={{ left: `${position.x}px`, top: `${position.y}px` }}
             />
-          ))}
-        </>
-      )}
+          )}
 
-      {cursorStyle === "Sparkle" && (
-        <>
-          <div
-            className="fixed pointer-events-none z-[9998] w-4 h-4 bg-yellow-400 rounded-sm rotate-45 transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_8px_rgba(250,204,21,0.8)]"
-            style={{ left: `${position.x}px`, top: `${position.y}px` }}
-          />
-          {trail.map((pt, index) => (
+          {cursorStyle === "Trail" && (
+            <>
+              <div
+                className={`fixed pointer-events-none z-[9998] bg-violet-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ${
+                  isPointer ? "w-5 h-5 scale-125" : "w-3 h-3"
+                }`}
+                style={{ left: `${position.x}px`, top: `${position.y}px` }}
+              />
+              {trail.map((pt, index) => (
+                <div
+                  key={pt.id}
+                  className="fixed pointer-events-none z-[9997] w-2 h-2 bg-violet-400/40 rounded-full transform -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    left: `${pt.x}px`,
+                    top: `${pt.y}px`,
+                    opacity: index / trail.length,
+                  }}
+                />
+              ))}
+            </>
+          )}
+
+          {cursorStyle === "Sparkle" && (
+            <>
+              <div
+                className={`fixed pointer-events-none z-[9998] bg-yellow-400 rounded-sm rotate-45 transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_8px_rgba(250,204,21,0.8)] transition-all duration-75 ${
+                  isPointer ? "w-6 h-6 scale-125" : "w-4 h-4"
+                }`}
+                style={{ left: `${position.x}px`, top: `${position.y}px` }}
+              />
+              {trail.map((pt, index) => (
+                <div
+                  key={pt.id}
+                  className="fixed pointer-events-none z-[9997] w-1.5 h-1.5 bg-yellow-300/60 rounded-full transform -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${pt.x}px`, top: `${pt.y}px` }}
+                />
+              ))}
+            </>
+          )}
+
+          {cursorStyle === "Orbit" && (
             <div
-              key={pt.id}
-              className="fixed pointer-events-none z-[9997] w-1.5 h-1.5 bg-yellow-300/60 rounded-full transform -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${pt.x}px`, top: `${pt.y}px` }}
+              className={`fixed pointer-events-none z-[9998] transform -translate-x-1/2 -translate-y-1/2 border border-dashed border-pink-500 rounded-full animate-spin transition-all duration-75 ${
+                isPointer ? "w-12 h-12 scale-125 border-2" : "w-8 h-8"
+              }`}
+              style={{ left: `${position.x}px`, top: `${position.y}px`, animationDuration: "3s" }}
             />
-          ))}
+          )}
         </>
-      )}
-
-      {cursorStyle === "Orbit" && (
-        <div
-          className="fixed pointer-events-none z-[9998] transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border border-dashed border-pink-500 rounded-full animate-spin"
-          style={{ left: `${position.x}px`, top: `${position.y}px`, animationDuration: "3s" }}
-        />
       )}
     </>
   );
