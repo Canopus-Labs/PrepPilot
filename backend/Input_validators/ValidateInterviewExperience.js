@@ -24,7 +24,12 @@ const createInterviewExperienceSchema = z.object({
   tags: z.array(z.string().trim().max(40)).max(10).optional().default([]),
   color: z.string().trim().max(40).optional(),
   clientKey: z.string().trim().min(8).max(64).optional().nullable(),
-  idempotencyKey: z.string().trim().min(8).max(64).optional().nullable(),
+  // Required so keyless retries cannot bypass the unique partial index.
+  idempotencyKey: z
+    .string()
+    .trim()
+    .min(8, "idempotencyKey is required")
+    .max(64),
 });
 
 const updateStatusSchema = z.object({

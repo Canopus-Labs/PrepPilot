@@ -45,6 +45,7 @@ describe("createInterviewExperience", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("persists a pending submission and returns the shaped experience", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(null);
     InterviewExperience.create = vi.fn().mockResolvedValue(sampleDoc);
 
     const req = makeReq({
@@ -52,6 +53,7 @@ describe("createInterviewExperience", () => {
       role: "SDE-2",
       summary: "Tough but fair process",
       clientKey: "client-key-123456",
+      idempotencyKey: "submit-key-abc12345",
     });
     const res = makeRes();
 
@@ -62,6 +64,7 @@ describe("createInterviewExperience", () => {
         company: "Google",
         status: "pending",
         clientKey: "client-key-123456",
+        idempotencyKey: "submit-key-abc12345",
       }),
     );
     expect(res.status).toHaveBeenCalledWith(201);
@@ -77,13 +80,38 @@ describe("createInterviewExperience", () => {
     );
   });
 
+  it("rejects missing or blank idempotency keys before creating", async () => {
+    InterviewExperience.create = vi.fn();
+
+    const req = makeReq({
+      company: "Google",
+      role: "SDE-2",
+      summary: "Summary",
+      idempotencyKey: "   ",
+    });
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.create).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "idempotencyKey is required",
+      }),
+    );
+  });
+
   it("returns 500 when persistence fails so the client can retry", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(null);
     InterviewExperience.create = vi.fn().mockRejectedValue(new Error("db down"));
 
     const req = makeReq({
       company: "Google",
       role: "SDE-2",
       summary: "Summary",
+      idempotencyKey: "submit-key-abc12345",
     });
     const res = makeRes();
 
