@@ -32,4 +32,4 @@ jobs:
       run: cd frontend && npm run build
       
     - name: Run Tests (Backend)
-      run: cd backend && npm test || echo "No tests configured yet"
+      run: cd backend && npm test
