@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
+import CustomCursor from "./components/CustomCursor";
 
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
@@ -49,6 +50,7 @@ import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
 import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
+
 import SnippetVault from "./pages/Snippets/SnippetVault";
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
 const ProtectedRoute = ({ children }) => {
@@ -77,6 +79,7 @@ const App = () => {
         <ErrorBoundary>
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
           <Router>
+            <CustomCursor />
             <AnimatePresence mode="wait">
               <Routes>
                 {/* Routes without Sidebar */}

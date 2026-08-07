@@ -255,6 +255,8 @@ const coursesRoutes = require("./routes/coursesRoutes");
 app.use("/api/courses", generalLimiter, coursesRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
+const roadmapRoutes = require("./routes/roadmapRoutes");
+app.use("/api/roadmaps", roadmapRoutes);
 
 
 app.use(
