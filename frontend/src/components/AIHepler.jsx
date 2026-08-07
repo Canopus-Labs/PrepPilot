@@ -23,7 +23,7 @@ export default function AIHelper() {
     setTimeout(scrollToBottom, 50);
   }
 
-  async function callApi(prompt, history, onProgress) {
+  async function callApi(prompt, history) {
     const res = await fetch(
       `${BASE_URL}/api/generate`,
       {
@@ -38,8 +38,8 @@ export default function AIHelper() {
       let friendlyMessage = `Request failed (Status ${res.status})`;
       try {
         const parsed = JSON.parse(txt);
-        if (parsed.message) {
-          friendlyMessage = parsed.message;
+        if (parsed.message || parsed.error) {
+          friendlyMessage = parsed.message || parsed.error;
         }
       } catch (err) {
         // ignore json parse error
@@ -47,24 +47,8 @@ export default function AIHelper() {
       throw new Error(friendlyMessage);
     }
 
-    if (res.body && typeof res.body.getReader === "function") {
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let done = false;
-      let accumulated = "";
-
-      while (!done) {
-        const { value, done: d } = await reader.read();
-        done = d;
-        if (value) {
-          const chunk = decoder.decode(value, { stream: !done });
-          accumulated += chunk;
-          onProgress(chunk, accumulated);
-        }
-      }
-      return accumulated;
-    }
-
+    // generateHandler returns a single JSON body — do not use getReader()
+    // (ReadableStream is always present on fetch responses and is not SSE).
     const data = await res.json();
     return data.text || "No response.";
   }
@@ -86,36 +70,13 @@ export default function AIHelper() {
     setLoading(true);
 
     try {
-      let lastText = "";
-      const onProgress = (chunk, accumulated) => {
-        lastText = accumulated;
-        setMessages((cur) =>
-          cur.map((msg) =>
-            msg.id === placeholderId ? { ...msg, text: lastText } : msg
-          )
-        );
-      };
-
       const historyForBackend = messages.slice(1).map(m => ({
         role: m.role === "assistant" ? "model" : "user",
         text: m.text
       }));
 
-      const full = await callApi(prompt, historyForBackend, onProgress);
-
-      let displayText = lastText || full || "(no response)";
-      if (
-        typeof displayText === "string" &&
-        displayText.startsWith("{") &&
-        displayText.endsWith("}")
-      ) {
-        try {
-          const parsed = JSON.parse(displayText);
-          displayText = parsed.text || displayText;
-        } catch (err) {
-          // ignore json parse error
-        }
-      }
+      const full = await callApi(prompt, historyForBackend);
+      const displayText = full || "(no response)";
 
       setMessages((cur) =>
         cur.map((msg) =>
