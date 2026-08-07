@@ -196,6 +196,13 @@ const toggleTask = async (req, res) => {
       if (status !== undefined) {
         milestone.status = status;
         milestone.completed = status === "done";
+      } else if (
+        completed !== undefined &&
+        !(milestone.subtasks && milestone.subtasks.length > 0)
+      ) {
+        // Subtask-less milestones treat `completed` as the source of truth:
+        // sync `status` so recomputeProgress() doesn't revert the toggle.
+        milestone.status = completed ? "done" : "todo";
       }
       // If a milestone with subtasks is toggled directly, cascade to subtasks
       if (
