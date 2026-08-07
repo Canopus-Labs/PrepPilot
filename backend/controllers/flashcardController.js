@@ -108,7 +108,7 @@ const createFlashcard = async (req, res) => {
 const getUserFlashcards = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { due, category } = req.query;
+    const { due, category, page, limit } = req.query;
 
     const query = { userId };
     if (due === "true") {
@@ -118,12 +118,28 @@ const getUserFlashcards = async (req, res) => {
       query.category = category;
     }
 
-    const flashcards = await Flashcard.find(query).sort({ dueDate: 1 });
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [flashcards, totalItems] = await Promise.all([
+      Flashcard.find(query).sort({ dueDate: 1 }).skip(skip).limit(limitNum).lean(),
+      Flashcard.countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limitNum);
 
     return res.status(200).json({
       success: true,
       count: flashcards.length,
       flashcards,
+      pagination: {
+        totalItems,
+        totalPages,
+        page: pageNum,
+        pageSize: limitNum,
+        hasNextPage: pageNum < totalPages,
+      },
     });
   } catch (error) {
     return res.status(500).json({
