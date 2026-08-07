@@ -100,8 +100,6 @@ function SheetDetail() {
 
   const handleResetProgress = async () => {
     setResetting(true);
-
-    // Prevent a stale debounced auto-save from overwriting the reset
     clearTimeout(saveTimeoutRef.current);
     saveAbortControllerRef.current?.abort();
 
@@ -117,6 +115,10 @@ function SheetDetail() {
       setShowResetModal(false);
     } catch (err) {
       console.error("Failed to reset progress:", err);
+      // Reset failed — the pending/in-flight save we just cancelled would have
+      // persisted the user's current progress. Re-persist it now so it isn't
+      // silently lost on reload.
+      persistProgress(completedTopics, followed);
     } finally {
       setResetting(false);
     }
@@ -168,38 +170,41 @@ function SheetDetail() {
   useEffect(() => {
     if (!followed) return;
 
-    const percentage =
-      totalSubtopics > 0
-        ? Math.round((completedCount / totalSubtopics) * 100)
-        : 0;
-
     saveTimeoutRef.current = setTimeout(() => {
-      localStorage.setItem(
-        `${id}-progress`,
-        JSON.stringify({ followed: true, completedTopics, percentage })
-      );
-      localStorage.setItem("sheet-last-update", Date.now().toString());
-
-      // Abort any still-in-flight save before starting a new one
-      saveAbortControllerRef.current?.abort();
-      const controller = new AbortController();
-      saveAbortControllerRef.current = controller;
-
-      axiosInstance.post(
-        "/api/user/sheet-progress",
-        { sheetId: id, followed: true, completedTopics, percentage },
-        { signal: controller.signal }
-      )
-        .then(() => refreshSheetProgress?.())
-        .catch((err) => {
-          if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
-            console.error("Failed to sync progress to backend:", err);
-          }
-        });
+      persistProgress(completedTopics, true);
     }, 500);
 
     return () => clearTimeout(saveTimeoutRef.current);
-  }, [completedTopics, followed, completedCount, id, refreshSheetProgress, totalSubtopics]);
+  }, [completedTopics, followed, persistProgress]);
+
+  const persistProgress = useCallback((topicsToSave, followedState) => {
+    const percentage =
+      totalSubtopics > 0
+        ? Math.round((Object.values(topicsToSave).filter(Boolean).length / totalSubtopics) * 100)
+        : 0;
+
+    localStorage.setItem(
+      `${id}-progress`,
+      JSON.stringify({ followed: followedState, completedTopics: topicsToSave, percentage })
+    );
+    localStorage.setItem("sheet-last-update", Date.now().toString());
+
+    saveAbortControllerRef.current?.abort();
+    const controller = new AbortController();
+    saveAbortControllerRef.current = controller;
+
+    return axiosInstance.post(
+      "/api/user/sheet-progress",
+      { sheetId: id, followed: followedState, completedTopics: topicsToSave, percentage },
+      { signal: controller.signal }
+    )
+      .then(() => refreshSheetProgress?.())
+      .catch((err) => {
+        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          console.error("Failed to sync progress to backend:", err);
+        }
+      });
+  }, [id, totalSubtopics, refreshSheetProgress]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;
