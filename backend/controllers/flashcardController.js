@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
 
 /**
@@ -145,6 +146,14 @@ const reviewFlashcard = async (req, res) => {
     const { rating } = req.body;
     const userId = req.user._id;
 
+    // Validate ObjectId format before querying database
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid flashcard ID format",
+      });
+    }
+
     if (!rating) {
       return res.status(400).json({
         success: false,
@@ -201,6 +210,14 @@ const deleteFlashcard = async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
 
+    // Validate ObjectId format before querying database
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid flashcard ID format",
+      });
+    }
+
     const flashcard = await Flashcard.findOneAndDelete({ _id: id, userId });
     if (!flashcard) {
       return res.status(404).json({
@@ -242,7 +259,10 @@ const getFlashcardStats = async (req, res) => {
       interval: { $gte: 21 },
     });
 
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    // Fix: Clone 'now' before setting hours to avoid in-place mutation of 'now'
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
     const reviewedToday = await Flashcard.countDocuments({
       userId,
       lastReviewedAt: { $gte: startOfDay },
