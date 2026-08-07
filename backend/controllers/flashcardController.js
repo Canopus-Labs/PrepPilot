@@ -242,7 +242,10 @@ const getFlashcardStats = async (req, res) => {
       interval: { $gte: 21 },
     });
 
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    // Fix: Clone 'now' before setting hours to avoid in-place mutation of 'now'
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
     const reviewedToday = await Flashcard.countDocuments({
       userId,
       lastReviewedAt: { $gte: startOfDay },
