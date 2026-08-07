@@ -10,7 +10,7 @@ const objectId = (label) =>
 
 // Schema for compileResume request
 const compileResumeSchema = z.object({
-  code: z.string().min(1, "LaTeX code is required"),
+  code: z.string().min(1, "LaTeX code is required").max(500000, "LaTeX code must be at most 500KB"),
 });
 
 // Schema for analyzeResume request
@@ -20,8 +20,8 @@ const analyzeResumeSchema = z.object({
 
 // Schema for saveResume request
 const saveResumeSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  latexCode: z.string().min(1, "LaTeX code is required"),
+  title: z.string().min(1, "Title is required").max(200),
+  latexCode: z.string().min(1, "LaTeX code is required").max(500000, "LaTeX code must be at most 500KB"),
   resumeId: z
     .string()
     .optional()
