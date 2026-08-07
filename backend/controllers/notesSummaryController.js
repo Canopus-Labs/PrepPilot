@@ -140,6 +140,27 @@ const summarizeNotes = async (req, res) => {
     const readingTime = computeReadingTime(pdfStats);
     const contentHash = crypto.createHash("sha256").update(buffer).digest("hex");
 
+    const existingSummary = await NotesSummary.findOne({ contentHash });
+    if (existingSummary) {
+      return res.status(200).json({
+        success: true,
+        fileName,
+        fileSize: buffer.length,
+        sourceType,
+        sourceUrl,
+        pageCount: pdfStats.numPages,
+        wordCount: pdfStats.wordCount,
+        contentHash,
+        summary: existingSummary.summary,
+        topics: existingSummary.topics,
+        prerequisites: existingSummary.prerequisites,
+        difficulty: existingSummary.difficulty,
+        readingTime,
+        learningOutcomes: existingSummary.learningOutcomes,
+        generatedAt: new Date().toISOString(),
+      });
+    }
+
     const prompt = `You are an expert academic tutor helping a student decide whether a set of study notes is useful before they read it.
 
 The attached PDF has ${pdfStats.numPages} page(s) and roughly ${pdfStats.wordCount} extractable word(s)${pdfStats.isLikelyScanned ? " (it appears to be mostly scanned/image content, so rely on what you can visually infer)" : ""}.
