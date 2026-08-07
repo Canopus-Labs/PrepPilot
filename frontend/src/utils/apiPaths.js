@@ -33,6 +33,12 @@ export const API_PATHS = {
         PIN: (id) => `/api/question/${id}/pin`, // Pin or Unpin a question (fixed to match backend)
         UPDATE_NOTE: (id) => `/api/question/${id}/note`, // Update/Add a note to a question (fixed to match backend)
     },
+    GOOGLE_CALENDAR: {
+        CONNECT: "/api/google-calendar/connect",
+        CALLBACK: "/api/google-calendar/callback",
+        STATUS: "/api/google-calendar/status",
+        EVENTS: "/api/google-calendar/events",
+    },
     APTITUDE: {
         GENERATE: "/api/questions", // Generate aptitude questions
     },
