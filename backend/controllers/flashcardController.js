@@ -110,20 +110,24 @@ const getUserFlashcards = async (req, res) => {
     const userId = req.user._id;
     const { due, category, page, limit } = req.query;
 
+    // Validate and sanitize query parameters before building the query object
+    const sanitizedDue = due === "true" ? true : false;
+    const sanitizedCategory = (typeof category === "string" && category.length <= 50) ? category : null;
+
     const query = { userId };
-    if (due === "true") {
+    if (sanitizedDue) {
       query.dueDate = { $lte: new Date() };
     }
-    if (category && category !== "All") {
-      query.category = category;
+    if (sanitizedCategory && sanitizedCategory !== "All") {
+      query.category = sanitizedCategory;
     }
 
     const VALID_PAGE_SIZES = [5, 10, 20, 50, 100];
-    const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit, 10);
-    // Use only values from a predefined safe set to satisfy CodeQL taint tracking
-    const safePage = Number.isSafeInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
-    const safeLimit = VALID_PAGE_SIZES.includes(parsedLimit) ? parsedLimit : 20;
+    const rawPage = parseInt(page, 10);
+    const rawLimit = parseInt(limit, 10);
+    // Explicitly sanitize pagination inputs before use in DB operations
+    const safePage = (Number.isSafeInteger(rawPage) && rawPage >= 1) ? rawPage : 1;
+    const safeLimit = VALID_PAGE_SIZES.includes(rawLimit) ? rawLimit : 20;
     const skipVal = (safePage - 1) * safeLimit;
 
     const [flashcards, totalItems] = await Promise.all([
