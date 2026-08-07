@@ -228,8 +228,33 @@ const saveResume = async (req, res) => {
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 }).limit(50);
-        res.status(200).json({ success: true, resumes });
+
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = Math.min(20, Math.max(1, parseInt(req.query.limit, 10) || 10));
+        const skip = (page - 1) * limit;
+
+        const [resumes, totalItems] = await Promise.all([
+            Resume.find({ user: userId })
+                .sort({ updatedAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Resume.countDocuments({ user: userId }),
+        ]);
+
+        const totalPages = Math.ceil(totalItems / limit);
+
+        res.status(200).json({
+            success: true,
+            resumes,
+            pagination: {
+                totalItems,
+                totalPages,
+                page,
+                pageSize: limit,
+                hasNextPage: page < totalPages,
+            },
+        });
     } catch (error) {
         console.error("Get Resumes Error:", error);
         res.status(500).json({ success: false, message: "Server Error" });
