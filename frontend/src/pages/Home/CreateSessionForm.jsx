@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import { UserContext } from "../../context/userContext";
 import { Target, Briefcase, Code2, FileText, Sparkles } from "lucide-react";
 
 const MAX_EXPERIENCE = 50;
@@ -18,6 +19,7 @@ const CreateSessionForm = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user, updateUser } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -80,6 +82,14 @@ if (experienceValue > MAX_EXPERIENCE) {
       });
 
       if (response.data?.session?._id) {
+        if (response.data?.streakSummary) {
+          updateUser({
+            ...(user || {}),
+            interviewStreak: response.data.streakSummary.current,
+            longestInterviewStreak: response.data.streakSummary.longest,
+            interviewStreakBadges: response.data.streakSummary.badges || [],
+          });
+        }
         navigate(`/interview-prep/${response.data?.session?._id}`);
       }
     } catch (error) {

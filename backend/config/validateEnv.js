@@ -10,6 +10,10 @@ const optionalEnvGroups = Object.freeze([
     feature: "Jobs for You",
     keys: ["ADZUNA_APP_ID", "ADZUNA_API_KEY"],
   },
+  {
+    feature: "Google Calendar integration",
+    keys: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REDIRECT_URI"],
+  },
 ]);
 
 const validateEnv = () => {

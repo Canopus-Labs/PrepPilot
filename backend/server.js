@@ -19,6 +19,7 @@ const {
 const { protect } = require("./middlewares/authMiddleware");
 const authRoutes = require("./routes/authRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
+const googleCalendarRoutes = require("./routes/googleCalendarRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
@@ -93,6 +94,7 @@ app.use(cookieParser());
 
 //Routes
 app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
+app.use("/api/google-calendar", sensitiveRouteHeaders, googleCalendarRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
 app.use("/api/question", generalLimiter, questionRoutes);
 app.use("/api", aiRoutes);

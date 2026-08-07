@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -13,9 +13,11 @@ import DeleteAlertContent from "../../components/DeleteAlertContent";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { CARD_BG } from "../../utils/data";
+import { UserContext } from "../../context/userContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useContext(UserContext);
   const [sessions, setSessions] = useState([]);
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
@@ -73,6 +75,50 @@ const Dashboard = () => {
             >
               🔥 Daily Challenge
             </button>
+          </div>
+
+          <div className="mb-8 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/70">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-400">
+                  Interview Streak
+                </p>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  Keep your practice rhythm alive
+                </h2>
+              </div>
+              <div className="rounded-full bg-orange-100 p-3 text-2xl text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">
+                🔥
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-slate-800/70">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Current Streak</p>
+                <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  {user?.interviewStreak ?? 0} days
+                </p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-slate-800/70">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Best Streak</p>
+                <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  {user?.longestInterviewStreak ?? 0} days
+                </p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-slate-800/70">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Earned Badges</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(user?.interviewStreakBadges?.length ? user.interviewStreakBadges : ["No badges yet"]).map((badge) => (
+                    <span
+                      key={badge}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${badge === "No badges yet" ? "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200" : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"}`}
+                    >
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Sessions Grid */}

@@ -1,7 +1,8 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
+const User = require("../models/User");
 const mongoose = require("mongoose");
-
+const { getInterviewStreakUpdate } = require("../utils/interviewStreak");
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;
 const MAX_EXPERIENCE = 50;
@@ -92,9 +93,38 @@ await createdSession[0].save({
   session: mongoSession,
 });
 
+            const user = await User.findById(userId).session(mongoSession);
+            if (!user) {
+                throw new Error("USER_NOT_FOUND");
+            }
+
+            const practiceDate = new Date().toISOString().split("T")[0];
+            const streakUpdate = getInterviewStreakUpdate(
+                {
+                    interviewStreak: Number(user.interviewStreak || 0),
+                    longestInterviewStreak: Number(user.longestInterviewStreak || 0),
+                    interviewStreakBadges: Array.isArray(user.interviewStreakBadges) ? user.interviewStreakBadges : [],
+                    interviewStreakLastPracticeDate: user.interviewStreakLastPracticeDate,
+                },
+                practiceDate
+            );
+
+            if (streakUpdate.changed) {
+                user.interviewStreak = Math.max(0, streakUpdate.streak);
+                user.longestInterviewStreak = Math.max(0, streakUpdate.longestStreak);
+                user.interviewStreakBadges = streakUpdate.badges;
+                user.interviewStreakLastPracticeDate = practiceDate;
+                await user.save({ session: mongoSession });
+            }
+
             res.status(201).json({
                 success: true,
                 session: createdSession[0],
+                streakSummary: {
+                    current: user.interviewStreak,
+                    longest: user.longestInterviewStreak,
+                    badges: user.interviewStreakBadges,
+                },
             });
         });
     } catch (err) {
@@ -102,6 +132,13 @@ await createdSession[0].save({
             return res.status(400).json({
                 success: false,
                 message: `Maximum of ${MAX_SESSIONS} sessions reached.`,
+            });
+        }
+
+        if (err.message === "USER_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
             });
         }
 

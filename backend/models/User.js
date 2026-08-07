@@ -53,6 +53,18 @@ const UserSchema = new mongoose.Schema(
         },
         
         unlockedAchievements: { type: [String], default: [] },
+        interviewStreak: { type: Number, default: 0, min: 0 },
+        longestInterviewStreak: { type: Number, default: 0, min: 0 },
+        interviewStreakBadges: { type: [String], default: [] },
+        interviewStreakLastPracticeDate: { type: String, default: null },
+
+        googleCalendarConnected: { type: Boolean, default: false },
+        googleCalendarEmail: { type: String, default: null },
+        googleCalendarConnectedAt: { type: Date, default: null },
+        googleCalendarAccessToken: { type: String, default: null },
+        googleCalendarRefreshToken: { type: String, default: null },
+        googleCalendarTokenExpiry: { type: Date, default: null },
+        googleCalendarLastSyncedAt: { type: Date, default: null },
 
         //Email Verification
         isEmailVerified: { type: Boolean, default: false },
@@ -90,6 +102,8 @@ UserSchema.set("toJSON", {
     delete ret.emailVerificationToken;
     delete ret.emailVerificationExpires;
     delete ret.tokenVersion;
+    delete ret.googleCalendarAccessToken;
+    delete ret.googleCalendarRefreshToken;
     return ret;
   },
 });

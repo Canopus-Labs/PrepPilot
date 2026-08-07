@@ -23,6 +23,7 @@
     "express-rate-limit": "^8.2.1",
     "file-type": "^18.5.0",
     "form-data": "^4.0.5",
+    "googleapis": "^174.0.1",
     "helmet": "^8.3.0",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.2",
