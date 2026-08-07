@@ -19,6 +19,7 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+const PASSWORD_SALT_ROUNDS = 10;
 
 // Single generic message used by BOTH registration branches so the response
 // body can never reveal whether an email is already registered.
