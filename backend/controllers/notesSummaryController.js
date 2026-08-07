@@ -246,7 +246,9 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     res.status(500).json({ success: false, message: "Failed to summarize notes." });
   } finally {
     if (uploadedFilePath) {
-      fs.promises.unlink(uploadedFilePath).catch(err => console.error("Failed to delete temp notes PDF:", err));
+      await require('fs').promises.unlink(uploadedFilePath).catch(err => {
+        if (err.code !== 'ENOENT') console.error("Failed to delete temp notes PDF:", err);
+      });
     }
   }
 };

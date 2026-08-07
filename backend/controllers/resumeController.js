@@ -171,7 +171,9 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
         res.status(500).json({ message: "Failed to analyze resume" });
     } finally {
         if (uploadedFilePath) {
-            fs.promises.unlink(uploadedFilePath).catch(err => console.error("Failed to delete temp resume PDF:", err));
+            await require('fs').promises.unlink(uploadedFilePath).catch(err => {
+                if (err.code !== 'ENOENT') console.error("Failed to delete temp resume PDF:", err);
+            });
         }
     }
 }

@@ -3,7 +3,6 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
-const { fileTypeFromBuffer, fileTypeFromFile } = require("file-type");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -52,6 +51,7 @@ const IMAGE_EXTENSION_BY_MIME = {
  * @returns {Promise<string|null>} Stored filename, or null if content is not an image.
  */
 const resolveImageFileName = async (file) => {
+  const { fileTypeFromBuffer } = await import("file-type");
   const fileType = await fileTypeFromBuffer(file.buffer);
   const ext = fileType && IMAGE_EXTENSION_BY_MIME[fileType.mime];
   if (!ext) return null;
@@ -122,6 +122,7 @@ const validateResumeMagicBytes = async (req, res, next) => {
   }
 
   try {
+    const { fileTypeFromBuffer, fileTypeFromFile } = await import("file-type");
     let fileType;
     if (req.file.buffer) {
       fileType = await fileTypeFromBuffer(req.file.buffer);
@@ -134,7 +135,12 @@ const validateResumeMagicBytes = async (req, res, next) => {
     ]);
 
     if (!fileType || !allowedMimeTypes.has(fileType.mime)) {
-      if (req.file.path) fs.promises.unlink(req.file.path).catch(() => {});
+      if (req.file.path) {
+        const safePath = path.join(os.tmpdir(), path.basename(req.file.path));
+        fs.promises.unlink(safePath).catch((err) => {
+          if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+        });
+      }
       return res.status(400).json({
         success: false,
         message: 'Invalid file type. Only PDF documents are allowed.'
@@ -143,7 +149,12 @@ const validateResumeMagicBytes = async (req, res, next) => {
 
     next();
   } catch (error) {
-    if (req.file && req.file.path) fs.promises.unlink(req.file.path).catch(() => {});
+    if (req.file && req.file.path) {
+      const safePath = path.join(os.tmpdir(), path.basename(req.file.path));
+      fs.promises.unlink(safePath).catch((err) => {
+        if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+      });
+    }
     console.error('Error validating file type:', error);
     return res.status(500).json({
       success: false,
