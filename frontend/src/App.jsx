@@ -51,6 +51,7 @@ import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChalle
 import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
 
+import SnippetVault from "./pages/Snippets/SnippetVault";
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
@@ -417,6 +418,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <FreeCourses />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/snippet-vault"
+                    element={
+                      <PageTransition>
+                        <SnippetVault />
                       </PageTransition>
                     }
                   />

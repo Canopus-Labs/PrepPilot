@@ -49,8 +49,25 @@ const validateGenerateInterviewTips = (req, res, next) => {
   }
 };
 
+// Schema for AI question similarity detection (issue #1306)
+const detectSimilaritySchema = z.object({
+  questionText: z.string().min(1, "questionText is required"),
+  sessionId: z.string().optional(),
+  limit: z.union([z.string(), z.number()]).optional().transform((v) => (v == null ? 5 : Number(v))),
+});
+
+const validateDetectSimilarity = (req, res, next) => {
+  try {
+    detectSimilaritySchema.parse(req.body);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateGenerateInterviewQuestions,
   validateGenerateConceptExplanation,
   validateGenerateInterviewTips,
+  validateDetectSimilarity,
 };

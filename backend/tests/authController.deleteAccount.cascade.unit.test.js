@@ -1,257 +1,231 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Module } from "node:module";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 
-// ─── Module Mocks ─────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// deleteUserAccount — transactional cascade cleanup (issue #1144).
+//
+// authController.js is CommonJS and loads deps via require(), which vitest's
+// vi.mock cannot intercept. We shim Node's module loader so the real mongoose
+// models / sessions are never touched.
+// ---------------------------------------------------------------------------
 
-vi.mock("../models/User.js", () => ({
-  findById: vi.fn(),
-  findByIdAndDelete: vi.fn(),
-}));
+const mongooseMock = vi.hoisted(() => ({ startSession: vi.fn() }));
+const userMock = vi.hoisted(() => ({ findById: vi.fn(), findByIdAndDelete: vi.fn() }));
+const sessionMock = vi.hoisted(() => ({ find: vi.fn(), deleteMany: vi.fn() }));
+const questionMock = vi.hoisted(() => ({ deleteMany: vi.fn() }));
+const flashcardMock = vi.hoisted(() => ({ deleteMany: vi.fn() }));
+const resumeMock = vi.hoisted(() => ({ deleteMany: vi.fn() }));
+const notesSummaryMock = vi.hoisted(() => ({ deleteMany: vi.fn() }));
+const roadmapProjectMock = vi.hoisted(() => ({ deleteMany: vi.fn() }));
+const userSheetProgressMock = vi.hoisted(() => ({ deleteMany: vi.fn() }));
 
-vi.mock("../models/Session.js", () => ({
-  find: vi.fn(),
-  deleteMany: vi.fn(),
-}));
+const txMock = {
+  withTransaction: vi.fn(),
+  endSession: vi.fn(),
+};
 
-vi.mock("../models/Question.js", () => ({
-  deleteMany: vi.fn(),
-}));
+const testDoubles = new Map();
+const originalLoad = Module._load;
+Module._load = function (request, parent, isMain) {
+  if (testDoubles.has(request)) {
+    return testDoubles.get(request);
+  }
+  return originalLoad.call(this, request, parent, isMain);
+};
 
-vi.mock("../models/Flashcard.js", () => ({
-  deleteMany: vi.fn(),
-}));
+const clearRequireCache = () => {
+  Object.keys(require.cache).forEach((key) => {
+    if (
+      key.includes("controllers\\authController") ||
+      key.includes("controllers/authController") ||
+      key.includes("models\\")
+    ) {
+      delete require.cache[key];
+    }
+  });
+};
 
-vi.mock("../models/Resume.js", () => ({
-  deleteMany: vi.fn(),
-}));
+// Mongoose queries are thenable objects that also expose .session(); this
+// builds the smallest such stub so `.session(tx)` chains work in the handler.
+const chainQuery = (value) => {
+  const q = { session: vi.fn().mockReturnThis() };
+  const p = Promise.resolve(value);
+  q.then = p.then.bind(p);
+  q.catch = p.catch.bind(p);
+  q.finally = p.finally.bind(p);
+  return q;
+};
 
-vi.mock("../models/NotesSummary.js", () => ({
-  deleteMany: vi.fn(),
-}));
-
-vi.mock("../models/RoadmapProject.js", () => ({
-  deleteMany: vi.fn(),
-}));
-
-vi.mock("../models/UserSheetProgress.js", () => ({
-  deleteMany: vi.fn(),
-}));
-
-// ─── Test Variables ───────────────────────────────────────────────────────────
+const rejectedChainQuery = (error) => {
+  const q = { session: vi.fn().mockReturnThis() };
+  const p = Promise.reject(error);
+  q.then = p.then.bind(p);
+  q.catch = p.catch.bind(p);
+  q.finally = p.finally.bind(p);
+  return q;
+};
 
 let deleteUserAccount;
-let User;
-let Session;
-let Question;
-let Flashcard;
-let Resume;
-let NotesSummary;
-let RoadmapProject;
-let UserSheetProgress;
 
-// ─── Setup ───────────────────────────────────────────────────────────────────
+beforeAll(async () => {
+  clearRequireCache();
 
-beforeEach(async () => {
-  vi.resetModules();
-  vi.clearAllMocks();
+  testDoubles.set("mongoose", mongooseMock);
+  testDoubles.set("../models/User", {
+    findById: userMock.findById,
+    findByIdAndDelete: userMock.findByIdAndDelete,
+  });
+  testDoubles.set("../models/Session", {
+    find: sessionMock.find,
+    deleteMany: sessionMock.deleteMany,
+  });
+  testDoubles.set("../models/Question", { deleteMany: questionMock.deleteMany });
+  testDoubles.set("../models/Flashcard", { deleteMany: flashcardMock.deleteMany });
+  testDoubles.set("../models/Resume", { deleteMany: resumeMock.deleteMany });
+  testDoubles.set("../models/NotesSummary", { deleteMany: notesSummaryMock.deleteMany });
+  testDoubles.set("../models/RoadmapProject", { deleteMany: roadmapProjectMock.deleteMany });
+  testDoubles.set("../models/UserSheetProgress", { deleteMany: userSheetProgressMock.deleteMany });
 
-  process.env.JWT_SECRET = "test-secret";
-  process.env.NODE_ENV = "test";
-
-  const ctrl = await import("../controllers/authController.js");
-  deleteUserAccount = ctrl.deleteUserAccount ?? ctrl.default?.deleteUserAccount;
-
-  const UserModule = await import("../models/User.js");
-  User = UserModule.default ?? UserModule;
-
-  const SessionModule = await import("../models/Session.js");
-  Session = SessionModule.default ?? SessionModule;
-
-  const QuestionModule = await import("../models/Question.js");
-  Question = QuestionModule.default ?? QuestionModule;
-
-  const FlashcardModule = await import("../models/Flashcard.js");
-  Flashcard = FlashcardModule.default ?? FlashcardModule;
-
-  const ResumeModule = await import("../models/Resume.js");
-  Resume = ResumeModule.default ?? ResumeModule;
-
-  const NotesSummaryModule = await import("../models/NotesSummary.js");
-  NotesSummary = NotesSummaryModule.default ?? NotesSummaryModule;
-
-  const RoadmapProjectModule = await import("../models/RoadmapProject.js");
-  RoadmapProject = RoadmapProjectModule.default ?? RoadmapProjectModule;
-
-  const UserSheetProgressModule = await import("../models/UserSheetProgress.js");
-  UserSheetProgress = UserSheetProgressModule.default ?? UserSheetProgressModule;
+  const mod = await import("../controllers/authController.js");
+  deleteUserAccount = mod.deleteUserAccount;
 });
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+beforeEach(() => {
+  process.env.NODE_ENV = "test";
+  mongooseMock.startSession.mockReset();
+  userMock.findById.mockReset();
+  userMock.findByIdAndDelete.mockReset();
+  sessionMock.find.mockReset();
+  sessionMock.deleteMany.mockReset();
+  questionMock.deleteMany.mockReset();
+  flashcardMock.deleteMany.mockReset();
+  resumeMock.deleteMany.mockReset();
+  notesSummaryMock.deleteMany.mockReset();
+  roadmapProjectMock.deleteMany.mockReset();
+  userSheetProgressMock.deleteMany.mockReset();
+  txMock.withTransaction.mockReset();
+  txMock.endSession.mockReset();
+});
 
-/** Build a minimal Express-style res mock with chainable .status() */
+afterEach(() => {
+  delete process.env.NODE_ENV;
+});
+
 const makeRes = () => {
-  const res = {
-    status: vi.fn(),
-    json: vi.fn(),
-    clearCookie: vi.fn(),
+  const res = { statusCode: 200, body: null, clearCookie: vi.fn() };
+  res.status = (code) => {
+    res.statusCode = code;
+    return res;
   };
-  res.status.mockReturnValue(res);
+  res.json = (body) => {
+    res.body = body;
+    return res;
+  };
   return res;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// deleteUserAccount
-// ─────────────────────────────────────────────────────────────────────────────
+// Seeds a healthy cascade: sessions found, every collection deletion succeeds.
+const seedSuccessfulCascade = () => {
+  mongooseMock.startSession.mockResolvedValue(txMock);
+  sessionMock.find.mockImplementation(() => chainQuery([{ _id: "session-1" }, { _id: "session-2" }]));
+  questionMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 5 }));
+  sessionMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 2 }));
+  flashcardMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 3 }));
+  resumeMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 2 }));
+  notesSummaryMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 1 }));
+  roadmapProjectMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 4 }));
+  userSheetProgressMock.deleteMany.mockImplementation(() => chainQuery({ deletedCount: 6 }));
+  userMock.findByIdAndDelete.mockImplementation(() => chainQuery({ _id: "user-to-delete-id" }));
+  txMock.withTransaction.mockImplementation((fn) => fn(txMock));
+};
 
-describe("deleteUserAccount", () => {
-  it("returns 404 when user is not found", async () => {
-    User.findById.mockResolvedValueOnce(null);
+describe("deleteUserAccount — transactional cascade (issue #1144)", () => {
+  it("returns 404 before starting a transaction when the user is not found", async () => {
+    userMock.findById.mockResolvedValueOnce(null);
 
-    const req = { user: { _id: "non-existent-user-id" } };
     const res = makeRes();
+    await deleteUserAccount({ user: { _id: "missing" } }, res);
 
-    await deleteUserAccount(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: false,
-        message: "User not found",
-      })
-    );
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ success: false, message: "User not found" });
+    expect(mongooseMock.startSession).not.toHaveBeenCalled();
   });
 
-  it("deletes user and all associated data when account is deleted", async () => {
-    const userId = "user-to-delete-id";
-    const mockUser = {
-      _id: userId,
-      name: "Test User",
-      email: "test@example.com",
-    };
+  it("runs every cascade delete inside the transaction and responds only after commit", async () => {
+    seedSuccessfulCascade();
+    userMock.findById.mockResolvedValueOnce({ _id: "user-to-delete-id" });
 
-    User.findById.mockResolvedValueOnce(mockUser);
-    User.findByIdAndDelete.mockResolvedValueOnce(mockUser);
-
-    // Mock sessions with questions
-    const mockSessions = [
-      { _id: "session-1" },
-      { _id: "session-2" },
-    ];
-    Session.find.mockResolvedValueOnce(mockSessions);
-    Session.deleteMany.mockResolvedValueOnce({ deletedCount: 2 });
-    Question.deleteMany.mockResolvedValueOnce({ deletedCount: 5 });
-
-    // Mock other collections
-    Flashcard.deleteMany.mockResolvedValueOnce({ deletedCount: 3 });
-    Resume.deleteMany.mockResolvedValueOnce({ deletedCount: 2 });
-    NotesSummary.deleteMany.mockResolvedValueOnce({ deletedCount: 1 });
-    RoadmapProject.deleteMany.mockResolvedValueOnce({ deletedCount: 4 });
-    UserSheetProgress.deleteMany.mockResolvedValueOnce({ deletedCount: 6 });
-
-    const req = { user: { _id: userId } };
     const res = makeRes();
+    await deleteUserAccount({ user: { _id: "user-to-delete-id" } }, res);
 
-    await deleteUserAccount(req, res);
+    // Every collection is wiped inside the transaction session.
+    expect(questionMock.deleteMany).toHaveBeenCalledWith({ session: { $in: ["session-1", "session-2"] } });
+    expect(sessionMock.deleteMany).toHaveBeenCalledWith({ user: "user-to-delete-id" });
+    expect(flashcardMock.deleteMany).toHaveBeenCalledWith({ userId: "user-to-delete-id" });
+    expect(resumeMock.deleteMany).toHaveBeenCalledWith({ user: "user-to-delete-id" });
+    expect(notesSummaryMock.deleteMany).toHaveBeenCalledWith({ user: "user-to-delete-id" });
+    expect(roadmapProjectMock.deleteMany).toHaveBeenCalledWith({ userId: "user-to-delete-id" });
+    expect(userSheetProgressMock.deleteMany).toHaveBeenCalledWith({ userId: "user-to-delete-id" });
+    expect(userMock.findByIdAndDelete).toHaveBeenCalledWith("user-to-delete-id");
 
-    // Verify cascade deletions were called
-    expect(Session.find).toHaveBeenCalledWith({ user: userId });
-    expect(Question.deleteMany).toHaveBeenCalledWith({
-      session: { $in: ["session-1", "session-2"] },
-    });
-    expect(Session.deleteMany).toHaveBeenCalledWith({ user: userId });
-    expect(Flashcard.deleteMany).toHaveBeenCalledWith({ userId: userId });
-    expect(Resume.deleteMany).toHaveBeenCalledWith({ user: userId });
-    expect(NotesSummary.deleteMany).toHaveBeenCalledWith({ user: userId });
-    expect(RoadmapProject.deleteMany).toHaveBeenCalledWith({ userId: userId });
-    expect(UserSheetProgress.deleteMany).toHaveBeenCalledWith({ userId: userId });
+    // The delete queries are bound to the transaction session.
+    expect(sessionMock.find).toHaveBeenCalledWith({ user: "user-to-delete-id" });
+    expect(sessionMock.find.mock.results[0].value.session).toHaveBeenCalledWith(txMock);
+    expect(userMock.findByIdAndDelete.mock.results[0].value.session).toHaveBeenCalledWith(txMock);
 
-    // Verify user account deletion
-    expect(User.findByIdAndDelete).toHaveBeenCalledWith(userId);
+    expect(txMock.withTransaction).toHaveBeenCalledTimes(1);
+    expect(txMock.endSession).toHaveBeenCalledTimes(1);
 
-    // Verify cookie clearing
-    expect(res.clearCookie).toHaveBeenCalledWith(
-      "refreshToken",
-      expect.objectContaining({
-        httpOnly: true,
-        path: "/api/auth",
-      })
-    );
-
-    // Verify success response
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: true,
-        message: "Account and all associated data deleted successfully",
-      })
-    );
+    expect(res.clearCookie).toHaveBeenCalledWith("refreshToken", expect.objectContaining({ httpOnly: true, path: "/api/auth" }));
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ success: true, message: "Account and all associated data deleted successfully" });
   });
 
-  it("handles deletion when user has no associated data", async () => {
-    const userId = "user-with-no-data-id";
-    const mockUser = {
-      _id: userId,
-      name: "New User",
-      email: "new@example.com",
-    };
+  it("rolls back and never deletes the account when one collection delete fails", async () => {
+    seedSuccessfulCascade();
+    // Inject a failure into the questions deletion — the whole transaction aborts.
+    questionMock.deleteMany.mockImplementation(() => rejectedChainQuery(new Error("network blip")));
+    userMock.findById.mockResolvedValueOnce({ _id: "user-to-delete-id" });
 
-    User.findById.mockResolvedValueOnce(mockUser);
-    User.findByIdAndDelete.mockResolvedValueOnce(mockUser);
-
-    // User has no sessions
-    Session.find.mockResolvedValueOnce([]);
-    // No other data exists
-    Flashcard.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    Resume.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    NotesSummary.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    RoadmapProject.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    UserSheetProgress.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-
-    const req = { user: { _id: userId } };
     const res = makeRes();
+    await deleteUserAccount({ user: { _id: "user-to-delete-id" } }, res);
 
-    await deleteUserAccount(req, res);
-
-    // Verify user account was still deleted
-    expect(User.findByIdAndDelete).toHaveBeenCalledWith(userId);
-
-    // Verify success response
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: true,
-        message: "Account and all associated data deleted successfully",
-      })
-    );
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ success: false, message: "Internal server error occurred" });
+    // The account must NOT have been deleted (nothing committed).
+    expect(userMock.findByIdAndDelete).not.toHaveBeenCalled();
+    expect(txMock.endSession).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 when database error occurs during deletion", async () => {
-    const userId = "user-id";
-    const mockUser = {
-      _id: userId,
-      name: "Test User",
-      email: "test@example.com",
-    };
-
-    User.findById.mockResolvedValueOnce(mockUser);
-    User.findByIdAndDelete.mockRejectedValueOnce(new Error("Database connection lost"));
-
-    // Mock cascade deletions
-    Session.find.mockResolvedValueOnce([]);
-    Flashcard.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    Resume.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    NotesSummary.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    RoadmapProject.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-    UserSheetProgress.deleteMany.mockResolvedValueOnce({ deletedCount: 0 });
-
-    const req = { user: { _id: userId } };
-    const res = makeRes();
-
-    await deleteUserAccount(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: false,
-        message: "Internal server error occurred",
-      })
+  it("falls back to a compensating cleanup pass when transactions are unsupported", async () => {
+    seedSuccessfulCascade();
+    userMock.findById.mockResolvedValueOnce({ _id: "user-to-delete-id" });
+    // Simulate standalone Mongo rejecting the transaction attempt.
+    txMock.withTransaction.mockRejectedValueOnce(
+      new Error("Transaction numbers are only allowed on a replica set members or mongos")
     );
+
+    const res = makeRes();
+    await deleteUserAccount({ user: { _id: "user-to-delete-id" } }, res);
+
+    // The compensating pass (no session) still completes account deletion.
+    expect(userMock.findByIdAndDelete).toHaveBeenCalledWith("user-to-delete-id");
+    expect(userMock.findByIdAndDelete.mock.results[0].value.session).toHaveBeenCalledWith(null);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(txMock.endSession).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles an account with no associated data (no sessions)", async () => {
+    seedSuccessfulCascade();
+    sessionMock.find.mockImplementation(() => chainQuery([]));
+    userMock.findById.mockResolvedValueOnce({ _id: "bare-user" });
+
+    const res = makeRes();
+    await deleteUserAccount({ user: { _id: "bare-user" } }, res);
+
+    expect(questionMock.deleteMany).not.toHaveBeenCalled();
+    expect(userMock.findByIdAndDelete).toHaveBeenCalledWith("bare-user");
+    expect(res.statusCode).toBe(200);
   });
 });

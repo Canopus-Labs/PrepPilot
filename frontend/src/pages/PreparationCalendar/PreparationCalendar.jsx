@@ -95,11 +95,11 @@ const PreparationCalendar = () => {
 
   const daysInMonth = useMemo(() => {
     return new Date(year, currentDate.getMonth() + 1, 0).getDate();
-  }, [currentDate]);
+  }, [currentDate, year]);
 
   const firstDay = useMemo(() => {
     return new Date(year, currentDate.getMonth(), 1).getDay();
-  }, [currentDate]);
+  }, [currentDate, year]);
 
   const toggleTask = (id) => {
     setStudyTasks((prev) =>

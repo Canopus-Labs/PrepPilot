@@ -28,10 +28,10 @@ beforeEach(async () => {
   changePassword = ctrl.changePassword ?? ctrl.default?.changePassword;
 
   const UserModule = await import("../models/User.js");
-  User = UserModule.default ?? UserModule;
+  User = UserModule;
 
   const bcryptModule = await import("bcryptjs");
-  bcrypt = bcryptModule.default ?? bcryptModule;
+  bcrypt = bcryptModule;
 });
 
 // ---------------------------------------------------------------------------
@@ -41,6 +41,7 @@ function makeRes() {
   const res = {};
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
+  res.clearCookie = vi.fn().mockReturnValue(res);
   return res;
 }
 
@@ -127,7 +128,10 @@ describe("changePassword — compliant newPassword succeeds", () => {
 
     await changePassword(req, res);
 
-    expect(bcrypt.hash).toHaveBeenCalledWith("N3wP@ssword!", "salt");
+    // The raw plaintext new password is assigned to the document so the model's
+    // pre('save') hook hashes it exactly once (#1263) — the controller must not
+    // pre-hash it (that would store bcrypt(bcrypt(password)) and lock the user out).
+    expect(mockUser.password).toBe("N3wP@ssword!");
     expect(mockUser.save).toHaveBeenCalledOnce();
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ success: true, message: "Password updated successfully" })

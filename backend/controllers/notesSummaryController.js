@@ -120,7 +120,7 @@ const summarizeNotes = async (req, res) => {
         buffer = await fetchRemotePdf(sourceUrl);
       } catch (err) {
         if (err instanceof PdfIntegrityError) {
-          return res.status(400).json({ success: false, message: err.message });
+          return res.status(400).json({ success: false, message: "Invalid PDF content" });
         }
         throw err;
       }
@@ -131,7 +131,7 @@ const summarizeNotes = async (req, res) => {
       pdfStats = await inspectPdfBuffer(buffer);
     } catch (err) {
       if (err instanceof PdfIntegrityError) {
-        return res.status(400).json({ success: false, message: err.message });
+        return res.status(400).json({ success: false, message: "Invalid PDF format" });
       }
       throw err;
     }
@@ -218,7 +218,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
   } catch (error) {
     console.error("Notes Summary Error:", error);
     if (error instanceof PdfIntegrityError) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({ success: false, message: "Invalid or corrupted PDF file." });
     }
 
     const geminiStatus = error?.status || error?.code;

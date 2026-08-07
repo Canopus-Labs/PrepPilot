@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Question = require("../models/Question");
 const Session = require("../models/Session");
 
+// Escape regex metacharacters so user search text is treated as a literal
+// substring. Building a RegExp from raw input allowed catastrophic-backtracking
+// patterns (e.g. `(a+)+$`) to stall the shared mongod process (ReDoS).
+const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
  * Get all questions for the authenticated user across their sessions.
  * @route GET /api/questions/my-questions
@@ -54,7 +59,8 @@ const getMyQuestions = async (req, res) => {
     }
 
     if (typeof q === "string" && q.trim().length > 0) {
-      const searchRegex = new RegExp(q.trim(), "i");
+      const term = q.trim().slice(0, 200);
+      const searchRegex = new RegExp(escapeRegex(term), "i");
       filter.$or = [
         { question: searchRegex },
         { answer: searchRegex },
@@ -62,8 +68,16 @@ const getMyQuestions = async (req, res) => {
       ];
     }
 
-    const pageNum = Math.max(1, parseInt(page, 10));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    // Defensive coercion: NaN (non-numeric input) must never reach
+    // .skip()/.limit() and become a 500. Invalid values fall back to safe
+    // defaults (page 1, limit 20) — the route layer rejects them with 400.
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
+    const pageNum =
+      Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
+    const limitNum = Number.isFinite(parsedLimit)
+      ? Math.min(100, Math.max(1, Math.floor(parsedLimit)))
+      : 20;
     const skip = (pageNum - 1) * limitNum;
 
     const [questions, totalItems] = await Promise.all([
