@@ -1,18 +1,41 @@
 import React, { useState } from "react";
-import { Brain, Sparkles, Send, BookOpen } from "lucide-react";
+import { Brain, Sparkles, Send, BookOpen, Loader } from "lucide-react";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
+
+const difficultyColors = {
+  Easy: "bg-green-100 text-green-700",
+  Medium: "bg-yellow-100 text-yellow-700",
+  Hard: "bg-red-100 text-red-700",
+  Expert: "bg-purple-100 text-purple-700",
+};
 
 const DifficultyEstimator = () => {
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const analyzeQuestion = () => {
+  const analyzeQuestion = async () => {
     if (!question.trim()) return;
-    setResult({
-      difficulty: "Hard",
-      confidence: 94,
-      estimatedTime: "35 Minutes",
-      prerequisites: ["Binary Trees", "Depth First Search", "Recursion", "Dynamic Programming"],
-    });
+
+    setLoading(true);
+    setError("");
+    try {
+      const res = await axiosInstance.post(API_PATHS.AI.ESTIMATE_DIFFICULTY, {
+        question: question.trim(),
+      });
+      setResult(res.data);
+    } catch (err) {
+      setResult(null);
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Failed to analyze the question. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,11 +70,22 @@ const DifficultyEstimator = () => {
           />
           <button
             onClick={analyzeQuestion}
-            className="mt-6 flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-xl font-semibold transition"
+            disabled={loading}
+            className="mt-6 flex items-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition"
           >
-            <Send size={18} />
-            Analyze Question
+            {loading ? (
+              <Loader size={18} className="animate-spin" />
+            ) : (
+              <Send size={18} />
+            )}
+            {loading ? "Analyzing..." : "Analyze Question"}
           </button>
+
+          {error && (
+            <div className="mt-6 rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5 text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Results */}
@@ -63,7 +97,7 @@ const DifficultyEstimator = () => {
               <div className="bg-white dark:bg-[#111827] rounded-3xl shadow border border-gray-200 dark:border-white/10 p-8 text-center">
                 <Sparkles size={32} className="mx-auto text-violet-600 mb-5" />
                 <h3 className="text-gray-500 mb-3">Difficulty Level</h3>
-                <span className="inline-flex px-6 py-3 rounded-full bg-red-100 text-red-700 text-xl font-bold">
+                <span className={`inline-flex px-6 py-3 rounded-full text-xl font-bold ${difficultyColors[result.difficulty] || difficultyColors.Hard}`}>
                   {result.difficulty}
                 </span>
               </div>
@@ -84,9 +118,15 @@ const DifficultyEstimator = () => {
               <h2 className="text-2xl font-bold mb-6">AI Analysis</h2>
               <p className="leading-8 text-gray-600 dark:text-gray-300">
                 This interview question has been classified as{" "}
-                <span className="font-bold text-red-600">Hard</span>{" "}
-                because it requires multiple algorithmic concepts, efficient optimization techniques, and strong problem-solving skills.
-                Candidates should have a solid understanding of data structures and algorithm design before attempting this question.
+                <span className="font-bold text-red-600">
+                  {result.difficulty}
+                </span>{" "}
+                with an estimated solving time of{" "}
+                <span className="font-bold">{result.estimatedTime}</span> and
+                an AI confidence of{" "}
+                <span className="font-bold">{result.confidence}%</span>.
+                Candidates should have a solid understanding of the recommended
+                prerequisite topics before attempting this question.
               </p>
             </div>
 
@@ -147,8 +187,10 @@ const DifficultyEstimator = () => {
             <div className="bg-white dark:bg-[#111827] rounded-3xl shadow border border-gray-200 dark:border-white/10 p-8">
               <h2 className="text-2xl font-bold mb-6">AI Recommendation</h2>
               <p className="leading-8 text-gray-600 dark:text-gray-300">
-                Before attempting this question, strengthen your understanding of Trees, DFS, Recursion, and Dynamic Programming.
-                Practice a few Medium-level questions first, then return to this problem to improve your confidence and problem-solving speed.
+                Before attempting this question, strengthen your understanding of{" "}
+                {result.prerequisites.join(", ")}. Practice a few easier
+                questions first, then return to this problem to improve your
+                confidence and problem-solving speed.
               </p>
             </div>
 
@@ -165,7 +207,7 @@ const DifficultyEstimator = () => {
                 <div className="text-center">
                   <div className="text-6xl">🧠</div>
                   <h3 className="mt-4 text-2xl font-bold">AI Ready</h3>
-                  <p className="text-4xl font-black">94%</p>
+                  <p className="text-4xl font-black">{result.confidence}%</p>
                 </div>
               </div>
             </div>

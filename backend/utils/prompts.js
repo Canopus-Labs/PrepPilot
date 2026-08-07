@@ -111,4 +111,26 @@ Important: Do NOT add any extra text outside the JSON format. Only return valid 
 `;
 };
 
-module.exports = { questionAnswerPrompt, conceptExplainPrompt, interviewTipsPrompt, sanitizeRole, ALLOWED_ROLES };
+const difficultyEstimatePrompt = (question) => (`
+You are an expert technical interviewer. Analyze the following interview question and estimate its difficulty.
+
+Question: "${question}"
+
+Return ONLY a valid JSON object with this exact structure and nothing else:
+{
+  "difficulty": "Easy" | "Medium" | "Hard" | "Expert",
+  "confidence": <integer between 0 and 100>,
+  "estimatedTime": "<number> Minutes",
+  "prerequisites": [<array of up to 5 prerequisite topic strings>]
+}
+
+Difficulty guidelines:
+- Easy: Simple logic, O(n) or O(1), basic data structures
+- Medium: Moderate complexity, O(n log n), multiple data structures
+- Hard: Complex algorithms, advanced concepts required
+- Expert: Very complex, optimal solution requires expert-level knowledge
+
+Important: Do NOT add any extra text. Only return valid JSON.
+`);
+
+module.exports = { questionAnswerPrompt, conceptExplainPrompt, interviewTipsPrompt, difficultyEstimatePrompt, sanitizeRole, ALLOWED_ROLES };

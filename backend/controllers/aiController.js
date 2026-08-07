@@ -3,6 +3,7 @@ const {
   conceptExplainPrompt,
   questionAnswerPrompt,
   interviewTipsPrompt,
+  difficultyEstimatePrompt,
 } = require("../utils/prompts");
 const Session = require("../models/Session");
 const Question = require("../models/Question");
@@ -278,4 +279,83 @@ const generateInterviewTips = async (req, res) => {
   }
 };
 
-module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips };
+/**
+ * Estimate the difficulty of an interview question using the Gemini AI service.
+ * @route POST /api/ai/estimate-difficulty
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @throws {Error} When the question is missing or Gemini generation fails.
+ * @example
+ * POST /api/ai/estimate-difficulty
+ * Authorization: Bearer eyJhb...
+ * {
+ *   "question": "Explain how to find the longest palindromic substring in a string."
+ * }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "difficulty": "Hard",
+ *   "confidence": 87,
+ *   "estimatedTime": "45 Minutes",
+ *   "prerequisites": ["Dynamic Programming", "String Manipulation"]
+ * }
+ */
+const estimateDifficulty = async (req, res) => {
+  try {
+    const { question } = req.body;
+
+    const prompt = difficultyEstimatePrompt(question);
+
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
+
+    const rawText = await result.response.text();
+    let cleanedText = rawText
+      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+      .replace(/(\s*```\s*)+$/i, "")
+      .trim();
+
+    try {
+      const data = JSON.parse(cleanedText);
+
+      // Validate Gemini response structure
+      const difficultySchema = z.object({
+        difficulty: z.enum(["Easy", "Medium", "Hard", "Expert"]),
+        confidence: z.number().int().min(0).max(100),
+        estimatedTime: z.string(),
+        prerequisites: z.array(z.string()),
+      });
+      const parsed = difficultySchema.safeParse(data);
+      if (!parsed.success) {
+        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+      }
+
+      res.status(200).json({ model: usedModel, ...parsed.data });
+    } catch (err) {
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      res.status(500).json({
+        message: "Gemini returned invalid JSON",
+      });
+    }
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+
+    if (error.status === 429) {
+      return res.status(429).json({ message: "Gemini API quota exceeded. Please try again later." });
+    }
+    if (error.status === 401 || (error.message && error.message.includes("API key not valid"))) {
+      return res.status(401).json({ message: "Invalid Gemini API Key configured." });
+    }
+    if (error.message && (error.message.includes("timeout") || error.message.includes("network"))) {
+      return res.status(504).json({ message: "Network timeout communicating with AI service." });
+    }
+    res.status(500).json({
+      message: "Failed to estimate difficulty",
+    });
+  }
+};
+
+module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips, estimateDifficulty };
