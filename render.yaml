@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: preppilot-frontend
+    runtime: static
+    branch: main
+    rootDir: frontend
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
