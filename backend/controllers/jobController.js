@@ -15,6 +15,23 @@ const SUPPORTED_COUNTRIES = new Set([
 
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
 
+// Bound the set of cache keys: role/country are client-controlled, so we trim,
+// normalize, and whitelist them before they touch the JobCache collection.
+const normalizeRole = (role) => {
+  if (typeof role !== "string") return "";
+  const trimmed = role.trim().toLowerCase();
+  if (trimmed.length === 0 || trimmed.length > 64) return "";
+  if (!/^[a-z0-9\s+#.,&()/'\-]*$/.test(trimmed)) return "";
+  return trimmed;
+};
+
+const normalizeCountry = (country) => {
+  if (typeof country !== "string") return ADZUNA_COUNTRY;
+  const trimmed = country.trim().toLowerCase();
+  if (!/^[a-z]{2}$/.test(trimmed)) return ADZUNA_COUNTRY;
+  return trimmed;
+};
+
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
   const { data } = await axios.get(url, {

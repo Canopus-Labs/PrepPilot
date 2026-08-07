@@ -17,10 +17,16 @@ const { generateWithFallback } = require('../utils/geminiHelper');
  * @example
  * 200 <PDF binary response>
  */
+const MAX_LATEX_CODE_LENGTH = 100000; // ~100KB — prevents oversized submissions to texlive.net
+
 const compileResume = async (req, res) => {
     try {
         const { code } = req.body;
-      
+
+        if (!code || typeof code !== 'string' || code.length > MAX_LATEX_CODE_LENGTH) {
+            return res.status(400).json({ message: "LaTeX code exceeds the maximum allowed length of 100KB" });
+        }
+
         // Normalize line endings to UNIX format, as texlive.net is highly sensitive to Windows \r\n
         const cleanCode = code.replace(/\r\n/g, '\n');
 
@@ -187,6 +193,10 @@ const saveResume = async (req, res) => {
             return res.status(400).json({ success: false, message: "Title and LaTeX code are required." });
         }
 
+        if (latexCode.length > MAX_LATEX_CODE_LENGTH) {
+            return res.status(400).json({ success: false, message: "LaTeX code exceeds the maximum allowed length of 100KB" });
+        }
+
         let resume;
         if (resumeId) {
             resume = await Resume.findOneAndUpdate(
@@ -228,7 +238,7 @@ const saveResume = async (req, res) => {
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
+        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 }).limit(50);
         res.status(200).json({ success: true, resumes });
     } catch (error) {
         console.error("Get Resumes Error:", error);

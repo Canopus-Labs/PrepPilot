@@ -6,10 +6,12 @@ const {
   computeReadingTime,
   PdfIntegrityError,
 } = require("../utils/pdfIntegrity");
-const { aiOutputSchema } = require("../Input_validators/ValidateNotesSummary");
+const {
+  aiOutputSchema,
+  saveNotesSummarySchema,
+} = require("../Input_validators/ValidateNotesSummary");
 const { NOTES_MAX_FILE_SIZE } = require("../middlewares/uploadMiddleware");
 const NotesSummary = require("../models/NotesSummary");
-const Joi = require("joi");
 
 const ALLOWED_REMOTE_HOSTS = new Set(["raw.githubusercontent.com"]);
 const MAX_SAVED_SUMMARIES_PER_USER = 30;
@@ -240,32 +242,6 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
 };
 
 
-const saveSummarySchema = Joi.object({
-  fileName: Joi.string().trim().max(255).required(),
-
-  sourceType: Joi.string().trim().required(),
-
-  sourceUrl: Joi.string().uri().allow("", null),
-
-  pageCount: Joi.number().integer().min(0).required(),
-
-  wordCount: Joi.number().integer().min(0).required(),
-
-  contentHash: Joi.string().required(),
-
-  summary: Joi.string().required(),
-
-  topics: Joi.array().items(Joi.string()).required(),
-
-  prerequisites: Joi.array().items(Joi.string()).required(),
-
-  difficulty: Joi.string().required(),
-
-  readingTime: Joi.number().min(0).required(),
-
-  learningOutcomes: Joi.array().items(Joi.string()).required(),
-});
-
 /**
  * @route POST /api/notes-summary/save
  * @access Private
@@ -273,16 +249,12 @@ const saveSummarySchema = Joi.object({
 const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
+    const validation = saveNotesSummarySchema.safeParse(req.body);
 
-    const { error, value } = saveSummarySchema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        message: error.details.map((d) => d.message),
+        message: validation.error.issues.map((issue) => issue.message),
       });
     }
 
@@ -299,7 +271,7 @@ const saveSummary = async (req, res) => {
       difficulty,
       readingTime,
       learningOutcomes,
-    } = value;
+    } = validation.data;
 
     const savedSummary = await NotesSummary.findOneAndUpdate(
       {
@@ -363,7 +335,7 @@ const getMySummaries = async (req, res) => {
   try {
     const summaries = await NotesSummary.find({ user: req.user._id }).sort({
       updatedAt: -1,
-    });
+    }).limit(50);
     res.status(200).json({
       success: true,
       summaries: summaries.map((s) => s.toSafeObject()),

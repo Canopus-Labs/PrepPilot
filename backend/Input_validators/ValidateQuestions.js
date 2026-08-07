@@ -8,7 +8,7 @@ const addQuestionToSessionSchema = z.object({
       question: z.string().min(1, "Question text is required"),
       answer: z.string().min(1, "Answer text is required"),
     })
-  ).min(1, "At least one question is required"),
+  ).min(1, "At least one question is required").max(50, "Maximum 50 questions allowed"),
 });
 
 // Schema for toggling pin (params only)
@@ -18,7 +18,7 @@ const togglePinQuestionSchema = z.object({
 
 // Schema for updating note
 const updateQuestionNoteSchema = z.object({
-  note: z.string(),
+  note: z.string().max(2000, "Note cannot exceed 2000 characters"),
 });
 
 

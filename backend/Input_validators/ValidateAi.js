@@ -6,7 +6,7 @@ const generateInterviewQuestionsSchema = z.object({
   role: z.string().min(1, "Role is required"),
   experience: z.string().min(1, "Experience is required"),
   topicsToFocus: z.array(z.string()).min(1, "At least one topic is required"),
-  numberOfQuestions: z.number().int().positive("Number of questions must be positive"),
+  numberOfQuestions: z.number().int().positive("Number of questions must be positive").max(50, "Number of questions cannot exceed 50"),
 });
 
 // Schema for concept explanation request

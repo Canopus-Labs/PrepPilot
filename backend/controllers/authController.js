@@ -5,6 +5,15 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
+// Models for cascade deletion on account delete
+const Session = require("../models/Session");
+const Question = require("../models/Question");
+const Flashcard = require("../models/Flashcard");
+const Resume = require("../models/Resume");
+const NotesSummary = require("../models/NotesSummary");
+const RoadmapProject = require("../models/RoadmapProject");
+const UserSheetProgress = require("../models/UserSheetProgress");
+
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -88,7 +97,13 @@ const registerUser = async (req, res) => {
 
         const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) {
-            return res.status(400).json({ success: false, message: "A user with this email already exists." });
+            // Do not reveal whether the email is already registered. Respond
+            // with the same generic success shape (no tokens, no user data)
+            // so the endpoint cannot be used for account enumeration.
+            return res.status(201).json({
+                success: true,
+                message: "If this email is not already registered, your account has been created.",
+            });
         }
 
         // Hash raw password with bcrypt before DB creation (#757)
@@ -537,7 +552,8 @@ const changePassword = async (req, res) => {
 };
 
 /**
- * Permanently delete user account.
+ * Permanently delete user account and all associated data.
+ * Implements cascade deletion to clean up orphaned documents.
  * @route DELETE /api/auth/delete-account
  */
 const deleteUserAccount = async (req, res) => {
@@ -548,8 +564,59 @@ const deleteUserAccount = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
+        // Cascade delete: remove all user-related data
+        const deletePromises = [];
+
+        // Delete user's sessions and their associated questions
+        const sessions = await Session.find({ user: userId });
+        const sessionIds = sessions.map(s => s._id);
+        if (sessionIds.length > 0) {
+            deletePromises.push(
+                Question.deleteMany({ session: { $in: sessionIds } })
+            );
+        }
+        deletePromises.push(Session.deleteMany({ user: userId }));
+
+        // Delete user's flashcards
+        deletePromises.push(
+            Flashcard.deleteMany({ userId: userId })
+        );
+
+        // Delete user's resumes
+        deletePromises.push(
+            Resume.deleteMany({ user: userId })
+        );
+
+        // Delete user's notes summaries
+        deletePromises.push(
+            NotesSummary.deleteMany({ user: userId })
+        );
+
+        // Delete user's roadmap projects
+        deletePromises.push(
+            RoadmapProject.deleteMany({ userId: userId })
+        );
+
+        // Delete user's sheet progress
+        deletePromises.push(
+            UserSheetProgress.deleteMany({ userId: userId })
+        );
+
+        // Wait for all deletions to complete
+        await Promise.all(deletePromises);
+
+        // Finally, delete the user account
         await User.findByIdAndDelete(userId);
-        res.json({ success: true, message: "Account deleted successfully" });
+        
+        // Clear auth cookies
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            path: "/api/auth"
+        });
+
+        res.json({ success: true, message: "Account and all associated data deleted successfully" });
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
