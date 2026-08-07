@@ -54,6 +54,11 @@ const UserSchema = new mongoose.Schema(
         
         unlockedAchievements: { type: [String], default: [] },
 
+        // Streak Tracking
+        currentStreak: { type: Number, default: 0 },
+        longestStreak: { type: Number, default: 0 },
+        lastPracticeDate: { type: Date, default: null },
+
         //Email Verification
         isEmailVerified: { type: Boolean, default: false },
         emailVerificationToken: { type: String, default: null },
