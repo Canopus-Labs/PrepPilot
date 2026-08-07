@@ -1,5 +1,12 @@
 const { z } = require("zod");
+const mongoose = require("mongoose");
 const { handleValidationError } = require('./ValidateQuestions')
+
+const objectId = (label) =>
+  z
+    .string()
+    .min(1, `${label} is required`)
+    .refine((v) => mongoose.isValidObjectId(v), "Invalid ObjectId format");
 
 // Schema for compileResume request
 const compileResumeSchema = z.object({
@@ -15,7 +22,15 @@ const analyzeResumeSchema = z.object({
 const saveResumeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   latexCode: z.string().min(1, "LaTeX code is required"),
-  resumeId: z.string().optional(),
+  resumeId: z
+    .string()
+    .optional()
+    .refine((v) => !v || mongoose.isValidObjectId(v), "Invalid ObjectId format"),
+});
+
+// Schema for deleteResume request (params)
+const deleteResumeSchema = z.object({
+  id: objectId("Resume ID"),
 });
 
 
@@ -53,8 +68,19 @@ const validateSaveResume = (req, res, next) => {
   }
 };
 
+// Middleware for deleteResume (params)
+const validateDeleteResume = (req, res, next) => {
+  try {
+    deleteResumeSchema.parse(req.params);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateCompileResume,
   validateAnalyzeResume,
   validateSaveResume,
+  validateDeleteResume,
 };

@@ -1,5 +1,12 @@
 const { z } = require("zod");
+const mongoose = require("mongoose");
 const { handleValidationError } = require("./ValidateQuestions");
+
+const objectId = (label) =>
+  z
+    .string()
+    .min(1, `${label} is required`)
+    .refine((v) => mongoose.isValidObjectId(v), "Invalid ObjectId format");
 
 // Schema for creating a session
 const createSessionSchema = z.object({
@@ -17,12 +24,12 @@ const createSessionSchema = z.object({
 
 // Schema for getting a session by ID (params)
 const getSessionByIdSchema = z.object({
-  id: z.string().min(1, "Session ID is required"),
+  id: objectId("Session ID"),
 });
 
 // Schema for deleting a session (params)
 const deleteSessionSchema = z.object({
-  id: z.string().min(1, "Session ID is required"),
+  id: objectId("Session ID"),
 });
 
 
