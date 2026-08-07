@@ -30,6 +30,7 @@
     "multer": "^2.0.2",
     "node-cache": "^5.1.2",
     "nodemailer": "^9.0.4",
+    "nodemailer": "^9.0.1",
     "pdf-parse": "^2.4.5",
     "resend": "^6.12.4",
     "zod": "^4.4.3"

@@ -1,8 +1,9 @@
 const User = require("../models/User");
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { sendVerificationEmail } = require("../utils/sendEmail");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
 // Models for cascade deletion on account delete
@@ -19,6 +20,7 @@ const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
 const PASSWORD_SALT_ROUNDS = 10;
+
 // Single generic message used by BOTH registration branches so the response
 // body can never reveal whether an email is already registered.
 const REGISTRATION_GENERIC_MESSAGE = "If this email is not already registered, your account has been created.";
@@ -109,6 +111,7 @@ const registerUser = async (req, res) => {
         }
 
         // Hash raw password with bcrypt before DB creation (#757)
+        // Hash raw user password before saving to database
         const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
 
         // Split name into first and last names for defaults
@@ -123,6 +126,9 @@ const registerUser = async (req, res) => {
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
+            password: password,
+            name,
+            email,
             password: hashedPassword,
             profileImageUrl,
             firstName,
@@ -151,6 +157,12 @@ const registerUser = async (req, res) => {
         // be used to enumerate accounts. Tokens are issued at login/refresh.
         return res.status(201).json({
             success: true,
+            message: "Account created successfully. You can now log in.",
+            accessToken,
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            profileImageUrl: user.profileImageUrl,
             message: REGISTRATION_GENERIC_MESSAGE,
         });
     } catch (error) {
@@ -365,25 +377,21 @@ const resendVerificationEmail = async (req, res) => {
 
         const user = await User.findOne({ email: email.trim().toLowerCase() });
 
-        // Return success even if user not found — avoids exposing which emails are registered
-        if (!user) {
-            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
+        // Always respond with the same generic success shape regardless of
+        // whether the email exists or is already verified, so the endpoint
+        // cannot be used to enumerate registered addresses. The email is sent
+        // only when a matching unverified user actually exists.
+        if (user && !user.isEmailVerified) {
+            // Generate a fresh token and reset expiry to 24 hours from now
+            user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+            user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await user.save();
+
+            const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+            await sendVerificationEmail(user.email, verificationUrl);
         }
 
-        // If already verified, no need to resend
-        if (user.isEmailVerified) {
-            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
-        }
-
-        // Generate a fresh token and reset expiry to 24 hours from now
-        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
-        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await user.save();
-
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
-        await sendVerificationEmail(user.email, verificationUrl);
-
-        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+        res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
@@ -532,12 +540,17 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password before saving (#757)
-        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+        // Assign the new password — the User schema's pre('save') hook hashes
+        // it exactly once, so bcrypt.compare(newPassword, storedHash) succeeds.
+        user.password = newPassword;
 
         // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
         user.refreshTokenHash = null;
         user.refreshTokenExpiresAt = null;
+        // Hash new password before assignment
+        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+
+        // Invalidate access tokens issued before the password change.
         user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
@@ -551,23 +564,116 @@ const changePassword = async (req, res) => {
 };
 
 /**
+ * Send a password reset link to a user who forgot their password.
+ * @route POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email || typeof email !== "string" || !email.trim()) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+        // Return the same generic response whether or not the account exists —
+        // prevents account enumeration via this endpoint.
+        if (!user) {
+            return res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+        }
+
+        // Generate a short-lived single-use reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.passwordResetToken = resetToken;
+        user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        await sendPasswordResetEmail(user.email, resetUrl);
+
+        res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+/**
+ * Reset a forgotten password using the token emailed to the user.
+ * @route POST /api/auth/reset-password
+ */
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({ success: false, message: "Token and new password are required." });
+        }
+
+        const { valid, errors } = validatePassword(newPassword);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: errors[0] });
+        }
+
+        // The reset token is a server-generated 64-character hex string. Reject
+        // anything else before it reaches the database so a malicious payload
+        // (e.g. a Mongo operator object such as { $ne: ... }) can never be used
+        // to build an injection query.
+        if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) {
+            return res.status(400).json({
+                success: false,
+                message: "This reset link is invalid or has expired. Please request a new one.",
+            });
+        }
+
+        const user = await User.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: new Date() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "This reset link is invalid or has expired. Please request a new one.",
+            });
+        }
+
+        // Assign the raw password; the User pre('save') hook hashes it exactly once.
+        user.password = newPassword;
+        user.passwordResetToken = null;
+        user.passwordResetExpires = null;
+        // Revoke all existing sessions so old tokens can no longer be used.
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
+        user.tokenVersion = (user.tokenVersion || 0) + 1;
+        await user.save();
+
+        res.clearCookie("refreshToken", { path: "/api/auth" });
+        res.json({ success: true, message: "Password reset successfully. You can now log in." });
+    } catch (error) {
+        console.error("Reset password error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+/**
  * Permanently delete user account and all associated data.
  * Implements cascade deletion to clean up orphaned documents.
  * @route DELETE /api/auth/delete-account
  */
 const deleteUserAccount = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-        // Cascade delete: remove all user-related data
-        const deletePromises = [];
-
-        // Delete user's sessions and their associated questions
-        const sessions = await Session.find({ user: userId });
+    // Cascade delete runs inside a single Mongo transaction so that a failure
+    // rolls back every collection: no partial deletions, no orphaned data, and
+    // the account is removed only when the whole cascade commits.
+    const runCascade = async (session) => {
+        const sessions = await Session.find({ user: userId }).session(session);
         const sessionIds = sessions.map(s => s._id);
         if (sessionIds.length > 0) {
             deletePromises.push(
@@ -599,14 +705,41 @@ const deleteUserAccount = async (req, res) => {
         // Delete user's sheet progress
         deletePromises.push(
             UserSheetProgress.deleteMany({ userId: userId })
+            await Question.deleteMany({ session: { $in: sessionIds } }).session(session);
+        }
+        await Session.deleteMany({ user: userId }).session(session);
+        await Flashcard.deleteMany({ userId: userId }).session(session);
+        await Resume.deleteMany({ user: userId }).session(session);
+        await NotesSummary.deleteMany({ user: userId }).session(session);
+        await RoadmapProject.deleteMany({ userId: userId }).session(session);
+        await UserSheetProgress.deleteMany({ userId: userId }).session(session);
+        await User.findByIdAndDelete(userId).session(session);
+    };
+
+    // Standalone (non-replica-set) MongoDB rejects transaction usage with an
+    // IllegalOperation error; there we fall back to a compensating cleanup pass
+    // so account deletion still completes rather than silently failing.
+    const isTransactionUnsupportedError = (error) => {
+        const message = String((error && error.message) || "");
+        return Boolean(
+            error && (error.codeName === "IllegalOperation" || error.code === 20) ||
+            message.includes("Transaction numbers are only allowed on a replica set") ||
+            message.includes("Transactions are not supported")
         );
+    };
 
-        // Wait for all deletions to complete
-        await Promise.all(deletePromises);
+    const tx = await mongoose.startSession();
+    try {
+        try {
+            await tx.withTransaction(() => runCascade(tx));
+        } catch (error) {
+            if (!isTransactionUnsupportedError(error)) {
+                throw error;
+            }
+            console.warn("Mongo transactions unavailable; running compensating cleanup for delete account");
+            await runCascade(null);
+        }
 
-        // Finally, delete the user account
-        await User.findByIdAndDelete(userId);
-        
         // Clear auth cookies
         res.clearCookie("refreshToken", {
             httpOnly: true,
@@ -619,6 +752,10 @@ const deleteUserAccount = async (req, res) => {
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
+    } finally {
+        if (tx && typeof tx.endSession === "function") {
+            await tx.endSession();
+        }
     }
 };
 
@@ -629,6 +766,8 @@ module.exports = {
     logoutUser,
     verifyEmail,
     resendVerificationEmail,
+    forgotPassword,
+    resetPassword,
     getUserProfile,
     updateUserProfile,
     changePassword,
