@@ -2,6 +2,7 @@ require("dotenv").config();
 const validateEnv = require("./config/validateEnv.js");
 validateEnv();
 const express = require("express");
+const helmet = require("helmet");
 
 // Global unhandled promise rejection handler
 process.on("unhandledRejection", (err) => {
@@ -30,6 +31,13 @@ const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
 const app = express();
 
 app.set("trust proxy", 1);
+// Helmet for API hardening; CSP stays in generalHeaders / SPA layer.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(generalHeaders);
 const isDev = process.env.NODE_ENV !== "production";
 const originEnvList = [
@@ -88,7 +96,7 @@ connectDB()
   });
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
 //Routes
