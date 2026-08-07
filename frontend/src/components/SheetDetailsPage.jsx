@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import gfg from "../assets/gfg.svg";
 import leetcode from "../assets/leetcode.svg";
 import youtube from "../assets/youtube.svg";
-import React, { useState, useEffect, useCallback, memo, useContext } from "react";
+import React, { useState, useEffect, useCallback, useRef, memo, useContext } from "react";
 import Modal from "./Loader/Modal";
 
 import { BASE_URL } from "../utils/apiPaths";
@@ -95,9 +95,16 @@ function SheetDetail() {
   const [followed, setFollowed] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const saveTimeoutRef = useRef(null);
+  const saveAbortControllerRef = useRef(null);
 
   const handleResetProgress = async () => {
     setResetting(true);
+
+    // Prevent a stale debounced auto-save from overwriting the reset
+    clearTimeout(saveTimeoutRef.current);
+    saveAbortControllerRef.current?.abort();
+
     try {
       await axiosInstance.delete(`/api/user/sheet-progress/${id}`);
       setCompletedTopics({});
@@ -166,21 +173,32 @@ function SheetDetail() {
         ? Math.round((completedCount / totalSubtopics) * 100)
         : 0;
 
-    const saveToStorage = setTimeout(() => {
+    saveTimeoutRef.current = setTimeout(() => {
       localStorage.setItem(
         `${id}-progress`,
         JSON.stringify({ followed: true, completedTopics, percentage })
       );
       localStorage.setItem("sheet-last-update", Date.now().toString());
 
-      axiosInstance.post("/api/user/sheet-progress", {
-        sheetId: id,
-        followed: true,
-        completedTopics,
-        percentage,
-      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
+      // Abort any still-in-flight save before starting a new one
+      saveAbortControllerRef.current?.abort();
+      const controller = new AbortController();
+      saveAbortControllerRef.current = controller;
 
-    return () => clearTimeout(saveToStorage);
+      axiosInstance.post(
+        "/api/user/sheet-progress",
+        { sheetId: id, followed: true, completedTopics, percentage },
+        { signal: controller.signal }
+      )
+        .then(() => refreshSheetProgress?.())
+        .catch((err) => {
+          if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+            console.error("Failed to sync progress to backend:", err);
+          }
+        });
+    }, 500);
+
+    return () => clearTimeout(saveTimeoutRef.current);
   }, [completedTopics, followed, completedCount, id, refreshSheetProgress, totalSubtopics]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
