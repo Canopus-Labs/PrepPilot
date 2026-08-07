@@ -2,10 +2,13 @@ const { z } = require('zod');
 const { handleValidationError } = require('./ValidateQuestions');
 
 const savedAchievementsSchema = z.object({
-  unlockedAchievements: z.array(z.string(), {
-    required_error: "unlockedAchievements must be an array",
-    invalid_type_error: "unlockedAchievements must be an array of strings",
-  }),
+  unlockedAchievements: z.array(
+    z.string().max(100, "Each achievement must be at most 100 characters"),
+    {
+      required_error: "unlockedAchievements must be an array",
+      invalid_type_error: "unlockedAchievements must be an array of strings",
+    }
+  ),
 });
 
 const validateSavedAchievements = (req, res, next) => {
