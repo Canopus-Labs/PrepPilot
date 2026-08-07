@@ -12,7 +12,7 @@ const createSessionSchema = z.object({
       question: z.string().min(1, "Question text is required"),
       answer: z.string().min(1, "Answer text is required"),
     })
-  ).optional(),
+  ).max(50, "Maximum 50 questions allowed").optional(),
 });
 
 // Schema for getting a session by ID (params)
