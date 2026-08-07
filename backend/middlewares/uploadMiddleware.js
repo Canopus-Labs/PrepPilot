@@ -1,7 +1,7 @@
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const { fileTypeFromBuffer } = require("file-type");
+const { fileTypeFromBuffer, fileTypeFromFile } = require("file-type");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -120,7 +120,12 @@ const validateResumeMagicBytes = async (req, res, next) => {
   }
 
   try {
-    const fileType = await fileTypeFromBuffer(req.file.buffer);
+    let fileType;
+    if (req.file.buffer) {
+      fileType = await fileTypeFromBuffer(req.file.buffer);
+    } else if (req.file.path) {
+      fileType = await fileTypeFromFile(req.file.path);
+    }
 
     const allowedMimeTypes = new Set([
       'application/pdf',
@@ -153,9 +158,12 @@ const upload = multer({
   limits: { fileSize: MAX_FILE_SIZE },
 });
 
-// Upload instance for resumes (memory storage)
+// Upload instance for resumes (disk storage)
 const uploadResume = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, "uploads/"),
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${sanitizeBase(file.originalname)}.pdf`)
+  }),
   fileFilter: resumeFileFilter,
   limits: { fileSize: MAX_FILE_SIZE },
 });
@@ -164,7 +172,10 @@ const uploadResume = multer({
 const NOTES_MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const uploadNotes = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, "uploads/"),
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${sanitizeBase(file.originalname)}.pdf`)
+  }),
   fileFilter: resumeFileFilter, // PDF-only, same filter as resumes
   limits: { fileSize: NOTES_MAX_FILE_SIZE },
 });

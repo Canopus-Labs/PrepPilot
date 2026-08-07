@@ -1,5 +1,6 @@
 const axios = require("axios");
 const crypto = require("crypto");
+const fs = require("fs");
 const { generateWithFallback } = require("../utils/geminiHelper");
 const {
   inspectPdfBuffer,
@@ -103,6 +104,7 @@ function parseAiJson(raw) {
  * @example
  */
 const summarizeNotes = async (req, res) => {
+  let uploadedFilePath = null;
   try {
     let buffer;
     let fileName;
@@ -110,7 +112,8 @@ const summarizeNotes = async (req, res) => {
     let sourceUrl = null;
 
     if (req.file) {
-      buffer = req.file.buffer;
+      uploadedFilePath = req.file.path;
+      buffer = await fs.promises.readFile(uploadedFilePath);
       fileName = req.file.originalname;
       sourceType = "upload";
     } else {
@@ -238,6 +241,10 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     }
 
     res.status(500).json({ success: false, message: "Failed to summarize notes." });
+  } finally {
+    if (uploadedFilePath) {
+      fs.promises.unlink(uploadedFilePath).catch(err => console.error("Failed to delete temp notes PDF:", err));
+    }
   }
 };
 

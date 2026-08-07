@@ -1,5 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const fs = require('fs');
 const { generateWithFallback } = require('../utils/geminiHelper');
 
 /**
@@ -100,10 +101,14 @@ const compileResume = async (req, res) => {
  * }
  */
 const analyzeResume = async (req, res) => {
+    let uploadedFilePath = null;
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No resume file uploaded" });
         }
+
+        uploadedFilePath = req.file.path;
+        const fileBuffer = await fs.promises.readFile(uploadedFilePath);
 
         const targetRole = req.body.targetRole || "General Professional";
 
@@ -133,7 +138,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
                 prompt,
                 {
                     inlineData: {
-                        data: req.file.buffer.toString("base64"),
+                        data: fileBuffer.toString("base64"),
                         mimeType: "application/pdf"
                     }
                 }
@@ -161,6 +166,10 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
     } catch (error) {
         console.error("Resume Analysis Error:", error);
         res.status(500).json({ message: "Failed to analyze resume" });
+    } finally {
+        if (uploadedFilePath) {
+            fs.promises.unlink(uploadedFilePath).catch(err => console.error("Failed to delete temp resume PDF:", err));
+        }
     }
 }
 
