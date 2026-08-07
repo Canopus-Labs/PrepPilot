@@ -77,4 +77,5 @@ module.exports = {
   validateSummarizeNotes,
   validateSaveNotesSummary,
   aiOutputSchema,
+  saveNotesSummarySchema,
 };
