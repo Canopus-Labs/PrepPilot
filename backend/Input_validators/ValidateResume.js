@@ -45,7 +45,7 @@ const validateCompileResume = (req, res, next) => {
 };
 
 // Middleware for analyzeResume
-const validateAnalyzeResume = (req, res, next) => {
+const validateAnalyzeResume = async (req, res, next) => {
   try {
     analyzeResumeSchema.parse(req.body);
     // also ensure file is uploaded
@@ -56,7 +56,7 @@ const validateAnalyzeResume = (req, res, next) => {
   } catch (error) {
     if (req.file && req.file.path) {
       const safePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
-      require('fs').promises.unlink(safePath).catch((err) => {
+      await require('fs').promises.unlink(safePath).catch((err) => {
         if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
       });
     }
