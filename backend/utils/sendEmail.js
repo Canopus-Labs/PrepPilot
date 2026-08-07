@@ -81,4 +81,32 @@ const sendVerificationEmail = async (toEmail, verificationUrl) => {
     });
 };
 
-module.exports = { sendVerificationEmail };
+/**
+ * Send a password reset link to a user who forgot their password.
+ * @param {string} toEmail - Recipient email address.
+ * @param {string} resetUrl - Full URL with token to reset the password.
+ */
+const sendPasswordResetEmail = async (toEmail, resetUrl) => {
+    await transporter.sendMail({
+        from: `"PrepPilot" <${process.env.EMAIL_USER}>`,
+        to: toEmail,
+        subject: "Reset your PrepPilot password",
+        html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#0f0f13;border-radius:16px;border:1px solid rgba(255,255,255,0.08)">
+                <div style="margin-bottom:24px">
+                    <h2 style="color:#ffffff;font-size:20px;margin:0 0 8px">Reset your password</h2>
+                    <p style="color:#9ca3af;font-size:14px;margin:0">Click the button below to choose a new password for your PrepPilot account.</p>
+                </div>
+                <a href="${resetUrl}"
+                   style="display:inline-block;padding:12px 24px;background:linear-gradient(to right,#7c3aed,#3b82f6);color:#fff;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px">
+                    Reset my password
+                </a>
+                <p style="color:#6b7280;font-size:12px;margin-top:24px">
+                    This link expires in <strong style="color:#9ca3af">1 hour</strong>. If you didn't request a password reset, you can safely ignore this email.
+                </p>
+            </div>
+        `,
+    });
+};
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail };

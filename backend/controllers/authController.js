@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { sendVerificationEmail } = require("../utils/sendEmail");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
 // Models for cascade deletion on account delete
@@ -563,6 +563,100 @@ const changePassword = async (req, res) => {
 };
 
 /**
+ * Send a password reset link to a user who forgot their password.
+ * @route POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email || typeof email !== "string" || !email.trim()) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+        // Return the same generic response whether or not the account exists —
+        // prevents account enumeration via this endpoint.
+        if (!user) {
+            return res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+        }
+
+        // Generate a short-lived single-use reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.passwordResetToken = resetToken;
+        user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        await sendPasswordResetEmail(user.email, resetUrl);
+
+        res.json({ success: true, message: "If this email is registered, a password reset link has been sent." });
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+/**
+ * Reset a forgotten password using the token emailed to the user.
+ * @route POST /api/auth/reset-password
+ */
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({ success: false, message: "Token and new password are required." });
+        }
+
+        const { valid, errors } = validatePassword(newPassword);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: errors[0] });
+        }
+
+        // The reset token is a server-generated 64-character hex string. Reject
+        // anything else before it reaches the database so a malicious payload
+        // (e.g. a Mongo operator object such as { $ne: ... }) can never be used
+        // to build an injection query.
+        if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) {
+            return res.status(400).json({
+                success: false,
+                message: "This reset link is invalid or has expired. Please request a new one.",
+            });
+        }
+
+        const user = await User.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: new Date() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "This reset link is invalid or has expired. Please request a new one.",
+            });
+        }
+
+        // Assign the raw password; the User pre('save') hook hashes it exactly once.
+        user.password = newPassword;
+        user.passwordResetToken = null;
+        user.passwordResetExpires = null;
+        // Revoke all existing sessions so old tokens can no longer be used.
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
+        user.tokenVersion = (user.tokenVersion || 0) + 1;
+        await user.save();
+
+        res.clearCookie("refreshToken", { path: "/api/auth" });
+        res.json({ success: true, message: "Password reset successfully. You can now log in." });
+    } catch (error) {
+        console.error("Reset password error:", error);
+        res.status(500).json({ success: false, message: "Internal server error occurred" });
+    }
+};
+
+/**
  * Permanently delete user account and all associated data.
  * Implements cascade deletion to clean up orphaned documents.
  * @route DELETE /api/auth/delete-account
@@ -671,6 +765,8 @@ module.exports = {
     logoutUser,
     verifyEmail,
     resendVerificationEmail,
+    forgotPassword,
+    resetPassword,
     getUserProfile,
     updateUserProfile,
     changePassword,
