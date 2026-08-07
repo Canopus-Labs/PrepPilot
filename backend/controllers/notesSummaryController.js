@@ -1,5 +1,6 @@
 const axios = require("axios");
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 const { generateWithFallback } = require("../utils/geminiHelper");
 const {
   inspectPdfBuffer,
@@ -380,6 +381,10 @@ const getMySummaries = async (req, res) => {
  */
 const deleteSummary = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid summary ID" });
+    }
+
     const summary = await NotesSummary.findOneAndDelete({
       _id: req.params.id,
       user: req.user._id,
