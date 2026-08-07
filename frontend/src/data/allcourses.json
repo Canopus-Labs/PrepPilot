@@ -355,6 +355,12 @@
         "name": "Artificial Intelligence Fundamentals",
         "source": "IBM SkillsBuild",
         "link": "https://skillsbuild.org/students/course-catalog/artificial-intelligence"
+      },
+      {
+        "icon": "fa-solid fa-brain",
+        "name": "DeepLearning.AI Short Courses",
+        "source": "DeepLearning.AI",
+        "link": "https://www.deeplearning.ai/short-courses/"
       }
     ]
   },
@@ -1213,6 +1219,18 @@
         "name": "Fundamentals of machine learning",
         "source": "Microsoft",
         "link": "https://learn.microsoft.com/en-us/training/modules/fundamentals-machine-learning/"
+      },
+      {
+        "icon": "fa-solid fa-asterisk",
+        "name": "DataCamp Free Courses",
+        "source": "DataCamp",
+        "link": "https://www.datacamp.com/free"
+      },
+      {
+        "icon": "fa-solid fa-asterisk",
+        "name": "Hugging Face Courses",
+        "source": "Hugging Face",
+        "link": "https://huggingface.co/learn"
       }
     ]
   },
@@ -2310,6 +2328,18 @@
         "name": "Introduction to machine learning",
         "source": "Microsoft Learn",
         "link": "https://learn.microsoft.com/en-us/training/modules/introduction-to-machine-learning/"
+      },
+      {
+        "icon": "fa-solid fa-desktop",
+        "name": "fast.ai - Practical Deep Learning for Coders",
+        "source": "fast.ai",
+        "link": "https://course.fast.ai/"
+      },
+      {
+        "icon": "fa-solid fa-desktop",
+        "name": "Stanford Online Free Courses",
+        "source": "Stanford Online",
+        "link": "https://online.stanford.edu/free-courses"
       }
     ]
   },
