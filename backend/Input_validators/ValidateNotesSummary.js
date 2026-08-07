@@ -28,6 +28,7 @@ const validateSummarizeNotes = (req, res, next) => {
   try {
     req.body = summarizeRequestSchema.parse(req.body || {});
     if (!req.file && !req.body.url) {
+      if (req.file && req.file.path) require('fs').promises.unlink(req.file.path).catch(() => {});
       return res.status(400).json({
         success: false,
         message: "Please upload a PDF or choose one from Notes & Books.",
@@ -35,6 +36,7 @@ const validateSummarizeNotes = (req, res, next) => {
     }
     next();
   } catch (error) {
+    if (req.file && req.file.path) require('fs').promises.unlink(req.file.path).catch(() => {});
     return handleValidationError(res, error);
   }
 };

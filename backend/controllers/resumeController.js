@@ -107,10 +107,13 @@ const analyzeResume = async (req, res) => {
             return res.status(400).json({ message: "No resume file uploaded" });
         }
 
-        uploadedFilePath = req.file.path;
-        const fileBuffer = await fs.promises.readFile(uploadedFilePath);
+        uploadedFilePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+        let fileBuffer = await fs.promises.readFile(uploadedFilePath);
 
         const targetRole = req.body.targetRole || "General Professional";
+
+        const base64Data = fileBuffer.toString("base64");
+        fileBuffer = null; // Release Buffer memory
 
         // 2. Prompt Engineering
         const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
@@ -138,7 +141,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
                 prompt,
                 {
                     inlineData: {
-                        data: fileBuffer.toString("base64"),
+                        data: base64Data,
                         mimeType: "application/pdf"
                     }
                 }

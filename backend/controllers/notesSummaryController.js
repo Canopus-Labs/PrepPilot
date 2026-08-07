@@ -112,7 +112,7 @@ const summarizeNotes = async (req, res) => {
     let sourceUrl = null;
 
     if (req.file) {
-      uploadedFilePath = req.file.path;
+      uploadedFilePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
       buffer = await fs.promises.readFile(uploadedFilePath);
       fileName = req.file.originalname;
       sourceType = "upload";
@@ -142,6 +142,9 @@ const summarizeNotes = async (req, res) => {
 
     const readingTime = computeReadingTime(pdfStats);
     const contentHash = crypto.createHash("sha256").update(buffer).digest("hex");
+    const fileSize = buffer.length;
+    const base64Data = buffer.toString("base64");
+    buffer = null; // Release Buffer memory
 
     const prompt = `You are an expert academic tutor helping a student decide whether a set of study notes is useful before they read it.
 
@@ -171,7 +174,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
         prompt,
         {
           inlineData: {
-            data: buffer.toString("base64"),
+            data: base64Data,
             mimeType: "application/pdf",
           },
         },
@@ -205,7 +208,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     res.status(200).json({
       success: true,
       fileName,
-      fileSize: buffer.length,
+      fileSize,
       sourceType,
       sourceUrl,
       pageCount: pdfStats.numPages,

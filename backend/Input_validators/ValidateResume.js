@@ -50,10 +50,12 @@ const validateAnalyzeResume = (req, res, next) => {
     analyzeResumeSchema.parse(req.body);
     // also ensure file is uploaded
     if (!req.file) {
+      if (req.file && req.file.path) require('fs').promises.unlink(req.file.path).catch(() => {});
       return res.status(400).json({ success: false, message: "No resume file uploaded" });
     }
     next();
   } catch (error) {
+    if (req.file && req.file.path) require('fs').promises.unlink(req.file.path).catch(() => {});
     return handleValidationError(res, error);
   }
 };

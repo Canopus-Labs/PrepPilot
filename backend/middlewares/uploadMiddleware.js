@@ -1,6 +1,8 @@
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
+const crypto = require("crypto");
 const { fileTypeFromBuffer, fileTypeFromFile } = require("file-type");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -128,20 +130,20 @@ const validateResumeMagicBytes = async (req, res, next) => {
     }
 
     const allowedMimeTypes = new Set([
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/pdf'
     ]);
 
     if (!fileType || !allowedMimeTypes.has(fileType.mime)) {
+      if (req.file.path) fs.promises.unlink(req.file.path).catch(() => {});
       return res.status(400).json({
         success: false,
-        message: 'Invalid file type. Only PDF and Word documents (.pdf, .doc, .docx) are allowed.'
+        message: 'Invalid file type. Only PDF documents are allowed.'
       });
     }
 
     next();
   } catch (error) {
+    if (req.file && req.file.path) fs.promises.unlink(req.file.path).catch(() => {});
     console.error('Error validating file type:', error);
     return res.status(500).json({
       success: false,
@@ -161,8 +163,8 @@ const upload = multer({
 // Upload instance for resumes (disk storage)
 const uploadResume = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, "uploads/"),
-    filename: (req, file, cb) => cb(null, `${Date.now()}-${sanitizeBase(file.originalname)}.pdf`)
+    destination: (req, file, cb) => cb(null, os.tmpdir()),
+    filename: (req, file, cb) => cb(null, crypto.randomBytes(16).toString("hex") + ".pdf")
   }),
   fileFilter: resumeFileFilter,
   limits: { fileSize: MAX_FILE_SIZE },
@@ -173,8 +175,8 @@ const NOTES_MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const uploadNotes = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, "uploads/"),
-    filename: (req, file, cb) => cb(null, `${Date.now()}-${sanitizeBase(file.originalname)}.pdf`)
+    destination: (req, file, cb) => cb(null, os.tmpdir()),
+    filename: (req, file, cb) => cb(null, crypto.randomBytes(16).toString("hex") + ".pdf")
   }),
   fileFilter: resumeFileFilter, // PDF-only, same filter as resumes
   limits: { fileSize: NOTES_MAX_FILE_SIZE },
