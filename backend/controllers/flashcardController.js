@@ -108,7 +108,7 @@ const createFlashcard = async (req, res) => {
 const getUserFlashcards = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { due, category } = req.query;
+    const { due, category, page, limit } = req.query;
 
     const query = { userId };
     if (due === "true") {
@@ -118,12 +118,32 @@ const getUserFlashcards = async (req, res) => {
       query.category = category;
     }
 
-    const flashcards = await Flashcard.find(query).sort({ dueDate: 1 });
+    const VALID_PAGE_SIZES = [5, 10, 20, 50, 100];
+    const parsedPage = parseInt(page, 10);
+    const parsedLimit = parseInt(limit, 10);
+    // Use only values from a predefined safe set to satisfy CodeQL taint tracking
+    const safePage = Number.isSafeInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
+    const safeLimit = VALID_PAGE_SIZES.includes(parsedLimit) ? parsedLimit : 20;
+    const skipVal = (safePage - 1) * safeLimit;
+
+    const [flashcards, totalItems] = await Promise.all([
+      Flashcard.find(query).sort({ dueDate: 1 }).skip(skipVal).limit(safeLimit).lean(),
+      Flashcard.countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / safeLimit);
 
     return res.status(200).json({
       success: true,
       count: flashcards.length,
       flashcards,
+      pagination: {
+        totalItems,
+        totalPages,
+        page: safePage,
+        pageSize: safeLimit,
+        hasNextPage: safePage < totalPages,
+      },
     });
   } catch (error) {
     return res.status(500).json({

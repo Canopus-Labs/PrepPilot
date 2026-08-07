@@ -93,7 +93,13 @@ describe("getUserFlashcards controller", () => {
 
   it("fetches flashcards for user", async () => {
     const cards = [{ _id: "c1" }, { _id: "c2" }];
-    Flashcard.find = vi.fn().mockReturnValue({ sort: vi.fn().mockResolvedValue(cards) });
+    const mockFind = {
+      sort: vi.fn().mockReturnValue({
+        skip: vi.fn().mockReturnValue({ limit: vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue(cards) }) }),
+      }),
+    };
+    Flashcard.find = vi.fn().mockReturnValue(mockFind);
+    Flashcard.countDocuments = vi.fn().mockResolvedValue(2);
 
     const req = makeReq({}, {}, {});
     const res = makeRes();
@@ -101,11 +107,19 @@ describe("getUserFlashcards controller", () => {
     await getUserFlashcards(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      success: true,
-      count: 2,
-      flashcards: cards,
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        count: 2,
+        flashcards: cards,
+        pagination: expect.objectContaining({
+          totalItems: 2,
+          totalPages: 1,
+          page: 1,
+          hasNextPage: false,
+        }),
+      })
+    );
   });
 });
 
