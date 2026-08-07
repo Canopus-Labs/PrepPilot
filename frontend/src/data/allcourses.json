@@ -1071,6 +1071,36 @@
         "name": "TryHackMe - Pre-Security Learning Path (Free)",
         "source": "TryHackMe",
         "link": "https://tryhackme.com/path/outline/presecurity"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "Cisco Cybersecurity Essentials (Free)",
+        "source": "Cisco Networking Academy",
+        "link": "https://skillsforall.com/course/cybersecurity-essentials"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "TryHackMe - Intro to Cyber Security Learning Path (Free)",
+        "source": "TryHackMe",
+        "link": "https://tryhackme.com/path/outline/introtosecurity"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "SANS Cyber Aces Online",
+        "source": "SANS Institute",
+        "link": "https://www.sans.org/mlp/free-cyber-security-training/"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "Google Cybersecurity Professional Certificate",
+        "source": "Coursera",
+        "link": "https://www.coursera.org/professional-certificates/google-cybersecurity"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "name": "EC Council Code Red - Digital Forensics Essentials (DFE)",
+        "source": "EC Council",
+        "link": "https://codered.eccouncil.org/course/digital-forensics-essentials"
       }
     ]
   },
@@ -1404,6 +1434,24 @@
         "name": "Ethical Hacking Essentials(EHE)",
         "source": "Coursera",
         "link": "https://www.coursera.org/learn/ethical-hacking-essentials-ehe"
+      },
+      {
+        "icon": "fa-solid fa-user-secret",
+        "name": "TryHackMe - Jr Penetration Tester Learning Path (Free)",
+        "source": "TryHackMe",
+        "link": "https://tryhackme.com/path/outline/jrpenetrationtester"
+      },
+      {
+        "icon": "fa-solid fa-user-secret",
+        "name": "Cisco Ethical Hacker (Free)",
+        "source": "Cisco Networking Academy",
+        "link": "https://skillsforall.com/course/ethical-hacker"
+      },
+      {
+        "icon": "fa-solid fa-user-secret",
+        "name": "Penetration Testing, Incident Response and Forensics",
+        "source": "Coursera",
+        "link": "https://www.coursera.org/learn/ibm-penetration-testing-incident-response-forensics"
       }
     ]
   },
