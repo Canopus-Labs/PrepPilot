@@ -3,6 +3,7 @@ const {
   conceptExplainPrompt,
   questionAnswerPrompt,
   interviewTipsPrompt,
+  difficultyEstimatePrompt,
 } = require("../utils/prompts");
 const Session = require("../models/Session");
 const Question = require("../models/Question");
@@ -249,4 +250,67 @@ const generateInterviewTips = async (req, res) => {
   }
 };
 
-module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips };
+/**
+ * Estimate the difficulty of a technical interview question using Gemini.
+ * @route POST /api/ai/estimate-difficulty
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ * @example
+ * POST /api/ai/estimate-difficulty
+ * Authorization: Bearer eyJhb...
+ * { "question": "Find the median of two sorted arrays in O(log(m+n))." }
+ * @example
+ * 200 {
+ *   "model": "models/gemini-2.5-flash",
+ *   "difficulty": "Hard",
+ *   "confidence": 85,
+ *   "estimatedTime": "35 Minutes",
+ *   "prerequisites": ["Binary Search", "Arrays", "Divide and Conquer"],
+ *   "analysis": "..."
+ * }
+ */
+const estimateDifficulty = async (req, res) => {
+  try {
+    const { question } = req.body;
+
+    const prompt = difficultyEstimatePrompt(question);
+
+    const { result, usedModel } = await generateWithFallback(
+      process.env.GEMINI_API_KEY,
+      [prompt]
+    );
+
+    const rawText = await result.response.text();
+    let cleanedText = rawText
+      .replace(/^(\s*```json\s*|\s*```\s*)+/i, "")
+      .replace(/(\s*```\s*)+$/i, "")
+      .trim();
+
+    try {
+      const data = JSON.parse(cleanedText);
+
+      const difficultySchema = z.object({
+        difficulty: z.enum(["Easy", "Medium", "Hard", "Expert"]),
+        confidence: z.number().int().min(0).max(100),
+        estimatedTime: z.string(),
+        prerequisites: z.array(z.string()),
+        analysis: z.string(),
+      });
+      const parsed = difficultySchema.safeParse(data);
+      if (!parsed.success) {
+        return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
+      }
+
+      res.status(200).json({ model: usedModel, ...data });
+    } catch (err) {
+      console.error("Gemini returned invalid JSON:", cleanedText);
+      res.status(500).json({ message: "Gemini returned invalid JSON" });
+    }
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    res.status(500).json({ message: "Failed to estimate difficulty" });
+  }
+};
+
+module.exports = { generateInterviewQuestions, generateConceptExplanation, generateInterviewTips, estimateDifficulty };
