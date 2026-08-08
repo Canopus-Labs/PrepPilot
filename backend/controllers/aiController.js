@@ -94,11 +94,10 @@ const generateInterviewQuestions = async (req, res) => {
         return res.status(500).json({ message: "Invalid AI response format", details: parsed.error.issues[0]?.message });
       }
 
-      if (Array.isArray(data)) {
-        res.status(200).json({ model: usedModel, question: data });
-      } else {
-        res.status(200).json({ model: usedModel, ...data });
-      }
+      // Normalize both accepted forms (array or { questions: [...] }) so the
+      // response always exposes the `question` key the frontend reads.
+      const questions = Array.isArray(data) ? data : data.questions;
+      res.status(200).json({ model: usedModel, question: questions });
     } catch (err) {
       console.error("Gemini returned invalid JSON:", cleanedText);
       res.status(500).json({
