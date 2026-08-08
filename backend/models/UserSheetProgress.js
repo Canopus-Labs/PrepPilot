@@ -5,7 +5,7 @@ const UserSheetProgressSchema = new mongoose.Schema({
   sheetId: { type: String, required: true },
   followed: { type: Boolean, default: false },
   completedTopics: { type: Object, default: {} },
-  percentage: { type: Number, default: 0 },
+  percentage: { type: Number, default: 0, min: 0, max: 100 },
 }, { timestamps: true });
 
 UserSheetProgressSchema.index({ userId: 1, sheetId: 1 }, { unique: true });

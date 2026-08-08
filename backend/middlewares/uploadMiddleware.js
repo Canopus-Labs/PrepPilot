@@ -1,7 +1,8 @@
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const { fileTypeFromBuffer } = require("file-type");
+const os = require("os");
+const crypto = require("crypto");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -50,6 +51,7 @@ const IMAGE_EXTENSION_BY_MIME = {
  * @returns {Promise<string|null>} Stored filename, or null if content is not an image.
  */
 const resolveImageFileName = async (file) => {
+  const { fileTypeFromBuffer } = await import("file-type");
   const fileType = await fileTypeFromBuffer(file.buffer);
   const ext = fileType && IMAGE_EXTENSION_BY_MIME[fileType.mime];
   if (!ext) return null;
@@ -120,23 +122,39 @@ const validateResumeMagicBytes = async (req, res, next) => {
   }
 
   try {
-    const fileType = await fileTypeFromBuffer(req.file.buffer);
+    const { fileTypeFromBuffer, fileTypeFromFile } = await import("file-type");
+    let fileType;
+    if (req.file.buffer) {
+      fileType = await fileTypeFromBuffer(req.file.buffer);
+    } else if (req.file.path) {
+      fileType = await fileTypeFromFile(req.file.path);
+    }
 
     const allowedMimeTypes = new Set([
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/pdf'
     ]);
 
     if (!fileType || !allowedMimeTypes.has(fileType.mime)) {
+      if (req.file.path) {
+        const safePath = path.join(os.tmpdir(), path.basename(req.file.path));
+        fs.promises.unlink(safePath).catch((err) => {
+          if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+        });
+      }
       return res.status(400).json({
         success: false,
-        message: 'Invalid file type. Only PDF and Word documents (.pdf, .doc, .docx) are allowed.'
+        message: 'Invalid file type. Only PDF documents are allowed.'
       });
     }
 
     next();
   } catch (error) {
+    if (req.file && req.file.path) {
+      const safePath = path.join(os.tmpdir(), path.basename(req.file.path));
+      fs.promises.unlink(safePath).catch((err) => {
+        if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+      });
+    }
     console.error('Error validating file type:', error);
     return res.status(500).json({
       success: false,
@@ -153,9 +171,12 @@ const upload = multer({
   limits: { fileSize: MAX_FILE_SIZE },
 });
 
-// Upload instance for resumes (memory storage)
+// Upload instance for resumes (disk storage)
 const uploadResume = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, os.tmpdir()),
+    filename: (req, file, cb) => cb(null, crypto.randomBytes(16).toString("hex") + ".pdf")
+  }),
   fileFilter: resumeFileFilter,
   limits: { fileSize: MAX_FILE_SIZE },
 });
@@ -164,7 +185,10 @@ const uploadResume = multer({
 const NOTES_MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const uploadNotes = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, os.tmpdir()),
+    filename: (req, file, cb) => cb(null, crypto.randomBytes(16).toString("hex") + ".pdf")
+  }),
   fileFilter: resumeFileFilter, // PDF-only, same filter as resumes
   limits: { fileSize: NOTES_MAX_FILE_SIZE },
 });

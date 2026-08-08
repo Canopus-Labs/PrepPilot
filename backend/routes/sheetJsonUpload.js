@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Sheet = require('../models/Sheet');
-const { protect } = require('../middlewares/authMiddleware');
+const { protect, requireAdmin } = require('../middlewares/authMiddleware');
 const {
   normalizeSheet,
   computeSheetStats,
@@ -9,7 +9,7 @@ const {
 
 // POST /api/sheets/upload
 // Body: { filename: "file.json", data: {...sheet data...} }
-router.post('/upload', protect, async (req, res) => {
+router.post('/upload', protect, requireAdmin, async (req, res) => {
   const { filename, data } = req.body;
 
   if (!filename || !data) {
@@ -55,7 +55,7 @@ router.post('/upload', protect, async (req, res) => {
 // POST /api/sheets/validate
 // Body: { data: {...sheet data...} }
 // Dry-run: returns stats + errors without writing to the DB.
-router.post('/validate', protect, async (req, res) => {
+router.post('/validate', protect, requireAdmin, async (req, res) => {
   const { data } = req.body;
 
   if (!data) {
@@ -94,7 +94,7 @@ router.post('/validate', protect, async (req, res) => {
 
 // PUT /api/sheets/:id
 // Update a single sheet after validation.
-router.put('/:id', protect, async (req, res) => {
+router.put('/:id', protect, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const body = req.body && req.body.sheet ? req.body.sheet : req.body;
 
@@ -127,7 +127,7 @@ router.put('/:id', protect, async (req, res) => {
 
 // DELETE /api/sheets/:id
 // Requires confirmId matching :id to prevent accidental deletion.
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { confirmId } = req.body || {};
 

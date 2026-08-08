@@ -1,5 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const fs = require('fs');
 const { generateWithFallback } = require('../utils/geminiHelper');
 
 /**
@@ -17,10 +18,16 @@ const { generateWithFallback } = require('../utils/geminiHelper');
  * @example
  * 200 <PDF binary response>
  */
+const MAX_LATEX_CODE_LENGTH = 100000; // ~100KB — prevents oversized submissions to texlive.net
+
 const compileResume = async (req, res) => {
     try {
         const { code } = req.body;
-      
+
+        if (!code || typeof code !== 'string' || code.length > MAX_LATEX_CODE_LENGTH) {
+            return res.status(400).json({ message: "LaTeX code exceeds the maximum allowed length of 100KB" });
+        }
+
         // Normalize line endings to UNIX format, as texlive.net is highly sensitive to Windows \r\n
         const cleanCode = code.replace(/\r\n/g, '\n');
 
@@ -94,12 +101,19 @@ const compileResume = async (req, res) => {
  * }
  */
 const analyzeResume = async (req, res) => {
+    let uploadedFilePath = null;
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No resume file uploaded" });
         }
 
+        uploadedFilePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+        let fileBuffer = await fs.promises.readFile(uploadedFilePath);
+
         const targetRole = req.body.targetRole || "General Professional";
+
+        const base64Data = fileBuffer.toString("base64");
+        fileBuffer = null; // Release Buffer memory
 
         // 2. Prompt Engineering
         const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
@@ -127,7 +141,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
                 prompt,
                 {
                     inlineData: {
-                        data: req.file.buffer.toString("base64"),
+                        data: base64Data,
                         mimeType: "application/pdf"
                     }
                 }
@@ -155,6 +169,12 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
     } catch (error) {
         console.error("Resume Analysis Error:", error);
         res.status(500).json({ message: "Failed to analyze resume" });
+    } finally {
+        if (uploadedFilePath) {
+            await require('fs').promises.unlink(uploadedFilePath).catch(err => {
+                if (err.code !== 'ENOENT') console.error("Failed to delete temp resume PDF:", err);
+            });
+        }
     }
 }
 
@@ -185,6 +205,10 @@ const saveResume = async (req, res) => {
 
         if (!title || !latexCode) {
             return res.status(400).json({ success: false, message: "Title and LaTeX code are required." });
+        }
+
+        if (latexCode.length > MAX_LATEX_CODE_LENGTH) {
+            return res.status(400).json({ success: false, message: "LaTeX code exceeds the maximum allowed length of 100KB" });
         }
 
         let resume;

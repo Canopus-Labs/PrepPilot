@@ -15,7 +15,7 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
 import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
@@ -248,21 +248,6 @@ const LandingPage = () => {
   // Hero parallax
   const heroRef = useRef(null);
   const statsRef = useRef(null);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 60, damping: 20, mass: 0.4 });
-  const springY = useSpring(mouseY, { stiffness: 60, damping: 20, mass: 0.4 });
-  const blobX1 = useTransform(springX, [-0.5, 0.5], [-20, 20]);
-  const blobY1 = useTransform(springY, [-0.5, 0.5], [-20, 20]);
-  const blobX2 = useTransform(springX, [-0.5, 0.5], [16, -16]);
-  const blobY2 = useTransform(springY, [-0.5, 0.5], [16, -16]);
-
-  const handleHeroMouseMove = (e) => {
-    if (!heroRef.current) return;
-    const rect = heroRef.current.getBoundingClientRect();
-    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
-    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
 
   const scrollToStats = () => {
     statsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });

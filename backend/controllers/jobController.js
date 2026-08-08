@@ -25,6 +25,16 @@ function getValidCountry(country) {
   return ADZUNA_COUNTRY;
 }
 
+// Bound the set of cache keys: role is client-controlled, so we trim,
+// normalize, and validate it before it touches the JobCache collection.
+const normalizeRole = (role) => {
+  if (typeof role !== "string") return "";
+  const trimmed = role.trim().toLowerCase();
+  if (trimmed.length === 0 || trimmed.length > 64) return "";
+  if (!/^[a-z0-9\s+#.,&()/'\-]*$/.test(trimmed)) return "";
+  return trimmed;
+};
+
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
   const { data } = await axios.get(url, {
@@ -66,9 +76,9 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
-    const role    = req.query.role || latestSession?.role || "software engineer";
+    const role = normalizeRole(req.query.role) || normalizeRole(latestSession?.role) || "software engineer";
     const country = getValidCountry(req.query.country);
-    const cacheKey = `${role.toLowerCase()}|${country}`;
+    const cacheKey = `${role}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
     if (cached && Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS) {
@@ -98,8 +108,10 @@ exports.refreshJobCache = async () => {
     });
 
     for (const role of roles) {
-      const cacheKey = `${role.toLowerCase()}|${ADZUNA_COUNTRY}`;
-      const jobs = await fetchFromAdzuna(role);
+      const normalizedRole = normalizeRole(role);
+      if (!normalizedRole) continue;
+      const cacheKey = `${normalizedRole}|${ADZUNA_COUNTRY}`;
+      const jobs = await fetchFromAdzuna(normalizedRole);
       await JobCache.findOneAndUpdate(
         { cacheKey },
         { jobs, fetchedAt: new Date() },
