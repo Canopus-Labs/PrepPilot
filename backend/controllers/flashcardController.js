@@ -172,7 +172,7 @@ const reviewFlashcard = async (req, res) => {
     if (!rating) {
       return res.status(400).json({
         success: false,
-        message: "Rating is required. Supported values: 'again', 'hard', 'good', 'easy'.",
+        message: "Rating is required. Supported values: 'again', 'hard', 'medium', 'good', 'easy', or numbers 1-4.",
       });
     }
 
