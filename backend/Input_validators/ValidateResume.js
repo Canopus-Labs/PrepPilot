@@ -19,7 +19,7 @@ const analyzeResumeSchema = z.object({
     .string()
     .min(1, "Target role is required")
     .max(50, "Target role must be at most 50 characters")
-    .regex(/^[a-zA-Z0-9\s\-]+$/, "Target role must contain only alphanumeric characters, spaces, and hyphens")
+    .regex(/^[a-zA-Z0-9 \-]+$/, "Target role must contain only alphanumeric characters, spaces, and hyphens")
     .optional(),
 });
 
