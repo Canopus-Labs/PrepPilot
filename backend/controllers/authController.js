@@ -117,7 +117,9 @@ const registerUser = async (req, res) => {
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // Auto-verify user — email verification temporarily disabled
+        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
@@ -135,24 +137,17 @@ const registerUser = async (req, res) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // skip email verification until SMTP is configured
+            isEmailVerified: false,
+            emailVerificationToken,
+            emailVerificationExpires,
         });
 
-        const accessToken = generateAccessToken(user._id, user.tokenVersion);
-        const refreshToken = generateRefreshToken(user._id);
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+        await sendVerificationEmail(user.email, verificationUrl);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
-        await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            profileImageUrl: user.profileImageUrl,
+            message: "Account created successfully. Please check your email to verify your account before logging in.",
         });
     } catch (error) {
         console.error("Register error:", error);
