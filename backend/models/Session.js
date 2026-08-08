@@ -3,6 +3,7 @@ const Question = require("./Question");
 const sessionSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
     role: { type: String, required: true },
+    company: { type: String, required: true },
     experience: { type: String, required: true },
     topicsToFocus: { type: [String], required: true },
     description: String,

@@ -351,6 +351,7 @@ Request Body:
 ```json
 {
   "role": "Backend Engineer",
+  "company": "Google",
   "experience": "3 years",
   "topicsToFocus": ["Node.js", "Databases"],
   "description": "Prepare for backend interview",
@@ -364,6 +365,7 @@ Response `201`:
   "session": {
     "_id": "6426c5a5...",
     "role": "Backend Engineer",
+    "company": "Google",
     "experience": "3 years",
     "description": "Prepare for backend interview",
     "questions": ["..."]
@@ -371,7 +373,7 @@ Response `201`:
 }
 ```
 Errors:
-- `403` session limit reached (default max: 50)
+- `400` missing required fields (role, company, experience, topicsToFocus) or session limit reached (default max: 50)
 - `500` server error
 
 ---
