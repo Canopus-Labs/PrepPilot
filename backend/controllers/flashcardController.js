@@ -65,6 +65,21 @@ const createFlashcard = async (req, res) => {
     const { question, answer, category, sourceId } = req.body;
     const userId = req.user._id;
 
+    // Validate presence and type of mandatory fields
+    if (
+      !question ||
+      typeof question !== "string" ||
+      !question.trim() ||
+      !answer ||
+      typeof answer !== "string" ||
+      !answer.trim()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Question and answer are required non-empty string fields",
+      });
+    }
+
     // Check if card with exact sourceId already exists for this user
     if (sourceId) {
       const existingCard = await Flashcard.findOne({ userId, sourceId });
@@ -79,8 +94,8 @@ const createFlashcard = async (req, res) => {
 
     const flashcard = await Flashcard.create({
       userId,
-      question,
-      answer,
+      question: question.trim(),
+      answer: answer.trim(),
       category: category || "General",
       sourceId: sourceId || null,
       dueDate: new Date(),
