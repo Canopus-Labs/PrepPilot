@@ -5,6 +5,7 @@ const {
   getAllProgress,
   exportProgress,
   importProgress,
+  resetProgress,
 } = require('../controllers/userSheetProgressController');
 const { protect } = require('../middlewares/authMiddleware');
 const { validateSaveProgress, validateGetProgress } = require('../Input_validators/ValidateUserSheetProgress');
@@ -35,6 +36,12 @@ router.post('/sheet-progress/import', importProgress);
  * @route GET /api/user/sheet-progress/:sheetId
  */
 router.get('/sheet-progress/:sheetId', validateGetProgress, getProgress);
+
+/**
+ * Reset progress for a specific sheet for the authenticated user.
+ * @route DELETE /api/user/sheet-progress/:sheetId
+ */
+router.delete('/sheet-progress/:sheetId', validateGetProgress, resetProgress);
 
 /**
  * Get all sheet progress records for the authenticated user.
