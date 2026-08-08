@@ -21,6 +21,7 @@ export const API_PATHS = {
     AI: {
         GENERATE_QUESTIONS: "/api/ai/generate-questions", // Generate interview questions and answers using Gemini
         GENERATE_EXPLANATION: "/api/ai/generate-explanation", // Generate concept explanation using Gemini
+        DIFFICULTY_ESTIMATE: "/api/ai/difficulty", // Estimate interview question difficulty
     },
     SESSION: {
         CREATE: "/api/sessions/create", // Create a new interview session with questions
