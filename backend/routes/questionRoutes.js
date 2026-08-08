@@ -8,7 +8,7 @@ const {
 const {protect} = require("../middlewares/authMiddleware");
 
 const { generalLimiter } = require("../middlewares/rateLimiter");
-const { validateAddQuestionToSession, validateTogglePinQuestion, validateUpdateQuestionNote } = require('../Input_validators/ValidateQuestions');
+const { validateAddQuestionToSession, validateTogglePinQuestion, validateUpdateQuestionNote, validateGetMyQuestions } = require('../Input_validators/ValidateQuestions');
 const router = express.Router();
 
 /**
@@ -20,7 +20,7 @@ router.use(generalLimiter, protect);
  * Get all questions for the authenticated user across their sessions.
  * @route GET /api/questions/my-questions
  */
-router.get('/my-questions', getMyQuestions);
+router.get('/my-questions', validateGetMyQuestions, getMyQuestions);
 
 /**
  * Add new questions to an existing session.
