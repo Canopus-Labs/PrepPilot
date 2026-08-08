@@ -30,7 +30,7 @@ const AuthPage = () => {
         {page === "login" ? (
           <Login
             setCurrentPage={setPage}
-            onLoginSuccess={() => navigate(redirectTo)}
+            onLoginSuccess={() => navigate(redirectTo, { replace: true })}
           />
         ) : (
           <SignUp setCurrentPage={setPage} />

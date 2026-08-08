@@ -78,7 +78,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
         if (onLoginSuccess) {
           onLoginSuccess();
         } else {
-          navigate(redirectTo);
+          navigate(redirectTo, { replace: true });
         }
       }
     } catch (error) {
