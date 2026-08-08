@@ -3,6 +3,30 @@ const { handleValidationError } = require("./ValidateQuestions");
 
 // ── Schemas ───────────────────────────────────────────────
 
+// Profile image URLs must point at a remote http(s) resource. z.string().url()
+// alone accepts any scheme (e.g. "javascript:..."), so restrict to http/https
+// to avoid stored XSS, tracking pixels, or data: payloads. Empty string and
+// null are allowed so callers can leave the field unset or clear the image.
+const profileImageUrlSchema = z.union([
+  z.literal(""),
+  z.null(),
+  z
+    .string()
+    .trim()
+    .max(2048, "Profile image URL must be at most 2048 characters")
+    .refine(
+      (value) => {
+        try {
+          const parsed = new URL(value);
+          return parsed.protocol === "http:" || parsed.protocol === "https:";
+        } catch {
+          return false;
+        }
+      },
+      "Profile image URL must be a valid http(s) URL"
+    ),
+]);
+
 const registerUserZod = z.object({
   name: z.string().min(4, "Name must be at least 4 characters").trim(),
   email: z.string().email("Enter a valid email").trim(),
@@ -13,8 +37,16 @@ const registerUserZod = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/, "Password must contain at least one special character"),
-  profileImageUrl: z.string().url("Enter a valid URL").trim().optional().or(z.literal("")),
+  profileImageUrl: profileImageUrlSchema.optional(),
 });
+
+// PUT /api/auth/profile accepts many fields; validate only the fields we know
+// how to constrain and preserve the rest via passthrough().
+const updateProfileZod = z
+  .object({
+    profileImageUrl: profileImageUrlSchema.optional(),
+  })
+  .passthrough();
 
 const loginUserZod = z.object({
   email: z.string().email("Enter a valid email"),
@@ -29,7 +61,16 @@ const resendVerificationZod = z.object({
 
 const validateUserSignup = (req, res, next) => {
   try {
-    registerUserZod.parse(req.body);
+    req.body = registerUserZod.parse(req.body);
+    next();
+  } catch (err) {
+    return handleValidationError(res, err);
+  }
+};
+
+const validateUpdateProfile = (req, res, next) => {
+  try {
+    req.body = updateProfileZod.parse(req.body);
     next();
   } catch (err) {
     return handleValidationError(res, err);
@@ -67,4 +108,5 @@ module.exports = {
   validateUserSignup,
   validateRefreshToken,
   validateResendEmail,
+  validateUpdateProfile,
 };

@@ -2,7 +2,7 @@ const express = require("express");
 const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser } = require("../controllers/authController");
 const { protect } = require("../middlewares/authMiddleware");
 const { upload, validateImageUpload } = require("../middlewares/uploadMiddleware");
-const { validateUserLogin, validateUserSignup, validateRefreshToken, validateResendEmail } = require("../Input_validators/ValidateAuth");
+const { validateUserLogin, validateUserSignup, validateRefreshToken, validateResendEmail, validateUpdateProfile } = require("../Input_validators/ValidateAuth");
 const csrfHeaderCheck = require("../middlewares/csrfHeaderCheck");
 const router = express.Router();
 
@@ -31,7 +31,7 @@ router.get("/csrf-token", generalLimiter, (req, res) => {
 router.post("/refresh", authLimiter, csrfHeaderCheck, validateRefreshToken, refreshToken);
 router.post("/logout", authLimiter, csrfHeaderCheck, validateRefreshToken, logoutUser);
 router.get("/profile", protect, generalLimiter, getUserProfile);
-router.put("/profile", protect, generalLimiter, updateUserProfile);
+router.put("/profile", protect, generalLimiter, validateUpdateProfile, updateUserProfile);
 router.put("/change-password", protect, sensitiveAuthLimiter, changePassword);
 router.delete("/delete-account", protect, sensitiveAuthLimiter, deleteUserAccount);
 router.post("/resend-verification", authLimiter,  validateResendEmail, resendVerificationEmail);
