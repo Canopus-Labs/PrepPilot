@@ -333,8 +333,8 @@ const verifyEmail = async (req, res) => {
     try {
         const { token } = req.query;
 
-        if (!token) {
-            return res.status(400).json({ success: false, message: "Verification token is missing." });
+        if (!token || typeof token !== "string") {
+            return res.status(400).json({ success: false, message: "Verification token is missing or invalid." });
         }
 
         // Find user with matching token that hasn't expired yet
