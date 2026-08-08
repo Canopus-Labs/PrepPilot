@@ -345,9 +345,11 @@ const App = () => {
                   <Route
                     path="/question-bank"
                     element={
-                      <PageTransition>
-                        <QuestionBank />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <QuestionBank />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route

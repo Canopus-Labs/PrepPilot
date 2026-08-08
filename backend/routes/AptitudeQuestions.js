@@ -1,5 +1,7 @@
 const express = require("express");
 const { generateWithFallback } = require("../utils/geminiHelper");
+const { protect } = require("../middlewares/authMiddleware");
+const { z } = require("zod");
 const NodeCache = require("node-cache");
 
 const questionCache = new NodeCache({
@@ -10,15 +12,59 @@ const router = express.Router();
 const MAX_RETRIES = 3;
 const INITIAL_DELAY = 1000;
 
+// Topics are restricted to safe, instruction-free strings so the value can be
+// interpolated into the Gemini prompt without acting as a prompt-injection
+// vector, and so poisoned topic strings cannot be cached and served to others.
+const TOPIC_PATTERN = /^[A-Za-z0-9 _-]{1,60}$/;
+const BLOCKED_TOPIC_PATTERNS = [
+  /ignore previous instructions/i,
+  /ignore all instructions/i,
+  /system prompt/i,
+  /jailbreak/i,
+  /bypass/i,
+  /act as/i,
+  /you are now/i,
+  /override/i,
+  /disregard/i,
+  /pretend/i,
+];
+
+/**
+ * Validate and sanitize a requested aptitude topic. Returns the trimmed topic
+ * when it is safe, or null when it is missing, too long, contains disallowed
+ * characters, or looks like instruction-injection content.
+ * @param {unknown} raw
+ * @returns {string|null}
+ */
+const sanitizeTopic = (raw) => {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!TOPIC_PATTERN.test(trimmed)) return null;
+  if (BLOCKED_TOPIC_PATTERNS.some((p) => p.test(trimmed))) return null;
+  return trimmed;
+};
+
+// Gemini output is validated against this shape before being cached/served so
+// malformed responses never reach the client.
+const questionsSchema = z
+  .array(
+    z.object({
+      question: z.string().min(1),
+      options: z.array(z.string().min(1)).length(4),
+      answer: z.string().min(1),
+    })
+  )
+  .min(1);
 
 // GET /api/questions?topic=Probability
-router.get("/", async (req, res) => {
-  const { topic } = req.query;
-  if (typeof topic !== "string" || topic.trim().length === 0) {
-    return res.status(400).json({ error: "Topic is required" });
+router.get("/", protect, async (req, res) => {
+  const topic = sanitizeTopic(req.query.topic);
+  if (!topic) {
+    return res.status(400).json({
+      error: "Invalid topic. Use letters, numbers, spaces, underscores or hyphens (max 60 characters).",
+    });
   }
-  const normalizedTopic = topic.trim().toLowerCase();
-  const cacheKey = `questions:${normalizedTopic}`;
+  const cacheKey = `questions:${topic.toLowerCase()}`;
 
   const cachedQuestions = questionCache.get(cacheKey);
 
@@ -68,9 +114,17 @@ router.get("/", async (req, res) => {
           error: "Failed to parse Gemini response",
         });
     }
-    questionCache.set(cacheKey, questions);
 
-    res.json(questions);
+    const parsed = questionsSchema.safeParse(questions);
+    if (!parsed.success) {
+      console.error("Gemini response failed validation:", rawText);
+      return res
+        .status(502)
+        .json({ error: "Failed to generate valid questions" });
+    }
+    questionCache.set(cacheKey, parsed.data);
+
+    res.json(parsed.data);
   } catch (error) {
     console.error("Gemini API error:", error);
     res
@@ -79,3 +133,6 @@ router.get("/", async (req, res) => {
   }
 });
 module.exports = router;
+module.exports.sanitizeTopic = sanitizeTopic;
+module.exports.TOPIC_PATTERN = TOPIC_PATTERN;
+module.exports.questionsSchema = questionsSchema;
