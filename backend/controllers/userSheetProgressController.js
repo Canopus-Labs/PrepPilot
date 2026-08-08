@@ -52,6 +52,34 @@ exports.saveProgress = async (req, res) => {
     });
   }
 
+  // Validate optional update fields if provided
+  if (followed !== undefined && typeof followed !== "boolean") {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid followed field, must be a boolean",
+    });
+  }
+
+  if (completedTopics !== undefined && !Array.isArray(completedTopics)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid completedTopics field, must be an array",
+    });
+  }
+
+  if (
+    percentage !== undefined &&
+    (typeof percentage !== "number" ||
+      Number.isNaN(percentage) ||
+      percentage < 0 ||
+      percentage > 100)
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid percentage field, must be a number between 0 and 100",
+    });
+  }
+
   const validatedSheetId = sheetId.trim();
 
   // Build update fields only for fields that are explicitly defined in the request.
