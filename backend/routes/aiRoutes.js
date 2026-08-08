@@ -244,34 +244,98 @@ router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, gener
 // Structured problem-solving route
 router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
 
-// List available models
 /**
- * List available Gemini models configured for the backend.
+ * Known Gemini models available via the @google/generative-ai SDK.
+ * The SDK does not expose a listModels() method, so this endpoint
+ * returns the curated set of models the backend is configured to use.
  * @route GET /api/models
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When listing models fails.
- * @example
- * GET /api/models
- * @example
- * 200 {"availableModels": ["gemini-2.5-flash"], "configured": "models/gemini-2.5-flash", "note": "..."}
  */
-router.get("/models", async (req, res) => {
-  try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const models = await genAI.listModels();
-    const modelNames = models.map((m) => m.name.replace("models/", ""));
-    res.json({
-      availableModels: modelNames,
-      configured: process.env.GEMINI_MODEL || null,
-      note: "Actual availability depends on your API key & region. Set GEMINI_MODEL in .env to force a specific one.",
-    });
-  } catch (e) {
-    console.error("List models error:", e);
-    res.status(500).json({ error: "Failed to list models" });
-  }
+router.get("/models", (req, res) => {
+  const KNOWN_MODELS = [
+    "models/gemini-2.5-flash",
+    "models/gemini-flash-latest",
+    "models/gemini-2.0-flash",
+  ];
+  res.json({
+    availableModels: KNOWN_MODELS.map((m) => m.replace("models/", "")),
+    configured: process.env.GEMINI_MODEL || null,
+    note: "Actual availability depends on your API key and region. Set GEMINI_MODEL in .env to force a specific model.",
+  });
 });
+
+/**
+ * Estimate the difficulty of an interview question using AI.
+ * @route POST /api/ai/difficulty
+ */
+async function difficultyHandler(req, res) {
+  const { question } = req.body || {};
+  if (!question || !question.trim()) {
+    return res.status(400).json({ error: "Question is required" });
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: "GEMINI_API_KEY not configured on server" });
+  }
+
+  try {
+    const DIFFICULTY_PROMPT = `You are an expert technical interviewer. Analyze the following interview question and respond with ONLY a valid JSON object, no other text:
+
+{
+  "difficulty": "Easy" or "Medium" or "Hard" or "Expert",
+  "confidence": a number between 0-100,
+  "estimatedTime": "e.g. '15 Minutes'",
+  "prerequisites": ["topic1", "topic2", ...],
+  "analysis": "2-3 sentence explanation of why this difficulty was chosen"
+}
+
+Question: ${question.trim()}`;
+
+    const { result, usedModel } = await generateChatWithFallback(
+      process.env.GEMINI_API_KEY,
+      DIFFICULTY_PROMPT,
+      [],
+      {
+        systemInstruction:
+          "You are an expert coding interview assessor. Always respond with ONLY valid JSON matching the exact schema requested. Never add any text outside the JSON.",
+      }
+    );
+
+    const rawText = await result.response.text();
+    const cleaned = rawText
+      .replace(/^[\s`]*json\s*/i, "")
+      .replace(/^\s*```/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      return res.json({
+        difficulty: "Medium",
+        confidence: 70,
+        estimatedTime: "20 Minutes",
+        prerequisites: ["Data Structures", "Algorithms"],
+        analysis: cleaned.slice(0, 200),
+        model: usedModel,
+      });
+    }
+
+    return res.json({
+      difficulty: parsed.difficulty || "Medium",
+      confidence: parsed.confidence || 70,
+      estimatedTime: parsed.estimatedTime || "20 Minutes",
+      prerequisites: Array.isArray(parsed.prerequisites) ? parsed.prerequisites : [],
+      analysis: parsed.analysis || "",
+      model: usedModel,
+    });
+  } catch (error) {
+    console.error("[AI] Difficulty estimation failed:", error);
+    return res.status(500).json({ error: "Failed to estimate difficulty" });
+  }
+}
+
+router.post("/ai/difficulty", aiLimiter, difficultyHandler);
 
 module.exports = router;
 module.exports.buildChatPayload = buildChatPayload;
