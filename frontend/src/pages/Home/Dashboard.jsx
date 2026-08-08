@@ -56,6 +56,27 @@ const Dashboard = () => {
         <div className="container mx-auto pt-8 pb-16 px-4 md:px-0 relative z-10">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 md:mb-10 gap-4">
+
+  <div>
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+      Your Interview Sessions
+    </h1>
+
+    <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
+      Manage, review, and dynamically create your AI-driven mock interview sessions.
+    </p>
+  </div>
+
+  <button
+    onClick={() => navigate("/daily-challenge")}
+    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+  >
+    🔥 Daily Challenge
+  </button>
+
+</div>
+          <div className="flex items-center justify-between mb-8 md:mb-10">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
                 Your Interview Sessions
@@ -73,6 +94,20 @@ const Dashboard = () => {
             >
               🔥 Daily Challenge
             </button>
+          </div>
+    onClick={() => navigate("/revision-planner")}
+    className="inline-flex items-center gap-2 px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold shadow-md transition-all"
+  >
+    📅 Revision Planner
+  </button>
+
+</div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
+              Your Interview Sessions
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
+              Manage, review, and dynamically create your AI-driven mock interview sessions.
+            </p>
           </div>
 
           {/* Sessions Grid */}

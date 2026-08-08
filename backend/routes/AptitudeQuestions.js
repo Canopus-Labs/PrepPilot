@@ -20,6 +20,11 @@ router.get("/", async (req, res) => {
   const normalizedTopic = topic.trim().toLowerCase();
   const cacheKey = `questions:${normalizedTopic}`;
 
+const cachedQuestions = questionCache.get(cacheKey);
+
+if (cachedQuestions) {
+  return res.json(cachedQuestions);
+}
   const cachedQuestions = questionCache.get(cacheKey);
 
   if (cachedQuestions) {

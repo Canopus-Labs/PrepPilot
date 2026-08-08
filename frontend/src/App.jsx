@@ -1,29 +1,13 @@
-import Compiler from "./components/Compiler";
-import SkillAssessment from "./components/SkillAssessment";
-import DsaSheet from "./components/SheetDetailsPage";
-import SheetList from "./components/SheetList";
-import UserProvider from "./context/userContext";
-import ThemeProvider from "./context/themeContext";
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { lazy, Suspense, useContext } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
+
+// Eagerly loaded shells/infra used on every render.
+import UserProvider, { UserContext } from "./context/userContext";
+import ThemeProvider from "./context/themeContext";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
-
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import AuthPage from "./pages/Auth/AuthPage";
-import VerifyEmail from "./pages/Auth/verifyEmail";
-import LandingPage from "./LandingPage";
-import Dashboard from "./pages/Home/Dashboard";
-import ProgressTrackerDashboard from "./pages/Home/ProgressTrackerDashboard";
-import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
-import AIHelper from "./components/AIHepler";
-import PracticePage from "./pages/InterviewPrep/components/PracticePage";
-import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
-import { useContext } from "react";
-import { UserContext } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
 import { Navigate, Outlet } from "react-router-dom";
 import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
@@ -50,6 +34,47 @@ import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChalle
 import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
+import RevisionPlanner from "./pages/RevisionPlanner/RevisionPlanner";
+
+// Route-level code-splitting: each page is fetched only when its route is
+// visited, so heavy libraries (Monaco, PDF, syntax highlighter) stay out of
+// the initial bundle.
+const Compiler = lazy(() => import("./components/Compiler"));
+const SkillAssessment = lazy(() => import("./components/SkillAssessment"));
+const DsaSheet = lazy(() => import("./components/SheetDetailsPage"));
+const SheetList = lazy(() => import("./components/SheetList"));
+const AuthPage = lazy(() => import("./pages/Auth/AuthPage"));
+const VerifyEmail = lazy(() => import("./pages/Auth/verifyEmail"));
+const LandingPage = lazy(() => import("./LandingPage"));
+const Dashboard = lazy(() => import("./pages/Home/Dashboard"));
+const ProgressTrackerDashboard = lazy(() => import("./pages/Home/ProgressTrackerDashboard"));
+const InterviewPrep = lazy(() => import("./pages/InterviewPrep/InterviewPrep"));
+const AIHelper = lazy(() => import("./components/AIHepler"));
+const PracticePage = lazy(() => import("./pages/InterviewPrep/components/PracticePage"));
+const CognitiveGamesPage = lazy(() => import("./pages/CognitiveGames/CognitiveGamesPage"));
+const ResumeTemplates = lazy(() => import("./pages/ResumeBuilder/ResumeTemplates"));
+const ResumeEditor = lazy(() => import("./pages/ResumeBuilder/ResumeEditor"));
+const ResumeAnalyzer = lazy(() => import("./pages/ResumeBuilder/ResumeAnalyzer"));
+const InterviewExperiences = lazy(() => import("./pages/InterviewExperiences/InterviewExperiences"));
+const TermsandConditions = lazy(() => import("./pages/Terms/TermsandConditions"));
+const ProjectIdeas = lazy(() => import("./pages/ProjectIdeas/ProjectIdeas"));
+const RepositoryHive = lazy(() => import("./pages/OpenSource/RepositoryHive"));
+const OSSBlog = lazy(() => import("./pages/OpenSource/OSSBlog"));
+const OpenSourceEvents = lazy(() => import("./pages/OpenSource/OpenSourceEvents"));
+const NotesBooks = lazy(() => import("./pages/NotesBooks/NotesBooks"));
+const JobsForYou = lazy(() => import("./pages/Jobs/JobsForYou"));
+const HelpSupport = lazy(() => import("./pages/Support/HelpSupport"));
+const Settings = lazy(() => import("./pages/Settings/Settings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/Terms/PrivacyPolicy"));
+const FreeCourses = lazy(() => import("./pages/FreeCourses/FreeCourses"));
+const SpacedRepetitionPage = lazy(() => import("./pages/SpacedRepetition/SpacedRepetitionPage"));
+
+const RouteFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600" />
+  </div>
+);
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -77,6 +102,7 @@ const App = () => {
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
           <Router>
             <AnimatePresence mode="wait">
+              <Suspense fallback={<RouteFallback />}>
               <Routes>
                 {/* Routes without Sidebar */}
                 <Route
@@ -243,6 +269,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <SpacedRepetitionPage />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/revision-planner"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <RevisionPlanner />
                         </PageTransition>
                       </ProtectedRoute>
                     }
@@ -475,6 +511,7 @@ const App = () => {
                     }
                  />
               </Routes>
+              </Suspense>
             </AnimatePresence>
           </Router>
           <Toaster

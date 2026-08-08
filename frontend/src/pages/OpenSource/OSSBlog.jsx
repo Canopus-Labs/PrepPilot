@@ -9,7 +9,6 @@ import {
   ExternalLink,
   Search,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 const OSSBlog = () => {
   const [articles, setArticles] = useState([]);

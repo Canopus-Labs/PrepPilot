@@ -16,6 +16,21 @@ export default defineConfig(({ mode }) => {
     resolve: {
       dedupe: ['react', 'react-dom'],
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // Split heavy, route-specific vendors into their own chunks so they
+          // aren't pulled into the initial paint.
+          manualChunks: {
+            'vendor-monaco': ['@monaco-editor/react'],
+            'vendor-syntax': ['react-syntax-highlighter'],
+            'vendor-pdf': ['html2pdf.js'],
+            'vendor-motion': ['framer-motion'],
+            'vendor-markdown': ['react-markdown', 'remark-gfm'],
+          },
+        },
+      },
+    },
     server: {
       proxy: useProxy
         ? {
