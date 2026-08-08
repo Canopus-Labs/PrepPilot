@@ -6,11 +6,14 @@ const Flashcard = require("../models/Flashcard");
  * Returns updated { interval, repetition, efactor, dueDate }
  */
 const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) => {
+  // Map ratings to the standard SM-2 quality scale (0-5):
+  //   again/1 -> 1, hard/2 -> 2, medium/3 -> 3, good/4 -> 4, easy/5 -> 5
   let score = 3;
   if (rating === "again" || rating === "1") score = 1;
   else if (rating === "hard" || rating === "2") score = 2;
-  else if (rating === "medium" || rating === "good" || rating === "3") score = 4;
-  else if (rating === "easy" || rating === "4") score = 5;
+  else if (rating === "medium" || rating === "3") score = 3;
+  else if (rating === "good" || rating === "4") score = 4;
+  else if (rating === "easy" || rating === "5") score = 5;
 
   let newRepetition = repetition;
   let newInterval = interval;
@@ -27,13 +30,16 @@ const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) =
       newInterval = repetition <= 1 ? 1 : Math.max(1, Math.round(interval * 1.2));
     }
   } else {
-    // Successful recall (Medium / Easy)
+    // Successful recall (Medium / Good / Easy). Scale interval growth with the
+    // score so "medium" (3) schedules shorter than "good" (4), which is shorter
+    // than "easy" (5).
     if (repetition === 0) {
-      newInterval = score === 5 ? 2 : 1;
+      newInterval = score >= 4 ? 2 : 1;
     } else if (repetition === 1) {
-      newInterval = score === 5 ? 7 : 6;
+      newInterval = score >= 4 ? 6 : 3;
     } else {
-      const multiplier = score === 5 ? newEFactor * 1.3 : newEFactor;
+      const multiplier =
+        score === 5 ? newEFactor * 1.3 : score === 4 ? newEFactor : newEFactor * 0.8;
       newInterval = Math.max(1, Math.round(interval * multiplier));
     }
     newRepetition += 1;
