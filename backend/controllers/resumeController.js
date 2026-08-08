@@ -155,6 +155,24 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
             console.error("Failed to parse Gemini JSON:", aiResponse);
             return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
         }
+        try {
+            await ResumeAnalysisHistory.create({
+                user: req.user._id,
+                targetRole,
+                resumeScore: jsonResult.resumeScore || 0,
+                roleMatch: jsonResult.roleMatch || 0,
+                missingSkills: jsonResult.missingSkills || [],
+                missingKeywords: jsonResult.missingKeywords || [],
+                actionVerbs: jsonResult.actionVerbs || [],
+                formattingIssues: jsonResult.formattingIssues || [],
+                missingProjects: jsonResult.missingProjects || [],
+                atsCompatibility: jsonResult.atsCompatibility || {},
+                suggestions: jsonResult.suggestions || [],
+                sections: jsonResult.sections || {}
+            });
+        } catch (dbErr) {
+            console.error("Failed to save analysis history:", dbErr);
+        }
 
         res.status(200).json(jsonResult);
 
@@ -165,6 +183,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
 }
 
 const Resume = require("../models/Resume");
+const ResumeAnalysisHistory = require("../models/ResumeAnalysisHistory");
 
 /**
  * Save or update a user's resume record.
@@ -261,4 +280,21 @@ async function deleteResume(req, res) {
     }
 }
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
+/**
+ * Retrieve saved resume analysis history for the authenticated user.
+ * @route GET /api/resume/analysis-history
+ */
+const getResumeAnalysisHistory = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const history = await ResumeAnalysisHistory.find({ user: userId })
+            .sort({ createdAt: -1 })
+            .limit(50);
+        res.status(200).json({ success: true, history });
+    } catch (error) {
+        console.error("Get Analysis History Error:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory };
