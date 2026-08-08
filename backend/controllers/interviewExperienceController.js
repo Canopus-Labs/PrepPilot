@@ -1,4 +1,7 @@
+const mongoose = require("mongoose");
 const InterviewExperience = require("../models/InterviewExperience");
+
+const ALLOWED_STATUSES = ["pending", "approved", "rejected"];
 
 const toClientShape = (doc) => {
   const obj = typeof doc.toObject === "function" ? doc.toObject() : doc;
@@ -166,9 +169,27 @@ const getMyInterviewExperiences = async (req, res) => {
  */
 const updateInterviewExperienceStatus = async (req, res) => {
   try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid experience id",
+      });
+    }
+
+    // Resolve against a constant allowlist so the update document is never
+    // built directly from the request body (CodeQL js/nosql-injection).
+    const status = ALLOWED_STATUSES.find((value) => value === req.body?.status);
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "status must be pending, approved, or rejected",
+      });
+    }
+
     const experience = await InterviewExperience.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
+      id,
+      { status },
       { new: true },
     );
 

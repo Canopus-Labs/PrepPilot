@@ -225,14 +225,49 @@ describe("updateInterviewExperienceStatus", () => {
 
     await updateInterviewExperienceStatus(req, res);
 
+    expect(InterviewExperience.findByIdAndUpdate).toHaveBeenCalledWith(
+      "507f1f77bcf86cd799439011",
+      { status: "approved" },
+      { new: true },
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json.mock.calls[0][0].experience.status).toBe("approved");
+  });
+
+  it("rejects an invalid status before querying", async () => {
+    InterviewExperience.findByIdAndUpdate = vi.fn();
+
+    const req = makeReq(
+      { status: { $ne: null } },
+      { id: "507f1f77bcf86cd799439011" },
+    );
+    const res = makeRes();
+
+    await updateInterviewExperienceStatus(req, res);
+
+    expect(InterviewExperience.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("rejects an invalid ObjectId before querying", async () => {
+    InterviewExperience.findByIdAndUpdate = vi.fn();
+
+    const req = makeReq({ status: "rejected" }, { id: "missing" });
+    const res = makeRes();
+
+    await updateInterviewExperienceStatus(req, res);
+
+    expect(InterviewExperience.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
   });
 
   it("rejects an unknown id", async () => {
     InterviewExperience.findByIdAndUpdate = vi.fn().mockResolvedValue(null);
 
-    const req = makeReq({ status: "rejected" }, { id: "missing" });
+    const req = makeReq(
+      { status: "rejected" },
+      { id: "507f1f77bcf86cd799439012" },
+    );
     const res = makeRes();
 
     await updateInterviewExperienceStatus(req, res);
