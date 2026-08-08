@@ -15,6 +15,7 @@ const {
   generateInterviewQuestions,
   generateConceptExplanation,
   generateInterviewTips,
+  estimateDifficulty,
 } = require("./controllers/aiController");
 const { protect } = require("./middlewares/authMiddleware");
 const authRoutes = require("./routes/authRoutes");
@@ -115,7 +116,7 @@ app.use("/api/user", generalLimiter, userSheetProgressRoutes);
 const achievementRoutes = require("./routes/achievementRoutes");
 app.use("/api/user", generalLimiter, achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
-const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips } = require("./Input_validators/ValidateAi.js");
+const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips, validateEstimateDifficulty } = require("./Input_validators/ValidateAi.js");
 app.use("/api/resume", generalLimiter, resumeRoutes);
 const notesSummaryRoutes = require("./routes/notesSummaryRoutes");
 app.use("/api/notes-summary", generalLimiter, notesSummaryRoutes);
@@ -146,6 +147,15 @@ app.post(
   protect,
   validateGenerateInterviewTips,      // Zod validator
   generateInterviewTips               // Controller
+);
+
+app.post(
+  "/api/ai/estimate-difficulty",
+  sensitiveRouteHeaders,
+  aiLimiter,
+  protect,
+  validateEstimateDifficulty,         // Zod validator
+  estimateDifficulty                  // Controller
 );
 
 
