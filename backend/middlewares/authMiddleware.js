@@ -29,6 +29,13 @@ const protect = async (req, res, next) => {
         });
       }
 
+      // Check if email is verified
+      if (!req.user.isEmailVerified) {
+        return res.status(403).json({
+          message: "Please verify your email to access this resource"
+        });
+      }
+
       // Reject tokens issued before the user's current version (logout / password change).
       if ((decoded.tokenVersion ?? 0) !== (req.user.tokenVersion ?? 0)) {
         return res.status(401).json({ message: "Session expired, please log in again" });
