@@ -86,16 +86,46 @@ app.use((req, res, next) => {
   next();
 });
 
-connectDB()
-  .then((success) => {
-    if (success) {
+// ── Graceful startup: block app.listen() until MongoDB is reachable ────────
+// Previously connectDB() was fire-and-forget and the server started
+// regardless, leaving every endpoint to fail with cryptic errors when the
+// DB was down. Now we await the connection and exit(1) in production if it
+// fails, while still allowing a dev server to start for route debugging.
+async function startServer() {
+  let dbConnected = false;
+  try {
+    dbConnected = await connectDB();
+    if (dbConnected) {
       console.log("MongoDB connected successfully");
     } else {
-      console.warn("⚠️ Failed to connect to MongoDB - server will run without database connection");
+      if (process.env.NODE_ENV === "production") {
+        console.error(
+          "FATAL: Cannot connect to MongoDB — database is required in production. Exiting.",
+        );
+        process.exit(1);
+      }
+      console.warn(
+        "⚠️ Failed to connect to MongoDB - server will run without database connection (dev mode only)",
+      );
     }
-  })
-  .catch((err) => {
+  } catch (err) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("FATAL: Database connection error:", err.message);
+      process.exit(1);
+    }
     console.error("Database connection error:", err.message);
+  }
+
+  // Lightweight health probe so load balancers / orchestrators can tell a
+  // degraded instance from a healthy one.
+  app.get("/api/health", (req, res) => {
+    const mongoose = require("mongoose");
+    const ready = dbConnected && mongoose.connection.readyState === 1;
+    res.status(ready ? 200 : 503).json({
+      status: ready ? "ok" : "degraded",
+      database: ready ? "connected" : "disconnected",
+      timestamp: new Date().toISOString(),
+    });
   });
 
 // Middleware
@@ -181,16 +211,19 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server connected and running on port ${PORT}`);
-  if (process.env.NODE_ENV === "production") {
-    console.log("Allowed CORS origins (production):");
-  } else {
-    console.log("Allowed CORS origins (development):");
-  }
-  for (const o of allowedOrigins) {
-    console.log("  -", o);
-  }
+    console.log(`Server connected and running on port ${PORT}`);
+    if (process.env.NODE_ENV === "production") {
+        console.log("Allowed CORS origins (production):");
+    } else {
+        console.log("Allowed CORS origins (development):");
+    }
+    for (const o of allowedOrigins) {
+        console.log("  -", o);
+    }
 });
+}
+
+startServer();
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
