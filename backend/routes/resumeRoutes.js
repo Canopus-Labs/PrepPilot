@@ -4,7 +4,7 @@ const { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume } =
 const { protect } = require('../middlewares/authMiddleware');
 const { upload, uploadResume, validateResumeMagicBytes } = require('../middlewares/uploadMiddleware');
 const { aiLimiter } = require('../middlewares/rateLimiter');
-const { validateCompileResume, validateAnalyzeResume, validateSaveResume } = require('../Input_validators/ValidateResume');
+const { validateCompileResume, validateAnalyzeResume, validateSaveResume, validateDeleteResume } = require('../Input_validators/ValidateResume');
 
 
 router.use(protect);
@@ -31,6 +31,6 @@ router.get('/my-resumes', getMyResumes);
 // @route   DELETE /api/resume/:id
 // @desc    Delete a saved resume by ID
 // @access  Private
-router.delete('/:id', deleteResume);
+router.delete('/:id', validateDeleteResume, deleteResume);
 
 module.exports = router;

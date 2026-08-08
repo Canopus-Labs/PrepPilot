@@ -46,10 +46,13 @@ jobs:
             const MAX_OPEN_PRS    = parseInt(process.env.MAX_OPEN_PRS,    10);
             const LABEL           = process.env.RATE_LIMITED_LABEL;
 
-            // ── Excluded contributors (always exempt, regardless of role) ───
-            const EXCLUDED_USERS = [
-              "jainiksha",   // project lead / trusted contributor
-            ];
+            // ── Users that are NEVER rate-limited (project leads / maintainers)
+            const EXCLUDED_USERS = ["jainiksha"];
+
+            // ── Users that are ALWAYS rate-limited (no collaborator bypass) ──
+            // Add contributors here who should be subject to limits even if they
+            // have triage/write access granted during a program.
+            const FORCE_LIMIT_USERS = ["ionfwsrijan"];
 
             const CLOSE_MESSAGE =
               `Thank you for your contribution!\n\n` +
@@ -68,47 +71,63 @@ jobs:
 
             core.info(`Event: ${context.eventName}  |  Author: ${actor}  |  #${itemNumber}`);
 
-            // ── 0. Exempt explicitly excluded users ─────────────────────────
+            // ── 0. Never rate-limit excluded/trusted users ──────────────────
             if (EXCLUDED_USERS.map(u => u.toLowerCase()).includes(actor.toLowerCase())) {
               core.info(`${actor} is in the exclusion list — skipping rate limit.`);
               return;
             }
 
-            // ── 1. Exempt specific contributors, repo owner, admins and collaborators ──
-            const EXEMPT_USERS = ["jainiksha"]; // add more usernames here if needed
-            if (EXEMPT_USERS.map(u => u.toLowerCase()).includes(actor.toLowerCase())) {
-              core.info(`${actor} is in the exempt list — skipping rate limit.`);
-              return;
+            // ── 1. Collaborator exemption (skip for force-limited users) ─────
+            const forceLimit = FORCE_LIMIT_USERS.map(u => u.toLowerCase()).includes(actor.toLowerCase());
+            if (!forceLimit) {
+              try {
+                const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner, repo, username: actor,
+                });
+                if (["admin", "maintain", "write"].includes(perm.permission)) {
+                  core.info(`${actor} has '${perm.permission}' permission — skipping rate limit.`);
+                  return;
+                }
+              } catch (err) {
+                if (err.status !== 404) core.warning(`Permission check failed: ${err.message}`);
+              }
+            } else {
+              core.info(`${actor} is in force-limit list — bypassing collaborator exemption.`);
             }
 
-            try {
-              const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
-                owner, repo, username: actor,
-              });
-              // permission levels: admin | maintain | write | triage | read
-              if (["admin", "maintain", "write"].includes(perm.permission)) {
-                core.info(`${actor} has '${perm.permission}' permission — skipping rate limit.`);
-                return;
-              }
-            } catch (err) {
-              // 404 = not a collaborator; any other error → log but continue
-              if (err.status !== 404) core.warning(`Permission check failed: ${err.message}`);
-            }
+            // ── 1b. Wait briefly for GitHub Search API to index the new item ─
+            await new Promise(r => setTimeout(r, 5000));
 
             // ── 2. Count open Issues / PRs by this author ───────────────────
-            //    GitHub search API: one request for issues, one for PRs.
-            //    We exclude the newly created item from each count so the
-            //    threshold is "already had N open BEFORE this one".
-
+            // Use the REST list API (real-time) instead of Search API (has indexing delay).
             async function countOpen(type) {
-              // type = "issue" or "pr"
-              const qualifier = type === "issue" ? "is:issue" : "is:pr";
-              const { data } = await github.rest.search.issuesAndPullRequests({
-                q: `repo:${owner}/${repo} is:open ${qualifier} author:${actor}`,
-                per_page: 100,   // max per page; enough for any sane contributor
-              });
-              // Subtract 1 for the item we just opened (it's already in the index)
-              return Math.max(0, data.total_count - 1);
+              let count = 0;
+              let page  = 1;
+              while (true) {
+                const endpoint = type === "issue"
+                  ? github.rest.issues.listForRepo
+                  : github.rest.pulls.list;
+                const { data } = await endpoint({
+                  owner, repo,
+                  state: "open",
+                  per_page: 100,
+                  page,
+                  ...(type === "issue" ? { creator: actor } : {}),
+                });
+                if (!data.length) break;
+                for (const item of data) {
+                  // issues.listForRepo also returns PRs; skip them when counting issues
+                  const hasPR = !!item.pull_request;
+                  if (type === "issue" && hasPR) continue;
+                  if (item.user.login.toLowerCase() === actor.toLowerCase()) {
+                    // Exclude the current item that just triggered this run
+                    if (item.number !== itemNumber) count++;
+                  }
+                }
+                if (data.length < 100) break;
+                page++;
+              }
+              return count;
             }
 
             const openIssues = isIssue ? await countOpen("issue") : null;

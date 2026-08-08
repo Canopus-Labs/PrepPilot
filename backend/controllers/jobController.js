@@ -38,6 +38,23 @@ const isValidCountry = (country) => {
 // instead of crashing the server or spamming failed API calls.
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
 
+// Bound the set of cache keys: role/country are client-controlled, so we trim,
+// normalize, and whitelist them before they touch the JobCache collection.
+const normalizeRole = (role) => {
+  if (typeof role !== "string") return "";
+  const trimmed = role.trim().toLowerCase();
+  if (trimmed.length === 0 || trimmed.length > 64) return "";
+  if (!/^[a-z0-9\s+#.,&()/'\-]*$/.test(trimmed)) return "";
+  return trimmed;
+};
+
+const normalizeCountry = (country) => {
+  if (typeof country !== "string") return ADZUNA_COUNTRY;
+  const trimmed = country.trim().toLowerCase();
+  if (!/^[a-z]{2}$/.test(trimmed)) return ADZUNA_COUNTRY;
+  return trimmed;
+};
+
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
   const { data } = await axios.get(url, {
@@ -79,18 +96,18 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
-    const role    = req.query.role || latestSession?.role || "software engineer";
+    // Validate country against the Adzuna allow-list (Issue #1301).
+    // Invalid codes return 400 rather than silently falling back, so callers
+    // know their input was rejected.
+    const role = normalizeRole(req.query.role) || normalizeRole(latestSession?.role) || "software engineer";
     const countryParam = req.query.country || ADZUNA_COUNTRY;
-    
-    // Validate country parameter (Issue #1301)
     if (!isValidCountry(countryParam)) {
       return res.status(400).json({
         message: `Invalid country code. Valid codes are: ${VALID_ADZUNA_COUNTRIES.join(", ")}`,
       });
     }
-    
     const country = countryParam.toLowerCase();
-    const cacheKey = `${role.toLowerCase()}|${country}`;
+    const cacheKey = `${role}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
     if (cached && Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS) {
@@ -120,8 +137,10 @@ exports.refreshJobCache = async () => {
     });
 
     for (const role of roles) {
-      const cacheKey = `${role.toLowerCase()}|${ADZUNA_COUNTRY}`;
-      const jobs = await fetchFromAdzuna(role);
+      const normalizedRole = normalizeRole(role);
+      if (!normalizedRole) continue;
+      const cacheKey = `${normalizedRole}|${ADZUNA_COUNTRY}`;
+      const jobs = await fetchFromAdzuna(normalizedRole);
       await JobCache.findOneAndUpdate(
         { cacheKey },
         { jobs, fetchedAt: new Date() },

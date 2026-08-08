@@ -150,6 +150,46 @@ exports.getProgress = async (req, res) => {
 };
 
 /**
+ * Reset (clear) progress for a specific sheet for the authenticated user.
+ * @route DELETE /api/user/sheet-progress/:sheetId
+ */
+exports.resetProgress = async (req, res) => {
+  const { sheetId } = req.params;
+  const userId = req.user._id;
+
+  if (
+    typeof sheetId !== "string" ||
+    sheetId.trim().length === 0 ||
+    sheetId.length > 100
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid sheetId",
+    });
+  }
+
+  const validatedSheetId = sheetId.trim();
+
+  try {
+    const progress = await UserSheetProgress.findOneAndUpdate(
+      { userId, sheetId: validatedSheetId },
+      { $set: { completedTopics: {}, percentage: 0 } },
+      { new: true }
+    );
+
+    return res.json({
+      success: true,
+      progress: progress || null,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error occurred",
+    });
+  }
+};
+
+/**
  * Export all sheet progress for the authenticated user as a JSON file.
  * @route GET /api/user/sheet-progress/export
  */
