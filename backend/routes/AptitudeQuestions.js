@@ -14,7 +14,7 @@ const INITIAL_DELAY = 1000;
 // GET /api/questions?topic=Probability
 router.get("/", async (req, res) => {
   const { topic } = req.query;
-  if (typeof topic !== "string" || topic.trim() === "") {
+  if (typeof topic !== "string" || topic.trim().length === 0) {
     return res.status(400).json({ error: "Topic is required" });
   }
   const normalizedTopic = topic.trim().toLowerCase();

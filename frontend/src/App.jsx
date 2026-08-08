@@ -16,6 +16,7 @@ import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
 import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
 import TermsandConditions from "./pages/Terms/TermsandConditions";
 import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
+import ProjectRoadmap from "./pages/ProjectRoadmap/ProjectRoadmap";
 import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
@@ -28,8 +29,11 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
+import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
+import QuestionBank from "./pages/QuestionBank/QuestionBank";
 import RevisionPlanner from "./pages/RevisionPlanner/RevisionPlanner";
 
 // Route-level code-splitting: each page is fetched only when its route is
@@ -173,10 +177,22 @@ const App = () => {
                 <Route
                   element={
                     <MainLayout>
-                      <Outlet />
+                      <ErrorBoundary>
+                        <Outlet />
+                      </ErrorBoundary>
                     </MainLayout>
                   }
                 >
+                  <Route
+                    path="/behavioral-coach"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <BehavioralCoach />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/dashboard"
                     element={
@@ -302,6 +318,16 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/problem-solver"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ProblemSolver />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/sheet/:id"
                     element={
                       <PageTransition>
@@ -354,10 +380,26 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/question-bank"
+                    element={
+                      <PageTransition>
+                        <QuestionBank />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
                     path="/project-ideas"
                     element={
                       <PageTransition>
                         <ProjectIdeas />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/project-roadmap"
+                    element={
+                      <PageTransition>
+                        <ProjectRoadmap />
                       </PageTransition>
                     }
                   />
