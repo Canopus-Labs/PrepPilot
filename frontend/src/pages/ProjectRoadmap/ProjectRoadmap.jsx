@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Map, Sparkles, Save, RefreshCw, X, LogIn } from "lucide-react";
-import { BASE_URL, API_PATHS } from "../../utils/apiPaths";
+import { BASE_URL, API_PATHS, getAuthHeaders } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosinstance";
 import { UserContext } from "../../context/userContext";
 
@@ -75,7 +75,7 @@ const ProjectRoadmap = () => {
       const prompt = buildRoadmapPrompt(finalIdea, finalAnswers);
       const res = await fetch(`${BASE_URL}/api/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ prompt, systemInstruction: ROADMAP_SYSTEM_INSTRUCTION }),
       });
       if (!res.ok) throw new Error(`Server error ${res.status}`);
@@ -225,7 +225,7 @@ const ProjectRoadmap = () => {
       );
       const res = await fetch(`${BASE_URL}/api/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ prompt, systemInstruction: ROADMAP_SYSTEM_INSTRUCTION }),
       });
       if (!res.ok) throw new Error(`Server error ${res.status}`);

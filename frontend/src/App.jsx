@@ -183,9 +183,11 @@ const App = () => {
                   <Route
                     path="/ai-helper"
                     element={
-                      <PageTransition>
-                        <AIHelper />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <AIHelper />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
@@ -249,17 +251,21 @@ const App = () => {
                   <Route
                     path="/ai-insight"
                     element={
-                      <PageTransition>
-                        <AIHelper />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <AIHelper />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/ai-assistance"
                     element={
-                      <PageTransition>
-                        <AIHelper />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <AIHelper />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route

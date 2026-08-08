@@ -3,6 +3,7 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
+const { protect } = require('../middlewares/authMiddleware');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { sanitizePromptText } = sanitizeAiPrompt;
@@ -237,12 +238,12 @@ async function generateHandler(req, res) {
 }
 
 // Primary route used by frontend
-router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/generate', aiLimiter, protect, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
-router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/ai/generate', aiLimiter, protect, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 
 // Structured problem-solving route
-router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
+router.post('/solve', aiLimiter, protect, sanitizeAiPrompt, validateProblemSolve, solveHandler);
 
 // List available models
 /**

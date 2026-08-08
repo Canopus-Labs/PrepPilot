@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BASE_URL } from "../../utils/apiPaths";
+import { BASE_URL, getAuthHeaders } from "../../utils/apiPaths";
 import {
   Lightbulb,
   Layers,
@@ -350,7 +350,7 @@ const ProjectIdeas = () => {
 
       const res = await fetch(`${BASE_URL}/api/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ 
           prompt,
           systemInstruction: "You are an API that ONLY returns valid JSON arrays. Do not include any conversational text, greetings, or formatting outside the JSON array."

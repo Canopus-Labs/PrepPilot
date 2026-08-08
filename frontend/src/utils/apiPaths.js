@@ -2,6 +2,14 @@
 export const BASE_URL =
     import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
 
+// Build auth headers for raw fetch() calls (axiosInstance attaches the same
+// token automatically). Returns an empty object when no token is present.
+export const getAuthHeaders = () => {
+    const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const API_PATHS = {
     AUTH: {
     REGISTER: "/api/auth/register",

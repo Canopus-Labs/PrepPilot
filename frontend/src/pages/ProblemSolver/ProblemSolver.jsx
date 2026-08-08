@@ -13,7 +13,7 @@ import {
   Gauge,
   Terminal,
 } from "lucide-react";
-import { BASE_URL } from "../../utils/apiPaths";
+import { BASE_URL, getAuthHeaders } from "../../utils/apiPaths";
 
 const LANGUAGES = [
   { value: "python", label: "Python" },
@@ -140,7 +140,7 @@ export default function ProblemSolver() {
     try {
       const res = await fetch(`${BASE_URL}/api/solve`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ problem, language, constraints }),
       });
 

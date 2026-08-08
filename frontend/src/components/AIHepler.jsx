@@ -1,7 +1,7 @@
 import React, { useState, useRef, useContext } from "react";
 import { UserContext } from "../context/userContext";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
-import { BASE_URL } from "../utils/apiPaths";
+import { BASE_URL, getAuthHeaders } from "../utils/apiPaths";
 import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
@@ -28,7 +28,7 @@ export default function AIHelper() {
       `${BASE_URL}/api/generate`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ prompt, history }),
       }
     );
