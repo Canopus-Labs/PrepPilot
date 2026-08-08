@@ -15,7 +15,12 @@ const compileResumeSchema = z.object({
 
 // Schema for analyzeResume request
 const analyzeResumeSchema = z.object({
-  targetRole: z.string().min(1, "Target role is required").optional(),
+  targetRole: z
+    .string()
+    .min(1, "Target role is required")
+    .max(50, "Target role must be at most 50 characters")
+    .regex(/^[a-zA-Z0-9\s\-]+$/, "Target role must contain only alphanumeric characters, spaces, and hyphens")
+    .optional(),
 });
 
 // Schema for saveResume request
