@@ -93,7 +93,7 @@ exports.saveProgress = async (req, res) => {
       } catch (retryErr) {
         return res.status(500).json({
           success: false,
-          error: retryErr.message,
+          error: "Internal server error occurred",
         });
       }
     }
