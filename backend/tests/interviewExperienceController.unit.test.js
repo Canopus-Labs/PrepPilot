@@ -52,7 +52,7 @@ describe("createInterviewExperience", () => {
       company: "Google",
       role: "SDE-2",
       summary: "Tough but fair process",
-      clientKey: "client-key-123456",
+      clientKey: "11111111-1111-4111-8111-111111111111",
       idempotencyKey: "submit-key-abc12345",
     });
     const res = makeRes();
@@ -63,7 +63,7 @@ describe("createInterviewExperience", () => {
       expect.objectContaining({
         company: "Google",
         status: "pending",
-        clientKey: "client-key-123456",
+        clientKey: "11111111-1111-4111-8111-111111111111",
         idempotencyKey: "submit-key-abc12345",
       }),
     );
@@ -134,7 +134,7 @@ describe("createInterviewExperience", () => {
       company: "Google",
       role: "SDE-2",
       summary: "Summary",
-      clientKey: "client-key-123456",
+      clientKey: "11111111-1111-4111-8111-111111111111",
       idempotencyKey: "submit-key-abc12345",
     });
     const res = makeRes();
@@ -155,7 +155,7 @@ describe("createInterviewExperience", () => {
       company: "Google",
       role: "SDE-2",
       summary: "Tough but fair process",
-      clientKey: "client-key-123456",
+      clientKey: "11111111-1111-4111-8111-111111111111",
       idempotencyKey: "submit-key-abc12345",
     });
     const res = makeRes();
@@ -188,13 +188,13 @@ describe("getMyInterviewExperiences", () => {
       }),
     });
 
-    const req = makeReq({}, {}, { clientKey: "client-key-123456" });
+    const req = makeReq({}, {}, { clientKey: "11111111-1111-4111-8111-111111111111" });
     const res = makeRes();
 
     await getMyInterviewExperiences(req, res);
 
     expect(InterviewExperience.find).toHaveBeenCalledWith({
-      $or: [{ clientKey: "client-key-123456" }],
+      $or: [{ clientKey: "11111111-1111-4111-8111-111111111111" }],
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json.mock.calls[0][0].experiences[0].status).toBe("pending");
@@ -206,6 +206,18 @@ describe("getMyInterviewExperiences", () => {
 
     await getMyInterviewExperiences(req, res);
 
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("ignores legacy weak clientKeys so /mine cannot be enumerated", async () => {
+    InterviewExperience.find = vi.fn();
+
+    const req = makeReq({}, {}, { clientKey: "anon-1234567890" });
+    const res = makeRes();
+
+    await getMyInterviewExperiences(req, res);
+
+    expect(InterviewExperience.find).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(400);
   });
 });

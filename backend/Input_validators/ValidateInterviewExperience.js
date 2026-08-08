@@ -23,7 +23,15 @@ const createInterviewExperienceSchema = z.object({
   tips: z.array(z.string().trim().max(500)).max(20).optional().default([]),
   tags: z.array(z.string().trim().max(40)).max(10).optional().default([]),
   color: z.string().trim().max(40).optional(),
-  clientKey: z.string().trim().min(8).max(64).optional().nullable(),
+  clientKey: z
+    .string()
+    .trim()
+    .regex(
+      /^([0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i,
+      "Invalid clientKey format",
+    )
+    .optional()
+    .nullable(),
   // Required so keyless retries cannot bypass the unique partial index.
   idempotencyKey: z
     .string()

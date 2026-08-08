@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const InterviewExperience = require("../models/InterviewExperience");
 
 const ALLOWED_STATUSES = ["pending", "approved", "rejected"];
+const SECURE_CLIENT_KEY =
+  /^([0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
+
+const isSecureClientKey = (value) =>
+  typeof value === "string" && SECURE_CLIENT_KEY.test(value);
 
 const toClientShape = (doc) => {
   const obj = typeof doc.toObject === "function" ? doc.toObject() : doc;
@@ -47,10 +52,17 @@ const createInterviewExperience = async (req, res) => {
 
     if (req.user?._id) {
       payload.userId = req.user._id;
-    } else if (!payload.clientKey) {
+    } else if (!isSecureClientKey(payload.clientKey)) {
       return res.status(400).json({
         success: false,
         message: "clientKey is required for anonymous submissions",
+      });
+    }
+
+    if (payload.clientKey && !isSecureClientKey(payload.clientKey)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid clientKey format",
       });
     }
 
@@ -132,8 +144,9 @@ const getApprovedInterviewExperiences = async (req, res) => {
  */
 const getMyInterviewExperiences = async (req, res) => {
   try {
-    const clientKey =
+    const rawClientKey =
       typeof req.query.clientKey === "string" ? req.query.clientKey.trim() : "";
+    const clientKey = isSecureClientKey(rawClientKey) ? rawClientKey : "";
     const filters = [];
 
     if (req.user?._id) {

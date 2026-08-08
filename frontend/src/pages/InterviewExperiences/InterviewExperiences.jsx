@@ -26,6 +26,13 @@ import { API_PATHS } from "../../utils/apiPaths";
 
 const CLIENT_KEY_STORAGE = "preppilot_interview_experience_client_key";
 
+const isSecureClientKey = (value) =>
+  typeof value === "string" &&
+  (/^[0-9a-f]{32}$/i.test(value) ||
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    ));
+
 const createSecureClientKey = () => {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID();
@@ -45,7 +52,8 @@ const createSecureClientKey = () => {
 const getOrCreateClientKey = () => {
   try {
     const existing = localStorage.getItem(CLIENT_KEY_STORAGE);
-    if (existing) return existing;
+    if (isSecureClientKey(existing)) return existing;
+    localStorage.removeItem(CLIENT_KEY_STORAGE);
     const created = createSecureClientKey();
     if (!created) return null;
     localStorage.setItem(CLIENT_KEY_STORAGE, created);
@@ -539,14 +547,6 @@ const SubmitModal = ({ onClose, onAdd, clientKey }) => {
     setSubmitting(true);
     setSubmitError("");
 
-    if (!clientKey) {
-      setSubmitError(
-        "Unable to create a secure client key in this browser. Sign in or try another browser.",
-      );
-      setSubmitting(false);
-      return;
-    }
-
     const payload = {
       company: form.company.trim(),
       role: form.role.trim(),
@@ -567,7 +567,7 @@ const SubmitModal = ({ onClose, onAdd, clientKey }) => {
         : [],
       tags: [form.difficulty, form.role.trim().split(" ")[0]].filter(Boolean),
       color: `hsl(${(form.company.trim().charCodeAt(0) * 37) % 360}, 55%, 50%)`,
-      clientKey,
+      ...(clientKey ? { clientKey } : {}),
       idempotencyKey: idempotencyKeyRef.current,
     };
 
