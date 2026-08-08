@@ -11,8 +11,6 @@ import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
 import AuthPage from "./pages/Auth/AuthPage";
 import VerifyEmail from "./pages/Auth/verifyEmail";
 import LandingPage from "./LandingPage";
@@ -47,7 +45,10 @@ import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
 import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
 import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
+import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
+
+import QuestionBank from "./pages/QuestionBank/QuestionBank";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   if (loading) {
@@ -280,6 +281,16 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/problem-solver"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ProblemSolver />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/sheet/:id"
                     element={
                       <PageTransition>
@@ -328,6 +339,14 @@ const App = () => {
                     element={
                       <PageTransition>
                         <InterviewExperiences />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/question-bank"
+                    element={
+                      <PageTransition>
+                        <QuestionBank />
                       </PageTransition>
                     }
                   />

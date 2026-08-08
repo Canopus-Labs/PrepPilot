@@ -8,7 +8,7 @@ const protect = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
 
-    if (token && token.startsWith("Bearer")) {
+    if (token && token.toLowerCase().startsWith("bearer")) {
       // Extract token from "Bearer <token>"
       token = token.split(" ")[1];
 
@@ -44,4 +44,24 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+// Middleware to restrict a route to administrators (must run after protect).
+// Admins are allow-listed by email via the ADMIN_EMAILS env var
+// (comma-separated). With no allow-list configured, admin routes are closed.
+const requireAdmin = (req, res, next) => {
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (adminEmails.length === 0) {
+    return res.status(403).json({ message: "Forbidden: no admins configured" });
+  }
+
+  if (!req.user || !adminEmails.includes(req.user.email.toLowerCase())) {
+    return res.status(403).json({ message: "Forbidden: admin access required" });
+  }
+
+  next();
+};
+
+module.exports = { protect, requireAdmin };

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const ResumeSchema = new mongoose.Schema(
     {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
         title: { type: String, required: true },
         latexCode: { type: String, required: true },
     },

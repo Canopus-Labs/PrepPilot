@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { sanitizeMarkdownUrl } from "../../../utils/sanitizeMarkdownUrl";
 
 const AIResponsePreview = ({ content }) => {
     const [copied, setCopied] = useState(false);
@@ -65,7 +66,22 @@ const copyResponse = async () => {
                         h2({children}){ return <h2 className='text-2xl font-bold mt-7 mb-3 text-gray-900 dark:text-white'>{children}</h2>; },
                         h3({children}){ return <h3 className='text-lg font-bold mt-6 mb-2 text-violet-700 dark:text-violet-400'>{children}</h3>; },
                         h4({children}){ return <h4 className='text-base font-bold mt-5 mb-2 text-gray-900 dark:text-gray-200'>{children}</h4>; },
-                        a({children, href}){ return <a href={href} className='text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-medium'>{children}</a>; },
+                        a({children, href}){
+                            const safeHref = sanitizeMarkdownUrl(href);
+                            if (!safeHref) {
+                                return <span className="font-medium">{children}</span>;
+                            }
+                            return (
+                                <a
+                                    href={safeHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-medium"
+                                >
+                                    {children}
+                                </a>
+                            );
+                        },
                         table({children}){
                             return(
                                 <div className='overflow-x-auto my-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm'>
@@ -81,7 +97,17 @@ const copyResponse = async () => {
                         th({children}){ return <th className='px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider'>{children}</th>; },
                         td({children}){ return <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300'>{children}</td>; },
                         hr(){ return <hr className='my-8 border-gray-200 dark:border-white/10'></hr>; },
-                        img({src,alt}){ return <img src={src} alt={alt} className='my-6 max-w-full rounded-xl shadow-md border border-gray-100 dark:border-white/10'></img>; }
+                        img({src,alt}){
+                            const safeSrc = sanitizeMarkdownUrl(src);
+                            if (!safeSrc) return null;
+                            return (
+                                <img
+                                    src={safeSrc}
+                                    alt={alt || ""}
+                                    className="my-6 max-w-full rounded-xl shadow-md border border-gray-100 dark:border-white/10"
+                                />
+                            );
+                        }
                     }}
                 >
                     {content}

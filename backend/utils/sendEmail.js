@@ -59,7 +59,6 @@ const transporter = createTransporter();
  * @param {string} verificationUrl - Full URL with token for email verification.
  */
 const sendVerificationEmail = async (toEmail, verificationUrl) => {
-    console.log("Attempting SMTP connection...");
     await transporter.sendMail({
         from: `"PrepPilot" <${process.env.EMAIL_USER}>`,
         to: toEmail,
@@ -80,7 +79,6 @@ const sendVerificationEmail = async (toEmail, verificationUrl) => {
             </div>
         `,
     });
-    console.log("SMTP verified");
 };
 
 module.exports = { sendVerificationEmail };

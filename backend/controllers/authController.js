@@ -5,10 +5,21 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 
+// Models for cascade deletion on account delete
+const Session = require("../models/Session");
+const Question = require("../models/Question");
+const Flashcard = require("../models/Flashcard");
+const Resume = require("../models/Resume");
+const NotesSummary = require("../models/NotesSummary");
+const RoadmapProject = require("../models/RoadmapProject");
+const UserSheetProgress = require("../models/UserSheetProgress");
+
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_TOKEN_SALT_ROUNDS = 10;
+const PASSWORD_SALT_ROUNDS = 10;
+
 const getRefreshCookieOptions = () => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -44,14 +55,39 @@ const generateRefreshToken = (userId) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl } = req.body;
+
+        // Early payload presence & type validation to prevent unhandled TypeErrors (#758)
+        if (!name || typeof name !== "string" || !name.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Name is required and must be a non-empty string.",
+            });
+        }
+
+        if (!email || typeof email !== "string" || !email.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required and must be a valid string.",
+            });
+        }
+
+        if (!password || typeof password !== "string") {
+            return res.status(400).json({
+                success: false,
+                message: "Password is required.",
+            });
+        }
+
+        const cleanName = name.trim();
+        const cleanEmail = email.trim().toLowerCase();
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
 
-        if (!emailRegex.test(email)) {
-           return res.status(400).json({
-           success: false,
-           message: "Please enter a valid email address.",
-        });
+        if (!emailRegex.test(cleanEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address.",
+            });
         }
 
         const { valid, errors } = validatePassword(password);
@@ -59,24 +95,33 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: errors[0] });
         }
 
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) {
-            return res.status(400).json({ success: false, message: "A user with this email already exists." });
+            // Do not reveal whether the email is already registered. Respond
+            // with the same generic success shape (no tokens, no user data)
+            // so the endpoint cannot be used for account enumeration.
+            return res.status(201).json({
+                success: true,
+                message: "If this email is not already registered, your account has been created.",
+            });
         }
 
+        // Hash raw password with bcrypt before DB creation (#757)
+        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
+
         // Split name into first and last names for defaults
-        const nameParts = name.trim().split(/\s+/);
+        const nameParts = cleanName.split(/\s+/);
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
         // Generate default unique PrepPilot ID
-        const defaultPrepPilotId = email.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
+        const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
         // Auto-verify user — email verification temporarily disabled
         const user = await User.create({
-            name,
-            email,
-            password: password,
+            name: cleanName,
+            email: cleanEmail,
+            password: hashedPassword,
             profileImageUrl,
             firstName,
             lastName,
@@ -104,7 +149,6 @@ const registerUser = async (req, res) => {
             success: true,
             message: "Account created successfully. You can now log in.",
             accessToken,
-            
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -124,7 +168,11 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: "Email and password are required." });
+        }
+
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
         if (!user) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
@@ -157,7 +205,6 @@ const loginUser = async (req, res) => {
             email: user.email,
             profileImageUrl: user.profileImageUrl,
             accessToken,
-
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -216,7 +263,6 @@ const refreshToken = async (req, res) => {
             success: true,
             message: "Token refreshed successfully.",
             accessToken,
-        
         });
     } catch (error) {
         console.error("Refresh token error:", error);
@@ -276,8 +322,8 @@ const verifyEmail = async (req, res) => {
     try {
         const { token } = req.query;
 
-        if (!token) {
-            return res.status(400).json({ success: false, message: "Verification token is missing." });
+        if (!token || typeof token !== "string") {
+            return res.status(400).json({ success: false, message: "Verification token is missing or invalid." });
         }
 
         // Find user with matching token that hasn't expired yet
@@ -318,7 +364,7 @@ const resendVerificationEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email is required." });
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
 
         // Return success even if user not found — avoids exposing which emails are registered
         if (!user) {
@@ -352,11 +398,25 @@ const resendVerificationEmail = async (req, res) => {
 const getUserProfile = async (req, res) => {
     try {
         const user = req.user;
-        if(!user){
+        if (!user) {
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
+
+        // Reset streak to 0 if one or more calendar days were missed
+        if (user.lastPracticeDate && user.currentStreak > 0) {
+            const now = new Date();
+            const d1 = new Date(user.lastPracticeDate);
+            const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
+            const utc2 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+            if (diffDays > 1) {
+                user.currentStreak = 0;
+                await user.save();
+            }
+        }
+
         res.json(user);
-    }catch(error){
+    } catch (error) {
         console.error("Get profile error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
@@ -449,7 +509,7 @@ const updateUserProfile = async (req, res) => {
 
         await user.save();
 
-        // return updated user, excluding password
+        // Return updated user, excluding password
         const updatedUser = await User.findById(userId).select("-password");
         res.json(updatedUser);
     } catch (error) {
@@ -487,12 +547,17 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password
-        user.password = newPassword;
-        // Invalidate access tokens issued before the password change.
+        // Hash new password before saving (#757)
+        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+
+        // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
+        user.refreshTokenHash = null;
+        user.refreshTokenExpiresAt = null;
         user.tokenVersion = (user.tokenVersion || 0) + 1;
         await user.save();
 
+        // Fix #759: Clear refresh cookie on client response
+        res.clearCookie("refreshToken", { path: "/api/auth" });
         res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         console.error("Change password error:", error);
@@ -501,7 +566,8 @@ const changePassword = async (req, res) => {
 };
 
 /**
- * Permanently delete user account.
+ * Permanently delete user account and all associated data.
+ * Implements cascade deletion to clean up orphaned documents.
  * @route DELETE /api/auth/delete-account
  */
 const deleteUserAccount = async (req, res) => {
@@ -512,12 +578,74 @@ const deleteUserAccount = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
+        // Cascade delete: remove all user-related data
+        const deletePromises = [];
+
+        // Delete user's sessions and their associated questions
+        const sessions = await Session.find({ user: userId });
+        const sessionIds = sessions.map(s => s._id);
+        if (sessionIds.length > 0) {
+            deletePromises.push(
+                Question.deleteMany({ session: { $in: sessionIds } })
+            );
+        }
+        deletePromises.push(Session.deleteMany({ user: userId }));
+
+        // Delete user's flashcards
+        deletePromises.push(
+            Flashcard.deleteMany({ userId: userId })
+        );
+
+        // Delete user's resumes
+        deletePromises.push(
+            Resume.deleteMany({ user: userId })
+        );
+
+        // Delete user's notes summaries
+        deletePromises.push(
+            NotesSummary.deleteMany({ user: userId })
+        );
+
+        // Delete user's roadmap projects
+        deletePromises.push(
+            RoadmapProject.deleteMany({ userId: userId })
+        );
+
+        // Delete user's sheet progress
+        deletePromises.push(
+            UserSheetProgress.deleteMany({ userId: userId })
+        );
+
+        // Wait for all deletions to complete
+        await Promise.all(deletePromises);
+
+        // Finally, delete the user account
         await User.findByIdAndDelete(userId);
-        res.json({ success: true, message: "Account deleted successfully" });
+        
+        // Clear auth cookies
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            path: "/api/auth"
+        });
+
+        res.json({ success: true, message: "Account and all associated data deleted successfully" });
     } catch (error) {
         console.error("Delete account error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount };
+module.exports = {
+    registerUser,
+    loginUser,
+    refreshToken,
+    logoutUser,
+    verifyEmail,
+    resendVerificationEmail,
+    getUserProfile,
+    updateUserProfile,
+    changePassword,
+    deleteUserAccount,
+};

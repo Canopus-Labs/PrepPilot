@@ -2,12 +2,13 @@ import { useParams } from "react-router-dom";
 import gfg from "../assets/gfg.svg";
 import leetcode from "../assets/leetcode.svg";
 import youtube from "../assets/youtube.svg";
-import React, { useState, useEffect, useCallback, memo, useContext } from "react";
+import React, { useState, useEffect, useCallback, useRef, memo, useContext } from "react";
+import Modal from "./Loader/Modal";
 
 import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
 import { UserContext } from "../context/userContext";
-import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare } from "lucide-react";
+import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare, RotateCcw } from "lucide-react";
 
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
   let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
@@ -92,6 +93,36 @@ function SheetDetail() {
   const [loading, setLoading] = useState(true);
   const [completedTopics, setCompletedTopics] = useState({});
   const [followed, setFollowed] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const saveTimeoutRef = useRef(null);
+  const saveAbortControllerRef = useRef(null);
+
+  const handleResetProgress = async () => {
+    setResetting(true);
+    clearTimeout(saveTimeoutRef.current);
+    saveAbortControllerRef.current?.abort();
+
+    try {
+      await axiosInstance.delete(`/api/user/sheet-progress/${id}`);
+      setCompletedTopics({});
+      localStorage.setItem(
+        `${id}-progress`,
+        JSON.stringify({ followed, completedTopics: {}, percentage: 0 })
+      );
+      localStorage.setItem("sheet-last-update", Date.now().toString());
+      refreshSheetProgress?.();
+      setShowResetModal(false);
+    } catch (err) {
+      console.error("Failed to reset progress:", err);
+      // Reset failed — the pending/in-flight save we just cancelled would have
+      // persisted the user's current progress. Re-persist it now so it isn't
+      // silently lost on reload.
+      persistProgress(completedTopics, followed);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/sheets/${id}`)
@@ -139,27 +170,41 @@ function SheetDetail() {
   useEffect(() => {
     if (!followed) return;
 
+    saveTimeoutRef.current = setTimeout(() => {
+      persistProgress(completedTopics, true);
+    }, 500);
+
+    return () => clearTimeout(saveTimeoutRef.current);
+  }, [completedTopics, followed, persistProgress]);
+
+  const persistProgress = useCallback((topicsToSave, followedState) => {
     const percentage =
       totalSubtopics > 0
-        ? Math.round((completedCount / totalSubtopics) * 100)
+        ? Math.round((Object.values(topicsToSave).filter(Boolean).length / totalSubtopics) * 100)
         : 0;
 
-    const saveToStorage = setTimeout(() => {
-      localStorage.setItem(
-        `${id}-progress`,
-        JSON.stringify({ followed: true, completedTopics, percentage })
-      );
-      localStorage.setItem("sheet-last-update", Date.now().toString());
+    localStorage.setItem(
+      `${id}-progress`,
+      JSON.stringify({ followed: followedState, completedTopics: topicsToSave, percentage })
+    );
+    localStorage.setItem("sheet-last-update", Date.now().toString());
 
-      axiosInstance.post("/api/user/sheet-progress", {
-        sheetId: id,
-        followed: true,
-        completedTopics,
-        percentage,
-      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync progress to backend:", err));    }, 500);
+    saveAbortControllerRef.current?.abort();
+    const controller = new AbortController();
+    saveAbortControllerRef.current = controller;
 
-    return () => clearTimeout(saveToStorage);
-  }, [completedTopics, followed, completedCount, id, refreshSheetProgress, totalSubtopics]);
+    return axiosInstance.post(
+      "/api/user/sheet-progress",
+      { sheetId: id, followed: followedState, completedTopics: topicsToSave, percentage },
+      { signal: controller.signal }
+    )
+      .then(() => refreshSheetProgress?.())
+      .catch((err) => {
+        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          console.error("Failed to sync progress to backend:", err);
+        }
+      });
+  }, [id, totalSubtopics, refreshSheetProgress]);
 
   const handleCompleteToggle = useCallback((sectionIdx, topicIdx, subIdx) => {
     if (!followed) return;
@@ -270,7 +315,18 @@ function SheetDetail() {
           <div className="mt-6 pt-5 border-t border-gray-200 dark:border-white/10">
             <div className="flex justify-between items-end mb-2">
               <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Overall Progress</span>
-              <span className="text-sm font-bold text-violet-600 dark:text-violet-400">{progressPercent}%</span>
+              <div className="flex items-center gap-3">
+                {followed && completedCount > 0 && (
+                  <button
+                    onClick={() => setShowResetModal(true)}
+                    className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                    title="Reset progress for this sheet"
+                  >
+                    <RotateCcw size={12} /> Reset
+                  </button>
+                )}
+                <span className="text-sm font-bold text-violet-600 dark:text-violet-400">{progressPercent}%</span>
+              </div>
             </div>
             <div className="w-full bg-gray-200 dark:bg-white/10 h-2 rounded-full overflow-hidden shadow-inner flex">
               <div
@@ -334,6 +390,36 @@ function SheetDetail() {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        title="Reset Progress"
+      >
+        <div className="text-sm text-gray-300">
+          <p className="mb-6">
+            This will clear your progress on{" "}
+            <span className="font-semibold text-white">{sheet.title}</span>. This can't be undone.
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowResetModal(false)}
+              disabled={resetting}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleResetProgress}
+              disabled={resetting}
+              className="px-4 py-2 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+            >
+              {resetting ? "Resetting..." : "Reset Progress"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
     </>
   );
 }
