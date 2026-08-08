@@ -318,27 +318,30 @@ const resendVerificationEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email is required." });
         }
 
+        // Generic response returned for every non-error path so the endpoint
+        // cannot be used to enumerate which emails are registered or already
+        // verified. The email is only actually sent when a matching unverified
+        // user exists.
+        const GENERIC_RESPONSE = {
+            success: true,
+            message: "If this email is registered and unverified, a verification link has been sent.",
+        };
+
         const user = await User.findOne({ email });
 
-        // Return success even if user not found — avoids exposing which emails are registered
-        if (!user) {
-            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
+        if (user && !user.isEmailVerified) {
+            // Generate a fresh token and reset expiry to 24 hours from now
+            user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+            user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await user.save();
+
+            const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+            await sendVerificationEmail(user.email, verificationUrl);
         }
 
-        // If already verified, no need to resend
-        if (user.isEmailVerified) {
-            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
-        }
-
-        // Generate a fresh token and reset expiry to 24 hours from now
-        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
-        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await user.save();
-
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
-        await sendVerificationEmail(user.email, verificationUrl);
-
-        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+        // Identical response whether the user doesn't exist, is already
+        // verified, or was genuinely sent a new link.
+        return res.json(GENERIC_RESPONSE);
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
