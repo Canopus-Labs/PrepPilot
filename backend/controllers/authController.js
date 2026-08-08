@@ -354,6 +354,7 @@ const verifyEmail = async (req, res) => {
 
 /**
  * Resend verification email to an unverified user.
+ * Uses constant-time response to prevent email enumeration via timing analysis.
  * @route POST /api/auth/resend-verification
  */
 const resendVerificationEmail = async (req, res) => {
@@ -366,14 +367,20 @@ const resendVerificationEmail = async (req, res) => {
 
         const user = await User.findOne({ email: email.trim().toLowerCase() });
 
-        // Return success even if user not found — avoids exposing which emails are registered
-        if (!user) {
-            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
-        }
+        // Enumeration guard: always sleep for a fixed duration before returning
+        // a generic success message. This closes the timing oracle that allowed
+        // an attacker to distinguish "email not registered" (fast) from
+        // "already verified, no email sent" (slow, DB lookup + email check).
+        const enumerationDelayMs = 200 + Math.random() * 100;
+        await new Promise((resolve) => setTimeout(resolve, enumerationDelayMs));
 
-        // If already verified, no need to resend
-        if (user.isEmailVerified) {
-            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
+        if (!user || user.isEmailVerified) {
+            // Return identical response in both cases to avoid leaking
+            // whether the email address is registered.
+            return res.json({
+                success: true,
+                message: "If this email is registered and unverified, a verification link has been sent.",
+            });
         }
 
         // Generate a fresh token and reset expiry to 24 hours from now
