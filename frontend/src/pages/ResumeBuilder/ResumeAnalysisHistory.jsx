@@ -108,9 +108,12 @@ const ResumeAnalysisHistory = () => {
               <div key={item._id} className="bg-white dark:bg-[#151c2f] border border-gray-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 
                 {/* Summary Row */}
-                <div 
+                <button 
                   onClick={() => toggleExpand(item._id)}
-                  className="p-6 sm:p-8 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-6"
+                  aria-expanded={expandedId === item._id}
+                  aria-controls={`expandable-content-${item._id}`}
+                  aria-label={`Toggle analysis details for ${item.targetRole || "General"}`}
+                  className="w-full text-left p-6 sm:p-8 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-6"
                 >
                   <div className="flex items-center gap-6">
                     {renderScore(item.resumeScore)}
@@ -136,15 +139,15 @@ const ResumeAnalysisHistory = () => {
                          {item.atsCompatibility?.status || 'Unknown'}
                        </span>
                     </div>
-                    <button className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-500 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition">
+                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-500 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition">
                       {expandedId === item._id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                    </button>
+                    </div>
                   </div>
-                </div>
+                </button>
 
                 {/* Expanded Details */}
                 {expandedId === item._id && (
-                  <div className="p-6 sm:p-8 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-[#111827] space-y-8 animate-in slide-in-from-top-4 duration-300">
+                  <div id={`expandable-content-${item._id}`} className="p-6 sm:p-8 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-[#111827] space-y-8 animate-in slide-in-from-top-4 duration-300">
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <div className="space-y-6">
@@ -165,6 +168,22 @@ const ResumeAnalysisHistory = () => {
                             <p className="text-sm text-gray-500">None detected</p>
                           )}
                         </div>
+
+                        {/* Missing Keywords */}
+                        {item.missingKeywords?.length > 0 && (
+                          <div className="bg-white dark:bg-[#151c2f] p-6 rounded-2xl border border-gray-200 dark:border-white/5">
+                            <h4 className="text-sm font-bold tracking-wide uppercase text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                              <Target size={16} className="text-indigo-500" /> Missing Keywords
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {item.missingKeywords.map((keyword, i) => (
+                                <span key={i} className="px-3 py-1 text-xs font-bold rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20">
+                                  {keyword}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Formatting Issues */}
                         {item.formattingIssues?.length > 0 && (

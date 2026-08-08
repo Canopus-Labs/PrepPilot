@@ -116,6 +116,7 @@ Return the analysis STRICTLY as a JSON object with the following exact keys and 
   "resumeScore": (number between 0 and 100),
   "roleMatch": (number between 0 and 100),
   "missingSkills": [array of short strings, max 5],
+  "missingKeywords": [array of short strings, max 5],
   "missingProjects": [array of short strings, max 3],
   "atsCompatibility": {
     "status": "Good" | "Average" | "Poor",
