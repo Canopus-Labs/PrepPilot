@@ -85,6 +85,7 @@ describe("searchGitHub controller", () => {
       sort: "stars",
       order: "desc",
       per_page: 30,
+      page: 1,
     });
     expect(searchCache.get(key)).toBeTruthy();
   });
@@ -96,6 +97,7 @@ describe("searchGitHub controller", () => {
       sort: "stars",
       order: "desc",
       per_page: 30,
+      page: 1,
     });
     searchCache.set(key, {
       items: [{ id: 7, name: "cached-repo" }],
@@ -160,6 +162,7 @@ describe("searchGitHub controller", () => {
       sort: "stars",
       order: "desc",
       per_page: 30,
+      page: 1,
     });
     searchCache.set(key, {
       items: [{ id: 3, name: "vite" }],
