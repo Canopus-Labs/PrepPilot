@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target } from "lucide-react";
+import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target, History } from "lucide-react";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import { Link } from "react-router-dom";
 
 const ResumeAnalyzer = () => {
   const [file, setFile] = useState(null);
@@ -128,18 +129,26 @@ const ResumeAnalyzer = () => {
       <div className="max-w-5xl mx-auto space-y-10">
         
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 shadow-sm flex items-center justify-center shrink-0">
-            <Zap size={28} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 shadow-sm flex items-center justify-center shrink-0">
+              <Zap size={28} />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                AI Resume Analyzer
+              </h1>
+              <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                Upload your resume for real-time ATS parsing, scoring, and role-matched AI suggestions.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-              AI Resume Analyzer
-            </h1>
-            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1 font-medium">
-              Upload your resume for real-time ATS parsing, scoring, and role-matched AI suggestions.
-            </p>
-          </div>
+          <Link
+            to="/resume-analyzer/history"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-800 dark:text-gray-200 font-bold transition-all border border-gray-200 dark:border-gray-700"
+          >
+            <History size={18} /> View History
+          </Link>
         </div>
 
         {/* Dynamic Display */}
