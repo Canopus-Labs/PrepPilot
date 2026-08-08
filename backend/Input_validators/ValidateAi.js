@@ -20,6 +20,11 @@ const generateInterviewTipsSchema = z.object({
   experience: z.string().min(1, "Experience is required").max(50, "Experience cannot exceed 50 characters"),
 });
 
+// Schema for difficulty estimation request
+const estimateDifficultySchema = z.object({
+  question: z.string().min(1, "Question is required").max(2000, "Question is too long"),
+});
+
 
 const validateGenerateInterviewQuestions = (req,res,next)=>{
 
@@ -49,8 +54,18 @@ const validateGenerateInterviewTips = (req, res, next) => {
   }
 };
 
+const validateEstimateDifficulty = (req, res, next) => {
+  try {
+    estimateDifficultySchema.parse(req.body);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateGenerateInterviewQuestions,
   validateGenerateConceptExplanation,
   validateGenerateInterviewTips,
+  validateEstimateDifficulty,
 };
