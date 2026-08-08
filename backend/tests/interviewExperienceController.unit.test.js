@@ -103,6 +103,29 @@ describe("createInterviewExperience", () => {
     );
   });
 
+  it("rejects anonymous creates without a clientKey", async () => {
+    InterviewExperience.create = vi.fn();
+
+    const req = makeReq({
+      company: "Google",
+      role: "SDE-2",
+      summary: "Summary",
+      idempotencyKey: "submit-key-abc12345",
+    });
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.create).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "clientKey is required for anonymous submissions",
+      }),
+    );
+  });
+
   it("returns 500 when persistence fails so the client can retry", async () => {
     InterviewExperience.findOne = vi.fn().mockResolvedValue(null);
     InterviewExperience.create = vi.fn().mockRejectedValue(new Error("db down"));
@@ -111,6 +134,7 @@ describe("createInterviewExperience", () => {
       company: "Google",
       role: "SDE-2",
       summary: "Summary",
+      clientKey: "client-key-123456",
       idempotencyKey: "submit-key-abc12345",
     });
     const res = makeRes();

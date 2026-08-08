@@ -47,6 +47,11 @@ const createInterviewExperience = async (req, res) => {
 
     if (req.user?._id) {
       payload.userId = req.user._id;
+    } else if (!payload.clientKey) {
+      return res.status(400).json({
+        success: false,
+        message: "clientKey is required for anonymous submissions",
+      });
     }
 
     if (!payload.color && payload.company) {

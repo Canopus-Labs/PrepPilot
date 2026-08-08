@@ -26,18 +26,33 @@ import { API_PATHS } from "../../utils/apiPaths";
 
 const CLIENT_KEY_STORAGE = "preppilot_interview_experience_client_key";
 
+const createSecureClientKey = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  if (globalThis.crypto?.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+      "",
+    );
+  }
+
+  return null;
+};
+
 const getOrCreateClientKey = () => {
   try {
     const existing = localStorage.getItem(CLIENT_KEY_STORAGE);
     if (existing) return existing;
-    const created =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `anon-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const created = createSecureClientKey();
+    if (!created) return null;
     localStorage.setItem(CLIENT_KEY_STORAGE, created);
     return created;
   } catch {
-    return `anon-${Date.now()}`;
+    // Storage may be unavailable; still return a crypto key for this session only.
+    return createSecureClientKey();
   }
 };
 
@@ -524,6 +539,14 @@ const SubmitModal = ({ onClose, onAdd, clientKey }) => {
     setSubmitting(true);
     setSubmitError("");
 
+    if (!clientKey) {
+      setSubmitError(
+        "Unable to create a secure client key in this browser. Sign in or try another browser.",
+      );
+      setSubmitting(false);
+      return;
+    }
+
     const payload = {
       company: form.company.trim(),
       role: form.role.trim(),
@@ -822,6 +845,11 @@ const InterviewExperiences = () => {
   const loadMyExperiences = useCallback(async () => {
     setLoadingMine(true);
     setLoadError("");
+    if (!clientKey) {
+      setUserExperiences([]);
+      setLoadingMine(false);
+      return;
+    }
     try {
       const { data } = await axiosInstance.get(
         API_PATHS.INTERVIEW_EXPERIENCES.MINE,
