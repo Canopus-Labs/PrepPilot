@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Question = require("../models/Question");
 const Session = require("../models/Session");
 
+// Escape regex metacharacters so user search text is treated as a literal
+// substring. Building a RegExp from raw input allowed catastrophic-backtracking
+// patterns (e.g. `(a+)+$`) to stall the shared mongod process (ReDoS).
+const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
  * Get all questions for the authenticated user across their sessions.
  * @route GET /api/questions/my-questions
@@ -54,7 +59,8 @@ const getMyQuestions = async (req, res) => {
     }
 
     if (typeof q === "string" && q.trim().length > 0) {
-      const searchRegex = new RegExp(q.trim(), "i");
+      const term = q.trim().slice(0, 200);
+      const searchRegex = new RegExp(escapeRegex(term), "i");
       filter.$or = [
         { question: searchRegex },
         { answer: searchRegex },
