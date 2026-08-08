@@ -1,5 +1,42 @@
 const rateLimit = require('express-rate-limit');
+const { RateLimiterRedis, RateLimiterMemory } = require('rate-limiter-flexible');
+const redisClient = require('../config/redis');
 
+// Login endpoint: strict brute-force protection (5 attempts per 15 minutes)
+const maxConsecutiveFailsByUsernameAndIP = 5;
+let strictLoginLimiterInstance;
+
+if (redisClient) {
+    strictLoginLimiterInstance = new RateLimiterRedis({
+        storeClient: redisClient,
+        keyPrefix: 'login_fail_ip',
+        points: maxConsecutiveFailsByUsernameAndIP,
+        duration: 60 * 15, // 15 minutes
+        blockDuration: 60 * 15, // Block for 15 minutes
+    });
+} else {
+    strictLoginLimiterInstance = new RateLimiterMemory({
+        keyPrefix: 'login_fail_ip',
+        points: maxConsecutiveFailsByUsernameAndIP,
+        duration: 60 * 15,
+        blockDuration: 60 * 15,
+    });
+}
+
+const strictLoginLimiter = async (req, res, next) => {
+    const ipAddr = req.ip;
+    try {
+        const resLimiter = await strictLoginLimiterInstance.get(ipAddr);
+        if (resLimiter !== null && resLimiter.consumedPoints >= maxConsecutiveFailsByUsernameAndIP) {
+            const retrySecs = Math.round(resLimiter.msBeforeNext / 1000) || 1;
+            res.set('Retry-After', String(retrySecs));
+            return res.status(429).json({ error: 'Too many login attempts. Your account is temporarily locked. Please try again after 15 minutes.' });
+        }
+        next();
+    } catch (err) {
+        next();
+    }
+};
 // Rate-limit key derived from the trusted client IP. req.ip honors
 // X-Forwarded-For only from the configured trusted proxy CIDR(s); without one
 // it is the direct socket address, so a spoofed header cannot rotate the limit
@@ -61,7 +98,8 @@ const sensitiveAuthLimiter = rateLimit({
 });
 
 module.exports = {
-    loginLimiter,
+    strictLoginLimiter,
+    strictLoginLimiterInstance,
     authLimiter,
     aiLimiter,
     generalLimiter,

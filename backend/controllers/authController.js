@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
+const { strictLoginLimiterInstance } = require('../middlewares/rateLimiter');
 
 // Models for cascade deletion on account delete
 const Session = require("../models/Session");
@@ -174,12 +175,18 @@ const loginUser = async (req, res) => {
 
         const user = await User.findOne({ email: email.trim().toLowerCase() });
         if (!user) {
+            if (strictLoginLimiterInstance) {
+                try { await strictLoginLimiterInstance.consume(req.ip); } catch (e) {}
+            }
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
         // Verify password against stored hash
         const isMatch = await user.isValidPassword(password);
         if (!isMatch) {
+            if (strictLoginLimiterInstance) {
+                try { await strictLoginLimiterInstance.consume(req.ip); } catch (e) {}
+            }
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
 
@@ -189,6 +196,10 @@ const loginUser = async (req, res) => {
                 success: false,
                 message: "Please verify your email before logging in. Check your inbox for the verification link.",
             });
+        }
+        
+        if (strictLoginLimiterInstance) {
+            try { await strictLoginLimiterInstance.delete(req.ip); } catch (e) {}
         }
 
         const accessToken = generateAccessToken(user._id, user.tokenVersion);

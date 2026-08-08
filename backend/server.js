@@ -102,23 +102,26 @@ connectDB()
 app.use(express.json());
 app.use(cookieParser());
 
+// Apply rate limiter globally to all API routes
+app.use("/api", generalLimiter);
+
 //Routes
-app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
-app.use("/api/sessions", generalLimiter, sessionRoutes);
-app.use("/api/question", generalLimiter, questionRoutes);
+app.use("/api/auth", sensitiveRouteHeaders, authRoutes);
+app.use("/api/sessions", sessionRoutes);
+app.use("/api/question", questionRoutes);
 app.use("/api", aiRoutes);
-app.use("/api/questions", generalLimiter, aptitudeQuestionsRoutes);
+app.use("/api/questions", aptitudeQuestionsRoutes);
 const sheetJsonUpload = require("./routes/sheetJsonUpload");
-app.use("/api/sheets", generalLimiter, sheetJsonUpload);
+app.use("/api/sheets", sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
-app.use("/api/user", generalLimiter, userSheetProgressRoutes);
+app.use("/api/user", userSheetProgressRoutes);
 const achievementRoutes = require("./routes/achievementRoutes");
-app.use("/api/user", generalLimiter, achievementRoutes);
+app.use("/api/user", achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips } = require("./Input_validators/ValidateAi.js");
-app.use("/api/resume", generalLimiter, resumeRoutes);
+app.use("/api/resume", resumeRoutes);
 const notesSummaryRoutes = require("./routes/notesSummaryRoutes");
-app.use("/api/notes-summary", generalLimiter, notesSummaryRoutes);
+app.use("/api/notes-summary", notesSummaryRoutes);
 
 // AI routes with Zod validation
 app.post(
@@ -149,12 +152,12 @@ app.post(
 );
 
 
-app.use("/api/books", generalLimiter, booksRoutes);
-app.use("/api/jobs", generalLimiter, jobRoutes);
+app.use("/api/books", booksRoutes);
+app.use("/api/jobs", jobRoutes);
 const coursesRoutes = require("./routes/coursesRoutes");
-app.use("/api/courses", generalLimiter, coursesRoutes);
+app.use("/api/courses", coursesRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
-app.use("/api/flashcards", generalLimiter, flashcardRoutes);
+app.use("/api/flashcards", flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
 
