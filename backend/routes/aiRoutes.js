@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
 const { aiLimiter } = require('../middlewares/rateLimiter');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
@@ -259,9 +258,26 @@ router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHa
  */
 router.get("/models", async (req, res) => {
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const models = await genAI.listModels();
-    const modelNames = models.map((m) => m.name.replace("models/", ""));
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "GEMINI_API_KEY not configured on server" });
+    }
+
+    // The @google/generative-ai client exposes no listModels() method, so
+    // query the Gemini REST API directly to return real, key-scoped models.
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+      { signal: AbortSignal.timeout(10000) }
+    );
+
+    if (!response.ok) {
+      console.error("List models error:", response.status, await response.text());
+      return res.status(502).json({ error: "Failed to list models" });
+    }
+
+    const data = await response.json();
+    const modelNames = (data.models || []).map((m) => m.name.replace("models/", ""));
+
     res.json({
       availableModels: modelNames,
       configured: process.env.GEMINI_MODEL || null,
