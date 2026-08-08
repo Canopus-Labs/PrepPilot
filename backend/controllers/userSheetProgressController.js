@@ -81,10 +81,18 @@ exports.saveProgress = async (req, res) => {
     // Rare duplicate-key race during concurrent upserts.
     if (err.code === 11000) {
       try {
-        const progress = await UserSheetProgress.findOne({
-          userId,
-          sheetId: validatedSheetId,
-        });
+        const progress = await UserSheetProgress.findOneAndUpdate(
+          {
+            userId,
+            sheetId: validatedSheetId,
+          },
+          {
+            $set: updateFields,
+          },
+          {
+            new: true,
+          }
+        );
 
         return res.json({
           success: true,
