@@ -19,6 +19,7 @@ const MAX_EXPERIENCE = 50;
  * Authorization: Bearer eyJhb...
  * {
  *   "role": "Backend Engineer",
+ *   "company": "Google",
  *   "experience": "3 years",
  *   "topicsToFocus": ["Node.js","Databases"],
  *   "description": "Prepare for backend interview",
@@ -34,7 +35,7 @@ exports.createSession = async (req, res) => {
     try {
         await mongoSession.withTransaction(async () => {
             const userId = req.user._id;
-            const { role, experience, topicsToFocus, description } = req.body;
+            const { role, company, experience, topicsToFocus, description } = req.body;
             const experienceNumber = Number(experience);
  
             if (!role || role.trim() === "") {
@@ -70,6 +71,7 @@ exports.createSession = async (req, res) => {
                     {
                         user: userId,
                         role,
+                        company,
                         experience,
                         topicsToFocus,
                         description,
