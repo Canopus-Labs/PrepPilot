@@ -317,9 +317,11 @@ const App = () => {
                   <Route
                     path="/compiler"
                     element={
-                      <PageTransition>
-                        <Compiler />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Compiler />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route

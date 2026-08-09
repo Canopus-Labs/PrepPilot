@@ -159,6 +159,8 @@ const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
+const compilerRoutes = require("./routes/compilerRoutes");
+app.use("/api/compiler", compilerRoutes);
 
 
 app.use(

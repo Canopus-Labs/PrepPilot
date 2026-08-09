@@ -85,4 +85,7 @@ export const API_PATHS = {
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
+    COMPILER: {
+        RUN: "/api/compiler/run",
+    },
 };
