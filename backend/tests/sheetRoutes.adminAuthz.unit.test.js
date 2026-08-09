@@ -143,6 +143,20 @@ describe("requireAdmin middleware (#1446)", () => {
 });
 
 describe("/api/sheets mutation audit trail", () => {
+  it.each([
+    ["POST", "/upload"],
+    ["PUT", "/:id"],
+    ["DELETE", "/:id"],
+  ])("%s %s stays admin-only while adding audit behavior (#1715)", (method, path) => {
+    const stack = getLayerStack(sheetRouter, method, path);
+    expect(stack).not.toBeNull();
+    const protectIdx = stack.findIndex((fn) => fn && fn.name === "protect");
+    const adminIdx = stack.findIndex((fn) => fn && fn.name === "requireAdmin");
+
+    expect(protectIdx).toBeGreaterThanOrEqual(0);
+    expect(adminIdx).toBe(protectIdx + 1);
+  });
+
   it("keeps soft-delete audit fields on the sheet model", () => {
     expect(Sheet.schema.path("createdBy")).toBeTruthy();
     expect(Sheet.schema.path("updatedBy")).toBeTruthy();
