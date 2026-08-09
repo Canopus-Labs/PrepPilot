@@ -22,6 +22,7 @@ beforeAll(async () => {
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.unstubAllEnvs();
 });
 
@@ -34,6 +35,27 @@ function getLayerStack(router, method, path) {
   );
   if (!layer) return null;
   return layer.route.stack.map((s) => s.handle);
+}
+
+function getRouteHandler(method, path) {
+  const stack = getLayerStack(sheetRouter, method, path);
+  return stack[stack.length - 1];
+}
+
+function createRes() {
+  const res = {
+    statusCode: 200,
+    body: null,
+    status: vi.fn((code) => {
+      res.statusCode = code;
+      return res;
+    }),
+    json: vi.fn((body) => {
+      res.body = body;
+      return res;
+    }),
+  };
+  return res;
 }
 
 const WRITE_ROUTES = [
@@ -128,14 +150,124 @@ describe("/api/sheets mutation audit trail", () => {
     expect(Sheet.schema.path("deletedBy")).toBeTruthy();
   });
 
-  it("soft-deletes sheets instead of hard-deleting catalog records", () => {
-    const stack = getLayerStack(sheetRouter, "DELETE", "/:id");
-    const deleteHandler = stack[stack.length - 1];
-    const source = deleteHandler.toString();
+  it("records createdBy and updatedBy when uploading sheets", async () => {
+    const userId = new mongoose.Types.ObjectId();
+    const findOneAndUpdate = vi
+      .spyOn(Sheet, "findOneAndUpdate")
+      .mockResolvedValue({ id: "array-basics" });
+    const uploadHandler = getRouteHandler("POST", "/upload");
+    const res = createRes();
 
-    expect(source).toContain("findOneAndUpdate");
-    expect(source).toContain("deletedAt");
-    expect(source).toContain("deletedBy");
-    expect(source).not.toContain("findOneAndDelete");
+    await uploadHandler(
+      {
+        user: { _id: userId },
+        body: {
+          filename: "sheets.json",
+          data: { id: "array-basics", title: "Array Basics" },
+        },
+      },
+      res
+    );
+
+    expect(findOneAndUpdate).toHaveBeenCalledWith(
+      { id: "array-basics" },
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          updatedBy: userId,
+          deletedAt: null,
+        }),
+        $setOnInsert: expect.objectContaining({
+          createdBy: userId,
+          uploadedAt: expect.any(Date),
+        }),
+        $unset: { deletedBy: "" },
+      }),
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  it("records updatedBy when updating a sheet", async () => {
+    const userId = new mongoose.Types.ObjectId();
+    const findOneAndUpdate = vi
+      .spyOn(Sheet, "findOneAndUpdate")
+      .mockResolvedValue({ id: "array-basics" });
+    const updateHandler = getRouteHandler("PUT", "/:id");
+    const res = createRes();
+
+    await updateHandler(
+      {
+        user: { _id: userId },
+        params: { id: "array-basics" },
+        body: { id: "array-basics", title: "Array Basics" },
+      },
+      res
+    );
+
+    expect(findOneAndUpdate).toHaveBeenCalledWith(
+      { id: "array-basics", deletedAt: null },
+      {
+        $set: expect.objectContaining({
+          updatedBy: userId,
+        }),
+      },
+      { new: true, setDefaultsOnInsert: true }
+    );
+    expect(res.body).toEqual({ message: "Sheet updated.", sheet: { id: "array-basics" } });
+  });
+
+  it("soft-deletes sheets instead of hard-deleting catalog records", async () => {
+    const userId = new mongoose.Types.ObjectId();
+    const deletedAt = new Date();
+    const findOneAndUpdate = vi
+      .spyOn(Sheet, "findOneAndUpdate")
+      .mockResolvedValue({ id: "array-basics", deletedAt });
+    const findOneAndDelete = vi.spyOn(Sheet, "findOneAndDelete");
+    const deleteHandler = getRouteHandler("DELETE", "/:id");
+    const res = createRes();
+
+    await deleteHandler(
+      {
+        user: { _id: userId },
+        params: { id: "array-basics" },
+        body: { confirmId: "array-basics" },
+      },
+      res
+    );
+
+    expect(findOneAndUpdate).toHaveBeenCalledWith(
+      { id: "array-basics", deletedAt: null },
+      {
+        $set: {
+          deletedAt: expect.any(Date),
+          deletedBy: userId,
+        },
+      },
+      { new: true }
+    );
+    expect(findOneAndDelete).not.toHaveBeenCalled();
+    expect(res.body).toEqual({
+      message: "Sheet deleted.",
+      id: "array-basics",
+      deletedAt,
+    });
+  });
+
+  it("returns 404 when soft-deleting a missing or already deleted sheet", async () => {
+    vi.spyOn(Sheet, "findOneAndUpdate").mockResolvedValue(null);
+    const deleteHandler = getRouteHandler("DELETE", "/:id");
+    const res = createRes();
+
+    await deleteHandler(
+      {
+        user: { _id: new mongoose.Types.ObjectId() },
+        params: { id: "array-basics" },
+        body: { confirmId: "array-basics" },
+      },
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.body).toEqual({ error: "Sheet not found." });
   });
 });

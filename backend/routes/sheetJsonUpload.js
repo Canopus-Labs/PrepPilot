@@ -184,7 +184,10 @@ router.get('/', async (req, res) => {
     const skip = (page - 1) * limit;
 
     const visibleSheets = { deletedAt: null };
-    const sheets = await Sheet.find(visibleSheets).skip(skip).limit(limit);
+    const sheets = await Sheet.find(visibleSheets)
+      .select('-createdBy -updatedBy -deletedBy')
+      .skip(skip)
+      .limit(limit);
     const total = await Sheet.countDocuments(visibleSheets);
 
     res.json({ 
@@ -204,7 +207,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     // Always find by cust
-    const sheet = await Sheet.findOne({ id: req.params.id, deletedAt: null });
+    const sheet = await Sheet.findOne({ id: req.params.id, deletedAt: null })
+      .select('-createdBy -updatedBy -deletedBy');
     if (!sheet) {
       return res.status(404).json({ error: 'Sheet not found.' });
     }
