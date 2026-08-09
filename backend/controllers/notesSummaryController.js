@@ -1,5 +1,6 @@
 const axios = require("axios");
 const crypto = require("crypto");
+const fs = require("fs");
 const { generateWithFallback } = require("../utils/geminiHelper");
 const {
   inspectPdfBuffer,
@@ -103,6 +104,7 @@ function parseAiJson(raw) {
  * @example
  */
 const summarizeNotes = async (req, res) => {
+  let uploadedFilePath = null;
   try {
     let buffer;
     let fileName;
@@ -110,7 +112,8 @@ const summarizeNotes = async (req, res) => {
     let sourceUrl = null;
 
     if (req.file) {
-      buffer = req.file.buffer;
+      uploadedFilePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+      buffer = await fs.promises.readFile(uploadedFilePath);
       fileName = req.file.originalname;
       sourceType = "upload";
     } else {
@@ -139,6 +142,9 @@ const summarizeNotes = async (req, res) => {
 
     const readingTime = computeReadingTime(pdfStats);
     const contentHash = crypto.createHash("sha256").update(buffer).digest("hex");
+    const fileSize = buffer.length;
+    const base64Data = buffer.toString("base64");
+    buffer = null; // Release Buffer memory
 
     const existingSummary = await NotesSummary.findOne({ contentHash });
     if (existingSummary) {
@@ -189,7 +195,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
         prompt,
         {
           inlineData: {
-            data: buffer.toString("base64"),
+            data: base64Data,
             mimeType: "application/pdf",
           },
         },
@@ -223,7 +229,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     res.status(200).json({
       success: true,
       fileName,
-      fileSize: buffer.length,
+      fileSize,
       sourceType,
       sourceUrl,
       pageCount: pdfStats.numPages,
@@ -259,6 +265,12 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     }
 
     res.status(500).json({ success: false, message: "Failed to summarize notes." });
+  } finally {
+    if (uploadedFilePath) {
+      await require('fs').promises.unlink(uploadedFilePath).catch(err => {
+        if (err.code !== 'ENOENT') console.error("Failed to delete temp notes PDF:", err);
+      });
+    }
   }
 };
 
