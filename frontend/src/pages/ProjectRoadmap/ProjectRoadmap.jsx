@@ -13,7 +13,6 @@ import {
   buildRegeneratePrompt,
   normalizeGeneratedRoadmap,
   tryParseJSON,
-  ROADMAP_SYSTEM_INSTRUCTION,
 } from "./utils/roadmapAi";
 import { exportRoadmapAsMarkdown, exportRoadmapAsPDF } from "./utils/exportRoadmap";
 
@@ -70,12 +69,17 @@ const ProjectRoadmap = () => {
 
   // ── Generate roadmap via AI ────────────────────────────
   const handleGenerate = async (finalIdea, finalAnswers) => {
+    if (!user) {
+      toast.error("Log in to save roadmaps, track progress, and resume planning later.");
+      return;
+    }
+
     setGenerating(true);
     try {
       const prompt = buildRoadmapPrompt(finalIdea, finalAnswers);
       const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
         prompt,
-        systemInstruction: ROADMAP_SYSTEM_INSTRUCTION,
+        responseMode: "roadmap",
       });
       const parsed = tryParseJSON(data.text || "");
       if (!parsed) throw new Error("The AI returned an unexpected format. Please try again.");
@@ -222,7 +226,7 @@ const ProjectRoadmap = () => {
       );
       const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
         prompt,
-        systemInstruction: ROADMAP_SYSTEM_INSTRUCTION,
+        responseMode: "roadmap-section",
       });
       const parsed = tryParseJSON(data.text || "");
       if (!parsed || parsed[sectionKey] === undefined) {

@@ -75,11 +75,16 @@ export default function AIHelper() {
         )
       );
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      const errorMessage =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Something went wrong";
+      setError(errorMessage);
       setMessages((cur) =>
         cur.map((msg) =>
           msg.id === placeholderId
-            ? { ...msg, text: "Error: " + (err.message || "Failed") }
+            ? { ...msg, text: "Error: " + errorMessage }
             : msg
         )
       );

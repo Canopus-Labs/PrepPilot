@@ -349,9 +349,9 @@ const ProjectIdeas = () => {
         selectedLevel,
       );
 
-      const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, { 
+      const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
         prompt,
-        systemInstruction: "You are an API that ONLY returns valid JSON arrays. Do not include any conversational text, greetings, or formatting outside the JSON array."
+        responseMode: "project-ideas",
       });
       const fullText = data.text || "";
 
