@@ -97,12 +97,21 @@ const registerUser = async (req, res) => {
 
         const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) {
-            // Do not reveal whether the email is already registered. Respond
-            // with the same generic success shape (no tokens, no user data)
-            // so the endpoint cannot be used for account enumeration.
+            if (!userExists.isEmailVerified) {
+                const rawToken = crypto.randomBytes(32).toString("hex");
+                userExists.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+                userExists.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                await userExists.save();
+                try {
+                    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
+                    await sendVerificationEmail(userExists.email, verificationUrl);
+                } catch (err) {
+                    console.error("Failed to resend verification email on re-registration:", err);
+                }
+            }
             return res.status(201).json({
                 success: true,
-                message: "If this email is not already registered, your account has been created.",
+                message: "If this email is not already registered, your account has been created. Please check your email to verify your account before logging in.",
             });
         }
 
@@ -117,7 +126,8 @@ const registerUser = async (req, res) => {
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
         const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
         const user = await User.create({
@@ -142,12 +152,16 @@ const registerUser = async (req, res) => {
             emailVerificationExpires,
         });
 
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
-        await sendVerificationEmail(user.email, verificationUrl);
+        try {
+            const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
+            await sendVerificationEmail(user.email, verificationUrl);
+        } catch (err) {
+            console.error("Failed to send initial verification email:", err);
+        }
 
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. Please check your email to verify your account before logging in.",
+            message: "If this email is not already registered, your account has been created. Please check your email to verify your account before logging in.",
         });
     } catch (error) {
         console.error("Register error:", error);
@@ -322,8 +336,9 @@ const verifyEmail = async (req, res) => {
         }
 
         // Find user with matching token that hasn't expired yet
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
         const user = await User.findOne({
-            emailVerificationToken: token,
+            emailVerificationToken: hashedToken,
             emailVerificationExpires: { $gt: new Date() },
         });
 
@@ -372,14 +387,15 @@ const resendVerificationEmail = async (req, res) => {
         }
 
         // Generate a fresh token and reset expiry to 24 hours from now
-        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
         user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await user.save();
 
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
         await sendVerificationEmail(user.email, verificationUrl);
 
-        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+        res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
