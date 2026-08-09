@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
@@ -8,6 +9,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 
 let sheetRouter;
 let requireAdmin;
+let Sheet;
 
 beforeAll(async () => {
   const sheetRouterMod = await import("../routes/sheetJsonUpload.js");
@@ -15,6 +17,8 @@ beforeAll(async () => {
 
   const authMod = await import("../middlewares/authMiddleware.js");
   requireAdmin = authMod.requireAdmin;
+
+  Sheet = mongoose.models.Sheet;
 });
 
 afterEach(() => {
@@ -113,5 +117,25 @@ describe("requireAdmin middleware (#1446)", () => {
     };
     requireAdmin({}, res, () => {});
     expect(statusCode).toBe(403);
+  });
+});
+
+describe("/api/sheets mutation audit trail", () => {
+  it("keeps soft-delete audit fields on the sheet model", () => {
+    expect(Sheet.schema.path("createdBy")).toBeTruthy();
+    expect(Sheet.schema.path("updatedBy")).toBeTruthy();
+    expect(Sheet.schema.path("deletedAt")).toBeTruthy();
+    expect(Sheet.schema.path("deletedBy")).toBeTruthy();
+  });
+
+  it("soft-deletes sheets instead of hard-deleting catalog records", () => {
+    const stack = getLayerStack(sheetRouter, "DELETE", "/:id");
+    const deleteHandler = stack[stack.length - 1];
+    const source = deleteHandler.toString();
+
+    expect(source).toContain("findOneAndUpdate");
+    expect(source).toContain("deletedAt");
+    expect(source).toContain("deletedBy");
+    expect(source).not.toContain("findOneAndDelete");
   });
 });
