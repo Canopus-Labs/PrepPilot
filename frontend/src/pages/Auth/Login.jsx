@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Button/Button";
 import { validateEmail } from "../../utils/helper";
@@ -22,6 +22,11 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo =
+    location.state?.from?.pathname && location.state.from.pathname !== "/login"
+      ? `${location.state.from.pathname}${location.state.from.search || ""}`
+      : "/dashboard";
 
   const clearError = () => {
     if (error) {
@@ -73,7 +78,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
         if (onLoginSuccess) {
           onLoginSuccess();
         } else {
-          navigate("/dashboard");
+          navigate(redirectTo, { replace: true });
         }
       }
     } catch (error) {
@@ -118,7 +123,7 @@ const Login = ({ setCurrentPage, onLoginSuccess }) => {
          }}
          label="Email Address"
          placeholder="your@email.com"
-         type="text"
+         type="email"
          autoFocus
         />
           </div>

@@ -11,21 +11,10 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const MONTH_ORDER = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+import {
+  MONTH_ORDER,
+  parseEventsFromMarkdown,
+} from "../../utils/parseOpenSourceEvents";
 
 const SOURCE_URL =
   "https://raw.githubusercontent.com/EverythingOpenSource/open-source-events/main/README.md";
@@ -92,64 +81,6 @@ const CustomSelect = ({ label, value, options, onChange }) => {
       </div>
     </div>
   );
-};
-
-const parseEventsFromMarkdown = (markdown) => {
-  const lines = markdown.split(/\r?\n/);
-  const events = [];
-  let currentMonth = "";
-
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i].trim();
-
-    const monthMatch = line.match(/^##\s+([A-Za-z]+)/);
-    const monthCandidate = monthMatch ? monthMatch[1] : "";
-    if (MONTH_ORDER.includes(monthCandidate)) {
-      currentMonth = monthCandidate;
-      continue;
-    }
-
-    const eventMatch = line.match(/^[-*]\s+\[([^\]]+)\]\(([^)]+)\)/);
-    if (!eventMatch) continue;
-
-    let dateLine = "";
-    for (let j = i + 1; j < Math.min(i + 6, lines.length); j += 1) {
-      const peek = lines[j].trim();
-      if (/^[-*]\s+\[/.test(peek) || /^##\s+/.test(peek)) break;
-      const cleaned = peek.replace(/^>\s*/, "");
-      if (/^Date:/i.test(cleaned)) {
-        dateLine = cleaned;
-        break;
-      }
-    }
-
-    let date = "";
-    let mode = "";
-    let location = "";
-    if (dateLine) {
-      const parts = dateLine
-        .replace(/^Date:\s*/i, "")
-        .split("||")
-        .map((part) => part.trim())
-        .filter(Boolean);
-
-      if (parts[0]) date = parts[0];
-      if (parts[1]) mode = parts[1].replace(/^Mode:\s*/i, "").trim();
-      if (parts[2]) location = parts[2].replace(/^Location:\s*/i, "").trim();
-    }
-
-    events.push({
-      id: `${eventMatch[1]}-${events.length}`,
-      name: eventMatch[1],
-      url: eventMatch[2],
-      month: currentMonth || "TBA",
-      date,
-      mode,
-      location,
-    });
-  }
-
-  return events;
 };
 
 const OpenSourceEvents = () => {

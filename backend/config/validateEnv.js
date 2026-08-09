@@ -4,13 +4,18 @@ const requiredEnvVars = Object.freeze([
   "GEMINI_API_KEY",
 ]);
 
-// Optional integrations — the server boots fine without these, but the
-// dependent feature is disabled until they are provided.
-// ADZUNA_APP_ID / ADZUNA_API_KEY → "Jobs for You" (see controllers/jobController.js)
+// Optional integrations mapping missing keys to dependent features
+const optionalEnvGroups = Object.freeze([
+  {
+    feature: "Jobs for You",
+    keys: ["ADZUNA_APP_ID", "ADZUNA_API_KEY"],
+  },
+]);
 
 const validateEnv = () => {
   const missingVars = [];
 
+  // 1. Check required environment variables
   requiredEnvVars.forEach((envVar) => {
     const value = process.env[envVar];
 
@@ -27,13 +32,27 @@ const validateEnv = () => {
     });
 
     console.error(
-      "\n⚠️ Please add the missing environment variables to your .env file.\n",
+      "\n Please add the missing environment variables to your .env file.\n",
     );
 
     process.exit(1);
   }
 
-  console.log("✅ Environment variables validated successfully\n");
+  // 2. Check optional environment variables and warn if missing
+  optionalEnvGroups.forEach(({ feature, keys }) => {
+    const missingKeys = keys.filter((key) => {
+      const val = process.env[key];
+      return !val || val.trim() === "";
+    });
+
+    if (missingKeys.length > 0) {
+      console.warn(
+        `⚠️  [Optional Config] Missing: ${missingKeys.join(", ")} -> "${feature}" feature will be disabled.`
+      );
+    }
+  });
+
+  console.log(" Environment variables validated successfully\n");
 };
 
 module.exports = validateEnv;

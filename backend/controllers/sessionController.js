@@ -1,6 +1,7 @@
 const Session = require("../models/Session");
 const Question = require("../models/Question");
 const mongoose = require("mongoose");
+const User = require("../models/User");
 
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;
@@ -43,7 +44,7 @@ exports.createSession = async (req, res) => {
                 });
             }
 
-            if (isNaN(experienceNumber)) {
+            if (Number.isNaN(experienceNumber)) {
               return res.status(400).json({
                     success: false,
                     message: "Years of experience must be a valid number.",
@@ -91,6 +92,52 @@ createdSession[0].questions = createdQuestions.map((q) => q._id);
 await createdSession[0].save({
   session: mongoSession,
 });
+
+            // Update user streak on successful session creation
+            const user = await User.findById(userId).session(mongoSession);
+            if (user) {
+                const now = new Date();
+                const getUTCDayDifference = (date1, date2) => {
+                    const d1 = new Date(date1);
+                    const d2 = new Date(date2);
+                    const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
+                    const utc2 = Date.UTC(d2.getUTCFullYear(), d2.getUTCMonth(), d2.getUTCDate());
+                    const msPerDay = 1000 * 60 * 60 * 24;
+                    return Math.floor((utc2 - utc1) / msPerDay);
+                };
+
+                if (!user.lastPracticeDate) {
+                    user.currentStreak = 1;
+                } else {
+                    const diff = getUTCDayDifference(user.lastPracticeDate, now);
+                    if (diff === 1) {
+                        user.currentStreak += 1;
+                    } else if (diff > 1) {
+                        user.currentStreak = 1;
+                    } // if diff === 0, keep current streak (already practiced today)
+                }
+
+                user.lastPracticeDate = now;
+
+                if (user.currentStreak > (user.longestStreak || 0)) {
+                    user.longestStreak = user.currentStreak;
+                }
+
+                // Check milestone badges
+                const streakMilestones = [
+                    { days: 3, badge: "3-Day Streak" },
+                    { days: 7, badge: "7-Day Streak" },
+                    { days: 30, badge: "30-Day Streak" }
+                ];
+
+                for (const milestone of streakMilestones) {
+                    if (user.currentStreak >= milestone.days && !user.unlockedAchievements.includes(milestone.badge)) {
+                        user.unlockedAchievements.push(milestone.badge);
+                    }
+                }
+
+                await user.save({ session: mongoSession });
+            }
 
             res.status(201).json({
                 success: true,

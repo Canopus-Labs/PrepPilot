@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import Login from "./Login";
 import SignUp from "./SignUp";
 import { UserContext } from "../../context/userContext";
@@ -13,10 +13,15 @@ const AuthPage = () => {
   const [page, setPage] = useState("login");
   const { user, loading } = useContext(UserContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo =
+    location.state?.from?.pathname && location.state.from.pathname !== "/login"
+      ? `${location.state.from.pathname}${location.state.from.search || ""}`
+      : "/dashboard";
 
-  // Already logged in → go to dashboard
+  // Already logged in → go to return URL or dashboard
   if (!loading && user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   return (
@@ -25,7 +30,7 @@ const AuthPage = () => {
         {page === "login" ? (
           <Login
             setCurrentPage={setPage}
-            onLoginSuccess={() => navigate("/dashboard")}
+            onLoginSuccess={() => navigate(redirectTo, { replace: true })}
           />
         ) : (
           <SignUp setCurrentPage={setPage} />
