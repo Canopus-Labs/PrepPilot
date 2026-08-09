@@ -1,11 +1,10 @@
-import React, { useState, useRef, useContext } from "react";
-import { UserContext } from "../context/userContext";
+import React, { useState, useRef } from "react";
 import { Bot, User as UserIcon, Send, Sparkles, Trash2 } from "lucide-react";
-import { BASE_URL } from "../utils/apiPaths";
+import { API_PATHS } from "../utils/apiPaths";
+import axiosInstance from "../utils/axiosinstance";
 import AIResponsePreview from "../pages/InterviewPrep/components/AIResponsePreview";
 
 export default function AIHelper() {
-  const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([
     { id: 0, role: "assistant", text: "Hi! I am your AI Interview Assistant. How can I help you prepare today?" },
   ]);
@@ -23,49 +22,12 @@ export default function AIHelper() {
     setTimeout(scrollToBottom, 50);
   }
 
-  async function callApi(prompt, history, onProgress) {
-    const res = await fetch(
-      `${BASE_URL}/api/generate`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, history }),
-      }
-    );
+  async function callApi(prompt, history) {
+    const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
+      prompt,
+      history,
+    });
 
-    if (!res.ok) {
-      const txt = await res.text();
-      let friendlyMessage = `Request failed (Status ${res.status})`;
-      try {
-        const parsed = JSON.parse(txt);
-        if (parsed.message) {
-          friendlyMessage = parsed.message;
-        }
-      } catch (err) {
-        // ignore json parse error
-      }
-      throw new Error(friendlyMessage);
-    }
-
-    if (res.body && typeof res.body.getReader === "function") {
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let done = false;
-      let accumulated = "";
-
-      while (!done) {
-        const { value, done: d } = await reader.read();
-        done = d;
-        if (value) {
-          const chunk = decoder.decode(value, { stream: !done });
-          accumulated += chunk;
-          onProgress(chunk, accumulated);
-        }
-      }
-      return accumulated;
-    }
-
-    const data = await res.json();
     return data.text || "No response.";
   }
 
@@ -86,24 +48,14 @@ export default function AIHelper() {
     setLoading(true);
 
     try {
-      let lastText = "";
-      const onProgress = (chunk, accumulated) => {
-        lastText = accumulated;
-        setMessages((cur) =>
-          cur.map((msg) =>
-            msg.id === placeholderId ? { ...msg, text: lastText } : msg
-          )
-        );
-      };
-
       const historyForBackend = messages.slice(1).map(m => ({
         role: m.role === "assistant" ? "model" : "user",
         text: m.text
       }));
 
-      const full = await callApi(prompt, historyForBackend, onProgress);
+      const full = await callApi(prompt, historyForBackend);
 
-      let displayText = lastText || full || "(no response)";
+      let displayText = full || "(no response)";
       if (
         typeof displayText === "string" &&
         displayText.startsWith("{") &&
@@ -112,7 +64,7 @@ export default function AIHelper() {
         try {
           const parsed = JSON.parse(displayText);
           displayText = parsed.text || displayText;
-        } catch (err) {
+        } catch {
           // ignore json parse error
         }
       }

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Map, Sparkles, Save, RefreshCw, X, LogIn } from "lucide-react";
-import { BASE_URL, API_PATHS } from "../../utils/apiPaths";
+import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosinstance";
 import { UserContext } from "../../context/userContext";
 
@@ -73,13 +73,10 @@ const ProjectRoadmap = () => {
     setGenerating(true);
     try {
       const prompt = buildRoadmapPrompt(finalIdea, finalAnswers);
-      const res = await fetch(`${BASE_URL}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemInstruction: ROADMAP_SYSTEM_INSTRUCTION }),
+      const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
+        prompt,
+        systemInstruction: ROADMAP_SYSTEM_INSTRUCTION,
       });
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-      const data = await res.json();
       const parsed = tryParseJSON(data.text || "");
       if (!parsed) throw new Error("The AI returned an unexpected format. Please try again.");
 
@@ -223,13 +220,10 @@ const ProjectRoadmap = () => {
         sectionLabel,
         currentValue
       );
-      const res = await fetch(`${BASE_URL}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemInstruction: ROADMAP_SYSTEM_INSTRUCTION }),
+      const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
+        prompt,
+        systemInstruction: ROADMAP_SYSTEM_INSTRUCTION,
       });
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-      const data = await res.json();
       const parsed = tryParseJSON(data.text || "");
       if (!parsed || parsed[sectionKey] === undefined) {
         throw new Error("The AI returned an unexpected format.");
