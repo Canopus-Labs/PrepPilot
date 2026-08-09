@@ -7,16 +7,38 @@ const {
 /**
  * Get all sheet progress entries for the authenticated user.
  * @route GET /api/user/sheet-progress
+ * @query page optional page number (default 1)
+ * @query limit optional page size (default 50, max 100)
  */
 exports.getAllProgress = async (req, res) => {
   const userId = req.user._id;
 
+  // Parse and validate pagination params with safe fallbacks
+  const rawPage = Number(req.query.page);
+  const rawLimit = Number(req.query.limit);
+  const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
+  const limit = Number.isFinite(rawLimit)
+    ? Math.min(100, Math.max(1, Math.floor(rawLimit)))
+    : 50;
+  const skip = (page - 1) * limit;
+
   try {
-    const progressList = await UserSheetProgress.find({ userId }).limit(50);
+    const [progressList, total] = await Promise.all([
+      UserSheetProgress.find({ userId }).skip(skip).limit(limit).sort({ updatedAt: -1 }),
+      UserSheetProgress.countDocuments({ userId }),
+    ]);
 
     res.json({
       success: true,
       progressList,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+        hasNextPage: page * limit < total,
+        hasPreviousPage: page > 1,
+      },
     });
   } catch (err) {
     res.status(500).json({
