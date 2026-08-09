@@ -7,14 +7,14 @@ const {
 } = require("../controllers/questionController");
 const {protect} = require("../middlewares/authMiddleware");
 
-const { generalLimiter } = require("../middlewares/rateLimiter");
+
 const { validateAddQuestionToSession, validateTogglePinQuestion, validateUpdateQuestionNote } = require('../Input_validators/ValidateQuestions');
 const router = express.Router();
 
 /**
  * Apply rate limiter to all question routes.
  */
-router.use(generalLimiter, protect);
+router.use(protect);
 
 /**
  * Get all questions for the authenticated user across their sessions.

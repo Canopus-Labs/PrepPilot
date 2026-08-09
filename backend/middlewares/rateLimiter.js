@@ -4,29 +4,43 @@ const redisClient = require('../config/redis');
 
 // Login endpoint: strict brute-force protection (5 attempts per 15 minutes)
 const maxConsecutiveFailsByUsernameAndIP = 5;
-let strictLoginLimiterInstance;
+
+const memoryLimiter = new RateLimiterMemory({
+    keyPrefix: 'login_fail_ip',
+    points: maxConsecutiveFailsByUsernameAndIP,
+    duration: 60 * 15,
+    blockDuration: 60 * 15,
+});
+
+let activeLoginLimiter = memoryLimiter;
 
 if (redisClient) {
-    strictLoginLimiterInstance = new RateLimiterRedis({
+    const redisLimiter = new RateLimiterRedis({
         storeClient: redisClient,
-        keyPrefix: 'login_fail_ip',
-        points: maxConsecutiveFailsByUsernameAndIP,
-        duration: 60 * 15, // 15 minutes
-        blockDuration: 60 * 15, // Block for 15 minutes
-    });
-} else {
-    strictLoginLimiterInstance = new RateLimiterMemory({
         keyPrefix: 'login_fail_ip',
         points: maxConsecutiveFailsByUsernameAndIP,
         duration: 60 * 15,
         blockDuration: 60 * 15,
+        insuranceLimiter: memoryLimiter,
+    });
+
+    redisClient.on('ready', () => {
+        activeLoginLimiter = redisLimiter;
+    });
+    
+    redisClient.on('error', () => {
+        activeLoginLimiter = memoryLimiter;
+    });
+    
+    redisClient.on('end', () => {
+        activeLoginLimiter = memoryLimiter;
     });
 }
 
 const strictLoginLimiter = async (req, res, next) => {
     const ipAddr = req.ip;
     try {
-        const resLimiter = await strictLoginLimiterInstance.get(ipAddr);
+        const resLimiter = await activeLoginLimiter.get(ipAddr);
         if (resLimiter !== null && resLimiter.consumedPoints >= maxConsecutiveFailsByUsernameAndIP) {
             const retrySecs = Math.round(resLimiter.msBeforeNext / 1000) || 1;
             res.set('Retry-After', String(retrySecs));
@@ -77,7 +91,7 @@ const sensitiveAuthLimiter = rateLimit({
 
 module.exports = {
     strictLoginLimiter,
-    strictLoginLimiterInstance,
+    getStrictLoginLimiter: () => activeLoginLimiter,
     authLimiter,
     aiLimiter,
     generalLimiter,

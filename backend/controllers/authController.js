@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
-const { strictLoginLimiterInstance } = require('../middlewares/rateLimiter');
+const { getStrictLoginLimiter } = require('../middlewares/rateLimiter');
 
 // Models for cascade deletion on account delete
 const Session = require("../models/Session");
@@ -174,9 +174,16 @@ const loginUser = async (req, res) => {
         }
 
         const user = await User.findOne({ email: email.trim().toLowerCase() });
+        const strictLimiter = getStrictLoginLimiter();
         if (!user) {
-            if (strictLoginLimiterInstance) {
-                try { await strictLoginLimiterInstance.consume(req.ip); } catch (e) {}
+            if (strictLimiter) {
+                try { 
+                    await strictLimiter.consume(req.ip); 
+                } catch (rejRes) {
+                    const retrySecs = Math.round(rejRes.msBeforeNext / 1000) || 1;
+                    res.set('Retry-After', String(retrySecs));
+                    return res.status(429).json({ error: 'Too many login attempts. Your account is temporarily locked. Please try again after 15 minutes.' });
+                }
             }
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
@@ -184,8 +191,14 @@ const loginUser = async (req, res) => {
         // Verify password against stored hash
         const isMatch = await user.isValidPassword(password);
         if (!isMatch) {
-            if (strictLoginLimiterInstance) {
-                try { await strictLoginLimiterInstance.consume(req.ip); } catch (e) {}
+            if (strictLimiter) {
+                try { 
+                    await strictLimiter.consume(req.ip); 
+                } catch (rejRes) {
+                    const retrySecs = Math.round(rejRes.msBeforeNext / 1000) || 1;
+                    res.set('Retry-After', String(retrySecs));
+                    return res.status(429).json({ error: 'Too many login attempts. Your account is temporarily locked. Please try again after 15 minutes.' });
+                }
             }
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
         }
@@ -198,8 +211,8 @@ const loginUser = async (req, res) => {
             });
         }
         
-        if (strictLoginLimiterInstance) {
-            try { await strictLoginLimiterInstance.delete(req.ip); } catch (e) {}
+        if (strictLimiter) {
+            try { await strictLimiter.delete(req.ip); } catch (e) {}
         }
 
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
@@ -648,6 +661,20 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 
+/**
+ * Handle forgotten password requests.
+ * @route POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required." });
+    }
+    
+    // Placeholder for actual token generation and email sending logic
+    return res.status(200).json({ success: true, message: "If that email is registered, a password reset link has been sent." });
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -659,4 +686,5 @@ module.exports = {
     updateUserProfile,
     changePassword,
     deleteUserAccount,
+    forgotPassword,
 };
