@@ -1,5 +1,12 @@
 const { z } = require("zod");
+const mongoose = require("mongoose");
 const { handleValidationError } = require('./ValidateQuestions')
+
+const objectId = (label) =>
+  z
+    .string()
+    .min(1, `${label} is required`)
+    .refine((v) => mongoose.isValidObjectId(v), "Invalid ObjectId format");
 
 // Schema for compileResume request
 const compileResumeSchema = z.object({
@@ -8,14 +15,27 @@ const compileResumeSchema = z.object({
 
 // Schema for analyzeResume request
 const analyzeResumeSchema = z.object({
-  targetRole: z.string().min(1, "Target role is required").optional(),
+  targetRole: z
+    .string()
+    .min(1, "Target role is required")
+    .max(50, "Target role must be at most 50 characters")
+    .regex(/^[a-zA-Z0-9 \-]+$/, "Target role must contain only alphanumeric characters, spaces, and hyphens")
+    .optional(),
 });
 
 // Schema for saveResume request
 const saveResumeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   latexCode: z.string().min(1, "LaTeX code is required"),
-  resumeId: z.string().optional(),
+  resumeId: z
+    .string()
+    .optional()
+    .refine((v) => !v || mongoose.isValidObjectId(v), "Invalid ObjectId format"),
+});
+
+// Schema for deleteResume request (params)
+const deleteResumeSchema = z.object({
+  id: objectId("Resume ID"),
 });
 
 
@@ -30,7 +50,7 @@ const validateCompileResume = (req, res, next) => {
 };
 
 // Middleware for analyzeResume
-const validateAnalyzeResume = (req, res, next) => {
+const validateAnalyzeResume = async (req, res, next) => {
   try {
     analyzeResumeSchema.parse(req.body);
     // also ensure file is uploaded
@@ -39,6 +59,12 @@ const validateAnalyzeResume = (req, res, next) => {
     }
     next();
   } catch (error) {
+    if (req.file && req.file.path) {
+      const safePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+      await require('fs').promises.unlink(safePath).catch((err) => {
+        if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+      });
+    }
     return handleValidationError(res, error);
   }
 };
@@ -53,8 +79,19 @@ const validateSaveResume = (req, res, next) => {
   }
 };
 
+// Middleware for deleteResume (params)
+const validateDeleteResume = (req, res, next) => {
+  try {
+    deleteResumeSchema.parse(req.params);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateCompileResume,
   validateAnalyzeResume,
   validateSaveResume,
+  validateDeleteResume,
 };

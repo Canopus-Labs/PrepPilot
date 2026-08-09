@@ -54,6 +54,11 @@ const UserSchema = new mongoose.Schema(
         
         unlockedAchievements: { type: [String], default: [] },
 
+        // Streak Tracking
+        currentStreak: { type: Number, default: 0 },
+        longestStreak: { type: Number, default: 0 },
+        lastPracticeDate: { type: Date, default: null },
+
         //Email Verification
         isEmailVerified: { type: Boolean, default: false },
         emailVerificationToken: { type: String, default: null },
@@ -77,6 +82,21 @@ UserSchema.methods.isValidPassword = async function(candidatePassword) {
   // Compare candidate password with the stored hash
   return await bcrypt.compare(candidatePassword, this.password);
 };   
-   
+
+// Never serialize secrets when a User document is sent over the wire (e.g.
+// res.json(user) in GET /api/auth/profile). These fields remain readable in
+// code where they are explicitly needed (login comparison, refresh rotation),
+// but are stripped from every JSON output.
+UserSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    delete ret.password;
+    delete ret.refreshTokenHash;
+    delete ret.refreshTokenExpiresAt;
+    delete ret.emailVerificationToken;
+    delete ret.emailVerificationExpires;
+    delete ret.tokenVersion;
+    return ret;
+  },
+});
 
 module.exports = mongoose.model("User", UserSchema);

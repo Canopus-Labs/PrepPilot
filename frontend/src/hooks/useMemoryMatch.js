@@ -6,6 +6,7 @@ import {
   playVictorySound,
   initAudioContext,
 } from "../utils/matchAudio";
+import { getDailySeed } from "../utils/dailySeed";
 
 // ─── Game Difficulty Specifications ─────────────────────────────────────────────
 export const DIFFICULTY_CONFIGS = {
@@ -77,7 +78,7 @@ export const useMemoryMatch = () => {
   const [stars, setStars] = useState(3);
   const [wrongMoves, setWrongMoves] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
-  
+
   // High Scores & Achievements
   const [highScore, setHighScore] = useState(() => {
     const saved = localStorage.getItem("memory_match_high_score");
@@ -120,7 +121,7 @@ export const useMemoryMatch = () => {
     let a = 1103515245;
     let c = 12345;
     let s = seed;
-    
+
     const nextRandom = () => {
       s = (a * s + c) % m;
       return s / m;
@@ -178,9 +179,9 @@ export const useMemoryMatch = () => {
         { r: 6, c: 6, p: 18 },
       ];
       // If daily challenge is enabled, choose seed-based layout, else random
-      const dateInt = new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate();
+      const dateInt = getDailySeed();
       const index = challengeMode ? (dateInt % options.length) : Math.floor(Math.random() * options.length);
-      
+
       rows = options[index].r;
       cols = options[index].c;
       pairsCount = options[index].p;
@@ -197,7 +198,7 @@ export const useMemoryMatch = () => {
     let shuffledDeck = [];
     if (challengeMode) {
       // Create seed based on calendar date (YYYYMMDD)
-      const dateSeed = new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate();
+      const dateSeed = getDailySeed();
       shuffledDeck = seedShuffle(deckPool, dateSeed);
     } else {
       shuffledDeck = randomShuffle(deckPool);
@@ -223,7 +224,7 @@ export const useMemoryMatch = () => {
 
     // Set clicked card as flipped
     playCardFlipSound();
-    
+
     const updatedCards = cards.map((c, i) => i === cardIndex ? { ...c, isFlipped: true } : c);
     setCards(updatedCards);
 
@@ -242,13 +243,13 @@ export const useMemoryMatch = () => {
       if (card1.iconIndex === card2.iconIndex) {
         // ─── CORRESPONDING MATCH FOUND ───
         playMatchSuccessSound();
-        
+
         // Mark match states immediately
-        const matchedCards = updatedCards.map((c, i) => 
+        const matchedCards = updatedCards.map((c, i) =>
           (i === firstIdx || i === secondIdx) ? { ...c, isMatched: true } : c
         );
         setCards(matchedCards);
-        
+
         // Combo multiplier progression
         const currentCombo = combo;
         const pts = Math.round(100 * currentCombo * DIFFICULTY_CONFIGS[difficulty].multiplier);
@@ -274,7 +275,7 @@ export const useMemoryMatch = () => {
         // Schedule flip back timers
         if (flipbackTimeoutRef.current) clearTimeout(flipbackTimeoutRef.current);
         flipbackTimeoutRef.current = setTimeout(() => {
-          const revertedCards = updatedCards.map((c, i) => 
+          const revertedCards = updatedCards.map((c, i) =>
             (i === firstIdx || i === secondIdx) ? { ...c, isFlipped: false } : c
           );
           setCards(revertedCards);
@@ -308,18 +309,26 @@ export const useMemoryMatch = () => {
 
     // 2. Score Time Bonus
     let timeBonus = 0;
+
     const timeCap = config.maxExpectedTime;
+
     if (timeElapsed < timeCap) {
-      timeBonus = Math.round((timeCap - timeElapsed) * 15 * config.multiplier);
-      setScore((s) => s + timeBonus);
+      timeBonus = Math.round(
+        (timeCap - timeElapsed) * 15 * config.multiplier
+      );
     }
 
     // 3. Perfect Game check
     const isPerfect = totalWrong === 0;
     setPerfectGame(isPerfect);
-    if (isPerfect) {
-      setScore((s) => s + 500); // 500 bonus points for perfect game
-    }
+
+    const perfectBonus = isPerfect ? 500 : 0;
+
+    // Final score after all bonuses
+    const finalScore = score + timeBonus + perfectBonus;
+
+    // Update displayed score once
+    setScore(finalScore);
 
     // 4. Achievement unlocking checks
     const unlocked = [];
@@ -336,12 +345,14 @@ export const useMemoryMatch = () => {
 
     // 5. Update and persist High Score
     setHighScore((prevHigh) => {
-      // Account for score updates (including time bonus and perfect bonus)
-      const finalScore = score + timeBonus + (isPerfect ? 500 : 0);
       if (finalScore > prevHigh) {
-        localStorage.setItem("memory_match_high_score", finalScore.toString());
+        localStorage.setItem(
+          "memory_match_high_score",
+          finalScore.toString()
+        );
         return finalScore;
       }
+
       return prevHigh;
     });
   };
