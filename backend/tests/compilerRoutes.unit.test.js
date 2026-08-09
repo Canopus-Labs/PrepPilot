@@ -1,7 +1,11 @@
+import { createRequire } from "node:module";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+
+const require = createRequire(import.meta.url);
 
 let compilerRouter;
 let runCode;
+let aiLimiter;
 
 beforeEach(async () => {
   const routerMod = await import("../routes/compilerRoutes.js");
@@ -9,6 +13,8 @@ beforeEach(async () => {
 
   const controllerMod = await import("../controllers/compilerController.js");
   runCode = controllerMod.runCode;
+
+  aiLimiter = require("../middlewares/rateLimiter.js").aiLimiter;
 });
 
 afterEach(() => {
@@ -35,6 +41,7 @@ describe("/api/compiler routes", () => {
 
     expect(routerMiddleware.some((fn) => fn && fn.name === "protect")).toBe(true);
     expect(stack).not.toBeNull();
+    expect(stack).toContain(aiLimiter);
     expect(stack.some((fn) => fn && fn.name === "validateCompileCode")).toBe(true);
     expect(stack.some((fn) => fn && fn.name === "runCode")).toBe(true);
   });
