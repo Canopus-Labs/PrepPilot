@@ -5,8 +5,6 @@ const { protect } = require("../middlewares/authMiddleware");
 const { aiLimiter } = require("../middlewares/rateLimiter");
 const { validateCompileCode } = require("../Input_validators/ValidateCompiler");
 
-router.use(protect);
-
-router.post("/run", aiLimiter, validateCompileCode, runCode);
+router.post("/run", aiLimiter, protect, validateCompileCode, runCode);
 
 module.exports = router;

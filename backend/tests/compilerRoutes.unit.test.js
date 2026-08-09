@@ -34,14 +34,11 @@ function getLayerStack(router, method, path) {
 
 describe("/api/compiler routes", () => {
   it("mounts authenticated, rate-limited code execution", () => {
-    const routerMiddleware = compilerRouter.stack
-      .filter((layer) => !layer.route)
-      .map((layer) => layer.handle);
     const stack = getLayerStack(compilerRouter, "POST", "/run");
 
-    expect(routerMiddleware.some((fn) => fn && fn.name === "protect")).toBe(true);
     expect(stack).not.toBeNull();
     expect(stack).toContain(aiLimiter);
+    expect(stack.some((fn) => fn && fn.name === "protect")).toBe(true);
     expect(stack.some((fn) => fn && fn.name === "validateCompileCode")).toBe(true);
     expect(stack.some((fn) => fn && fn.name === "runCode")).toBe(true);
   });
