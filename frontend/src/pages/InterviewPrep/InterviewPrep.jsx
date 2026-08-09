@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuCircleAlert, LuListCollapse, LuDownload } from "react-icons/lu";
+import { LuCircleAlert, LuListCollapse, LuDownload, LuCalendarCheck2 } from "react-icons/lu";
 import html2pdf from "html2pdf.js";
 import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 import { toast } from "react-hot-toast";
@@ -22,6 +22,8 @@ const InterviewPrep = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [openLearnMoreDrawer, setOpenLearnMoreDrawer] = useState(false);
   const [explanation, setExplanation] = useState(null);
+  const [calendarStatus, setCalendarStatus] = useState({ connected: false, email: null });
+  const [calendarSyncing, setCalendarSyncing] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdateLoader, setIsUpdateLoader] = useState(false);
@@ -68,7 +70,7 @@ const InterviewPrep = () => {
       if (response.data) {
         setExplanation(response.data);
       }
-    } catch (error) {
+    } catch (err) {
       setExplanation(null);
       setErrorMsg("Failed to generate explanation, try again later.");
     } finally {
@@ -87,6 +89,52 @@ const InterviewPrep = () => {
       }
     } catch (error) {
       console.error("Error", error);
+    }
+  };
+
+  const connectGoogleCalendar = async () => {
+    try {
+      setCalendarSyncing(true);
+      const response = await axiosInstance.get(API_PATHS.GOOGLE_CALENDAR.CONNECT);
+      if (response.data?.authUrl) {
+        window.location.href = response.data.authUrl;
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to connect Google Calendar");
+    } finally {
+      setCalendarSyncing(false);
+    }
+  };
+
+  const syncGoogleCalendar = async () => {
+    try {
+      setCalendarSyncing(true);
+      const response = await axiosInstance.post(API_PATHS.GOOGLE_CALENDAR.EVENTS, {
+        title: `${sessionData?.role || "Interview"} practice session`,
+        description: sessionData?.description || `PrepPilot session for ${sessionData?.role || "interview prep"}`,
+        startTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        reminderMinutes: 15,
+      });
+
+      if (response.data?.success) {
+        toast.success("Google Calendar event synced");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to sync Google Calendar event");
+    } finally {
+      setCalendarSyncing(false);
+    }
+  };
+
+  const loadCalendarStatus = async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.GOOGLE_CALENDAR.STATUS);
+      if (response.data?.success) {
+        setCalendarStatus({ connected: response.data.connected, email: response.data.email });
+      }
+    } catch (error) {
+      console.error("Calendar status error", error);
     }
   };
 
@@ -126,6 +174,7 @@ const InterviewPrep = () => {
 
   useEffect(() => {
     if (sessionId) fetchSessionDetailsById();
+    loadCalendarStatus();
   }, [sessionId]);
 
   return (
@@ -144,19 +193,35 @@ const InterviewPrep = () => {
       />
 
       <div className="container mx-auto pt-6 pb-10 px-4 sm:px-6 md:px-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">
             Interview Q & A
           </h2>
-          {sessionData?.questions?.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={handleDownloadPdf}
-              className="mt-3 sm:mt-0 flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm"
+              onClick={calendarStatus.connected ? syncGoogleCalendar : connectGoogleCalendar}
+              disabled={calendarSyncing}
+              className="flex items-center gap-2 bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm hover:opacity-90 transition disabled:opacity-70"
             >
-              <LuDownload size={16} />
-              Download PDF
+              <LuCalendarCheck2 size={16} />
+              {calendarSyncing ? "Working..." : calendarStatus.connected ? "Sync to Google Calendar" : "Connect Google Calendar"}
             </button>
-          )}
+            {sessionData?.questions?.length > 0 && (
+              <button
+                onClick={handleDownloadPdf}
+                className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm"
+              >
+                <LuDownload size={16} />
+                Download PDF
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-4 text-sm text-slate-600 dark:text-slate-300">
+          <p className="font-medium text-slate-900 dark:text-white">
+            {calendarStatus.connected ? `Connected to Google Calendar${calendarStatus.email ? ` (${calendarStatus.email})` : ""}.` : "Connect your Google Calendar to sync interview prep reminders and mock interview blocks."}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">

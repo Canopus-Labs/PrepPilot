@@ -24,7 +24,7 @@ const summarizeRequestSchema = z.object({
   fileName: z.string().max(200).optional(),
 });
 
-const validateSummarizeNotes = (req, res, next) => {
+const validateSummarizeNotes = async (req, res, next) => {
   try {
     req.body = summarizeRequestSchema.parse(req.body || {});
     if (!req.file && !req.body.url) {
@@ -35,6 +35,12 @@ const validateSummarizeNotes = (req, res, next) => {
     }
     next();
   } catch (error) {
+    if (req.file && req.file.path) {
+      const safePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+      await require('fs').promises.unlink(safePath).catch((err) => {
+        if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+      });
+    }
     return handleValidationError(res, error);
   }
 };
@@ -77,4 +83,5 @@ module.exports = {
   validateSummarizeNotes,
   validateSaveNotesSummary,
   aiOutputSchema,
+  saveNotesSummarySchema,
 };

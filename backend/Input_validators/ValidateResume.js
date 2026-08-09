@@ -15,7 +15,12 @@ const compileResumeSchema = z.object({
 });
 
 const analyzeResumeSchema = z.object({
-  targetRole: z.string().min(1, "Target role is required").optional(),
+  targetRole: z
+    .string()
+    .min(1, "Target role is required")
+    .max(50, "Target role must be at most 50 characters")
+    .regex(/^[a-zA-Z0-9 \-]+$/, "Target role must contain only alphanumeric characters, spaces, and hyphens")
+    .optional(),
 });
 
 const saveResumeSchema = z.object({
@@ -63,8 +68,19 @@ const validateAnalyzeResume = (req, res, next) => {
 // Middleware for saveResume
 const validateSaveResume = validate(saveResumeSchema);
 
+// Middleware for deleteResume (params)
+const validateDeleteResume = (req, res, next) => {
+  try {
+    deleteResumeSchema.parse(req.params);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateCompileResume,
   validateAnalyzeResume,
   validateSaveResume,
+  validateDeleteResume,
 };
