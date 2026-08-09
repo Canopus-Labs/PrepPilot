@@ -701,15 +701,22 @@ const Settings = () => {
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                     Country
                   </label>
+
                   <input
                     type="text"
                     value={country}
-                    onChange={(e) => setCountry(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (/^[A-Za-z\s'-]*$/.test(value)) {
+                        setCountry(value);
+                      }
+                    }}
                     placeholder="Enter Country"
                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white"
                   />
+                  </div>
                 </div>
-              </div>
               <div className="border-t border-slate-200/60 dark:border-slate-800 pt-6">
                 <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-6">
                   Educational Details
