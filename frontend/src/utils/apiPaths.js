@@ -79,4 +79,7 @@ export const API_PATHS = {
         TOGGLE_TASK: (id) => `/api/roadmaps/${id}/tasks`,
         DELETE: (id) => `/api/roadmaps/${id}`,
     },
+    GITHUB: {
+        SEARCH: "/api/github/search",
+    },
 };
