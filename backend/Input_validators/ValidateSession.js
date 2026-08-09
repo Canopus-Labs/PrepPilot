@@ -12,7 +12,7 @@ const objectId = (label) =>
 const createSessionSchema = z.object({
   role: z.string().min(1, "Role is required"),
   experience: z.string().min(1, "Experience is required"),
-  topicsToFocus: z.array(z.string()).min(1, "At least one topic is required"),
+  topicsToFocus: z.array(z.string().min(1)).min(1, "At least one topic is required").max(20, "Cannot specify more than 20 topics"),
   description: z.string().optional(),
   question: z.array(
     z.object({
