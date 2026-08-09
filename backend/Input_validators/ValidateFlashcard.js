@@ -4,7 +4,7 @@ const { handleValidationError } = require("./ValidateQuestions");
 const createFlashcardSchema = z.object({
   question: z.string().min(1, "Question text is required").max(5000, "Question text must be at most 5000 characters"),
   answer: z.string().min(1, "Answer text is required").max(10000, "Answer text must be at most 10000 characters"),
-  category: z.string().optional().default("General"),
+  category: z.string().max(100, "Category must be at most 100 characters").optional().default("General"),
   sourceId: z.string().optional().nullable(),
 });
 
