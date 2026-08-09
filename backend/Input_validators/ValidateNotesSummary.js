@@ -57,7 +57,9 @@ const aiOutputSchema = z.object({
 
 const saveNotesSummarySchema = z.object({
   fileName: z.string().min(1).max(200),
-  sourceType: z.enum(["upload", "platform"]),
+  sourceType: z.enum(["upload", "platform"], {
+    errorMap: () => ({ message: "sourceType must be either 'upload' or 'platform'" }),
+  }),
   sourceUrl: z.string().url().optional().nullable(),
   pageCount: z.number().int().nonnegative().optional().default(0),
   wordCount: z.number().int().nonnegative().optional().default(0),
