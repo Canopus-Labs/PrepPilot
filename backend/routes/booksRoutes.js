@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { setCacheControl } = require("../middlewares/cacheMiddleware");
 
 const GITHUB_OWNER = "KaranUnique";
 const GITHUB_REPO = "Free-programming-books";
@@ -143,7 +144,7 @@ async function listFilesRecursive(prefix, page, limit) {
  * @example
  * 200 {"categories": [{"id":"...","title":"...","pagination":{"totalItems":100,...},"items":[...]}], "warnings": []}
  */
-router.get("/", async (_req, res) => {
+router.get("/", setCacheControl(86400), async (_req, res) => {
   try {
     let categoryDirs;
     let treeData = null;
@@ -240,7 +241,7 @@ router.get("/", async (_req, res) => {
  * @example
  * 302 redirect to raw file URL
  */
-router.get("/download", (req, res) => {
+router.get("/download", setCacheControl(86400), (req, res) => {
   const { url } = req.query;
   if (typeof url !== "string" || !url.trim()) {
     return res.status(400).json({ message: "url query is required" });

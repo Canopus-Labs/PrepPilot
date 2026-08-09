@@ -7,12 +7,13 @@ const questionCache = new NodeCache({
 });
 
 const router = express.Router();
+const { setCacheControl } = require("../middlewares/cacheMiddleware");
 const MAX_RETRIES = 3;
 const INITIAL_DELAY = 1000;
 
 
 // GET /api/questions?topic=Probability
-router.get("/", async (req, res) => {
+router.get("/", setCacheControl(3600), async (req, res) => {
   const { topic } = req.query;
   if (typeof topic !== "string" || topic.trim().length === 0) {
     return res.status(400).json({ error: "Topic is required" });

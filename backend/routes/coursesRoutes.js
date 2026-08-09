@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const router = express.Router();
+const { setCacheControl } = require("../middlewares/cacheMiddleware");
 
 /**
  * Serve all free courses data from the local JSON file.
@@ -11,7 +12,7 @@ const router = express.Router();
  * @example
  * 200 [{ "title": "AI Tools", "cards": [...] }, ...]
  */
-router.get("/", (req, res) => {
+router.get("/", setCacheControl(86400), (req, res) => {
   try {
     const data = require(path.join(__dirname, "../data/allcourses.json"));
     res.json(data);
