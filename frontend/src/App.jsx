@@ -27,6 +27,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
 import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
 import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
+import ResumeAnalysisHistory from "./pages/ResumeBuilder/ResumeAnalysisHistory";
 import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
 import TermsandConditions from "./pages/Terms/TermsandConditions";
 import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
@@ -330,6 +331,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <ResumeAnalyzer />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/resume-analyzer/history"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ResumeAnalysisHistory />
                         </PageTransition>
                       </ProtectedRoute>
                     }
