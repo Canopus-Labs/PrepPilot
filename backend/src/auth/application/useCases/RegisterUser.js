@@ -31,12 +31,8 @@ class RegisterUser {
                 
                 await this.userRepository.save(userExists);
                 
-                try {
-                    const verificationUrl = `${frontendUrl}/verify-email?token=${rawToken}`;
-                    await this.emailService.sendVerificationEmail(userExists.email, verificationUrl);
-                } catch (err) {
-                    console.error("Failed to resend verification email on re-registration:", err);
-                }
+                const verificationUrl = `${frontendUrl}/verify-email?token=${rawToken}`;
+                await this.emailService.sendVerificationEmail(userExists.email, verificationUrl);
             }
             // Return true indicating process completed but email was already used (to avoid enumeration)
             return { alreadyRegistered: true }; 
@@ -66,14 +62,19 @@ class RegisterUser {
             emailVerificationExpires
         });
 
-        await this.userRepository.save(newUser);
-
         try {
-            const verificationUrl = `${frontendUrl}/verify-email?token=${rawToken}`;
-            await this.emailService.sendVerificationEmail(newUser.email, verificationUrl);
-        } catch (err) {
-            console.error("Failed to send initial verification email:", err);
+            await this.userRepository.save(newUser);
+        } catch (error) {
+            if (error instanceof ConflictError) {
+                // If it fails due to a duplicate-email constraint race condition,
+                // fall back to the existing user response flow.
+                return { alreadyRegistered: true };
+            }
+            throw error;
         }
+
+        const verificationUrl = `${frontendUrl}/verify-email?token=${rawToken}`;
+        await this.emailService.sendVerificationEmail(newUser.email, verificationUrl);
 
         return { alreadyRegistered: false };
     }

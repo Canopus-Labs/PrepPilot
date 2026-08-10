@@ -1,6 +1,7 @@
 const IUserRepository = require("../../application/ports/IUserRepository");
 const UserModel = require("../../../../models/User");
 const UserEntity = require("../../domain/entities/UserEntity");
+const { NotFoundError, ConflictError } = require("../../../shared/domain/BaseError");
 
 class UserRepositoryMongoImpl extends IUserRepository {
     
@@ -41,12 +42,22 @@ class UserRepositoryMongoImpl extends IUserRepository {
         delete data.id;
         
         let doc;
-        if (userEntity.id) {
-            // Update existing
-            doc = await UserModel.findByIdAndUpdate(userEntity.id, data, { new: true, upsert: true });
-        } else {
-            // Create new
-            doc = await UserModel.create(data);
+        try {
+            if (userEntity.id) {
+                // Update existing
+                doc = await UserModel.findByIdAndUpdate(userEntity.id, data, { new: true });
+                if (!doc) {
+                    throw new NotFoundError(`User with ID ${userEntity.id} not found.`);
+                }
+            } else {
+                // Create new
+                doc = await UserModel.create(data);
+            }
+        } catch (error) {
+            if (error.code === 11000) {
+                throw new ConflictError("Duplicate entry detected.");
+            }
+            throw error;
         }
         return this._mapToEntity(doc);
     }

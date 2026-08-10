@@ -51,14 +51,14 @@ class UserEntity {
             education: "",
             achievements: "",
             workExperience: "",
+            ...profileDetails,
             socials: {
                 github: "",
                 linkedin: "",
                 twitter: "",
                 portfolio: "",
-                ...(profileDetails.socials || {})
-            },
-            ...profileDetails,
+                ...(profileDetails?.socials || {})
+            }
         };
         this.visibility = visibility;
         this.prepPilotId = prepPilotId;
