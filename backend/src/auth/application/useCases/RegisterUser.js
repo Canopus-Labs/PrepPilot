@@ -26,13 +26,18 @@ class RegisterUser {
             // Existing user handling
             if (!userExists.isEmailVerified) {
                 const rawToken = crypto.randomBytes(32).toString("hex");
-                userExists.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+                const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+                userExists.emailVerificationToken = hashedToken;
                 userExists.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
                 
                 await this.userRepository.save(userExists);
                 
-                const verificationUrl = `${frontendUrl}/verify-email?token=${rawToken}`;
-                await this.emailService.sendVerificationEmail(userExists.email, verificationUrl);
+                // Outbox/version check to prevent delivery of superseded tokens
+                const latestUser = await this.userRepository.findByEmail(cleanEmail);
+                if (latestUser && latestUser.emailVerificationToken === hashedToken) {
+                    const verificationUrl = `${frontendUrl}/verify-email?token=${rawToken}`;
+                    await this.emailService.sendVerificationEmail(userExists.email, verificationUrl);
+                }
             }
             // Return true indicating process completed but email was already used (to avoid enumeration)
             return { alreadyRegistered: true }; 
@@ -65,7 +70,7 @@ class RegisterUser {
         try {
             await this.userRepository.save(newUser);
         } catch (error) {
-            if (error instanceof ConflictError) {
+            if (error instanceof ConflictError && Object.keys(error.fields || {}).includes("email")) {
                 // If it fails due to a duplicate-email constraint race condition,
                 // fall back to the existing user response flow.
                 return { alreadyRegistered: true };

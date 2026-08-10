@@ -55,7 +55,7 @@ class UserRepositoryMongoImpl extends IUserRepository {
             }
         } catch (error) {
             if (error.code === 11000) {
-                throw new ConflictError("Duplicate entry detected.");
+                throw new ConflictError("Duplicate entry detected.", error.keyValue || {});
             }
             throw error;
         }

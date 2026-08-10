@@ -20,8 +20,9 @@ class NotFoundError extends DomainError {
 }
 
 class ConflictError extends DomainError {
-    constructor(message) {
+    constructor(message, fields = {}) {
         super(message, "CONFLICT_ERROR");
+        this.fields = fields;
     }
 }
 
