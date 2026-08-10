@@ -13,9 +13,9 @@ const difficultySchema = z.object({
 });
 
 const readingTimeSchema = z.object({
-  minutes: z.number().int().positive(),
+  minutes: z.number().int().positive().refine(v => Number.isFinite(v), { message: 'Minutes must be a finite number' }),
   label: z.string().min(1).max(50),
-  pages: z.number().int().nonnegative(),
+  pages: z.number().int().nonnegative().refine(v => Number.isFinite(v), { message: 'Pages must be a finite number' }),
 });
 
 
