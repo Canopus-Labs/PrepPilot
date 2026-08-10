@@ -86,18 +86,6 @@ app.use((req, res, next) => {
   next();
 });
 
-connectDB()
-  .then((success) => {
-    if (success) {
-      console.log("MongoDB connected successfully");
-    } else {
-      console.warn("⚠️ Failed to connect to MongoDB - server will run without database connection");
-    }
-  })
-  .catch((err) => {
-    console.error("Database connection error:", err.message);
-  });
-
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -182,28 +170,60 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server connected and running on port ${PORT}`);
-  if (process.env.NODE_ENV === "production") {
-    console.log("Allowed CORS origins (production):");
-  } else {
-    console.log("Allowed CORS origins (development):");
-  }
-  for (const o of allowedOrigins) {
-    console.log("  -", o);
-  }
-});
 
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(
-      `Port ${PORT} is already in use. Please free the port or use a different one.`,
-    );
+// Database is required for this service. Block startup until MongoDB is
+// reachable; if it is not, fail fast with a clear FATAL message instead of
+// starting in a degraded state where every endpoint returns cryptic errors
+// and background jobs fail silently. (Resolves #1303.)
+async function startServer() {
+  let dbConnected;
+  try {
+    dbConnected = await connectDB();
+  } catch (err) {
+    console.error("FATAL: Cannot connect to MongoDB:", err.message);
+    console.error("Exiting - database is required for this service");
     process.exit(1);
-  } else {
-    console.error("Server error:", err);
   }
-});
+  if (!dbConnected) {
+    console.error("FATAL: Cannot connect to MongoDB");
+    console.error("Exiting - database is required for this service");
+    process.exit(1);
+  }
+  console.log("MongoDB connected successfully");
+
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server connected and running on port ${PORT}`);
+    if (process.env.NODE_ENV === "production") {
+      console.log("Allowed CORS origins (production):");
+    } else {
+      console.log("Allowed CORS origins (development):");
+    }
+    for (const o of allowedOrigins) {
+      console.log("  -", o);
+    }
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(
+        `Port ${PORT} is already in use. Please free the port or use a different one.`,
+      );
+      process.exit(1);
+    } else {
+      console.error("Server error:", err);
+    }
+  });
+}
+
+// Only boot when run directly (`node server.js`). When required as a module
+// (e.g. by scripts/check-routes.js or tests), export the configured app without
+// binding a port or connecting to the database.
+module.exports = app;
+module.exports.startServer = startServer;
+module.exports.app = app;
+if (require.main === module) {
+  startServer();
+}
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
