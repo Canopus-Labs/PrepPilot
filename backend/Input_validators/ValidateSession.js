@@ -17,8 +17,8 @@ const createSessionSchema = z.object({
   description: z.string().optional(),
   question: z.array(
     z.object({
-      question: z.string().min(1, "Question text is required"),
-      answer: z.string().min(1, "Answer text is required"),
+      question: z.string().min(1, "Question text is required").max(5000, "Question text cannot exceed 5000 characters"),
+      answer: z.string().min(1, "Answer text is required").max(10000, "Answer text cannot exceed 10000 characters"),
     })
   ).max(50, "Maximum 50 questions allowed").optional(),
 });
