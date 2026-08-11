@@ -159,6 +159,8 @@ const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
+const googleCalendarRoutes = require("./routes/googleCalendarRoutes");
+app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 
 
 app.use(
