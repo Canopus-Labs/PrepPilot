@@ -44,10 +44,10 @@ const milestoneFields = z.object({
 
 const techStackFields = z
   .object({
-    frontend: z.array(z.string()),
-    backend: z.array(z.string()),
-    database: z.array(z.string()),
-    other: z.array(z.string()),
+    frontend: z.array(z.string().max(100, "Technology name cannot exceed 100 characters")),
+    backend: z.array(z.string().max(100, "Technology name cannot exceed 100 characters")),
+    database: z.array(z.string().max(100, "Technology name cannot exceed 100 characters")),
+    other: z.array(z.string().max(100, "Technology name cannot exceed 100 characters")),
   })
   .partial();
 
