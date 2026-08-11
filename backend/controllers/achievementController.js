@@ -3,8 +3,22 @@ const { VALID_ACHIEVEMENTS } = require('../constants/achievements');
 
 exports.getAchievements = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select('unlockedAchievements');
+        const user = await User.findById(req.user._id).select('unlockedAchievements lastPracticeDate currentStreak');
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+        // Reset streak to 0 if one or more calendar days were missed
+        if (user.lastPracticeDate && user.currentStreak > 0) {
+            const now = new Date();
+            const d1 = new Date(user.lastPracticeDate);
+            const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
+            const utc2 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+            if (diffDays > 1) {
+                user.currentStreak = 0;
+                await user.save();
+            }
+        }
+
         res.json({ success: true, unlockedAchievements: user.unlockedAchievements });
     } catch (err) {
         res.status(500).json({ success: false, error: "A server error occurred" });

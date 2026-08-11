@@ -43,7 +43,7 @@ const VerifyEmail = () => {
         };
 
         verify();
-    }, []);
+    }, [navigate, searchParams]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-[#0a0a0f] px-4">

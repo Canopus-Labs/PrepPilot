@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target } from "lucide-react";
+import { Upload, FileText, Briefcase, Zap, CheckCircle2, AlertTriangle, AlertCircle, X, ChevronRight, RefreshCw, Target, History } from "lucide-react";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import { Link } from "react-router-dom";
 
 const ResumeAnalyzer = () => {
   const [file, setFile] = useState(null);
@@ -128,18 +129,26 @@ const ResumeAnalyzer = () => {
       <div className="max-w-5xl mx-auto space-y-10">
         
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 shadow-sm flex items-center justify-center shrink-0">
-            <Zap size={28} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 shadow-sm flex items-center justify-center shrink-0">
+              <Zap size={28} />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                AI Resume Analyzer
+              </h1>
+              <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                Upload your resume for real-time ATS parsing, scoring, and role-matched AI suggestions.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-              AI Resume Analyzer
-            </h1>
-            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1 font-medium">
-              Upload your resume for real-time ATS parsing, scoring, and role-matched AI suggestions.
-            </p>
-          </div>
+          <Link
+            to="/resume-analyzer/history"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-800 dark:text-gray-200 font-bold transition-all border border-gray-200 dark:border-gray-700"
+          >
+            <History size={18} /> View History
+          </Link>
         </div>
 
         {/* Dynamic Display */}
@@ -259,7 +268,7 @@ const ResumeAnalyzer = () => {
                  <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -ml-20 -mb-20 pointer-events-none"></div>
                  
-                 {renderScoreRing(result.resumeScore, "Overall Score", "Based on deep analysis")}
+                 {renderScoreRing(result.resumeScore, "ATS Compatibility Score", "Based on deep analysis")}
                  
                  <div className="hidden sm:block w-px h-32 bg-gradient-to-b from-transparent via-gray-200 dark:via-white/10 to-transparent mx-8"></div>
                  <div className="sm:hidden h-px w-full max-w-xs bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent my-8"></div>
@@ -318,6 +327,46 @@ const ResumeAnalyzer = () => {
                    )}
                  </div>
 
+                 <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm">
+  <h3 className="text-lg font-bold mb-5">
+    Missing Keywords
+  </h3>
+
+  <div className="flex flex-wrap gap-2">
+    {(result.missingKeywords || []).map((item, index) => (
+      <span
+        key={index}
+        className="px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700 font-semibold"
+      >
+        {item}
+      </span>
+    ))}
+  </div>
+</div>
+<div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8">
+    <h3 className="font-bold mb-5">
+        Suggested Action Verbs
+    </h3>
+
+    <ul>
+        {(result.actionVerbs || []).map((verb,index)=>(
+            <li key={index}>
+                • {verb}
+            </li>
+        ))}
+    </ul>
+</div>
+<div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8">
+<h3>Formatting Issues</h3>
+
+{result.formattingIssues?.map((issue,index)=>(
+<div key={index}>
+⚠️ {issue}
+</div>
+))}
+
+</div>
+
                  {/* Missing Projects */}
                  <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm">
                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
@@ -335,6 +384,29 @@ const ResumeAnalyzer = () => {
                    </ul>
                  </div>
                </div>
+
+               <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm">
+  <h3 className="text-lg font-bold mb-5">
+    Resume Sections
+  </h3>
+
+  {Object.entries(result.sections || {}).map(([section, value]) => (
+    <div
+      key={section}
+      className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-white/10"
+    >
+      <span>{section}</span>
+
+      <span
+        className={`font-semibold ${
+          value ? "text-green-500" : "text-red-500"
+        }`}
+      >
+        {value ? "✔ Present" : "✖ Missing"}
+      </span>
+    </div>
+  ))}
+</div>
 
                {/* Suggestions List */}
                <div className="bg-white dark:bg-[#151c2f] rounded-3xl p-8 border border-gray-200 dark:border-white/5 shadow-sm flex flex-col h-full">
@@ -360,6 +432,11 @@ const ResumeAnalyzer = () => {
                  >
                    Analyze Another Resume
                  </button>
+                 <button
+                  className="mt-4 w-full py-4 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition"
+                >
+                  Download Improvement Report
+                </button>
                </div>
                
             </div>

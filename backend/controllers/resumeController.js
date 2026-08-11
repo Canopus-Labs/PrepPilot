@@ -1,5 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const fs = require('fs');
 const { generateWithFallback } = require('../utils/geminiHelper');
 
 /**
@@ -17,10 +18,16 @@ const { generateWithFallback } = require('../utils/geminiHelper');
  * @example
  * 200 <PDF binary response>
  */
+const MAX_LATEX_CODE_LENGTH = 100000; // ~100KB — prevents oversized submissions to texlive.net
+
 const compileResume = async (req, res) => {
     try {
         const { code } = req.body;
-      
+
+        if (!code || typeof code !== 'string' || code.length > MAX_LATEX_CODE_LENGTH) {
+            return res.status(400).json({ message: "LaTeX code exceeds the maximum allowed length of 100KB" });
+        }
+
         // Normalize line endings to UNIX format, as texlive.net is highly sensitive to Windows \r\n
         const cleanCode = code.replace(/\r\n/g, '\n');
 
@@ -94,12 +101,19 @@ const compileResume = async (req, res) => {
  * }
  */
 const analyzeResume = async (req, res) => {
+    let uploadedFilePath = null;
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No resume file uploaded" });
         }
 
+        uploadedFilePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+        let fileBuffer = await fs.promises.readFile(uploadedFilePath);
+
         const targetRole = req.body.targetRole || "General Professional";
+
+        const base64Data = fileBuffer.toString("base64");
+        fileBuffer = null; // Release Buffer memory
 
         // 2. Prompt Engineering
         const prompt = `You are an expert ATS (Applicant Tracking System) and Senior Technical Recruiter.
@@ -110,6 +124,7 @@ Return the analysis STRICTLY as a JSON object with the following exact keys and 
   "resumeScore": (number between 0 and 100),
   "roleMatch": (number between 0 and 100),
   "missingSkills": [array of short strings, max 5],
+  "missingKeywords": [array of short strings, max 5],
   "missingProjects": [array of short strings, max 3],
   "atsCompatibility": {
     "status": "Good" | "Average" | "Poor",
@@ -127,7 +142,7 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
                 prompt,
                 {
                     inlineData: {
-                        data: req.file.buffer.toString("base64"),
+                        data: base64Data,
                         mimeType: "application/pdf"
                     }
                 }
@@ -149,16 +164,41 @@ DO NOT wrap the response in markdown blocks like \`\`\`json. Return ONLY the raw
             console.error("Failed to parse Gemini JSON:", aiResponse);
             return res.status(500).json({ message: "AI response parsing failed.", raw: aiResponse });
         }
+        try {
+            await ResumeAnalysisHistory.create({
+                user: req.user._id,
+                targetRole,
+                resumeScore: jsonResult.resumeScore || 0,
+                roleMatch: jsonResult.roleMatch || 0,
+                missingSkills: jsonResult.missingSkills || [],
+                missingKeywords: jsonResult.missingKeywords || [],
+                actionVerbs: jsonResult.actionVerbs || [],
+                formattingIssues: jsonResult.formattingIssues || [],
+                missingProjects: jsonResult.missingProjects || [],
+                atsCompatibility: jsonResult.atsCompatibility || {},
+                suggestions: jsonResult.suggestions || [],
+                sections: jsonResult.sections || {}
+            });
+        } catch (dbErr) {
+            console.error("Failed to save analysis history:", dbErr);
+        }
 
         res.status(200).json(jsonResult);
 
     } catch (error) {
         console.error("Resume Analysis Error:", error);
         res.status(500).json({ message: "Failed to analyze resume" });
+    } finally {
+        if (uploadedFilePath) {
+            await require('fs').promises.unlink(uploadedFilePath).catch(err => {
+                if (err.code !== 'ENOENT') console.error("Failed to delete temp resume PDF:", err);
+            });
+        }
     }
 }
 
 const Resume = require("../models/Resume");
+const ResumeAnalysisHistory = require("../models/ResumeAnalysisHistory");
 
 /**
  * Save or update a user's resume record.
@@ -185,6 +225,10 @@ const saveResume = async (req, res) => {
 
         if (!title || !latexCode) {
             return res.status(400).json({ success: false, message: "Title and LaTeX code are required." });
+        }
+
+        if (latexCode.length > MAX_LATEX_CODE_LENGTH) {
+            return res.status(400).json({ success: false, message: "LaTeX code exceeds the maximum allowed length of 100KB" });
         }
 
         let resume;
@@ -228,7 +272,7 @@ const saveResume = async (req, res) => {
 const getMyResumes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 });
+        const resumes = await Resume.find({ user: userId }).sort({ updatedAt: -1 }).limit(50);
         res.status(200).json({ success: true, resumes });
     } catch (error) {
         console.error("Get Resumes Error:", error);
@@ -251,4 +295,21 @@ async function deleteResume(req, res) {
     }
 }
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume };
+/**
+ * Retrieve saved resume analysis history for the authenticated user.
+ * @route GET /api/resume/analysis-history
+ */
+const getResumeAnalysisHistory = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const history = await ResumeAnalysisHistory.find({ user: userId })
+            .sort({ createdAt: -1 })
+            .limit(50);
+        res.status(200).json({ success: true, history });
+    } catch (error) {
+        console.error("Get Analysis History Error:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory };

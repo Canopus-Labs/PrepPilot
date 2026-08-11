@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
 
 // Allowed ratings (strings and numbers)
@@ -51,7 +52,7 @@ const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) =
   const q = score;
   newEFactor = newEFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
   if (newEFactor < 1.3) newEFactor = 1.3;
-  newEFactor = Math.round(newEFactor * 100) / 100;
+  newEFactor = Math.round(newEFactor * 100 + Number.EPSILON) / 100;
 
   const now = new Date();
   const nextDueDate = new Date(now.getTime() + newInterval * 24 * 60 * 60 * 1000);
@@ -74,6 +75,21 @@ const createFlashcard = async (req, res) => {
     const { question, answer, category, sourceId } = req.body;
     const userId = req.user._id;
 
+    // Validate presence and type of mandatory fields
+    if (
+      !question ||
+      typeof question !== "string" ||
+      !question.trim() ||
+      !answer ||
+      typeof answer !== "string" ||
+      !answer.trim()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Question and answer are required non-empty string fields",
+      });
+    }
+
     // Check if card with exact sourceId already exists for this user
     if (sourceId) {
       const existingCard = await Flashcard.findOne({ userId, sourceId });
@@ -88,8 +104,8 @@ const createFlashcard = async (req, res) => {
 
     const flashcard = await Flashcard.create({
       userId,
-      question,
-      answer,
+      question: question.trim(),
+      answer: answer.trim(),
       category: category || "General",
       sourceId: sourceId || null,
       dueDate: new Date(),
@@ -230,6 +246,14 @@ const deleteFlashcard = async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
 
+    // Validate ObjectId format before querying database
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid flashcard ID format",
+      });
+    }
+
     const flashcard = await Flashcard.findOneAndDelete({ _id: id, userId });
     if (!flashcard) {
       return res.status(404).json({
@@ -271,7 +295,10 @@ const getFlashcardStats = async (req, res) => {
       interval: { $gte: 21 },
     });
 
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    // Fix: Clone 'now' before setting hours to avoid in-place mutation of 'now'
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
     const reviewedToday = await Flashcard.countDocuments({
       userId,
       lastReviewedAt: { $gte: startOfDay },

@@ -342,7 +342,7 @@ export const usePatternMatrix = () => {
         }, 1500);
       }
     }
-  }, [phase, paused, selected, wrongClicks, targets, gridSize, difficulty, level, streak, lives, score, startCountdown, clearTimers]);
+  }, [phase, paused, selected, wrongClicks, targets, gridSize, difficulty, level, streak, lives, score, startCountdown]);
 
   // ─── Pause & Resume Utilities ────────────────────────────────────────────────
   const pauseGame = useCallback(() => {

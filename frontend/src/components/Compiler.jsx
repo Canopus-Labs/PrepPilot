@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { Play } from "lucide-react"; // icon for Run button
+import Editor from "@monaco-editor/react";
+import { Play } from "lucide-react";
 import DashboardLayout from "./Layouts/DashboardLayout";
 
 const RAPIDAPI_KEY = import.meta.env.VITE_REACT_APP_RAPIDAPI_KEY;
+
+const LANGUAGE_MAP = {
+  "54": "cpp",
+  "62": "java",
+  "71": "python",
+  "63": "javascript",
+};
 
 const Compiler = () => {
   const [language, setLanguage] = useState("62"); // Default Java
@@ -21,9 +29,8 @@ int main() {
     "71": `print("Hello World")`,
     "63": `console.log("Hello World");`
   };
-    const [code, setCode] = useState(codeTemplates[language]); // Keep only one instance
+  const [code, setCode] = useState(codeTemplates[language]);
 
-  // Update code template when language changes
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setLanguage(lang);
@@ -45,13 +52,14 @@ int main() {
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
-            language_id: parseInt(language),
+            language_id: parseInt(language, 10),
             source_code: code,
             stdin: "",
           }),
         }
       );
 
+      if (!response.ok) throw new Error("Request failed");
       const result = await response.json();
       const finalOutput =
         result.stdout ||
@@ -61,7 +69,7 @@ int main() {
 
       setOutput(finalOutput);
     } catch (error) {
-      setOutput("❌ Error running code: " + error.message);
+      setOutput("Error running code: " + error.message);
     }
   };
 
@@ -76,9 +84,7 @@ int main() {
           </p>
         </div>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
-          {/* Code Editor */}
-          <div className="flex-1 flex flex-col bg-white/10 backdrop-blur-lg border border-white/10 rounded shadow-xl overflow-hidden">
-            {/* Top Bar */}
+          <div className="flex-1 flex flex-col bg-white/10 backdrop-blur-lg border border-white/10 rounded shadow-xl overflow-hidden min-h-[360px]">
             <div className="flex justify-between items-center bg-gradient-to-r from-gray-600 to-gray-600 px-4 py-3">
               <div className="flex items-center gap-3 text-sm text-white">
                 <label htmlFor="language" className="text-lg">
@@ -97,7 +103,9 @@ int main() {
                 </select>
               </div>
               <button
+                type="button"
                 onClick={handleRun}
+                aria-label="Run code"
                 className="flex items-center gap-2 px-5 py-2 bg-violet-500 text-white font-semibold rounded-xl 
                            hover:bg-violet-700 transition shadow-md"
               >
@@ -106,25 +114,38 @@ int main() {
               </button>
             </div>
 
-            {/* Editor */}
-            <textarea
-              className="flex-1 w-full p-4 bg-black/30 text-white font-mono text-sm outline-none resize-none min-h-[300px]"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              spellCheck={false}
-            />
+            <div className="flex-1 min-h-[300px]" aria-label="Code editor">
+              <Editor
+                height="400px"
+                language={LANGUAGE_MAP[language] || "javascript"}
+                theme="vs-dark"
+                value={code}
+                onChange={(value) => setCode(value ?? "")}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  wordWrap: "on",
+                  tabSize: 2,
+                  ariaLabel: "Code editor",
+                }}
+              />
+            </div>
           </div>
 
-          {/* Output Panel */}
           <div className="md:w-2/5 bg-white/10 backdrop-blur-lg border border-white/10 rounded shadow-xl p-5 flex flex-col">
-            <h3 className="text-lg font-semibold text-violet-300 mb-3">Output</h3>
-            <pre className="bg-black/60 text-white rounded-xl p-4 h-[300px] md:h-[400px] overflow-y-auto text-sm font-mono whitespace-pre-wrap">
+            <h3 className="text-lg font-semibold text-violet-300 mb-3" id="compiler-output-label">
+              Output
+            </h3>
+            <pre
+              role="status"
+              aria-live="polite"
+              aria-labelledby="compiler-output-label"
+              className="bg-black/60 text-white rounded-xl p-4 h-[300px] md:h-[400px] overflow-y-auto text-sm font-mono whitespace-pre-wrap"
+            >
               {output}
             </pre>
-            {/* <div className="mt-4 text-xs text-gray-400">
-              Powered by Judge0 API. <br />
-              <span className="text-red-400">Note: Replace <b>YOUR_RAPID_API_KEY</b> with your actual API key in the code.</span>
-            </div> */}
           </div>
         </div>
       </div>

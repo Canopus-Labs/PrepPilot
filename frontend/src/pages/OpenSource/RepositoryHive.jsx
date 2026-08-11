@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Search,
   Github,
@@ -8,29 +8,31 @@ import {
   Code,
   Loader,
   AlertCircle,
+  ExternalLink,
+  MessageCircle,
+  ThumbsUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  FILTER_OPTIONS,
+  REPOSITORY_SORT_OPTIONS,
+  ISSUE_SORT_OPTIONS,
+  buildGitHubSearchUrl,
+  normalizeSearchResponse,
+  usesIssueLabelSearch,
+  getSearchPageInfo,
+} from "../../utils/repositoryHiveSearch";
 
-const FILTER_OPTIONS = [
-  {
-    id: "good-first-issue",
-    label: "Good First Issue",
-    topic: "good-first-issue",
-  },
-  {
-    id: "beginner-friendly",
-    label: "Beginner Friendly",
-    topic: "beginner-friendly",
-  },
-  { id: "documentation", label: "Documentation", topic: "documentation" },
-  { id: "bug-fix", label: "Bug Fix", topic: "bug-fix" },
-  { id: "feature", label: "Feature Request", topic: "feature" },
-  { id: "open-source", label: "Open Source", topic: "open-source" },
-  { id: "hacktoberfest", label: "Hacktoberfest", topic: "hacktoberfest" },
-  { id: "python", label: "Python", topic: "language:python" },
-  { id: "javascript", label: "JavaScript", topic: "language:javascript" },
-  { id: "java", label: "Java", topic: "language:java" },
-];
+const PER_PAGE = 30;
+const EMPTY_PAGE_INFO = {
+  totalCount: 0,
+  currentPage: 1,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPrevPage: false,
+};
 
 const RepositoryHive = () => {
   const [selectedFilters, setSelectedFilters] = useState(["good-first-issue"]);
@@ -39,49 +41,45 @@ const RepositoryHive = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("stars");
+  const [page, setPage] = useState(1);
+  const [pageInfo, setPageInfo] = useState(EMPTY_PAGE_INFO);
+  const abortRef = useRef(null);
 
-  useEffect(() => {
-    fetchRepositories();
-  }, [selectedFilters, sortBy]);
+  const showingIssueBackedResults = usesIssueLabelSearch(selectedFilters);
+  const sortOptions = showingIssueBackedResults
+    ? ISSUE_SORT_OPTIONS
+    : REPOSITORY_SORT_OPTIONS;
 
-  const fetchRepositories = async () => {
+  const fetchRepositories = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError("");
 
     try {
-      let queryParams = [];
-
-      // Build query with selected filters
-      selectedFilters.forEach((filter) => {
-        const option = FILTER_OPTIONS.find((f) => f.id === filter);
-        if (option) {
-          queryParams.push(option.topic);
-        }
+      const url = buildGitHubSearchUrl({
+        selectedFilters,
+        searchQuery,
+        sortBy,
+        perPage: PER_PAGE,
+        page,
       });
 
-      if (searchQuery.trim()) {
-        queryParams.push(searchQuery.trim());
-      }
-
-      const query = queryParams.join(" ").trim();
-      if (!query) {
+      if (!url) {
+        if (controller.signal.aborted) return;
         setRepositories([]);
+        setPageInfo(EMPTY_PAGE_INFO);
         setLoading(false);
         return;
       }
-
-      const sortMap = {
-        stars: "sort=stars&order=desc",
-        recent: "sort=updated&order=desc",
-        forks: "sort=forks&order=desc",
-      };
-
-      const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sortMap[sortBy]}&per_page=30`;
 
       const response = await fetch(url, {
         headers: {
           Accept: "application/vnd.github.v3+json",
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -89,18 +87,36 @@ const RepositoryHive = () => {
       }
 
       const data = await response.json();
-      setRepositories(data.items || []);
+      if (controller.signal.aborted) return;
+
+      setRepositories(normalizeSearchResponse(selectedFilters, data));
+      setPageInfo(getSearchPageInfo(data, page, PER_PAGE));
     } catch (err) {
+      if (err?.name === "AbortError" || controller.signal.aborted) return;
       setError(
         err.message || "Failed to fetch repositories. Please try again later.",
       );
       setRepositories([]);
+      setPageInfo(EMPTY_PAGE_INFO);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
-  };
+  }, [selectedFilters, searchQuery, sortBy, page]);
+
+  // Auto-fetch on filter/sort/page; search text applies only via Search / Enter.
+  useEffect(() => {
+    fetchRepositories();
+    return () => {
+      abortRef.current?.abort();
+    };
+    // intentionally omit searchQuery — typing should not hit GitHub until Search
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFilters, sortBy, page]);
 
   const toggleFilter = (filterId) => {
+    setPage(1);
     setSelectedFilters((prev) =>
       prev.includes(filterId)
         ? prev.filter((f) => f !== filterId)
@@ -113,9 +129,16 @@ const RepositoryHive = () => {
   };
 
   const handleSearch = () => {
-    if (repositories.length > 0 || searchQuery) {
-      fetchRepositories();
+    if (page !== 1) {
+      setPage(1);
+      return;
     }
+    fetchRepositories();
+  };
+
+  const handleSortChange = (nextSort) => {
+    setPage(1);
+    setSortBy(nextSort);
   };
 
   return (
@@ -158,7 +181,7 @@ const RepositoryHive = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Search repositories (e.g., react, django, kubernetes)..."
+                placeholder="Search repositories (e.g., react, django, tensorflow)..."
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
@@ -173,19 +196,15 @@ const RepositoryHive = () => {
           </div>
 
           {/* Sort Options */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-6 flex-wrap">
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
               Sort by:
             </span>
-            <div className="flex gap-2">
-              {[
-                { id: "stars", label: "⭐ Most Stars" },
-                { id: "recent", label: "📅 Recently Updated" },
-                { id: "forks", label: "🔀 Most Forks" },
-              ].map((option) => (
+            <div className="flex gap-2 flex-wrap">
+              {sortOptions.map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setSortBy(option.id)}
+                  onClick={() => handleSortChange(option.id)}
                   className={`px-4 py-2 rounded-lg border transition-all font-medium text-sm ${
                     sortBy === option.id
                       ? "bg-violet-600 text-white border-violet-600"
@@ -251,7 +270,9 @@ const RepositoryHive = () => {
               className="text-violet-600 dark:text-violet-400 animate-spin mb-4"
             />
             <p className="text-gray-600 dark:text-gray-400">
-              Loading repositories...
+              {showingIssueBackedResults
+                ? "Looking for open labelled issues..."
+                : "Loading repositories..."}
             </p>
           </div>
         )}
@@ -265,11 +286,8 @@ const RepositoryHive = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {repositories.map((repo, index) => (
-              <motion.a
+              <motion.div
                 key={repo.id}
-                href={repo.html_url}
-                target="_blank"
-                rel="noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -283,9 +301,14 @@ const RepositoryHive = () => {
                       className="text-violet-600 dark:text-violet-400 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <a
+                        href={repo.html_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors block"
+                      >
                         {repo.name}
-                      </h3>
+                      </a>
                       <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                         {repo.owner.login}
                       </p>
@@ -295,6 +318,31 @@ const RepositoryHive = () => {
                     {repo.description || "No description available"}
                   </p>
                 </div>
+
+                {repo.matchingIssue && (
+                  <a
+                    href={repo.matchingIssue.html_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mb-4 block rounded-lg border border-violet-500/30 bg-violet-500/5 px-3 py-2 hover:bg-violet-500/10 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-violet-500 mb-1">
+                          Open starter issue
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
+                          #{repo.matchingIssue.number} {repo.matchingIssue.title}
+                        </p>
+                      </div>
+                      <ExternalLink
+                        size={14}
+                        className="text-violet-500 flex-shrink-0 mt-1"
+                      />
+                    </div>
+                  </a>
+                )}
 
                 {/* Language & Topics */}
                 <div className="mb-4 flex-1">
@@ -329,29 +377,56 @@ const RepositoryHive = () => {
                   )}
                 </div>
 
-                {/* Stats */}
+                {/* Stats — issue metrics vs repository metrics */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/10 text-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Star size={14} />
-                      <span className="font-medium">
-                        {repo.stargazers_count}
-                      </span>
+                  {repo.metricsMode === "issue" ? (
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="flex items-center gap-1 text-gray-600 dark:text-gray-400"
+                        title="Issue reactions"
+                      >
+                        <ThumbsUp size={14} />
+                        <span className="font-medium">
+                          {repo.reactions_count ?? 0}
+                        </span>
+                      </div>
+                      <div
+                        className="flex items-center gap-1 text-gray-600 dark:text-gray-400"
+                        title="Issue comments"
+                      >
+                        <MessageCircle size={14} />
+                        <span className="font-medium">
+                          {repo.comments_count ?? 0}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <GitFork size={14} />
-                      <span className="font-medium">{repo.forks_count}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Eye size={14} />
-                      <span className="font-medium">{repo.watchers_count}</span>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {repo.open_issues_count} issues
-                  </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <Star size={14} />
+                          <span className="font-medium">
+                            {repo.stargazers_count}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <GitFork size={14} />
+                          <span className="font-medium">{repo.forks_count}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <Eye size={14} />
+                          <span className="font-medium">
+                            {repo.watchers_count}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        {repo.open_issues_count} issues
+                      </div>
+                    </>
+                  )}
                 </div>
-              </motion.a>
+              </motion.div>
             ))}
           </motion.div>
         )}
@@ -368,19 +443,51 @@ const RepositoryHive = () => {
               className="mx-auto text-gray-400 dark:text-gray-600 mb-4"
             />
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              No repositories found. Try adjusting your filters or search query.
+              {showingIssueBackedResults
+                ? "No open issues found for the selected labels. Try another filter or search term."
+                : "No repositories found. Try adjusting your filters or search query."}
             </p>
           </motion.div>
         )}
 
-        {/* Results Count */}
+        {/* Results Count + Pagination */}
         {!loading && repositories.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-8 text-center text-gray-600 dark:text-gray-400"
+            className="mt-8 flex flex-col items-center gap-4 text-gray-600 dark:text-gray-400"
           >
-            <p>Showing {repositories.length} repositories</p>
+            <p>
+              Showing {repositories.length}{" "}
+              {showingIssueBackedResults
+                ? "repositories with open labelled issues"
+                : "repositories"}
+              {pageInfo.totalCount > 0
+                ? ` · page ${pageInfo.currentPage} of ${pageInfo.totalPages}`
+                : ""}
+            </p>
+            {(pageInfo.hasPrevPage || pageInfo.hasNextPage) && (
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={!pageInfo.hasPrevPage || loading}
+                  className="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-white/10 text-sm font-medium disabled:opacity-40 hover:border-violet-400"
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!pageInfo.hasNextPage || loading}
+                  className="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-white/10 text-sm font-medium disabled:opacity-40 hover:border-violet-400"
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </div>

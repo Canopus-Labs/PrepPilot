@@ -67,3 +67,5 @@ coverage/
 # Misc
 # ========================
 *.local
+merge-prs.js
+check-labels.js
