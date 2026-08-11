@@ -11,6 +11,7 @@ const objectId = (label) =>
 // Schema for creating a session
 const createSessionSchema = z.object({
   role: z.string().min(1, "Role is required"),
+  company: z.string().min(1, "Company is required"),
   experience: z.string().min(1, "Experience is required"),
   topicsToFocus: z.array(z.string()).min(1, "At least one topic is required"),
   description: z.string().optional(),

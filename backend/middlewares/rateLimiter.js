@@ -40,6 +40,17 @@ const aiLimiter = rateLimit({
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
+// Authenticated AI generation endpoints: 20 requests per hour per user.
+const aiUserLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 20,
+    keyGenerator: (req) =>
+        req.user?._id ? `user:${req.user._id.toString()}` : ipKeyGenerator(req),
+    message: { error: 'AI generation limit reached (20 requests per hour) to prevent API abuse. Please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // General API endpoints: 100 requests per 15 minutes
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -64,6 +75,7 @@ module.exports = {
     loginLimiter,
     authLimiter,
     aiLimiter,
+    aiUserLimiter,
     generalLimiter,
     sensitiveAuthLimiter
 };

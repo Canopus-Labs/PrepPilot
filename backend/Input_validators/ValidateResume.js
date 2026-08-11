@@ -6,20 +6,11 @@ const { handleValidationError } = require("./ValidateQuestions");
 // ==========================================
 
 const compileResumeSchema = z.object({
-  code: z
-    .string({
-      required_error: "LaTeX code is required",
-      invalid_type_error: "LaTeX code must be a string",
-    })
-    .min(1, "LaTeX code is required"),
+  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
 });
 
 const analyzeResumeSchema = z.object({
   targetRole: z
-    .string({
-      invalid_type_error: "Target role must be a string",
-    })
-    .min(1, "Target role cannot be empty")
     .string()
     .min(1, "Target role is required")
     .max(50, "Target role must be at most 50 characters")
@@ -58,21 +49,18 @@ const saveResumeSchema = z.object({
     .refine((v) => !v || mongoose.isValidObjectId(v), "Invalid ObjectId format"),
 });
 
-// Schema for deleteResume request (params)
 const deleteResumeSchema = z.object({
-  id: objectId("Resume ID"),
+  id: z
+    .string()
+    .min(1, "Resume ID is required")
+    .refine((v) => mongoose.isValidObjectId(v), "Invalid ObjectId format"),
 });
 
-// ==========================================
-// Middleware Functions
-// ==========================================
+// ── Middleware ────────────────────────────────────────────────────────────────
 
-// Generic schema validator runner using Zod's safeParse
-const validate = (schema) => (req, res, next) => {
-  const result = schema.safeParse(req.body || {});
-  if (!result.success) {
-    return handleValidationError(res, result.error);
-  }
+const validateCompileResume = (req, res, next) => {
+  const result = compileResumeSchema.safeParse(req.body || {});
+  if (!result.success) return handleValidationError(res, result.error);
   next();
 };
 
@@ -110,24 +98,21 @@ const validateAnalyzeResume = async (req, res, next) => {
     return handleValidationError(res, error);
   }
   if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No resume file uploaded" });
+    return res.status(400).json({ success: false, message: "No resume file uploaded" });
   }
   next();
 };
 
-// Middleware for saveResume
-const validateSaveResume = validate(saveResumeSchema);
+const validateSaveResume = (req, res, next) => {
+  const result = saveResumeSchema.safeParse(req.body || {});
+  if (!result.success) return handleValidationError(res, result.error);
+  next();
+};
 
-// Middleware for deleteResume (params)
 const validateDeleteResume = (req, res, next) => {
-  try {
-    deleteResumeSchema.parse(req.params);
-    next();
-  } catch (error) {
-    return handleValidationError(res, error);
-  }
+  const result = deleteResumeSchema.safeParse(req.params || {});
+  if (!result.success) return handleValidationError(res, result.error);
+  next();
 };
 
 module.exports = {

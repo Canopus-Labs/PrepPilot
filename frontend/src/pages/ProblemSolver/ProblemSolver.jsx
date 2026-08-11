@@ -13,7 +13,8 @@ import {
   Gauge,
   Terminal,
 } from "lucide-react";
-import { BASE_URL } from "../../utils/apiPaths";
+import { API_PATHS } from "../../utils/apiPaths";
+import axiosInstance from "../../utils/axiosinstance";
 
 const LANGUAGES = [
   { value: "python", label: "Python" },
@@ -138,17 +139,11 @@ export default function ProblemSolver() {
     setSolution(null);
 
     try {
-      const res = await fetch(`${BASE_URL}/api/solve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problem, language, constraints }),
+      const { data } = await axiosInstance.post(API_PATHS.AI.SOLVE, {
+        problem,
+        language,
+        constraints,
       });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw new Error(data.error || `Request failed (Status ${res.status})`);
-      }
 
       if (!data.success) {
         throw new Error(
@@ -168,7 +163,7 @@ export default function ProblemSolver() {
       setSolution(next);
       setHistory((h) => [next, ...h.filter((item) => item.id !== next.id)]);
     } catch (err) {
-      setError(err.message || "Failed to generate solution");
+      setError(err.response?.data?.error || err.message || "Failed to generate solution");
     } finally {
       setLoading(false);
     }
