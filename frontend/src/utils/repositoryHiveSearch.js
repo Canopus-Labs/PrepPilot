@@ -182,19 +182,59 @@ export const buildGitHubSearchUrl = ({
   perPage = 30,
   page = 1,
 } = {}) => {
+  const params = buildGitHubSearchParams({
+    selectedFilters,
+    searchQuery,
+    sortBy,
+    perPage,
+    page,
+  });
+  if (!params) return null;
+
+  const sort = `sort=${params.sort}&order=${params.order}`;
+  return `https://api.github.com/search/${params.type}?q=${encodeURIComponent(params.q)}&${sort}&per_page=${params.per_page}&page=${params.page}`;
+};
+
+/** Params for the PrepPilot GitHub search proxy (`/api/github/search`). */
+export const buildGitHubSearchParams = ({
+  selectedFilters = [],
+  searchQuery = "",
+  sortBy = "stars",
+  perPage = 30,
+  page = 1,
+} = {}) => {
   const safePage = Math.max(1, Number(page) || 1);
+  const safePerPage = Math.min(Math.max(Number(perPage) || 30, 1), 30);
 
   if (usesIssueLabelSearch(selectedFilters)) {
     const query = buildIssueSearchQuery(selectedFilters, searchQuery);
     if (!query) return null;
-    const sort = ISSUE_SORT_MAP[sortBy] || ISSUE_SORT_MAP.recent;
-    return `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&${sort}&per_page=${perPage}&page=${safePage}`;
+    const sortPair = Object.fromEntries(
+      new URLSearchParams(ISSUE_SORT_MAP[sortBy] || ISSUE_SORT_MAP.recent),
+    );
+    return {
+      type: "issues",
+      q: query,
+      sort: sortPair.sort,
+      order: sortPair.order,
+      per_page: safePerPage,
+      page: safePage,
+    };
   }
 
   const query = buildRepositorySearchQuery(selectedFilters, searchQuery);
   if (!query) return null;
-  const sort = SORT_MAP[sortBy] || SORT_MAP.stars;
-  return `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&${sort}&per_page=${perPage}&page=${safePage}`;
+  const sortPair = Object.fromEntries(
+    new URLSearchParams(SORT_MAP[sortBy] || SORT_MAP.stars),
+  );
+  return {
+    type: "repositories",
+    q: query,
+    sort: sortPair.sort,
+    order: sortPair.order,
+    per_page: safePerPage,
+    page: safePage,
+  };
 };
 
 export const normalizeSearchResponse = (selectedFilters, data) => {

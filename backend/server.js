@@ -86,39 +86,72 @@ app.use((req, res, next) => {
   next();
 });
 
-connectDB()
-  .then((success) => {
-    if (success) {
+// ── Graceful startup: block app.listen() until MongoDB is reachable ────────
+// Previously connectDB() was fire-and-forget and the server started
+// regardless, leaving every endpoint to fail with cryptic errors when the
+// DB was down. Now we await the connection and exit(1) in production if it
+// fails, while still allowing a dev server to start for route debugging.
+async function startServer() {
+  let dbConnected = false;
+  try {
+    dbConnected = await connectDB();
+    if (dbConnected) {
       console.log("MongoDB connected successfully");
     } else {
-      console.warn("⚠️ Failed to connect to MongoDB - server will run without database connection");
+      if (process.env.NODE_ENV === "production") {
+        console.error(
+          "FATAL: Cannot connect to MongoDB — database is required in production. Exiting.",
+        );
+        process.exit(1);
+      }
+      console.warn(
+        "⚠️ Failed to connect to MongoDB - server will run without database connection (dev mode only)",
+      );
     }
-  })
-  .catch((err) => {
+  } catch (err) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("FATAL: Database connection error:", err.message);
+      process.exit(1);
+    }
     console.error("Database connection error:", err.message);
+  }
+
+  // Lightweight health probe so load balancers / orchestrators can tell a
+  // degraded instance from a healthy one.
+  app.get("/api/health", (req, res) => {
+    const mongoose = require("mongoose");
+    const ready = dbConnected && mongoose.connection.readyState === 1;
+    res.status(ready ? 200 : 503).json({
+      status: ready ? "ok" : "degraded",
+      database: ready ? "connected" : "disconnected",
+      timestamp: new Date().toISOString(),
+    });
   });
 
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
 
+// Apply rate limiter globally to all API routes
+app.use("/api", generalLimiter);
+
 //Routes
-app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
-app.use("/api/sessions", generalLimiter, sessionRoutes);
-app.use("/api/question", generalLimiter, questionRoutes);
+app.use("/api/auth", sensitiveRouteHeaders, authRoutes);
+app.use("/api/sessions", sessionRoutes);
+app.use("/api/question", questionRoutes);
 app.use("/api", aiRoutes);
-app.use("/api/questions", generalLimiter, aptitudeQuestionsRoutes);
+app.use("/api/questions", aptitudeQuestionsRoutes);
 const sheetJsonUpload = require("./routes/sheetJsonUpload");
-app.use("/api/sheets", generalLimiter, sheetJsonUpload);
+app.use("/api/sheets", sheetJsonUpload);
 const userSheetProgressRoutes = require("./routes/userSheetProgressRoutes");
-app.use("/api/user", generalLimiter, userSheetProgressRoutes);
+app.use("/api/user", userSheetProgressRoutes);
 const achievementRoutes = require("./routes/achievementRoutes");
-app.use("/api/user", generalLimiter, achievementRoutes);
+app.use("/api/user", achievementRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 const { validateGenerateInterviewQuestions, validateGenerateConceptExplanation, validateGenerateInterviewTips } = require("./Input_validators/ValidateAi.js");
-app.use("/api/resume", generalLimiter, resumeRoutes);
+app.use("/api/resume", resumeRoutes);
 const notesSummaryRoutes = require("./routes/notesSummaryRoutes");
-app.use("/api/notes-summary", generalLimiter, notesSummaryRoutes);
+app.use("/api/notes-summary", notesSummaryRoutes);
 
 // AI routes with Zod validation
 app.post(
@@ -149,18 +182,20 @@ app.post(
 );
 
 
-app.use("/api/books", generalLimiter, booksRoutes);
-app.use("/api/jobs", generalLimiter, jobRoutes);
+app.use("/api/books", booksRoutes);
+app.use("/api/jobs", jobRoutes);
 const coursesRoutes = require("./routes/coursesRoutes");
-app.use("/api/courses", generalLimiter, coursesRoutes);
+app.use("/api/courses", coursesRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
-app.use("/api/flashcards", generalLimiter, flashcardRoutes);
+app.use("/api/flashcards", flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const compilerRoutes = require("./routes/compilerRoutes");
 app.use("/api/compiler", compilerRoutes);
+const githubSearchRoutes = require("./routes/githubSearchRoutes");
+app.use("/api/github", generalLimiter, githubSearchRoutes);
 
 
 app.use(
@@ -185,16 +220,19 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server connected and running on port ${PORT}`);
-  if (process.env.NODE_ENV === "production") {
-    console.log("Allowed CORS origins (production):");
-  } else {
-    console.log("Allowed CORS origins (development):");
-  }
-  for (const o of allowedOrigins) {
-    console.log("  -", o);
-  }
+    console.log(`Server connected and running on port ${PORT}`);
+    if (process.env.NODE_ENV === "production") {
+        console.log("Allowed CORS origins (production):");
+    } else {
+        console.log("Allowed CORS origins (development):");
+    }
+    for (const o of allowedOrigins) {
+        console.log("  -", o);
+    }
 });
+}
+
+startServer();
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
