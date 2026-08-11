@@ -7,7 +7,24 @@ const setCacheControl = (maxAgeSeconds) => {
     return (req, res, next) => {
         // Only cache GET requests
         if (req.method === 'GET') {
-            res.setHeader('Cache-Control', `public, max-age=${maxAgeSeconds}`);
+            const originalJson = res.json;
+            const originalSend = res.send;
+
+            const setHeaderIfSuccess = () => {
+                if (res.statusCode >= 200 && res.statusCode < 300 && !res.headersSent) {
+                    res.setHeader('Cache-Control', `public, max-age=${maxAgeSeconds}`);
+                }
+            };
+
+            res.json = function(body) {
+                setHeaderIfSuccess();
+                return originalJson.call(this, body);
+            };
+
+            res.send = function(body) {
+                setHeaderIfSuccess();
+                return originalSend.call(this, body);
+            };
         }
         next();
     };

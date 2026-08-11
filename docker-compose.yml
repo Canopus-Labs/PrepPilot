@@ -40,8 +40,8 @@ services:
     ports:
       - "5173:5173"
     environment:
-      # Use localhost:8000 so the browser can make requests to the exposed backend port
-      - VITE_BACKEND_URL=http://localhost:8000
+      # Use localhost so the browser routes requests through nginx on port 80
+      - VITE_BACKEND_URL=http://localhost
     volumes:
       - ./frontend:/app
       - /app/node_modules
