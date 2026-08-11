@@ -347,7 +347,10 @@ const AIDynamicInterviewQuestionRotation = () => {
             </div>
 
           ))}
-                  {/* Difficulty Balancing */}
+
+        </div>
+
+        {/* Difficulty Balancing */}
 
         <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-8">
 

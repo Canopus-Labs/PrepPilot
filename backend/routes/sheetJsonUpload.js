@@ -154,8 +154,9 @@ router.delete('/:id', protect, requireAdmin, async (req, res) => {
 // GET / - fetch all sheets (for /api/sheets)
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 50;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const parsedLimit = parseInt(req.query.limit, 10);
+    const limit = Math.min(100, Math.max(1, isNaN(parsedLimit) ? 50 : parsedLimit));
     const skip = (page - 1) * limit;
 
     const sheets = await Sheet.find({}).skip(skip).limit(limit);

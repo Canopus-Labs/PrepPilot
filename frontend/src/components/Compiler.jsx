@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Play } from "lucide-react";
 import DashboardLayout from "./Layouts/DashboardLayout";
-
-const RAPIDAPI_KEY = import.meta.env.VITE_REACT_APP_RAPIDAPI_KEY;
+import { API_PATHS } from "../utils/apiPaths";
+import axiosInstance from "../utils/axiosinstance";
 
 const LANGUAGE_MAP = {
   "54": "cpp",
@@ -42,25 +42,12 @@ int main() {
     setOutput("Running...");
 
     try {
-      const response = await fetch(
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "X-RapidAPI-Key": RAPIDAPI_KEY,
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-          },
-          body: JSON.stringify({
-            language_id: parseInt(language, 10),
-            source_code: code,
-            stdin: "",
-          }),
-        }
-      );
+      const { data: result } = await axiosInstance.post(API_PATHS.COMPILER.RUN, {
+        language_id: parseInt(language, 10),
+        source_code: code,
+        stdin: "",
+      });
 
-      if (!response.ok) throw new Error("Request failed");
-      const result = await response.json();
       const finalOutput =
         result.stdout ||
         result.stderr ||
@@ -69,7 +56,7 @@ int main() {
 
       setOutput(finalOutput);
     } catch (error) {
-      setOutput("Error running code: " + error.message);
+      setOutput("Error running code: " + (error.response?.data?.message || error.message));
     }
   };
 

@@ -23,10 +23,11 @@ import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
 import { useContext } from "react";
 import { UserContext } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
 import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
 import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
+import ResumeAnalysisHistory from "./pages/ResumeBuilder/ResumeAnalysisHistory";
 import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
 import TermsandConditions from "./pages/Terms/TermsandConditions";
 import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
@@ -51,6 +52,7 @@ import Analytics from "./pages/Analytics";
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
+  const location = useLocation();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
@@ -59,7 +61,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
   return children;
 };
@@ -121,11 +123,13 @@ const App = () => {
                 <Route
                   path="/interview-prep/:sessionId"
                   element={
-                    <ErrorBoundary>
-                      <PageTransition>
-                        <InterviewPrep />
-                      </PageTransition>
-                    </ErrorBoundary>
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <PageTransition>
+                          <InterviewPrep />
+                        </PageTransition>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
                   }
                 />
                 {import.meta.env.DEV && (
@@ -169,9 +173,11 @@ const App = () => {
                   <Route
                     path="/dashboard"
                     element={
-                      <PageTransition>
-                        <ProgressTrackerDashboard />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ProgressTrackerDashboard />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   {import.meta.env.DEV && (
@@ -221,9 +227,11 @@ const App = () => {
                   <Route
                     path="/role-prep"
                     element={
-                      <PageTransition>
-                        <Dashboard />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Dashboard />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
@@ -309,9 +317,11 @@ const App = () => {
                   <Route
                     path="/compiler"
                     element={
-                      <PageTransition>
-                        <Compiler />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Compiler />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
@@ -330,6 +340,16 @@ const App = () => {
                       <ProtectedRoute>
                         <PageTransition>
                           <ResumeAnalyzer />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/resume-analyzer/history"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ResumeAnalysisHistory />
                         </PageTransition>
                       </ProtectedRoute>
                     }

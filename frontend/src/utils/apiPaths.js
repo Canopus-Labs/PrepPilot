@@ -48,6 +48,7 @@ export const API_PATHS = {
         ANALYZE: "/api/resume/analyze", // AI Resume Analyzer via Gemini
         SAVE: "/api/resume/save", // Save resume to backend
         GET_ALL: "/api/resume/my-resumes", // Get all user's saved resumes
+        GET_ANALYSIS_HISTORY: "/api/resume/analysis-history", // Get resume analysis history
     },
     NOTES_SUMMARY: {
         SUMMARIZE: "/api/notes-summary/summarize", // AI PDF notes summarizer via Gemini
@@ -79,7 +80,13 @@ export const API_PATHS = {
         TOGGLE_TASK: (id) => `/api/roadmaps/${id}/tasks`,
         DELETE: (id) => `/api/roadmaps/${id}`,
     },
-    GITHUB: {
-        SEARCH: "/api/github/search",
+    INTERVIEW_EXPERIENCES: {
+        CREATE: "/api/interview-experiences",
+        APPROVED: "/api/interview-experiences/approved",
+        MINE: "/api/interview-experiences/mine",
+        UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
+    },
+    COMPILER: {
+        RUN: "/api/compiler/run",
     },
 };
