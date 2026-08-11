@@ -8,6 +8,12 @@ const SECURE_CLIENT_KEY =
 const isSecureClientKey = (value) =>
   typeof value === "string" && SECURE_CLIENT_KEY.test(value);
 
+// Dedup must be scoped to the author so a re-used idempotencyKey can never
+// return another submitter's experience: the submitting user when
+// authenticated, otherwise the anonymous clientKey.
+const buildAuthorFilter = (req, clientKey) =>
+  req.user?._id ? { userId: req.user._id } : { clientKey };
+
 const toClientShape = (doc) => {
   const obj = typeof doc.toObject === "function" ? doc.toObject() : doc;
   return {
@@ -70,7 +76,10 @@ const createInterviewExperience = async (req, res) => {
       payload.color = `hsl(${(payload.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`;
     }
 
-    const existing = await InterviewExperience.findOne({ idempotencyKey });
+    const existing = await InterviewExperience.findOne({
+      idempotencyKey,
+      ...buildAuthorFilter(req, payload.clientKey),
+    });
     if (existing) {
       return res.status(200).json({
         success: true,
@@ -92,6 +101,7 @@ const createInterviewExperience = async (req, res) => {
       try {
         const existing = await InterviewExperience.findOne({
           idempotencyKey: req.body.idempotencyKey,
+          ...buildAuthorFilter(req, req.body.clientKey),
         });
         if (existing) {
           return res.status(200).json({

@@ -95,11 +95,26 @@ const interviewExperienceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Idempotency is scoped to the author so a re-used key can never collide
+// with another submitter's document: authenticated submissions dedupe by
+// userId, anonymous submissions by clientKey.
 interviewExperienceSchema.index(
-  { idempotencyKey: 1 },
+  { userId: 1, idempotencyKey: 1 },
   {
     unique: true,
     partialFilterExpression: {
+      userId: { $type: "objectId" },
+      idempotencyKey: { $type: "string", $gt: "" },
+    },
+  },
+);
+
+interviewExperienceSchema.index(
+  { clientKey: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      clientKey: { $type: "string", $gt: "" },
       idempotencyKey: { $type: "string", $gt: "" },
     },
   },

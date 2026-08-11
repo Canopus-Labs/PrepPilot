@@ -164,6 +164,7 @@ describe("createInterviewExperience", () => {
 
     expect(InterviewExperience.findOne).toHaveBeenCalledWith({
       idempotencyKey: "submit-key-abc12345",
+      clientKey: "11111111-1111-4111-8111-111111111111",
     });
     expect(InterviewExperience.create).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
@@ -174,6 +175,90 @@ describe("createInterviewExperience", () => {
           id: "507f1f77bcf86cd799439011",
         }),
       }),
+    );
+  });
+
+  it("scopes the dedup lookup to the authenticated user", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(sampleDoc);
+    InterviewExperience.create = vi.fn();
+
+    const req = makeReq(
+      {
+        company: "Google",
+        role: "SDE-2",
+        summary: "Tough but fair process",
+        idempotencyKey: "submit-key-abc12345",
+      },
+      {},
+      {},
+      { _id: "507f1f77bcf86cd799439011" },
+    );
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.findOne).toHaveBeenCalledWith({
+      idempotencyKey: "submit-key-abc12345",
+      userId: "507f1f77bcf86cd799439011",
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it("lets a different author reuse the same idempotencyKey", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(null);
+    InterviewExperience.create = vi.fn().mockResolvedValue(sampleDoc);
+
+    const req = makeReq({
+      company: "Google",
+      role: "SDE-2",
+      summary: "Tough but fair process",
+      clientKey: "11111111-1111-4111-8111-111111111111",
+      idempotencyKey: "submit-key-abc12345",
+    });
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.findOne).toHaveBeenCalledWith({
+      idempotencyKey: "submit-key-abc12345",
+      clientKey: "11111111-1111-4111-8111-111111111111",
+    });
+    expect(InterviewExperience.create).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  it("scopes the unique-index race lookup to the author", async () => {
+    InterviewExperience.findOne = vi
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(sampleDoc);
+    InterviewExperience.create = vi
+      .fn()
+      .mockRejectedValue({ code: 11000 });
+
+    const req = makeReq({
+      company: "Google",
+      role: "SDE-2",
+      summary: "Tough but fair process",
+      clientKey: "11111111-1111-4111-8111-111111111111",
+      idempotencyKey: "submit-key-abc12345",
+    });
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.findOne).toHaveBeenCalledTimes(2);
+    expect(InterviewExperience.findOne).toHaveBeenNthCalledWith(1, {
+      idempotencyKey: "submit-key-abc12345",
+      clientKey: "11111111-1111-4111-8111-111111111111",
+    });
+    expect(InterviewExperience.findOne).toHaveBeenNthCalledWith(2, {
+      idempotencyKey: "submit-key-abc12345",
+      clientKey: "11111111-1111-4111-8111-111111111111",
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true }),
     );
   });
 });
