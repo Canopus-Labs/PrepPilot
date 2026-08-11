@@ -1,5 +1,6 @@
 const express = require("express");
-const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser } = require("../controllers/authController");
+const { verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser } = require("../controllers/authController");
+const { authController: hexAuthController } = require("../src/auth/index");
 const { protect } = require("../middlewares/authMiddleware");
 const { upload, validateImageUpload } = require("../middlewares/uploadMiddleware");
 const { validateUserLogin, validateUserSignup, validateRefreshToken, validateResendEmail } = require("../Input_validators/ValidateAuth");
@@ -19,8 +20,8 @@ const {
 // that authenticate off the ambient refreshToken cookie.
 
 // Auth Routes
-router.post("/register", authLimiter, validateUserSignup, registerUser);
-router.post("/login", loginLimiter, validateUserLogin, loginUser);
+router.post("/register", authLimiter, validateUserSignup, hexAuthController.registerUser);
+router.post("/login", loginLimiter, validateUserLogin, hexAuthController.loginUser);
 
 // Frontend should GET this once on app load to prime the XSRF-TOKEN cookie
 // before it ever needs to call /refresh or /logout.
