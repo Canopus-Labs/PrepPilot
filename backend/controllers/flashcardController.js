@@ -1,60 +1,7 @@
 const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
 
-/**
- * SuperMemo SM-2 Algorithm helper
- * Returns updated { interval, repetition, efactor, dueDate }
- */
-const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) => {
-  let score = 3;
-  if (rating === "again" || rating === "1") score = 1;
-  else if (rating === "hard" || rating === "2") score = 2;
-  else if (rating === "medium" || rating === "good" || rating === "3") score = 4;
-  else if (rating === "easy" || rating === "4") score = 5;
-
-  let newRepetition = repetition;
-  let newInterval = interval;
-  let newEFactor = efactor;
-
-  if (score < 3) {
-    // Failed recall (Again / Hard)
-    if (score === 1) {
-      newRepetition = 0;
-      newInterval = 1;
-    } else {
-      // Hard: keep or slight progression
-      newRepetition = repetition > 0 ? repetition : 1;
-      newInterval = repetition <= 1 ? 1 : Math.max(1, Math.round(interval * 1.2));
-    }
-  } else {
-    // Successful recall (Medium / Easy)
-    if (repetition === 0) {
-      newInterval = score === 5 ? 2 : 1;
-    } else if (repetition === 1) {
-      newInterval = score === 5 ? 7 : 6;
-    } else {
-      const multiplier = score === 5 ? newEFactor * 1.3 : newEFactor;
-      newInterval = Math.max(1, Math.round(interval * multiplier));
-    }
-    newRepetition += 1;
-  }
-
-  // Update Ease Factor (EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)))
-  const q = score;
-  newEFactor = newEFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-  if (newEFactor < 1.3) newEFactor = 1.3;
-  newEFactor = Math.round(newEFactor * 100 + Number.EPSILON) / 100;
-
-  const now = new Date();
-  const nextDueDate = new Date(now.getTime() + newInterval * 24 * 60 * 60 * 1000);
-
-  return {
-    interval: newInterval,
-    repetition: newRepetition,
-    efactor: newEFactor,
-    dueDate: nextDueDate,
-  };
-};
+const { calculateSM2 } = require("../utils/srsAlgorithm");
 
 /**
  * @desc Create a new flashcard or bookmark a question for SRS
@@ -158,7 +105,7 @@ const getUserFlashcards = async (req, res) => {
 const reviewFlashcard = async (req, res) => {
   try {
     const { id } = req.params;
-    const { rating } = req.body;
+    const { rating, timezone } = req.body;
     const userId = req.user._id;
 
     // Validate ObjectId format before querying database
@@ -190,7 +137,8 @@ const reviewFlashcard = async (req, res) => {
         repetition: flashcard.repetition,
         efactor: flashcard.efactor,
       },
-      rating
+      rating,
+      timezone
     );
 
     flashcard.interval = sm2Result.interval;

@@ -15,11 +15,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { formatRetryMessage } from "../../utils/repositoryHiveRateLimit";
 import {
   FILTER_OPTIONS,
   REPOSITORY_SORT_OPTIONS,
   ISSUE_SORT_OPTIONS,
-  buildGitHubSearchUrl,
+  buildGitHubSearchParams,
   normalizeSearchResponse,
   usesIssueLabelSearch,
   getSearchPageInfo,
@@ -39,11 +42,13 @@ const RepositoryHive = () => {
   const [repositories, setRepositories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("stars");
   const [page, setPage] = useState(1);
   const [pageInfo, setPageInfo] = useState(EMPTY_PAGE_INFO);
   const abortRef = useRef(null);
+  const requestSeqRef = useRef(0);
 
   const showingIssueBackedResults = usesIssueLabelSearch(selectedFilters);
   const sortOptions = showingIssueBackedResults
@@ -54,12 +59,14 @@ const RepositoryHive = () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    const requestSeq = ++requestSeqRef.current;
 
     setLoading(true);
     setError("");
+    setWarning("");
 
     try {
-      const url = buildGitHubSearchUrl({
+      const params = buildGitHubSearchParams({
         selectedFilters,
         searchQuery,
         sortBy,
@@ -67,39 +74,65 @@ const RepositoryHive = () => {
         page,
       });
 
-      if (!url) {
-        if (controller.signal.aborted) return;
+      if (!params) {
+        if (controller.signal.aborted || requestSeq !== requestSeqRef.current) {
+          return;
+        }
         setRepositories([]);
         setPageInfo(EMPTY_PAGE_INFO);
         setLoading(false);
         return;
       }
 
-      const response = await fetch(url, {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-        },
+      const response = await axiosInstance.get(API_PATHS.GITHUB.SEARCH, {
+        params,
         signal: controller.signal,
       });
 
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
+      if (controller.signal.aborted || requestSeq !== requestSeqRef.current) {
+        return;
       }
 
-      const data = await response.json();
-      if (controller.signal.aborted) return;
-
+      const data = response.data || {};
       setRepositories(normalizeSearchResponse(selectedFilters, data));
       setPageInfo(getSearchPageInfo(data, page, PER_PAGE));
+
+      if (data.stale || data.warning) {
+        const retryHint = formatRetryMessage(
+          data.rateLimit?.retryAfterSeconds ?? data.retryAfterSeconds,
+          data.rateLimit?.resetAt,
+        );
+        setWarning(
+          [data.warning || "Showing last successful results.", retryHint]
+            .filter(Boolean)
+            .join(" "),
+        );
+      }
     } catch (err) {
-      if (err?.name === "AbortError" || controller.signal.aborted) return;
-      setError(
-        err.message || "Failed to fetch repositories. Please try again later.",
+      if (
+        err?.name === "CanceledError" ||
+        err?.name === "AbortError" ||
+        err?.code === "ERR_CANCELED" ||
+        controller.signal.aborted ||
+        requestSeq !== requestSeqRef.current
+      ) {
+        return;
+      }
+
+      const message =
+        err?.response?.data?.message ||
+        err.message ||
+        "Failed to fetch repositories. Please try again later.";
+      const retryHint = formatRetryMessage(
+        err?.response?.data?.retryAfterSeconds ??
+          err?.response?.data?.rateLimit?.retryAfterSeconds,
+        err?.response?.data?.rateLimit?.resetAt,
       );
-      setRepositories([]);
-      setPageInfo(EMPTY_PAGE_INFO);
+
+      setError([message, retryHint].filter(Boolean).join(" "));
+      // Keep last successful cards when the upstream quota is exhausted.
     } finally {
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && requestSeq === requestSeqRef.current) {
         setLoading(false);
       }
     }
@@ -258,12 +291,33 @@ const RepositoryHive = () => {
             />
             <div className="text-red-700 dark:text-red-400 text-sm">
               {error}
+              {repositories.length > 0 && (
+                <p className="mt-1 text-red-600/80 dark:text-red-300/80">
+                  Showing your last successful results meanwhile.
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {warning && !error && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg flex items-start gap-3"
+          >
+            <AlertCircle
+              size={20}
+              className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"
+            />
+            <div className="text-amber-800 dark:text-amber-300 text-sm">
+              {warning}
             </div>
           </motion.div>
         )}
 
         {/* Loading State */}
-        {loading && (
+        {loading && repositories.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader
               size={40}
@@ -277,8 +331,15 @@ const RepositoryHive = () => {
           </div>
         )}
 
+        {loading && repositories.length > 0 && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Loader size={16} className="animate-spin text-violet-500" />
+            Refreshing results...
+          </div>
+        )}
+
         {/* Repositories Grid */}
-        {!loading && repositories.length > 0 && (
+        {repositories.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -310,7 +371,7 @@ const RepositoryHive = () => {
                         {repo.name}
                       </a>
                       <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                        {repo.owner.login}
+                        {repo.owner?.login}
                       </p>
                     </div>
                   </div>
@@ -432,7 +493,7 @@ const RepositoryHive = () => {
         )}
 
         {/* Empty State */}
-        {!loading && repositories.length === 0 && !error && (
+        {!loading && repositories.length === 0 && !error && !warning && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -451,7 +512,7 @@ const RepositoryHive = () => {
         )}
 
         {/* Results Count + Pagination */}
-        {!loading && repositories.length > 0 && (
+        {repositories.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
