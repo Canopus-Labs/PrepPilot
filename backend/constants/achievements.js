@@ -10,6 +10,9 @@ const VALID_ACHIEVEMENTS = new Set([
   "Resume Expert",
   "DSA Beginner",
   "DSA Master",
+  "3-Day Streak",
+  "7-Day Streak",
+  "30-Day Streak",
 ]);
 
 module.exports = { VALID_ACHIEVEMENTS };

@@ -28,7 +28,7 @@ const safeString = z.string().refine(
 
 const aiPromptSchema = z.object({
   prompt: safeString.min(1, "Prompt is required").max(5000, "Prompt must be under 5000 characters"),
-  systemInstruction: z.string().optional(),
+  responseMode: z.enum(["project-ideas", "roadmap", "roadmap-section"]).optional(),
   history: z
     .array(
       z.object({
@@ -36,6 +36,7 @@ const aiPromptSchema = z.object({
         text: z.string(),
       })
     )
+    .max(20, "Conversation history is too large")
     .optional(),
   role: safeString.min(2).max(50).optional(),
   topic: safeString.min(2).max(100).optional(),

@@ -1,10 +1,18 @@
 const { z } = require("zod");
+const mongoose = require("mongoose");
 const { handleValidationError } = require("./ValidateQuestions");
+
+const objectId = (label) =>
+  z
+    .string()
+    .min(1, `${label} is required`)
+    .refine((v) => mongoose.isValidObjectId(v), "Invalid ObjectId format");
 
 // Schema for creating a session
 const createSessionSchema = z.object({
   role: z.string().min(1, "Role is required"),
-  experience: z.string().min(1, "Experience is required"),
+  company: z.string().min(1, "Company is required"),
+  experience: z.string().min(1, "Experience is required").max(100, "Experience cannot exceed 100 characters"),
   topicsToFocus: z.array(z.string()).min(1, "At least one topic is required"),
   description: z.string().optional(),
   question: z.array(
@@ -12,17 +20,17 @@ const createSessionSchema = z.object({
       question: z.string().min(1, "Question text is required"),
       answer: z.string().min(1, "Answer text is required"),
     })
-  ).optional(),
+  ).max(50, "Maximum 50 questions allowed").optional(),
 });
 
 // Schema for getting a session by ID (params)
 const getSessionByIdSchema = z.object({
-  id: z.string().min(1, "Session ID is required"),
+  id: objectId("Session ID"),
 });
 
 // Schema for deleting a session (params)
 const deleteSessionSchema = z.object({
-  id: z.string().min(1, "Session ID is required"),
+  id: objectId("Session ID"),
 });
 
 
