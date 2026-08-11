@@ -151,7 +151,7 @@ const summarizeNotes = async (req, res) => {
       return res.status(200).json({
         success: true,
         fileName,
-        fileSize: buffer.length,
+        fileSize,
         sourceType,
         sourceUrl,
         pageCount: pdfStats.numPages,
