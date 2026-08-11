@@ -4,7 +4,7 @@ const { handleValidationError } = require("./ValidateQuestions");
 // ── Schemas ───────────────────────────────────────────────
 
 const registerUserZod = z.object({
-  name: z.string().min(4, "Name must be at least 4 characters").trim(),
+  name: z.string().min(4, "Name must be at least 4 characters").max(80, "Name cannot exceed 80 characters").trim(),
   email: z.string().email("Enter a valid email").trim(),
   password: z
     .string()
@@ -13,7 +13,7 @@ const registerUserZod = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/, "Password must contain at least one special character"),
-  profileImageUrl: z.string().url("Enter a valid URL").trim().optional().or(z.literal("")),
+  profileImageUrl: z.string().url("Enter a valid URL").max(500, "Profile image URL cannot exceed 500 characters").trim().optional().or(z.literal("")),
 });
 
 const loginUserZod = z.object({
