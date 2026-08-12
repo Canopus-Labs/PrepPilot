@@ -1,14 +1,21 @@
 import { parse } from "@babel/parser";
 
-const LOOP_TYPES = new Set(["ForStatement", "WhileStatement", "DoWhileStatement"]);
+const LOOP_TYPES = new Set([
+  "ForStatement",
+  "ForInStatement",
+  "ForOfStatement",
+  "WhileStatement",
+  "DoWhileStatement",
+]);
 const LINEAR_ARRAY_METHODS = new Set(["forEach", "map", "filter", "find", "some", "every", "reduce"]);
+const ALLOCATING_ARRAY_METHODS = new Set(["map", "filter"]);
 const COMPLEXITY_BY_DEPTH = ["O(1)", "O(n)", "O(n²)", "O(n³)", "O(n⁴)", "O(n^k)"];
 
 function complexityForDepth(depth) {
   return COMPLEXITY_BY_DEPTH[Math.min(depth, COMPLEXITY_BY_DEPTH.length - 1)];
 }
 
-function walk(node, visitor, state) {
+function walk(node, visitor, state = {}) {
   if (!node || typeof node !== "object") return;
   visitor(node, state);
 
@@ -45,39 +52,110 @@ function getLoopDepth(node, currentDepth = 0) {
   return maxDepth;
 }
 
-function analyzeSpace(ast) {
+function isCallable(node) {
+  return node?.type === "FunctionDeclaration" || node?.type === "FunctionExpression" || node?.type === "ArrowFunctionExpression";
+}
+
+function getCallableName(node, parent) {
+  if (node?.id?.name) return node.id.name;
+  if (parent?.type === "VariableDeclarator" && parent.id?.type === "Identifier") return parent.id.name;
+  if (parent?.type === "AssignmentExpression" && parent.left?.type === "Identifier") return parent.left.name;
+  return null;
+}
+
+function collectCallables(ast) {
+  const callables = [];
+
+  function visit(node, parent = null) {
+    if (!node || typeof node !== "object") return;
+    if (isCallable(node)) {
+      const name = getCallableName(node, parent);
+      if (name && node.body) callables.push({ name, body: node.body });
+    }
+
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "loc" || key === "start" || key === "end") continue;
+      if (Array.isArray(value)) {
+        value.forEach((child) => {
+          if (child && typeof child.type === "string") visit(child, node);
+        });
+      } else if (value && typeof value.type === "string") {
+        visit(value, node);
+      }
+    }
+  }
+
+  visit(ast);
+  return callables;
+}
+
+function hasRecursiveCall(callable) {
+  let recursive = false;
+
+  function visit(node, parent = null) {
+    if (!node || typeof node !== "object" || recursive) return;
+    if (isCallable(node) && node !== callable.body) return;
+
+    if (
+      node.type === "CallExpression" &&
+      node.callee?.type === "Identifier" &&
+      node.callee.name === callable.name
+    ) {
+      recursive = true;
+      return;
+    }
+
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "loc" || key === "start" || key === "end") continue;
+      if (Array.isArray(value)) {
+        value.forEach((child) => {
+          if (child && typeof child.type === "string") visit(child, node);
+        });
+      } else if (value && typeof value.type === "string") {
+        visit(value, node);
+      }
+    }
+  }
+
+  visit(callable.body);
+  return recursive;
+}
+
+function analyzeRecursion(ast) {
+  const callables = collectCallables(ast);
+  const recursiveCallables = callables.filter(hasRecursiveCall);
+  return {
+    recursiveFunctionCount: recursiveCallables.length,
+    hasRecursion: recursiveCallables.length > 0,
+  };
+}
+
+function analyzeSpace(ast, recursion) {
   let dynamicAllocation = false;
-  let recursiveCall = false;
-  const functionNames = new Set();
 
   walk(ast, (node) => {
-    if (node.type === "FunctionDeclaration" && node.id?.name) functionNames.add(node.id.name);
     if (node.type === "ArrayExpression" || node.type === "NewExpression") dynamicAllocation = true;
-    if (node.type === "CallExpression" && node.callee?.type === "MemberExpression" && node.callee.property?.name === "push") {
-      dynamicAllocation = true;
+    if (
+      node.type === "CallExpression" &&
+      node.callee?.type === "MemberExpression" &&
+      !node.callee.computed
+    ) {
+      const method = node.callee.property?.name;
+      if (method === "push" || ALLOCATING_ARRAY_METHODS.has(method)) dynamicAllocation = true;
     }
-  }, {});
+  });
 
-  walk(ast, (node) => {
-    if (node.type === "CallExpression" && node.callee?.type === "Identifier" && functionNames.has(node.callee.name)) {
-      recursiveCall = true;
-    }
-  }, {});
-
-  if (recursiveCall) return "O(n) or O(depth)";
+  if (recursion.hasRecursion) return "O(n) or O(depth)";
   if (dynamicAllocation) return "O(n)";
   return "O(1)";
 }
 
-function analyzeLoops(ast) {
+function analyzeLoops(ast, recursion) {
   let loopCount = 0;
-  let recursiveFunctionCount = 0;
-  const functionNames = new Set();
   const arrayMethodLoops = [];
 
   walk(ast, (node) => {
     if (LOOP_TYPES.has(node.type)) loopCount += 1;
-    if (node.type === "FunctionDeclaration" && node.id?.name) functionNames.add(node.id.name);
     if (
       node.type === "CallExpression" &&
       node.callee?.type === "MemberExpression" &&
@@ -86,18 +164,12 @@ function analyzeLoops(ast) {
     ) {
       arrayMethodLoops.push(node.callee.property.name);
     }
-  }, {});
-
-  walk(ast, (node) => {
-    if (node.type === "CallExpression" && node.callee?.type === "Identifier" && functionNames.has(node.callee.name)) {
-      recursiveFunctionCount += 1;
-    }
-  }, {});
+  });
 
   return {
     maxLoopDepth: getLoopDepth(ast),
     loopCount,
-    recursiveFunctionCount,
+    recursiveFunctionCount: recursion.recursiveFunctionCount,
     arrayMethodLoops,
   };
 }
@@ -114,8 +186,15 @@ export function analyzeJavaScriptComplexity(code) {
   }
 
   try {
-    const ast = parse(code, { sourceType: "unambiguous", plugins: ["jsx", "typescript"] });
-    const loops = analyzeLoops(ast);
+    const ast = parse(code, {
+      sourceType: "unambiguous",
+      plugins: ["jsx", "typescript"],
+    });
+    const recursion = analyzeRecursion(ast);
+    const loops = analyzeLoops(ast, recursion);
+
+    // Array callbacks represent one traversal of their input. They should not
+    // be multiplied with one another by this lightweight heuristic.
     const timeComplexity = loops.maxLoopDepth > 0
       ? complexityForDepth(loops.maxLoopDepth)
       : loops.arrayMethodLoops.length > 0
@@ -142,7 +221,7 @@ export function analyzeJavaScriptComplexity(code) {
     return {
       status: "success",
       timeComplexity,
-      spaceComplexity: analyzeSpace(ast),
+      spaceComplexity: analyzeSpace(ast, recursion),
       explanation:
         loops.loopCount === 0 && loops.recursiveFunctionCount === 0 && loops.arrayMethodLoops.length === 0
           ? "No loop or recursive traversal was detected. The analyzed operations are treated as constant-time by this heuristic."
