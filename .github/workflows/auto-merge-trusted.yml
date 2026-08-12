@@ -1,4 +1,4 @@
-name: Auto Label & Merge - Trusted Contributors
+name: Auto Label Trusted Contributors
 
 on:
   pull_request_target:
@@ -9,15 +9,15 @@ on:
       - synchronize
 
 permissions:
-  contents: write
   pull-requests: write
 
 jobs:
-  auto-label-and-merge:
-    name: Auto-label and merge trusted PR
+  auto-label:
+    name: Add trusted contributor labels
     runs-on: ubuntu-latest
 
-    # Only trusted contributors targeting the feature branch
+    # Run only for trusted users, targeting the feature branch,
+    # and only when the PR is not a draft.
     if: >
       (
         github.event.pull_request.user.login == 'buttler-josh' ||
@@ -27,7 +27,7 @@ jobs:
       github.event.pull_request.draft == false
 
     steps:
-      - name: Add required labels and enable auto-merge
+      - name: Add required labels
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,8 +35,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const pr = context.payload.pull_request;
-            const prNumber = pr.number;
+            const prNumber = context.payload.pull_request.number;
 
             const LABELS = [
               {
@@ -72,13 +71,10 @@ jobs:
             ];
 
             core.info(
-              `Processing PR #${prNumber} by @${pr.user.login} → ${pr.base.ref}`
+              `Processing PR #${prNumber} by @${context.payload.pull_request.user.login}`
             );
 
-            // ------------------------------------------------------------
-            // 1. Create labels if they don't already exist
-            // ------------------------------------------------------------
-
+            // Create labels if they don't already exist
             for (const label of LABELS) {
               try {
                 await github.rest.issues.getLabel({
@@ -87,7 +83,7 @@ jobs:
                   name: label.name
                 });
 
-                core.info(`Label already exists: ${label.name}`);
+                core.info(`Label exists: ${label.name}`);
 
               } catch (error) {
                 if (error.status === 404) {
@@ -106,43 +102,14 @@ jobs:
               }
             }
 
-            // ------------------------------------------------------------
-            // 2. Add all required labels to the PR
-            // ------------------------------------------------------------
-
-            const labelNames = LABELS.map(label => label.name);
-
+            // Add all six labels to the PR
             await github.rest.issues.addLabels({
               owner,
               repo,
               issue_number: prNumber,
-              labels: labelNames
+              labels: LABELS.map(label => label.name)
             });
 
             core.info(
-              `Added ${labelNames.length} labels to PR #${prNumber}`
-            );
-
-            // ------------------------------------------------------------
-            // 3. Enable GitHub Auto-Merge
-            // ------------------------------------------------------------
-
-            const { execSync } = require("child_process");
-
-            execSync(
-              `gh pr merge ${prNumber} ` +
-              `--repo ${owner}/${repo} ` +
-              `--squash ` +
-              `--auto`,
-              {
-                stdio: "inherit",
-                env: {
-                  ...process.env,
-                  GH_TOKEN: process.env.GITHUB_TOKEN
-                }
-              }
-            );
-
-            core.info(
-              `Auto-merge enabled for PR #${prNumber}`
+              `Successfully added all ${LABELS.length} labels to PR #${prNumber}`
             );
