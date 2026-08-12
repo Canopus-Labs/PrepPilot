@@ -10,7 +10,6 @@ const LINEAR_ARRAY_METHODS = new Set([
   "every",
   "reduce",
 ]);
-
 const COMPLEXITY_BY_DEPTH = ["O(1)", "O(n)", "O(n²)", "O(n³)", "O(n⁴)", "O(n^k)"];
 
 function complexityForDepth(depth) {
@@ -19,12 +18,10 @@ function complexityForDepth(depth) {
 
 function walk(node, visitor, state) {
   if (!node || typeof node !== "object") return;
-
   visitor(node, state);
 
   for (const [key, value] of Object.entries(node)) {
     if (key === "loc" || key === "start" || key === "end") continue;
-
     if (Array.isArray(value)) {
       value.forEach((child) => {
         if (child && typeof child.type === "string") walk(child, visitor, state);
@@ -35,20 +32,10 @@ function walk(node, visitor, state) {
   }
 }
 
-function containsIdentifier(node, name) {
-  let found = false;
-  walk(node, (current) => {
-    if (current.type === "Identifier" && current.name === name) found = true;
-  }, {});
-  return found;
-}
-
 function getLoopDepth(node, currentDepth = 0) {
   if (!node || typeof node !== "object") return currentDepth;
-
-  let maxDepth = currentDepth;
   const nextDepth = LOOP_TYPES.has(node.type) ? currentDepth + 1 : currentDepth;
-  maxDepth = Math.max(maxDepth, nextDepth);
+  let maxDepth = nextDepth;
 
   for (const [key, value] of Object.entries(node)) {
     if (key === "loc" || key === "start" || key === "end") continue;
@@ -68,26 +55,20 @@ function getLoopDepth(node, currentDepth = 0) {
 
 function analyzeSpace(ast) {
   let dynamicAllocation = false;
-  let recursion = false;
+  let recursiveCall = false;
   const functionNames = new Set();
 
   walk(ast, (node) => {
     if (node.type === "FunctionDeclaration" && node.id?.name) {
       functionNames.add(node.id.name);
     }
-
-    if (
-      node.type === "ArrayExpression" &&
-      node.elements?.length > 0
-    ) {
+    if (node.type === "ArrayExpression" || node.type === "NewExpression") {
       dynamicAllocation = true;
     }
-
     if (
-      node.type === "NewExpression" ||
-      (node.type === "CallExpression" &&
-        node.callee?.type === "MemberExpression" &&
-        node.callee.property?.name === "push")
+      node.type === "CallExpression" &&
+      node.callee?.type === "MemberExpression" &&
+      node.callee.property?.name === "push"
     ) {
       dynamicAllocation = true;
     }
@@ -99,31 +80,35 @@ function analyzeSpace(ast) {
       node.callee?.type === "Identifier" &&
       functionNames.has(node.callee.name)
     ) {
-      recursion = true;
+      recursiveCall = true;
     }
   }, {});
 
-  if (recursion) return "O(n) or O(depth)";
+  if (recursiveCall) return "O(n) or O(depth)";
   if (dynamicAllocation) return "O(n)";
   return "O(1)";
 }
 
 function analyzeLoops(ast) {
-  let maxLoopDepth = 0;
   let loopCount = 0;
   let recursiveFunctionCount = 0;
   const functionNames = new Set();
+  const arrayMethodLoops = [];
 
   walk(ast, (node) => {
-    if (LOOP_TYPES.has(node.type)) {
-      loopCount += 1;
-    }
+    if (LOOP_TYPES.has(node.type)) loopCount += 1;
     if (node.type === "FunctionDeclaration" && node.id?.name) {
       functionNames.add(node.id.name);
     }
+    if (
+      node.type === "CallExpression" &&
+      node.callee?.type === "MemberExpression" &&
+      !node.callee.computed &&
+      LINEAR_ARRAY_METHODS.has(node.callee.property?.name)
+    ) {
+      arrayMethodLoops.push(node.callee.property.name);
+    }
   }, {});
-
-  maxLoopDepth = getLoopDepth(ast);
 
   walk(ast, (node) => {
     if (
@@ -135,20 +120,8 @@ function analyzeLoops(ast) {
     }
   }, {});
 
-  const arrayMethodLoops = [];
-  walk(ast, (node) => {
-    if (
-      node.type === "CallExpression" &&
-      node.callee?.type === "MemberExpression" &&
-      !node.callee.computed &&
-      LINEAR_ARRAY_METHODS.has(node.callee.property?.name)
-    ) {
-      arrayMethodLoops.push(node.callee.property.name);
-    }
-  }, {});
-
   return {
-    maxLoopDepth,
+    maxLoopDepth: getLoopDepth(ast),
     loopCount,
     recursiveFunctionCount,
     arrayMethodLoops,
@@ -171,13 +144,10 @@ export function analyzeJavaScriptComplexity(code) {
       sourceType: "unambiguous",
       plugins: ["jsx", "typescript"],
     });
-
     const loops = analyzeLoops(ast);
-    const timeComplexity = complexityForDepth(
-      loops.maxLoopDepth + (loops.recursiveFunctionCount > 0 ? 0 : 0)
-    );
-
+    const timeComplexity = complexityForDepth(loops.maxLoopDepth);
     const warnings = [];
+
     if (loops.maxLoopDepth >= 2) {
       warnings.push(
         `${loops.maxLoopDepth} nested loop levels detected; the dominant loop structure is approximately ${timeComplexity}.`
