@@ -1,15 +1,7 @@
 import { parse } from "@babel/parser";
 
 const LOOP_TYPES = new Set(["ForStatement", "WhileStatement", "DoWhileStatement"]);
-const LINEAR_ARRAY_METHODS = new Set([
-  "forEach",
-  "map",
-  "filter",
-  "find",
-  "some",
-  "every",
-  "reduce",
-]);
+const LINEAR_ARRAY_METHODS = new Set(["forEach", "map", "filter", "find", "some", "every", "reduce"]);
 const COMPLEXITY_BY_DEPTH = ["O(1)", "O(n)", "O(n²)", "O(n³)", "O(n⁴)", "O(n^k)"];
 
 function complexityForDepth(depth) {
@@ -59,27 +51,15 @@ function analyzeSpace(ast) {
   const functionNames = new Set();
 
   walk(ast, (node) => {
-    if (node.type === "FunctionDeclaration" && node.id?.name) {
-      functionNames.add(node.id.name);
-    }
-    if (node.type === "ArrayExpression" || node.type === "NewExpression") {
-      dynamicAllocation = true;
-    }
-    if (
-      node.type === "CallExpression" &&
-      node.callee?.type === "MemberExpression" &&
-      node.callee.property?.name === "push"
-    ) {
+    if (node.type === "FunctionDeclaration" && node.id?.name) functionNames.add(node.id.name);
+    if (node.type === "ArrayExpression" || node.type === "NewExpression") dynamicAllocation = true;
+    if (node.type === "CallExpression" && node.callee?.type === "MemberExpression" && node.callee.property?.name === "push") {
       dynamicAllocation = true;
     }
   }, {});
 
   walk(ast, (node) => {
-    if (
-      node.type === "CallExpression" &&
-      node.callee?.type === "Identifier" &&
-      functionNames.has(node.callee.name)
-    ) {
+    if (node.type === "CallExpression" && node.callee?.type === "Identifier" && functionNames.has(node.callee.name)) {
       recursiveCall = true;
     }
   }, {});
@@ -97,9 +77,7 @@ function analyzeLoops(ast) {
 
   walk(ast, (node) => {
     if (LOOP_TYPES.has(node.type)) loopCount += 1;
-    if (node.type === "FunctionDeclaration" && node.id?.name) {
-      functionNames.add(node.id.name);
-    }
+    if (node.type === "FunctionDeclaration" && node.id?.name) functionNames.add(node.id.name);
     if (
       node.type === "CallExpression" &&
       node.callee?.type === "MemberExpression" &&
@@ -111,11 +89,7 @@ function analyzeLoops(ast) {
   }, {});
 
   walk(ast, (node) => {
-    if (
-      node.type === "CallExpression" &&
-      node.callee?.type === "Identifier" &&
-      functionNames.has(node.callee.name)
-    ) {
+    if (node.type === "CallExpression" && node.callee?.type === "Identifier" && functionNames.has(node.callee.name)) {
       recursiveFunctionCount += 1;
     }
   }, {});
@@ -140,32 +114,29 @@ export function analyzeJavaScriptComplexity(code) {
   }
 
   try {
-    const ast = parse(code, {
-      sourceType: "unambiguous",
-      plugins: ["jsx", "typescript"],
-    });
+    const ast = parse(code, { sourceType: "unambiguous", plugins: ["jsx", "typescript"] });
     const loops = analyzeLoops(ast);
-    const timeComplexity = complexityForDepth(loops.maxLoopDepth);
+    const timeComplexity = loops.maxLoopDepth > 0
+      ? complexityForDepth(loops.maxLoopDepth)
+      : loops.arrayMethodLoops.length > 0
+        ? "O(n)"
+        : loops.recursiveFunctionCount > 0
+          ? "O(n) or O(branching^depth)"
+          : "O(1)";
     const warnings = [];
 
     if (loops.maxLoopDepth >= 2) {
-      warnings.push(
-        `${loops.maxLoopDepth} nested loop levels detected; the dominant loop structure is approximately ${timeComplexity}.`
-      );
+      warnings.push(`${loops.maxLoopDepth} nested loop levels detected; the dominant loop structure is approximately ${timeComplexity}.`);
     } else if (loops.loopCount === 1 || loops.arrayMethodLoops.length > 0) {
       warnings.push("A linear traversal was detected; review the input size to confirm O(n) behavior.");
     }
 
     if (loops.recursiveFunctionCount > 0) {
-      warnings.push(
-        "Recursive function calls were detected. Recursion depth and branching determine the final complexity."
-      );
+      warnings.push("Recursive function calls were detected. Recursion depth and branching determine the final complexity.");
     }
 
     if (loops.arrayMethodLoops.length > 0) {
-      warnings.push(
-        `Array traversal method(s) detected: ${[...new Set(loops.arrayMethodLoops)].join(", ")}.`
-      );
+      warnings.push(`Array traversal method(s) detected: ${[...new Set(loops.arrayMethodLoops)].join(", ")}.`);
     }
 
     return {
@@ -173,7 +144,7 @@ export function analyzeJavaScriptComplexity(code) {
       timeComplexity,
       spaceComplexity: analyzeSpace(ast),
       explanation:
-        loops.loopCount === 0 && loops.recursiveFunctionCount === 0
+        loops.loopCount === 0 && loops.recursiveFunctionCount === 0 && loops.arrayMethodLoops.length === 0
           ? "No loop or recursive traversal was detected. The analyzed operations are treated as constant-time by this heuristic."
           : "This is a static heuristic based on the parsed AST. It estimates dominant loop nesting and common allocation patterns; it is not a formal proof of Big-O complexity.",
       warnings,
