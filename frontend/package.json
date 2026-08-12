@@ -12,6 +12,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
+    "@babel/parser": "^7.28.3",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.12",
     "axios": "^1.11.0",
