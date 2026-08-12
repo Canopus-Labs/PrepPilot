@@ -708,9 +708,11 @@ const Settings = () => {
                     onChange={(e) => {
                       const value = e.target.value;
 
-                      if (/^[\p{L}\s'-]*$/u.test(value)) {
-                        setCountry(value);
-                      }
+                      const normalizedValue = value.normalize("NFC");
+
+                      if (/^[\p{L}\p{M}\s'-]*$/u.test(normalizedValue)) {
+                        setCountry(normalizedValue);
+}
                     }}
                     placeholder="Enter Country"
                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2.5 px-4 text-sm text-slate-900 dark:text-white"
