@@ -18,7 +18,7 @@ const analyzeResumeSchema = z.object({
 });
 
 const saveResumeSchema = z.object({
-  title: z.string({ required_error: "Title is required" }).min(1, "Title is required"),
+  title: z.string({ required_error: "Title is required" }).min(1, "Title is required").max(200, "Title cannot exceed 200 characters"),
   latexCode: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
   resumeId: z
     .string()

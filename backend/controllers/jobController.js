@@ -4,7 +4,7 @@ const JobCache = require("../models/JobCache");
 
 const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID;
 const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
-const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in";
+const ADZUNA_COUNTRY = (process.env.ADZUNA_COUNTRY || "in").toLowerCase().trim();
 const CACHE_TTL_MS   = 24 * 60 * 60 * 1000;
 
 // Supported Adzuna ISO country codes
@@ -35,7 +35,8 @@ const normalizeCountry = (country) => {
 };
 
 async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
-  const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
+  const normalizedCountry = country.toLowerCase().trim();
+  const url = `https://api.adzuna.com/v1/api/jobs/${normalizedCountry}/search/1`;
   const { data } = await axios.get(url, {
     params: {
       app_id:           ADZUNA_APP_ID,
@@ -75,17 +76,12 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
-    const role = req.query.role || latestSession?.role || "software engineer";
-    const country = (req.query.country || ADZUNA_COUNTRY).toLowerCase().trim();
+    const rawRole    = req.query.role || latestSession?.role || "software engineer";
+    const rawCountry = req.query.country || ADZUNA_COUNTRY;
 
-    // Validate country against supported Adzuna codes
-    if (!ALLOWED_ADZUNA_COUNTRIES.includes(country)) {
-      return res.status(400).json({
-        message: `Invalid or unsupported country parameter '${country}'. Supported country codes are: ${ALLOWED_ADZUNA_COUNTRIES.join(", ")}`,
-      });
-    }
-
-    const cacheKey = `${role.toLowerCase()}|${country}`;
+    const role     = rawRole.toLowerCase().trim();
+    const country  = rawCountry.toLowerCase().trim();
+    const cacheKey = `${role}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
     if (cached && Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS) {
@@ -115,16 +111,15 @@ exports.refreshJobCache = async () => {
     });
 
     for (const role of roles) {
-      const normalizedRole = normalizeRole(role);
-      if (!normalizedRole) continue;
+      const normalizedRole = role.toLowerCase().trim();
       const cacheKey = `${normalizedRole}|${ADZUNA_COUNTRY}`;
-      const jobs = await fetchFromAdzuna(normalizedRole);
+      const jobs = await fetchFromAdzuna(normalizedRole, ADZUNA_COUNTRY);
       await JobCache.findOneAndUpdate(
         { cacheKey },
         { jobs, fetchedAt: new Date() },
         { upsert: true, new: true }
       );
-
+      console.log(`[JobCron] Refreshed cache for: ${normalizedRole}`);
     }
   } catch (err) {
     console.error("[JobCron] Refresh failed:", err.message);

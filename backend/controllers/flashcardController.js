@@ -1,16 +1,25 @@
 const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
 
+// Allowed ratings (strings and numbers)
+const ALLOWED_RATINGS = new Set([
+  "again", "hard", "medium", "good", "easy",
+  "1", "2", "3", "4", "5",
+  1, 2, 3, 4, 5
+]);
+
 /**
  * SuperMemo SM-2 Algorithm helper
  * Returns updated { interval, repetition, efactor, dueDate }
  */
 const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) => {
+  const normalizedRating = typeof rating === "string" ? rating.trim().toLowerCase() : rating;
+
   let score = 3;
-  if (rating === "again" || rating === "1") score = 1;
-  else if (rating === "hard" || rating === "2") score = 2;
-  else if (rating === "medium" || rating === "good" || rating === "3") score = 4;
-  else if (rating === "easy" || rating === "4") score = 5;
+  if (normalizedRating === "again" || normalizedRating === "1" || normalizedRating === 1) score = 1;
+  else if (normalizedRating === "hard" || normalizedRating === "2" || normalizedRating === 2) score = 2;
+  else if (normalizedRating === "medium" || normalizedRating === "good" || normalizedRating === "3" || normalizedRating === 3) score = 4;
+  else if (normalizedRating === "easy" || normalizedRating === "4" || normalizedRating === 4) score = 5;
 
   let newRepetition = repetition;
   let newInterval = interval;
@@ -161,18 +170,30 @@ const reviewFlashcard = async (req, res) => {
     const { rating } = req.body;
     const userId = req.user._id;
 
-    // Validate ObjectId format before querying database
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    // 1. Check existence
+    if (rating === undefined || rating === null) {
       return res.status(400).json({
         success: false,
-        message: "Invalid flashcard ID format",
+        message: "Rating is required. Supported values: 'again', 'hard', 'medium', 'good', 'easy' or 1-5.",
       });
     }
 
-    if (!rating) {
+    // 2. Validate data type (must be primitive string or number)
+    if (typeof rating !== "string" && typeof rating !== "number") {
       return res.status(400).json({
         success: false,
-        message: "Rating is required. Supported values: 'again', 'hard', 'good', 'easy'.",
+        message: "Invalid rating type. Rating must be a string or number.",
+      });
+    }
+
+    // 3. Normalize string inputs
+    const normalizedRating = typeof rating === "string" ? rating.trim().toLowerCase() : rating;
+
+    // 4. Check if rating is in allowed list
+    if (!ALLOWED_RATINGS.has(normalizedRating)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid rating '${rating}'. Supported values: 'again', 'hard', 'medium', 'good', 'easy' or numbers 1-5.`,
       });
     }
 
@@ -190,7 +211,7 @@ const reviewFlashcard = async (req, res) => {
         repetition: flashcard.repetition,
         efactor: flashcard.efactor,
       },
-      rating
+      normalizedRating
     );
 
     flashcard.interval = sm2Result.interval;
