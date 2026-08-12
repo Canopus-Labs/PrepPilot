@@ -12,6 +12,7 @@ const LANGUAGE_MAP = {
   "62": "java",
   "71": "python",
   "63": "javascript",
+  "74": "typescript",
 };
 
 const Compiler = () => {
@@ -21,6 +22,7 @@ const Compiler = () => {
     "62": `public class Main {\n  public static void main(String[] args) {\n    System.out.println("Hello World");\n  }\n}`,
     "71": `print("Hello World")`,
     "63": `console.log("Hello World");`,
+    "74": `const message: string = "Hello World";\nconsole.log(message);`,
   };
   const [code, setCode] = useState(codeTemplates[language]);
   const [output, setOutput] = useState("No output");
@@ -35,7 +37,7 @@ const Compiler = () => {
   };
 
   useEffect(() => {
-    if (language !== "63") return;
+    if (language !== "63" && language !== "74") return;
 
     const timer = setTimeout(() => {
       setComplexity(analyzeJavaScriptComplexity(code));
@@ -106,6 +108,7 @@ const Compiler = () => {
                   <option value="62">Java</option>
                   <option value="71">Python</option>
                   <option value="63">JavaScript</option>
+                  <option value="74">TypeScript</option>
                 </select>
               </div>
               <button
@@ -157,7 +160,7 @@ const Compiler = () => {
         <div className="mx-auto max-w-6xl">
           <ComplexityProfiler
             analysis={complexity}
-            supported={language === "63"}
+            supported={language === "63" || language === "74"}
           />
         </div>
       </div>
