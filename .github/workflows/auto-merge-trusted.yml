@@ -19,9 +19,9 @@ jobs:
     # Only run for trusted contributors
     # No target branch restriction
     if: >
-      (
-        github.event.pull_request.user.login == 'buttler-josh' ||
-        github.event.pull_request.user.login == 'jainiksha'
+      contains(
+        fromJSON('["buttler-josh", "jainiksha"]'),
+        github.event.pull_request.user.login
       ) &&
       github.event.pull_request.draft == false
 
@@ -37,6 +37,12 @@ jobs:
             const pr = context.payload.pull_request;
             const prNumber = pr.number;
             const author = pr.user.login;
+
+            const TRUSTED = ['buttler-josh', 'jainiksha'];
+            if (!TRUSTED.includes(author.toLowerCase())) {
+              core.info(`Skipping: @${author} is not a trusted contributor.`);
+              return;
+            }
 
             const LABELS = [
               {
