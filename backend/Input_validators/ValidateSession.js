@@ -10,8 +10,8 @@ const objectId = (label) =>
 
 // Schema for creating a session
 const createSessionSchema = z.object({
-  role: z.string().min(1, "Role is required"),
-  company: z.string().min(1, "Company is required"),
+  role: z.string().min(1, "Role is required").max(120, "Role cannot exceed 120 characters"),
+  company: z.string().min(1, "Company is required").max(120, "Company cannot exceed 120 characters"),
   experience: z.string().min(1, "Experience is required").max(100, "Experience cannot exceed 100 characters"),
   topicsToFocus: z.array(z.string()).min(1, "At least one topic is required"),
   description: z.string().optional(),
