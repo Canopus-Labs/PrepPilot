@@ -16,14 +16,13 @@ jobs:
     name: Add trusted contributor labels
     runs-on: ubuntu-latest
 
-    # Run only for trusted users, targeting the feature branch,
-    # and only when the PR is not a draft.
+    # Only run for trusted contributors
+    # No target branch restriction
     if: >
       (
         github.event.pull_request.user.login == 'buttler-josh' ||
         github.event.pull_request.user.login == 'jainiksha'
       ) &&
-      github.event.pull_request.base.ref == 'feature' &&
       github.event.pull_request.draft == false
 
     steps:
@@ -35,7 +34,9 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const prNumber = context.payload.pull_request.number;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            const author = pr.user.login;
 
             const LABELS = [
               {
@@ -71,10 +72,13 @@ jobs:
             ];
 
             core.info(
-              `Processing PR #${prNumber} by @${context.payload.pull_request.user.login}`
+              `Processing PR #${prNumber} by @${author}`
             );
 
-            // Create labels if they don't already exist
+            // ------------------------------------------------------------
+            // 1. Create labels if they don't already exist
+            // ------------------------------------------------------------
+
             for (const label of LABELS) {
               try {
                 await github.rest.issues.getLabel({
@@ -83,7 +87,7 @@ jobs:
                   name: label.name
                 });
 
-                core.info(`Label exists: ${label.name}`);
+                core.info(`Label already exists: ${label.name}`);
 
               } catch (error) {
                 if (error.status === 404) {
@@ -102,14 +106,23 @@ jobs:
               }
             }
 
-            // Add all six labels to the PR
+            // ------------------------------------------------------------
+            // 2. Add all six labels to the PR
+            // ------------------------------------------------------------
+
+            const labelNames = LABELS.map(label => label.name);
+
             await github.rest.issues.addLabels({
               owner,
               repo,
               issue_number: prNumber,
-              labels: LABELS.map(label => label.name)
+              labels: labelNames
             });
 
             core.info(
-              `Successfully added all ${LABELS.length} labels to PR #${prNumber}`
+              `Successfully added ${labelNames.length} labels to PR #${prNumber}`
+            );
+
+            core.info(
+              `No merge operation performed. PR #${prNumber} requires manual review and merge.`
             );
