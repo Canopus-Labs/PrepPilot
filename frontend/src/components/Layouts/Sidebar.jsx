@@ -98,7 +98,10 @@ const NAV_ITEMS = [
     icon: Bot,
     isHeader: true,
     items: [
-      { id: "ai-assistance", title: "AI Assistance", path: "/ai-assistance", icon: Bot },
+      { id: "ai-assistance",    title: "AI Assistance",       path: "/ai-assistance",    icon: Bot },
+      { id: "behavioral-coach", title: "Behavioral Coach",    path: "/behavioral-coach", icon: MessageSquare },
+      { id: "daily-challenge",  title: "Daily Challenge",     path: "/daily-challenge",  icon: CalendarDays },
+      { id: "analytics",        title: "Analytics",           path: "/analytics",        icon: LayoutDashboard },
     ],
   },
   {
