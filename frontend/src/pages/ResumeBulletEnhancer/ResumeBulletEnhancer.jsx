@@ -271,10 +271,11 @@ const ResumeBulletEnhancer = () => {
 
                 </p>
 
-                <button className="mt-6 px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold">
-
-                  Copy Rewrite
-
+                <button
+                 onClick={() => navigator.clipboard.writeText(text)}
+                className="mt-6 px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold"
+                >
+                Copy Rewrite
                 </button>
 
               </div>
