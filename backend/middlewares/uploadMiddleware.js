@@ -99,10 +99,14 @@ const SERVED_IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const uploadsStaticHeaders = (res, filePath) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+  
   const ext = path.extname(filePath).toLowerCase();
   if (!SERVED_IMAGE_EXTENSIONS.has(ext)) {
     res.setHeader("Content-Disposition", "attachment");
     res.setHeader("Content-Type", "application/octet-stream");
+  } else {
+    // Cache images for 7 days (604800 seconds)
+    res.setHeader("Cache-Control", "public, max-age=604800");
   }
 };
 
