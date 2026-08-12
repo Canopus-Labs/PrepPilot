@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
+const { isValidCountry } = require("../utils/nameCountry");
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
@@ -379,13 +380,24 @@ const updateUserProfile = async (req, res) => {
         }
 
         // Update fields if they are sent in request
+       // Update fields if they are sent in request
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (bio !== undefined) user.bio = bio;
-        if (country !== undefined) user.country = country;
+
+        if (country !== undefined) {
+            if (country.trim() !== "" && !isValidCountry(country)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please enter a valid country name.",
+                });
+            }
+
+            user.country = country.trim();
+        }
+
         if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
         if (visibility !== undefined) user.visibility = visibility;
-
         // Sync name based on firstName and lastName
         if (firstName !== undefined || lastName !== undefined) {
             const fName = firstName !== undefined ? firstName : user.firstName;
