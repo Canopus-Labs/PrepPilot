@@ -20,7 +20,7 @@ const readingTimeSchema = z.object({
 
 
 const summarizeRequestSchema = z.object({
-  url: z.string().url("Provide a valid PDF URL").optional(),
+  url: z.string().url("Provide a valid PDF URL").max(2048).optional(),
   fileName: z.string().max(200).optional(),
 });
 
@@ -58,7 +58,7 @@ const aiOutputSchema = z.object({
 const saveNotesSummarySchema = z.object({
   fileName: z.string().min(1).max(200),
   sourceType: z.enum(["upload", "platform"]),
-  sourceUrl: z.string().url().optional().nullable(),
+  sourceUrl: z.string().url().max(2048).optional().nullable(),
   pageCount: z.number().int().nonnegative().optional().default(0),
   wordCount: z.number().int().nonnegative().optional().default(0),
   contentHash: z.string().max(128).optional().nullable(),
