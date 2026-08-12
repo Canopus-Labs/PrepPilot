@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { generateChatWithFallback } = require('../utils/geminiHelper');
-const { aiLimiter } = require('../middlewares/rateLimiter');
+const { aiLimiter, aiUserLimiter } = require('../middlewares/rateLimiter');
+const { protect } = require('../middlewares/authMiddleware');
 const { validateAiPrompt } = require('../middlewares/validateAiPrompt');
 const sanitizeAiPrompt = require('../middlewares/sanitizeAiPrompt');
 const { sanitizePromptText } = sanitizeAiPrompt;
@@ -22,6 +23,18 @@ const SYSTEM_INSTRUCTION = `You are PrepPilot AI Mentor.
 2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
 3. Politely redirect unrelated conversations.
 4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`;
+
+const RESPONSE_MODE_INSTRUCTIONS = {
+  "project-ideas":
+    "You are a project ideation API. Return only a valid JSON array of project idea objects. Do not include markdown, greetings, explanations, or text outside the JSON array.",
+  roadmap:
+    "You are a project roadmap API. Return only a valid JSON object matching the requested roadmap structure. Do not include markdown, greetings, explanations, or text outside the JSON object.",
+  "roadmap-section":
+    "You are a project roadmap section API. Return only a valid JSON object containing the requested section key. Do not include markdown, greetings, explanations, or text outside the JSON object.",
+};
+
+const getSystemInstruction = (responseMode) =>
+  RESPONSE_MODE_INSTRUCTIONS[responseMode] || SYSTEM_INSTRUCTION;
 
 const MAX_HISTORY_MESSAGES = 20;
 // Combined character budget for prompt + history (≈ rough token guard) to stop
@@ -164,7 +177,7 @@ async function solveHandler(req, res) {
  * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
  */
 async function generateHandler(req, res) {
-  const { prompt, history = [] } = req.body || {};
+  const { prompt, history = [], responseMode } = req.body || {};
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: "Missing prompt" });
   }
@@ -215,7 +228,7 @@ async function generateHandler(req, res) {
       process.env.GEMINI_API_KEY,
       prompt,
       formattedHistory,
-      { systemInstruction: SYSTEM_INSTRUCTION }
+      { systemInstruction: getSystemInstruction(responseMode) }
     );
 
     const rawText = await result.response.text();
@@ -237,12 +250,12 @@ async function generateHandler(req, res) {
 }
 
 // Primary route used by frontend
-router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/generate', aiLimiter, protect, aiUserLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
-router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+router.post('/ai/generate', aiLimiter, protect, aiUserLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 
 // Structured problem-solving route
-router.post('/solve', aiLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
+router.post('/solve', aiLimiter, protect, aiUserLimiter, sanitizeAiPrompt, validateProblemSolve, solveHandler);
 
 // List available models
 /**
@@ -278,3 +291,4 @@ module.exports.buildChatPayload = buildChatPayload;
 module.exports.SYSTEM_INSTRUCTION = SYSTEM_INSTRUCTION;
 module.exports.MAX_HISTORY_MESSAGES = MAX_HISTORY_MESSAGES;
 module.exports.MAX_COMBINED_CHARS = MAX_COMBINED_CHARS;
+module.exports.RESPONSE_MODE_INSTRUCTIONS = RESPONSE_MODE_INSTRUCTIONS;

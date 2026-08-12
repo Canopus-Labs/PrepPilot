@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Issue #1450: malformed ObjectId ids in params/body must return 400 instead
@@ -14,20 +14,12 @@ import { describe, it, expect, beforeAll } from "vitest";
 const VALID_ID = "6426c5a5e6a6f6a6f6a6f6a6";
 const BAD_IDS = ["abc", "000", "aaaaaaaa", "not-an-objectid", "zzzz"];
 
-let sessionValidators;
-let resumeValidators;
-let resumeRouter;
-
-beforeAll(async () => {
-  const sessionMod = await import("../Input_validators/ValidateSession.js");
-  sessionValidators = sessionMod;
-
-  const resumeMod = await import("../Input_validators/ValidateResume.js");
-  resumeValidators = resumeMod;
-
-  const resumeRouterMod = await import("../routes/resumeRoutes.js");
-  resumeRouter = resumeRouterMod.default ?? resumeRouterMod;
-});
+// Use require() for CJS modules to avoid Vite's ESM transform pipeline
+// treating require() calls as invalid syntax during dynamic import analysis.
+const sessionValidators = require("../Input_validators/ValidateSession.js");
+const resumeValidators = require("../Input_validators/ValidateResume.js");
+const resumeRouterMod = require("../routes/resumeRoutes.js");
+const resumeRouter = resumeRouterMod.default ?? resumeRouterMod;
 
 function run(mw, req) {
   let passed = false;

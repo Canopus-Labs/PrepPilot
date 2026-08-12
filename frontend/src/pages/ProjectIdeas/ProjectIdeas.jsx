@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BASE_URL } from "../../utils/apiPaths";
+import { API_PATHS } from "../../utils/apiPaths";
+import axiosInstance from "../../utils/axiosinstance";
 import {
   Lightbulb,
   Layers,
@@ -348,18 +349,10 @@ const ProjectIdeas = () => {
         selectedLevel,
       );
 
-      const res = await fetch(`${BASE_URL}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          prompt,
-          systemInstruction: "You are an API that ONLY returns valid JSON arrays. Do not include any conversational text, greetings, or formatting outside the JSON array."
-        }),
+      const { data } = await axiosInstance.post(API_PATHS.AI.GENERATE, {
+        prompt,
+        responseMode: "project-ideas",
       });
-
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-
-      const data = await res.json();
       const fullText = data.text || "";
 
       const parsed = tryParseJSON(fullText);
@@ -375,7 +368,7 @@ const ProjectIdeas = () => {
       }
     } catch (err) {
       console.error("Project Ideas Generator Error:", err);
-      setError(err.message || "Unknown error");
+      setError(err.response?.data?.error || err.message || "Unknown error");
     } finally {
       setLoading(false);
     }

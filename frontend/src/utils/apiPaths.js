@@ -19,6 +19,8 @@ export const API_PATHS = {
         UPLOAD_IMAGE: "/api/auth/upload-image", // Upload profile picture
     },
     AI: {
+        GENERATE: "/api/generate", // General AI helper generation
+        SOLVE: "/api/solve", // Structured coding problem solver
         GENERATE_QUESTIONS: "/api/ai/generate-questions", // Generate interview questions and answers using Gemini
         GENERATE_EXPLANATION: "/api/ai/generate-explanation", // Generate concept explanation using Gemini
     },
@@ -47,6 +49,7 @@ export const API_PATHS = {
         ANALYZE: "/api/resume/analyze", // AI Resume Analyzer via Gemini
         SAVE: "/api/resume/save", // Save resume to backend
         GET_ALL: "/api/resume/my-resumes", // Get all user's saved resumes
+        GET_ANALYSIS_HISTORY: "/api/resume/analysis-history", // Get resume analysis history
     },
     NOTES_SUMMARY: {
         SUMMARIZE: "/api/notes-summary/summarize", // AI PDF notes summarizer via Gemini
@@ -77,5 +80,11 @@ export const API_PATHS = {
         UPDATE: (id) => `/api/roadmaps/${id}`,
         TOGGLE_TASK: (id) => `/api/roadmaps/${id}/tasks`,
         DELETE: (id) => `/api/roadmaps/${id}`,
+    },
+    INTERVIEW_EXPERIENCES: {
+        CREATE: "/api/interview-experiences",
+        APPROVED: "/api/interview-experiences/approved",
+        MINE: "/api/interview-experiences/mine",
+        UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
 };

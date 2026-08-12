@@ -7,6 +7,12 @@ const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
 const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in";
 const CACHE_TTL_MS   = 24 * 60 * 60 * 1000;
 
+// Supported Adzuna ISO country codes
+const ALLOWED_ADZUNA_COUNTRIES = [
+  "at", "au", "be", "br", "ca", "ch", "de", "es", "fr", "gb",
+  "in", "it", "mx", "nl", "nz", "pl", "ru", "sg", "us", "za",
+];
+
 // The Jobs feature is optional: without Adzuna credentials it stays dormant
 // instead of crashing the server or spamming failed API calls.
 const isAdzunaConfigured = () => Boolean(ADZUNA_APP_ID && ADZUNA_API_KEY);
@@ -32,22 +38,22 @@ async function fetchFromAdzuna(role, country = ADZUNA_COUNTRY) {
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1`;
   const { data } = await axios.get(url, {
     params: {
-      app_id:   ADZUNA_APP_ID,
-      app_key:  ADZUNA_API_KEY,
-      what:     role,
+      app_id:           ADZUNA_APP_ID,
+      app_key:          ADZUNA_API_KEY,
+      what:             role,
       results_per_page: 10,
     },
   });
   return (data.results || []).map((j) => ({
-    id:          j.id,
-    title:       j.title,
-    company:     j.company?.display_name || "Unknown",
-    location:    j.location?.display_name || "Remote",
-    salary_min:  j.salary_min || null,
-    salary_max:  j.salary_max ?? null,
-    description: j.description ?? "",
+    id:           j.id,
+    title:        j.title,
+    company:      j.company?.display_name || "Unknown",
+    location:     j.location?.display_name || "Remote",
+    salary_min:   j.salary_min || null,
+    salary_max:   j.salary_max ?? null,
+    description:  j.description ?? "",
     redirect_url: j.redirect_url,
-    created:     j.created,
+    created:      j.created,
   }));
 }
 
@@ -69,8 +75,20 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
-    const role    = normalizeRole(req.query.role) || normalizeRole(latestSession?.role) || "software engineer";
-    const country = normalizeCountry(req.query.country);
+    const rawRole = req.query.role || latestSession?.role || "software engineer";
+    const rawCountry = req.query.country || ADZUNA_COUNTRY;
+
+    // Sanitize and bound client-controlled inputs before forming the cache key
+    const role = normalizeRole(rawRole) || "software engineer";
+    const country = normalizeCountry(rawCountry);
+
+    // Validate country against supported Adzuna codes
+    if (!ALLOWED_ADZUNA_COUNTRIES.includes(country)) {
+      return res.status(400).json({
+        message: `Invalid or unsupported country parameter '${rawCountry}'. Supported country codes are: ${ALLOWED_ADZUNA_COUNTRIES.join(", ")}`,
+      });
+    }
+
     const cacheKey = `${role}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });

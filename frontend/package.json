@@ -12,6 +12,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
+    "@babel/parser": "^7.28.3",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.12",
     "axios": "^1.11.0",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^5.0.0",
@@ -46,6 +48,7 @@
     "vitest": "^4.1.10"
   },
   "overrides": {
-    "tar": "7.5.19"
+    "tar": "7.5.19",
+    "postcss": "8.5.18"
   }
 }

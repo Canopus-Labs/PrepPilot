@@ -157,6 +157,8 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
+const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
+app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 
 
 app.use(

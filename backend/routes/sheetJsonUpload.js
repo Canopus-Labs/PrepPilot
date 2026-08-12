@@ -35,10 +35,20 @@ router.post('/upload', protect, requireAdmin, async (req, res) => {
         continue;
       }
 
-      // Insert or update sheet by id
       const sheet = await Sheet.findOneAndUpdate(
         { id: normalized.value.id },
-        normalized.value,
+        {
+          $set: {
+            ...normalized.value,
+            updatedBy: req.user._id,
+            deletedAt: null,
+          },
+          $setOnInsert: {
+            createdBy: req.user._id,
+            uploadedAt: new Date(),
+          },
+          $unset: { deletedBy: "" },
+        },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
 
@@ -109,8 +119,13 @@ router.put('/:id', protect, requireAdmin, async (req, res) => {
 
   try {
     const sheet = await Sheet.findOneAndUpdate(
-      { id },
-      normalized.value,
+      { id, deletedAt: null },
+      {
+        $set: {
+          ...normalized.value,
+          updatedBy: req.user._id,
+        },
+      },
       { new: true, setDefaultsOnInsert: true }
     );
 
@@ -136,13 +151,22 @@ router.delete('/:id', protect, requireAdmin, async (req, res) => {
   }
 
   try {
-    const sheet = await Sheet.findOneAndDelete({ id });
+    const sheet = await Sheet.findOneAndUpdate(
+      { id, deletedAt: null },
+      {
+        $set: {
+          deletedAt: new Date(),
+          deletedBy: req.user._id,
+        },
+      },
+      { new: true }
+    );
 
     if (!sheet) {
       return res.status(404).json({ error: 'Sheet not found.' });
     }
 
-    res.json({ message: 'Sheet deleted.', id });
+    res.json({ message: 'Sheet deleted.', id, deletedAt: sheet.deletedAt });
   } catch (err) {
     console.error('Error deleting sheet:', err);
     res.status(500).json({ error: 'Failed to delete sheet.' });
@@ -154,12 +178,17 @@ router.delete('/:id', protect, requireAdmin, async (req, res) => {
 // GET / - fetch all sheets (for /api/sheets)
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 50;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const parsedLimit = parseInt(req.query.limit, 10);
+    const limit = Math.min(100, Math.max(1, isNaN(parsedLimit) ? 50 : parsedLimit));
     const skip = (page - 1) * limit;
 
-    const sheets = await Sheet.find({}).skip(skip).limit(limit);
-    const total = await Sheet.countDocuments({});
+    const visibleSheets = { deletedAt: null };
+    const sheets = await Sheet.find(visibleSheets)
+      .select('-createdBy -updatedBy -deletedBy')
+      .skip(skip)
+      .limit(limit);
+    const total = await Sheet.countDocuments(visibleSheets);
 
     res.json({ 
       sheets,
@@ -178,7 +207,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     // Always find by cust
-    const sheet = await Sheet.findOne({ id: req.params.id });
+    const sheet = await Sheet.findOne({ id: req.params.id, deletedAt: null })
+      .select('-createdBy -updatedBy -deletedBy');
     if (!sheet) {
       return res.status(404).json({ error: 'Sheet not found.' });
     }
