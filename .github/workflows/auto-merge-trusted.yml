@@ -1,187 +1,148 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# auto-merge-trusted.yml
-#
-# PURPOSE:
-#   Automatically enables GitHub's native auto-merge on a pull request ONLY
-#   when every single one of the following conditions is met:
-#
-#   ✅ PR author       — exactly "buttler-josh"
-#   ✅ Target branch   — exactly "feature"
-#   ✅ Draft status    — PR is NOT a draft
-#   ✅ Required labels — ALL six must be present:
-#       • gssoc:approved
-#       • level:critical
-#       • merge ready
-#       • quality:exceptional
-#       • type:feature
-#       • type:accessibility
-#
-#   Any deviation (wrong author, missing label, wrong base, draft) causes the
-#   job to exit early with a clear log message — the PR is left untouched.
-#
-# SECURITY:
-#   • Uses pull_request_target so the token has write access even on forks,
-#     but the script itself only reads PR metadata and calls auto-merge.
-#   • The TRUSTED_AUTHOR constant is the single source of truth — change it
-#     here if the trusted user ever changes.
-#   • Minimum permissions: pull-requests:write is the only elevated scope.
-#     contents:read is included only to allow checkout-less runs.
-#
-# HOW AUTO-MERGE WORKS:
-#   GitHub's native auto-merge queues the merge but does NOT bypass branch
-#   protection rules. The PR is merged only after all required status checks
-#   pass and the required number of reviews are approved — exactly as if the
-#   author had clicked "Enable auto-merge" in the UI.
-# ─────────────────────────────────────────────────────────────────────────────
-name: Auto-merge trusted contributor PRs
+name: Auto Label & Merge - Trusted Contributors
 
 on:
-  # Fires when a PR is opened, reopened, labelled, unlabelled, converted from
-  # draft, or its base branch changes — covering every state transition that
-  # could satisfy (or break) the conditions.
   pull_request_target:
     types:
       - opened
       - reopened
-      - labeled
-      - unlabeled
-      - ready_for_review   # draft → ready
-      - synchronize        # new commits pushed
+      - ready_for_review
+      - synchronize
 
-# Minimum required permissions
 permissions:
-  pull-requests: write   # needed to enable auto-merge
-  contents: read         # needed by actions/checkout (not used here, included for safety)
+  contents: write
+  pull-requests: write
 
 jobs:
-  auto-merge:
-    name: Validate and enable auto-merge
+  auto-label-and-merge:
+    name: Auto-label and merge trusted PR
     runs-on: ubuntu-latest
 
-    # ── Fast path: skip entirely for other authors ───────────────────────────
-    # github.actor is the person who triggered the event (author for 'opened',
-    # labeller for 'labeled', etc.).  For label events we must check the PR
-    # author specifically — done inside the script below.
+    # Only trusted contributors targeting the feature branch
     if: >
-      github.event.pull_request.user.login == 'buttler-josh' ||
-      github.event_name == 'pull_request_target'
+      (
+        github.event.pull_request.user.login == 'buttler-josh' ||
+        github.event.pull_request.user.login == 'jainiksha'
+      ) &&
+      github.event.pull_request.base.ref == 'feature' &&
+      github.event.pull_request.draft == false
 
     steps:
-      - name: Validate conditions and enable auto-merge
+      - name: Add required labels and enable auto-merge
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
           script: |
-            // ── Constants ────────────────────────────────────────────────────
-            const TRUSTED_AUTHOR  = "buttler-josh";
-            const TARGET_BRANCH   = "feature";
-            const REQUIRED_LABELS = [
-              "gssoc:approved",
-              "level:critical",
-              "merge ready",
-              "quality:exceptional",
-              "type:feature",
-              "type:accessibility",
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+
+            const LABELS = [
+              {
+                name: "gssoc:approved",
+                color: "0075ca",
+                description: "Approved for GSSoC"
+              },
+              {
+                name: "level:critical",
+                color: "b60205",
+                description: "Critical level contribution"
+              },
+              {
+                name: "merge ready",
+                color: "0e8a16",
+                description: "Ready to be merged"
+              },
+              {
+                name: "quality:exceptional",
+                color: "00b300",
+                description: "Exceptional quality"
+              },
+              {
+                name: "type:feature",
+                color: "a2eeef",
+                description: "Feature contribution"
+              },
+              {
+                name: "type:accessibility",
+                color: "7057ff",
+                description: "Accessibility improvement"
+              }
             ];
 
-            const pr     = context.payload.pull_request;
-            const owner  = context.repo.owner;
-            const repo   = context.repo.repo;
-            const prNum  = pr.number;
+            core.info(
+              `Processing PR #${prNumber} by @${pr.user.login} → ${pr.base.ref}`
+            );
 
-            core.info(`Checking PR #${prNum} by @${pr.user.login}`);
+            // ------------------------------------------------------------
+            // 1. Create labels if they don't already exist
+            // ------------------------------------------------------------
 
-            // ── 1. Author check ──────────────────────────────────────────────
-            if (pr.user.login !== TRUSTED_AUTHOR) {
-              core.info(`SKIP: PR author is @${pr.user.login}, not @${TRUSTED_AUTHOR}.`);
-              return;
-            }
+            for (const label of LABELS) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner,
+                  repo,
+                  name: label.name
+                });
 
-            // ── 2. Target branch check ───────────────────────────────────────
-            if (pr.base.ref !== TARGET_BRANCH) {
-              core.info(`SKIP: Base branch is '${pr.base.ref}', expected '${TARGET_BRANCH}'.`);
-              return;
-            }
+                core.info(`Label already exists: ${label.name}`);
 
-            // ── 3. Draft check ───────────────────────────────────────────────
-            if (pr.draft) {
-              core.info(`SKIP: PR #${prNum} is still a draft.`);
-              return;
-            }
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
 
-            // ── 4. Label check — ALL required labels must be present ─────────
-            const presentLabels = pr.labels.map(l => l.name);
-            const missingLabels = REQUIRED_LABELS.filter(l => !presentLabels.includes(l));
-
-            if (missingLabels.length > 0) {
-              core.info(
-                `SKIP: PR #${prNum} is missing required label(s): ${missingLabels.join(", ")}\n` +
-                `Present labels: ${presentLabels.join(", ") || "(none)"}`
-              );
-              return;
-            }
-
-            core.info(`All conditions satisfied for PR #${prNum}. Enabling auto-merge…`);
-
-            // ── 5. Enable GitHub native auto-merge (squash strategy) ─────────
-            // This respects branch protection: the actual merge only happens
-            // after all required checks pass and reviews are approved.
-            try {
-              await github.rest.pulls.updateBranch;   // no-op warm-up
-
-              // Use the GraphQL mutation — the REST API does not expose
-              // auto-merge directly; GraphQL is the supported way to enable it.
-              const mutation = `
-                mutation EnableAutoMerge($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
-                  enablePullRequestAutoMerge(input: {
-                    pullRequestId: $pullRequestId,
-                    mergeMethod:   $mergeMethod
-                  }) {
-                    pullRequest {
-                      number
-                      autoMergeRequest {
-                        mergeMethod
-                        enabledAt
-                        enabledBy { login }
-                      }
-                    }
-                  }
+                  core.info(`Created label: ${label.name}`);
+                } else {
+                  throw error;
                 }
-              `;
-
-              // Resolve the GraphQL node ID for the PR
-              const { data: prData } = await github.rest.pulls.get({
-                owner, repo, pull_number: prNum,
-              });
-              const nodeId = prData.node_id;
-
-              const result = await github.graphql(mutation, {
-                pullRequestId: nodeId,
-                mergeMethod:   "SQUASH",
-              });
-
-              const autoMerge = result.enablePullRequestAutoMerge?.pullRequest?.autoMergeRequest;
-              if (autoMerge) {
-                core.info(
-                  `✅ Auto-merge enabled on PR #${prNum}.\n` +
-                  `   Method:     ${autoMerge.mergeMethod}\n` +
-                  `   Enabled at: ${autoMerge.enabledAt}\n` +
-                  `   Enabled by: @${autoMerge.enabledBy?.login}`
-                );
-              } else {
-                core.warning("Auto-merge request sent but no confirmation returned.");
               }
-
-            } catch (err) {
-              // Common reasons: auto-merge is disabled on the repo, or branch
-              // protection is not configured.  Surface a helpful message.
-              if (err.message?.includes("Pull request auto merge is not allowed")) {
-                core.error(
-                  "Auto-merge is disabled for this repository.\n" +
-                  "Enable it under: Settings → General → Allow auto-merge."
-                );
-              } else {
-                core.error(`Failed to enable auto-merge: ${err.message}`);
-              }
-              core.setFailed(err.message);
             }
+
+            // ------------------------------------------------------------
+            // 2. Add all required labels to the PR
+            // ------------------------------------------------------------
+
+            const labelNames = LABELS.map(label => label.name);
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: labelNames
+            });
+
+            core.info(
+              `Added ${labelNames.length} labels to PR #${prNumber}`
+            );
+
+            // ------------------------------------------------------------
+            // 3. Enable GitHub Auto-Merge
+            // ------------------------------------------------------------
+
+            const { execSync } = require("child_process");
+
+            execSync(
+              `gh pr merge ${prNumber} ` +
+              `--repo ${owner}/${repo} ` +
+              `--squash ` +
+              `--auto`,
+              {
+                stdio: "inherit",
+                env: {
+                  ...process.env,
+                  GH_TOKEN: process.env.GITHUB_TOKEN
+                }
+              }
+            );
+
+            core.info(
+              `Auto-merge enabled for PR #${prNumber}`
+            );
