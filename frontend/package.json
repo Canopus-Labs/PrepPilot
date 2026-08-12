@@ -49,6 +49,7 @@
   },
   "overrides": {
     "tar": "7.5.19",
-    "postcss": "8.5.18"
+    "postcss": "8.5.18",
+    "react-router": "8.3.0"
   }
 }
