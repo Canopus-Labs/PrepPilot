@@ -708,7 +708,7 @@ const Settings = () => {
                     onChange={(e) => {
                       const value = e.target.value;
 
-                      if (/^[A-Za-z\s'-]*$/.test(value)) {
+                      if (/^[\p{L}\s'-]*$/u.test(value)) {
                         setCountry(value);
                       }
                     }}
