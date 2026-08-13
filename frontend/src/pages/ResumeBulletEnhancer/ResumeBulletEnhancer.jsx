@@ -272,10 +272,20 @@ const ResumeBulletEnhancer = () => {
                 </p>
 
                 <button
-                 onClick={() => navigator.clipboard.writeText(text)}
-                className="mt-6 px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold"
-                >
-                Copy Rewrite
+                    onClick={async () => {
+                      try {
+                      if (!navigator.clipboard) {
+                       throw new Error("Clipboard API unavailable");
+                        }
+
+                     await navigator.clipboard.writeText(text);
+                      } catch (error) {
+                         console.error("Failed to copy rewrite:", error);
+                          }
+                       }}
+                       className="mt-6 px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold"
+                        >
+                       Copy Rewrite
                 </button>
 
               </div>
