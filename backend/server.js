@@ -24,6 +24,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const aptitudeQuestionsRoutes = require("./routes/AptitudeQuestions.js");
 const jobRoutes = require("./routes/jobRoutes");
+const googleCalendarRoutes = require("./routes/googleCalendarRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
 const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
@@ -150,6 +151,7 @@ app.post(
 
 
 app.use("/api/books", generalLimiter, booksRoutes);
+app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
 const coursesRoutes = require("./routes/coursesRoutes");
 app.use("/api/courses", generalLimiter, coursesRoutes);
