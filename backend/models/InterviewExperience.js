@@ -95,12 +95,26 @@ const interviewExperienceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Compound indexes scope idempotency dedup per-user and per-clientKey, preventing
+// one user from retrieving another user's submission by re-using a key.
 interviewExperienceSchema.index(
-  { idempotencyKey: 1 },
+  { idempotencyKey: 1, userId: 1 },
   {
     unique: true,
     partialFilterExpression: {
       idempotencyKey: { $type: "string", $gt: "" },
+      userId: { $type: "objectId" },
+    },
+  },
+);
+
+interviewExperienceSchema.index(
+  { idempotencyKey: 1, clientKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      idempotencyKey: { $type: "string", $gt: "" },
+      clientKey: { $type: "string", $gt: "" },
     },
   },
 );

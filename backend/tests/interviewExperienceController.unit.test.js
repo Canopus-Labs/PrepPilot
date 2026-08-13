@@ -164,6 +164,7 @@ describe("createInterviewExperience", () => {
 
     expect(InterviewExperience.findOne).toHaveBeenCalledWith({
       idempotencyKey: "submit-key-abc12345",
+      clientKey: "11111111-1111-4111-8111-111111111111",
     });
     expect(InterviewExperience.create).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);

@@ -70,7 +70,15 @@ const createInterviewExperience = async (req, res) => {
       payload.color = `hsl(${(payload.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`;
     }
 
-    const existing = await InterviewExperience.findOne({ idempotencyKey });
+    // Scope dedup to userId (authenticated) or clientKey (anonymous).
+    // This prevents one user from retrieving another user's submission by re-using the same key.
+    const dedupFilter = { idempotencyKey };
+    if (payload.userId) {
+      dedupFilter.userId = payload.userId;
+    } else {
+      dedupFilter.clientKey = payload.clientKey;
+    }
+    const existing = await InterviewExperience.findOne(dedupFilter);
     if (existing) {
       return res.status(200).json({
         success: true,
@@ -87,12 +95,16 @@ const createInterviewExperience = async (req, res) => {
       experience: toClientShape(experience),
     });
   } catch (error) {
-    // Concurrent retry won the unique index race — return the first write.
+    // Concurrent retry won the unique index race — return the first write, scoped to the same user/client.
     if (error?.code === 11000 && req.body?.idempotencyKey) {
       try {
-        const existing = await InterviewExperience.findOne({
-          idempotencyKey: req.body.idempotencyKey,
-        });
+        const retryFilter = { idempotencyKey: req.body.idempotencyKey.trim() };
+        if (req.user?._id) {
+          retryFilter.userId = req.user._id;
+        } else if (isSecureClientKey(req.body.clientKey)) {
+          retryFilter.clientKey = req.body.clientKey.trim();
+        }
+        const existing = await InterviewExperience.findOne(retryFilter);
         if (existing) {
           return res.status(200).json({
             success: true,
