@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
 const { isValidCountry } = require("../utils/nameCountry");
+const { resetStreakIfMissed } = require("../utils/streakTracker");
 
 // Models for cascade deletion on account delete
 const Session = require("../models/Session");
@@ -414,17 +415,8 @@ const getUserProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
 
-        // Reset streak to 0 if one or more calendar days were missed
-        if (user.lastPracticeDate && user.currentStreak > 0) {
-            const now = new Date();
-            const d1 = new Date(user.lastPracticeDate);
-            const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
-            const utc2 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-            if (diffDays > 1) {
-                user.currentStreak = 0;
-                await user.save();
-            }
+        if (resetStreakIfMissed(user)) {
+            await user.save();
         }
 
         res.json(user);
@@ -433,6 +425,7 @@ const getUserProfile = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
+
 
 /**
  * Update the user profile settings.
