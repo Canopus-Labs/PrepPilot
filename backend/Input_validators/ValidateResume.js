@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
 const compileResumeSchema = z.object({
-  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
+  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required").max(50000, "LaTeX code cannot exceed 50000 characters"),
 });
 
 const analyzeResumeSchema = z.object({
@@ -18,7 +18,7 @@ const analyzeResumeSchema = z.object({
 });
 
 const saveResumeSchema = z.object({
-  title: z.string({ required_error: "Title is required" }).min(1, "Title is required"),
+  title: z.string({ required_error: "Title is required" }).min(1, "Title is required").max(200, "Title cannot exceed 200 characters"),
   latexCode: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
   resumeId: z
     .string()

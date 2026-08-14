@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
+const { isValidCountry } = require("../utils/nameCountry");
+const { resetStreakIfMissed } = require("../utils/streakTracker");
 
 // Models for cascade deletion on account delete
 const Session = require("../models/Session");
@@ -97,12 +99,21 @@ const registerUser = async (req, res) => {
 
         const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) {
-            // Do not reveal whether the email is already registered. Respond
-            // with the same generic success shape (no tokens, no user data)
-            // so the endpoint cannot be used for account enumeration.
+            if (!userExists.isEmailVerified) {
+                const rawToken = crypto.randomBytes(32).toString("hex");
+                userExists.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+                userExists.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                await userExists.save();
+                try {
+                    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
+                    await sendVerificationEmail(userExists.email, verificationUrl);
+                } catch (err) {
+                    console.error("Failed to resend verification email on re-registration:", err);
+                }
+            }
             return res.status(201).json({
                 success: true,
-                message: "If this email is not already registered, your account has been created.",
+                message: "If this email is not already registered, your account has been created. Please check your email to verify your account before logging in.",
             });
         }
 
@@ -117,7 +128,10 @@ const registerUser = async (req, res) => {
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // Auto-verify user — email verification temporarily disabled
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+        const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
@@ -135,24 +149,21 @@ const registerUser = async (req, res) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // skip email verification until SMTP is configured
+            isEmailVerified: false,
+            emailVerificationToken,
+            emailVerificationExpires,
         });
 
-        const accessToken = generateAccessToken(user._id, user.tokenVersion);
-        const refreshToken = generateRefreshToken(user._id);
+        try {
+            const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
+            await sendVerificationEmail(user.email, verificationUrl);
+        } catch (err) {
+            console.error("Failed to send initial verification email:", err);
+        }
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
-        await user.save();
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
         return res.status(201).json({
             success: true,
-            message: "Account created successfully. You can now log in.",
-            accessToken,
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            profileImageUrl: user.profileImageUrl,
+            message: "If this email is not already registered, your account has been created. Please check your email to verify your account before logging in.",
         });
     } catch (error) {
         console.error("Register error:", error);
@@ -327,8 +338,9 @@ const verifyEmail = async (req, res) => {
         }
 
         // Find user with matching token that hasn't expired yet
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
         const user = await User.findOne({
-            emailVerificationToken: token,
+            emailVerificationToken: hashedToken,
             emailVerificationExpires: { $gt: new Date() },
         });
 
@@ -377,14 +389,15 @@ const resendVerificationEmail = async (req, res) => {
         }
 
         // Generate a fresh token and reset expiry to 24 hours from now
-        user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
         user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await user.save();
 
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${user.emailVerificationToken}`;
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
         await sendVerificationEmail(user.email, verificationUrl);
 
-        res.json({ success: true, message: "Verification email resent. Please check your inbox." });
+        res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
@@ -402,17 +415,8 @@ const getUserProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
 
-        // Reset streak to 0 if one or more calendar days were missed
-        if (user.lastPracticeDate && user.currentStreak > 0) {
-            const now = new Date();
-            const d1 = new Date(user.lastPracticeDate);
-            const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
-            const utc2 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-            if (diffDays > 1) {
-                user.currentStreak = 0;
-                await user.save();
-            }
+        if (resetStreakIfMissed(user)) {
+            await user.save();
         }
 
         res.json(user);
@@ -421,6 +425,7 @@ const getUserProfile = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
+
 
 /**
  * Update the user profile settings.
@@ -448,13 +453,24 @@ const updateUserProfile = async (req, res) => {
         }
 
         // Update fields if they are sent in request
+       // Update fields if they are sent in request
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (bio !== undefined) user.bio = bio;
-        if (country !== undefined) user.country = country;
+
+        if (country !== undefined) {
+            if (country.trim() !== "" && !isValidCountry(country)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please enter a valid country name.",
+                });
+            }
+
+            user.country = country.trim();
+        }
+
         if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
         if (visibility !== undefined) user.visibility = visibility;
-
         // Sync name based on firstName and lastName
         if (firstName !== undefined || lastName !== undefined) {
             const fName = firstName !== undefined ? firstName : user.firstName;

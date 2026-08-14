@@ -2,31 +2,10 @@ const Session = require("../models/Session");
 const Question = require("../models/Question");
 const mongoose = require("mongoose");
 const User = require("../models/User");
-
+const { applyStreakForActivity } = require("../utils/streakTracker");
 
 const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 50;
 const MAX_EXPERIENCE = 50;
-
-/**
- * Create a new practice session and associated questions.
- * @route POST /api/sessions/create
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When required fields are missing or user exceeds session limits.
- * @example
- * POST /api/sessions/create
- * Authorization: Bearer eyJhb...
- * {
- *   "role": "Backend Engineer",
- *   "experience": "3 years",
- *   "topicsToFocus": ["Node.js","Databases"],
- *   "description": "Prepare for backend interview",
- *   "question": [{"question":"Explain ACID properties","answer":"..."}]
- * }
- * @example
- * 201 {"success": true, "session": {"_id":"...","role":"Backend Engineer",...}}
- */
 
 exports.createSession = async (req, res) => {
     const mongoSession = await mongoose.startSession();
@@ -34,9 +13,9 @@ exports.createSession = async (req, res) => {
     try {
         await mongoSession.withTransaction(async () => {
             const userId = req.user._id;
-            const { role, experience, topicsToFocus, description } = req.body;
+            const { role, company, experience, topicsToFocus, description } = req.body;
             const experienceNumber = Number(experience);
- 
+
             if (!role || role.trim() === "") {
                 return res.status(400).json({
                     success: false,
@@ -70,6 +49,7 @@ exports.createSession = async (req, res) => {
                     {
                         user: userId,
                         role,
+                        company,
                         experience,
                         topicsToFocus,
                         description,
@@ -93,49 +73,9 @@ await createdSession[0].save({
   session: mongoSession,
 });
 
-            // Update user streak on successful session creation
             const user = await User.findById(userId).session(mongoSession);
             if (user) {
-                const now = new Date();
-                const getUTCDayDifference = (date1, date2) => {
-                    const d1 = new Date(date1);
-                    const d2 = new Date(date2);
-                    const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
-                    const utc2 = Date.UTC(d2.getUTCFullYear(), d2.getUTCMonth(), d2.getUTCDate());
-                    const msPerDay = 1000 * 60 * 60 * 24;
-                    return Math.floor((utc2 - utc1) / msPerDay);
-                };
-
-                if (!user.lastPracticeDate) {
-                    user.currentStreak = 1;
-                } else {
-                    const diff = getUTCDayDifference(user.lastPracticeDate, now);
-                    if (diff === 1) {
-                        user.currentStreak += 1;
-                    } else if (diff > 1) {
-                        user.currentStreak = 1;
-                    } // if diff === 0, keep current streak (already practiced today)
-                }
-
-                user.lastPracticeDate = now;
-
-                if (user.currentStreak > (user.longestStreak || 0)) {
-                    user.longestStreak = user.currentStreak;
-                }
-
-                // Check milestone badges
-                const streakMilestones = [
-                    { days: 3, badge: "3-Day Streak" },
-                    { days: 7, badge: "7-Day Streak" },
-                    { days: 30, badge: "30-Day Streak" }
-                ];
-
-                for (const milestone of streakMilestones) {
-                    if (user.currentStreak >= milestone.days && !user.unlockedAchievements.includes(milestone.badge)) {
-                        user.unlockedAchievements.push(milestone.badge);
-                    }
-                }
-
+                applyStreakForActivity(user);
                 await user.save({ session: mongoSession });
             }
 
@@ -162,19 +102,6 @@ await createdSession[0].save({
     }
 };
 
-/**
- * Get all sessions for the authenticated user.
- * @route GET /api/sessions/my-sessions
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When fetch fails.
- * @example
- * GET /api/sessions/my-sessions
- * Authorization: Bearer eyJhb...
- * @example
- * 200 [{"_id":"...","role":"...","questions":[...]}]
- */
 exports.getMySessions = async (req, res) => {
     try {
       const userId = req.user._id;
@@ -188,19 +115,6 @@ exports.getMySessions = async (req, res) => {
     }
 };
 
-/**
- * Get a specific session by ID with populated questions.
- * @route GET /api/sessions/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When session is not found.
- * @example
- * GET /api/sessions/6426c5a5...
- * Authorization: Bearer eyJhb...
- * @example
- * 200 {"success": true, "session": {"_id":"...","questions":[...]}}
- */
 exports.getSessionById = async (req, res) => {
     try {
   const session = await Session.findById(req.params.id)
@@ -225,20 +139,6 @@ exports.getSessionById = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
-/**
- * Delete a session and all linked questions for the authenticated user.
- * @route DELETE /api/sessions/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When session is missing or not owned by user.
- * @example
- * DELETE /api/sessions/6426c5a5...
- * Authorization: Bearer eyJhb...
- * @example
- * 200 {"message":"Session delete sucessfully"}
- */
 
 exports.deleteSession = async (req, res) => {
     const transaction = await mongoose.startSession();

@@ -1,22 +1,14 @@
 const User = require('../models/User');
 const { VALID_ACHIEVEMENTS } = require('../constants/achievements');
+const { resetStreakIfMissed } = require('../utils/streakTracker');
 
 exports.getAchievements = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('unlockedAchievements lastPracticeDate currentStreak');
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
-        // Reset streak to 0 if one or more calendar days were missed
-        if (user.lastPracticeDate && user.currentStreak > 0) {
-            const now = new Date();
-            const d1 = new Date(user.lastPracticeDate);
-            const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
-            const utc2 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-            if (diffDays > 1) {
-                user.currentStreak = 0;
-                await user.save();
-            }
+        if (resetStreakIfMissed(user)) {
+            await user.save();
         }
 
         res.json({ success: true, unlockedAchievements: user.unlockedAchievements });
@@ -35,7 +27,6 @@ exports.saveAchievements = async (req, res) => {
         });
     }
 
-    // Reject any ID not in the server-side allowlist
     const unknown = unlockedAchievements.filter((id) => !VALID_ACHIEVEMENTS.has(id));
 
     if (unknown.length > 0) {
@@ -46,8 +37,6 @@ exports.saveAchievements = async (req, res) => {
     }
 
     try {
-        // $addToSet is idempotent and additive-only — it never removes
-        // achievements the user already earned, and never duplicates.
         await User.findByIdAndUpdate(
             req.user._id,
             { $addToSet: { unlockedAchievements: { $each: unlockedAchievements } } },

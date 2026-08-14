@@ -28,8 +28,7 @@ const safeString = z.string().refine(
 
 const aiPromptSchema = z.object({
   prompt: safeString.min(1, "Prompt is required").max(5000, "Prompt must be under 5000 characters"),
-  // systemInstruction is intentionally NOT part of the request contract — the
-  // server owns the model persona (see aiRoutes.js SYSTEM_INSTRUCTION).
+  responseMode: z.enum(["project-ideas", "roadmap", "roadmap-section"]).optional(),
   history: z
     .array(
       z.object({

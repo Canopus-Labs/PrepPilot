@@ -1,4 +1,5 @@
 const UserSheetProgress = require("../models/UserSheetProgress");
+const { recordActivity } = require("../utils/streakTracker");
 const {
   normalizeProgressItems,
   buildBulkOps,
@@ -91,19 +92,12 @@ exports.saveProgress = async (req, res) => {
 
   try {
     const progress = await UserSheetProgress.findOneAndUpdate(
-      {
-        userId,
-        sheetId: validatedSheetId,
-      },
-      {
-        $set: updateFields,
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      }
+      { userId, sheetId: validatedSheetId },
+      { $set: updateFields },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
+    await recordActivity(userId);
 
     return res.json({
       success: true,
@@ -113,10 +107,18 @@ exports.saveProgress = async (req, res) => {
     // Rare duplicate-key race during concurrent upserts.
     if (err.code === 11000) {
       try {
-        const progress = await UserSheetProgress.findOne({
-          userId,
-          sheetId: validatedSheetId,
-        });
+        const progress = await UserSheetProgress.findOneAndUpdate(
+          {
+            userId,
+            sheetId: validatedSheetId,
+          },
+          {
+            $set: updateFields,
+          },
+          {
+            new: true,
+          }
+        );
 
         return res.json({
           success: true,
