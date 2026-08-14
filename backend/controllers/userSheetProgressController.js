@@ -97,11 +97,14 @@ exports.saveProgress = async (req, res) => {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    await recordActivity(userId);
+    const { newlyUnlocked } = await recordActivity(userId);
 
     return res.json({
       success: true,
       progress,
+      // Streak milestones (e.g. "7-Day Streak") unlocked by this activity,
+      // if any — lets the frontend show a toast.
+      newlyUnlockedAchievements: newlyUnlocked,
     });
   } catch (err) {
     // Rare duplicate-key race during concurrent upserts.
@@ -120,9 +123,12 @@ exports.saveProgress = async (req, res) => {
           }
         );
 
+        const { newlyUnlocked: retryNewlyUnlocked } = await recordActivity(userId);
+
         return res.json({
           success: true,
           progress,
+          newlyUnlockedAchievements: retryNewlyUnlocked,
         });
       } catch (retryErr) {
         return res.status(500).json({

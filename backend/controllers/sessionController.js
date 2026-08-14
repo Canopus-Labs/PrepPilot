@@ -73,15 +73,19 @@ await createdSession[0].save({
   session: mongoSession,
 });
 
+            let newlyUnlocked = [];
             const user = await User.findById(userId).session(mongoSession);
             if (user) {
-                applyStreakForActivity(user);
+                newlyUnlocked = applyStreakForActivity(user);
                 await user.save({ session: mongoSession });
             }
 
             res.status(201).json({
                 success: true,
                 session: createdSession[0],
+                // Streak milestones (e.g. "7-Day Streak") unlocked by this
+                // activity, if any — lets the frontend show a toast.
+                newlyUnlockedAchievements: newlyUnlocked,
             });
         });
     } catch (err) {
