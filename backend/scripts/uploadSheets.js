@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SHEETS_DIR = path.join(__dirname, '../sheets');
-const API_URL = 'http://localhost:8000/api/sheets/upload'; // Use local backend for uploads
+const API_URL = process.env.API_URL || 'http://localhost:8000/api/sheets/upload'; // Use local backend for uploads by default
 
 async function uploadSheet(filename) {
   const filePath = path.join(SHEETS_DIR, filename);

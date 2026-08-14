@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 // Links Schema
 const LinkSchema = new mongoose.Schema({
@@ -44,7 +45,11 @@ const SheetSchema = new mongoose.Schema({
   questions: { type: Number, default: 0 },
   category: { type: String, default: "general" },
   sections: [SectionSchema],
-  uploadedAt: { type: Date, default: Date.now }
+  uploadedAt: { type: Date, default: Date.now },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+  updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: Schema.Types.ObjectId, ref: "User" }
 });
 
 module.exports = mongoose.model('Sheet', SheetSchema);

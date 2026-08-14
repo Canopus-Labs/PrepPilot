@@ -10,7 +10,8 @@ import {
   Code2, Target, Settings, HelpCircle, User as UserIcon, LogOut,
   Menu, X, FileText, Zap, MessageSquare, Lightbulb, ChevronUp,
   ChevronDown, Github, BookOpen, BookMarked, CalendarDays, ScrollText,
-  Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles,
+  Grid3x3, GraduationCap, Calculator, RotateCcw, Sparkles, Map,
+  Brain,
 } from "lucide-react";
 
 /* ── NAV DEFINITION ──────────────────────────────────────────────────────── */
@@ -46,6 +47,7 @@ const NAV_ITEMS = [
     isHeader: true,
     items: [
       { id: "coding-sheets", title: "DSA Master Sheets", path: "/coding-sheets", icon: Code2 },
+      { id: "problem-solver", title: "AI Problem Solver", path: "/problem-solver", icon: BrainCircuit },
     ],
   },
   {
@@ -57,6 +59,7 @@ const NAV_ITEMS = [
       { id: "role-prep",              title: "Role-Specific Prep",    path: "/role-prep",              icon: Briefcase },
       { id: "spaced-repetition",     title: "Spaced Repetition",     path: "/spaced-repetition",      icon: RotateCcw },
       { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
+      { id: "question-bank",          title: "Question Bank",          path: "/question-bank",          icon: Brain },
       { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
     ],
   },
@@ -76,6 +79,7 @@ const NAV_ITEMS = [
     isHeader: true,
     items: [
       { id: "project-ideas", title: "Project Ideas", path: "/project-ideas", icon: Lightbulb },
+      { id: "project-roadmap", title: "Roadmap Assistant", path: "/project-roadmap", icon: Map },
     ],
   },
   {
@@ -94,7 +98,10 @@ const NAV_ITEMS = [
     icon: Bot,
     isHeader: true,
     items: [
-      { id: "ai-assistance", title: "AI Assistance", path: "/ai-assistance", icon: Bot },
+      { id: "ai-assistance",    title: "AI Assistance",       path: "/ai-assistance",    icon: Bot },
+      { id: "behavioral-coach", title: "Behavioral Coach",    path: "/behavioral-coach", icon: MessageSquare },
+      { id: "daily-challenge",  title: "Daily Challenge",     path: "/daily-challenge",  icon: CalendarDays },
+      { id: "analytics",        title: "Analytics",           path: "/analytics",        icon: LayoutDashboard },
     ],
   },
   {
@@ -144,7 +151,7 @@ const Sidebar = () => {
     user?.email?.charAt(0)?.toUpperCase() || "U";
 
   const handleLogout = async () => {
-    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch {}
+    try { await axiosInstance.post(API_PATHS.AUTH.LOGOUT); } catch (err) { /* ignore */ }
     finally {
       localStorage.clear(); sessionStorage.clear();
       clearUser(); navigate("/");

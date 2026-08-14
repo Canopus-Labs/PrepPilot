@@ -5,10 +5,10 @@ const addQuestionToSessionSchema = z.object({
   sessionId: z.string().min(1, "Session ID is required"),
   questions: z.array(
     z.object({
-      question: z.string().min(1, "Question text is required"),
-      answer: z.string().min(1, "Answer text is required"),
+      question: z.string().min(1, "Question text is required").max(5000, "Question must be at most 5000 characters"),
+      answer: z.string().min(1, "Answer text is required").max(10000, "Answer must be at most 10000 characters"),
     })
-  ).min(1, "At least one question is required"),
+  ).min(1, "At least one question is required").max(50, "Maximum 50 questions allowed"),
 });
 
 // Schema for toggling pin (params only)
@@ -18,7 +18,17 @@ const togglePinQuestionSchema = z.object({
 
 // Schema for updating note
 const updateQuestionNoteSchema = z.object({
-  note: z.string(),
+  note: z.string().max(2000, "Note cannot exceed 2000 characters"),
+});
+
+// Schema for query params of getMyQuestions. page/limit are coerced and must
+// be positive integers (limit capped at 100) so NaN never reaches the
+// controller's .skip()/.limit().
+const getMyQuestionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  sessionId: z.string().optional(),
+  pinned: z.enum(["true", "false"]).optional(),
 });
 
 
@@ -64,9 +74,20 @@ const validateUpdateQuestionNote = (req, res, next) => {
   }
 };
 
+// Middleware for getMyQuestions query params
+const validateGetMyQuestions = (req, res, next) => {
+  try {
+    getMyQuestionsQuerySchema.parse(req.query);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateAddQuestionToSession,
   validateTogglePinQuestion,
   validateUpdateQuestionNote,
+  validateGetMyQuestions,
   handleValidationError
 };

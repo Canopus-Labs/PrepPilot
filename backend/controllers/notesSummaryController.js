@@ -1,15 +1,18 @@
 const axios = require("axios");
 const crypto = require("crypto");
+const fs = require("fs");
 const { generateWithFallback } = require("../utils/geminiHelper");
 const {
   inspectPdfBuffer,
   computeReadingTime,
   PdfIntegrityError,
 } = require("../utils/pdfIntegrity");
-const { aiOutputSchema } = require("../Input_validators/ValidateNotesSummary");
+const {
+  aiOutputSchema,
+  saveNotesSummarySchema,
+} = require("../Input_validators/ValidateNotesSummary");
 const { NOTES_MAX_FILE_SIZE } = require("../middlewares/uploadMiddleware");
 const NotesSummary = require("../models/NotesSummary");
-const Joi = require("joi");
 
 const ALLOWED_REMOTE_HOSTS = new Set(["raw.githubusercontent.com"]);
 const MAX_SAVED_SUMMARIES_PER_USER = 30;
@@ -101,6 +104,7 @@ function parseAiJson(raw) {
  * @example
  */
 const summarizeNotes = async (req, res) => {
+  let uploadedFilePath = null;
   try {
     let buffer;
     let fileName;
@@ -108,7 +112,8 @@ const summarizeNotes = async (req, res) => {
     let sourceUrl = null;
 
     if (req.file) {
-      buffer = req.file.buffer;
+      uploadedFilePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+      buffer = await fs.promises.readFile(uploadedFilePath);
       fileName = req.file.originalname;
       sourceType = "upload";
     } else {
@@ -137,6 +142,30 @@ const summarizeNotes = async (req, res) => {
 
     const readingTime = computeReadingTime(pdfStats);
     const contentHash = crypto.createHash("sha256").update(buffer).digest("hex");
+    const fileSize = buffer.length;
+    const base64Data = buffer.toString("base64");
+    buffer = null; // Release Buffer memory
+
+    const existingSummary = await NotesSummary.findOne({ contentHash });
+    if (existingSummary) {
+      return res.status(200).json({
+        success: true,
+        fileName,
+        fileSize,
+        sourceType,
+        sourceUrl,
+        pageCount: pdfStats.numPages,
+        wordCount: pdfStats.wordCount,
+        contentHash,
+        summary: existingSummary.summary,
+        topics: existingSummary.topics,
+        prerequisites: existingSummary.prerequisites,
+        difficulty: existingSummary.difficulty,
+        readingTime,
+        learningOutcomes: existingSummary.learningOutcomes,
+        generatedAt: new Date().toISOString(),
+      });
+    }
 
     const prompt = `You are an expert academic tutor helping a student decide whether a set of study notes is useful before they read it.
 
@@ -166,7 +195,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
         prompt,
         {
           inlineData: {
-            data: buffer.toString("base64"),
+            data: base64Data,
             mimeType: "application/pdf",
           },
         },
@@ -200,7 +229,7 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     res.status(200).json({
       success: true,
       fileName,
-      fileSize: buffer.length,
+      fileSize,
       sourceType,
       sourceUrl,
       pageCount: pdfStats.numPages,
@@ -236,35 +265,15 @@ DO NOT wrap the response in markdown code blocks. Return ONLY the raw JSON objec
     }
 
     res.status(500).json({ success: false, message: "Failed to summarize notes." });
+  } finally {
+    if (uploadedFilePath) {
+      await require('fs').promises.unlink(uploadedFilePath).catch(err => {
+        if (err.code !== 'ENOENT') console.error("Failed to delete temp notes PDF:", err);
+      });
+    }
   }
 };
 
-
-const saveSummarySchema = Joi.object({
-  fileName: Joi.string().trim().max(255).required(),
-
-  sourceType: Joi.string().trim().required(),
-
-  sourceUrl: Joi.string().uri().allow("", null),
-
-  pageCount: Joi.number().integer().min(0).required(),
-
-  wordCount: Joi.number().integer().min(0).required(),
-
-  contentHash: Joi.string().required(),
-
-  summary: Joi.string().required(),
-
-  topics: Joi.array().items(Joi.string()).required(),
-
-  prerequisites: Joi.array().items(Joi.string()).required(),
-
-  difficulty: Joi.string().required(),
-
-  readingTime: Joi.number().min(0).required(),
-
-  learningOutcomes: Joi.array().items(Joi.string()).required(),
-});
 
 /**
  * @route POST /api/notes-summary/save
@@ -273,16 +282,12 @@ const saveSummarySchema = Joi.object({
 const saveSummary = async (req, res) => {
   try {
     const userId = req.user._id;
+    const validation = saveNotesSummarySchema.safeParse(req.body);
 
-    const { error, value } = saveSummarySchema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        message: error.details.map((d) => d.message),
+        message: validation.error.issues.map((issue) => issue.message),
       });
     }
 
@@ -299,7 +304,7 @@ const saveSummary = async (req, res) => {
       difficulty,
       readingTime,
       learningOutcomes,
-    } = value;
+    } = validation.data;
 
     const savedSummary = await NotesSummary.findOneAndUpdate(
       {
@@ -363,7 +368,7 @@ const getMySummaries = async (req, res) => {
   try {
     const summaries = await NotesSummary.find({ user: req.user._id }).sort({
       updatedAt: -1,
-    });
+    }).limit(50);
     res.status(200).json({
       success: true,
       summaries: summaries.map((s) => s.toSafeObject()),

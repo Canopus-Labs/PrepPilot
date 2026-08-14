@@ -11,8 +11,6 @@ import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
 import AuthPage from "./pages/Auth/AuthPage";
 import VerifyEmail from "./pages/Auth/verifyEmail";
 import LandingPage from "./LandingPage";
@@ -25,13 +23,15 @@ import CognitiveGamesPage from "./pages/CognitiveGames/CognitiveGamesPage";
 import { useContext } from "react";
 import { UserContext } from "./context/userContext";
 import MainLayout from "./components/Layouts/MainLayout";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import ResumeTemplates from "./pages/ResumeBuilder/ResumeTemplates";
 import ResumeEditor from "./pages/ResumeBuilder/ResumeEditor";
 import ResumeAnalyzer from "./pages/ResumeBuilder/ResumeAnalyzer";
+import ResumeAnalysisHistory from "./pages/ResumeBuilder/ResumeAnalysisHistory";
 import InterviewExperiences from "./pages/InterviewExperiences/InterviewExperiences";
 import TermsandConditions from "./pages/Terms/TermsandConditions";
 import ProjectIdeas from "./pages/ProjectIdeas/ProjectIdeas";
+import ProjectRoadmap from "./pages/ProjectRoadmap/ProjectRoadmap";
 import RepositoryHive from "./pages/OpenSource/RepositoryHive";
 import OSSBlog from "./pages/OpenSource/OSSBlog";
 import OpenSourceEvents from "./pages/OpenSource/OpenSourceEvents";
@@ -44,8 +44,15 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/Terms/PrivacyPolicy";
 import FreeCourses from "./pages/FreeCourses/FreeCourses";
 import SpacedRepetitionPage from "./pages/SpacedRepetition/SpacedRepetitionPage";
+import BehavioralCoach from "./pages/BehavioralCoach/BehavioralCoach";
+import DailyCodingChallenge from "./pages/DailyCodingChallenge/DailyCodingChallenge";
+import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
+import Analytics from "./pages/Analytics";
+
+import QuestionBank from "./pages/QuestionBank/QuestionBank";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
+  const location = useLocation();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
@@ -54,7 +61,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
   return children;
 };
@@ -116,11 +123,13 @@ const App = () => {
                 <Route
                   path="/interview-prep/:sessionId"
                   element={
-                    <ErrorBoundary>
-                      <PageTransition>
-                        <InterviewPrep />
-                      </PageTransition>
-                    </ErrorBoundary>
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <PageTransition>
+                          <InterviewPrep />
+                        </PageTransition>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
                   }
                 />
                 {import.meta.env.DEV && (
@@ -145,16 +154,30 @@ const App = () => {
                 <Route
                   element={
                     <MainLayout>
-                      <Outlet />
+                      <ErrorBoundary>
+                        <Outlet />
+                      </ErrorBoundary>
                     </MainLayout>
                   }
                 >
                   <Route
+                    path="/behavioral-coach"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <BehavioralCoach />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/dashboard"
                     element={
-                      <PageTransition>
-                        <ProgressTrackerDashboard />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ProgressTrackerDashboard />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   {import.meta.env.DEV && (
@@ -204,9 +227,21 @@ const App = () => {
                   <Route
                     path="/role-prep"
                     element={
-                      <PageTransition>
-                        <Dashboard />
-                      </PageTransition>
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Dashboard />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <Analytics />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
@@ -241,6 +276,26 @@ const App = () => {
                       <PageTransition>
                         <SheetList type="all" />
                       </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/daily-challenge"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <DailyCodingChallenge />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/problem-solver"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ProblemSolver />
+                        </PageTransition>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
@@ -288,6 +343,16 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/resume-analyzer/history"
+                    element={
+                      <ProtectedRoute>
+                        <PageTransition>
+                          <ResumeAnalysisHistory />
+                        </PageTransition>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/interview-experiences"
                     element={
                       <PageTransition>
@@ -296,10 +361,26 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/question-bank"
+                    element={
+                      <PageTransition>
+                        <QuestionBank />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
                     path="/project-ideas"
                     element={
                       <PageTransition>
                         <ProjectIdeas />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/project-roadmap"
+                    element={
+                      <PageTransition>
+                        <ProjectRoadmap />
                       </PageTransition>
                     }
                   />
