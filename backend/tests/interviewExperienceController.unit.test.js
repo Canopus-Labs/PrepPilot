@@ -164,6 +164,7 @@ describe("createInterviewExperience", () => {
 
     expect(InterviewExperience.findOne).toHaveBeenCalledWith({
       idempotencyKey: "submit-key-abc12345",
+      clientKey: "11111111-1111-4111-8111-111111111111",
     });
     expect(InterviewExperience.create).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
@@ -175,6 +176,56 @@ describe("createInterviewExperience", () => {
         }),
       }),
     );
+  });
+
+  it("scopes the dedup to the authenticated user so a re-used key does not leak another author's submission", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(null);
+    InterviewExperience.create = vi.fn().mockResolvedValue(sampleDoc);
+
+    const userA = { _id: "507f1f77bcf86cd799439011" };
+    const req = makeReq(
+      {
+        company: "Google",
+        role: "SDE-2",
+        summary: "Summary",
+        idempotencyKey: "shared-key-abc12345",
+      },
+      {},
+      {},
+      userA,
+    );
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.findOne).toHaveBeenCalledWith({
+      idempotencyKey: "shared-key-abc12345",
+      userId: "507f1f77bcf86cd799439011",
+    });
+    expect(InterviewExperience.create).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  it("isolates anonymous submissions by clientKey so different visitors with the same key both persist", async () => {
+    InterviewExperience.findOne = vi.fn().mockResolvedValue(null);
+    InterviewExperience.create = vi.fn().mockResolvedValue(sampleDoc);
+
+    const req = makeReq({
+      company: "Google",
+      role: "SDE-2",
+      summary: "Summary",
+      clientKey: "22222222-2222-4222-8222-222222222222",
+      idempotencyKey: "shared-key-abc12345",
+    });
+    const res = makeRes();
+
+    await createInterviewExperience(req, res);
+
+    expect(InterviewExperience.findOne).toHaveBeenCalledWith({
+      idempotencyKey: "shared-key-abc12345",
+      clientKey: "22222222-2222-4222-8222-222222222222",
+    });
+    expect(InterviewExperience.create).toHaveBeenCalled();
   });
 });
 

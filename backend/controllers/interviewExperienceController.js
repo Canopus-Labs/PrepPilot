@@ -70,7 +70,17 @@ const createInterviewExperience = async (req, res) => {
       payload.color = `hsl(${(payload.company.charCodeAt(0) * 37) % 360}, 55%, 50%)`;
     }
 
-    const existing = await InterviewExperience.findOne({ idempotencyKey });
+    // Scope idempotency to the author so a re-used key only matches the same
+    // submitter — otherwise a different user/anonymous visitor re-using a key
+    // receives the first author's full submission and their own is lost.
+    const authorFilter = req.user?._id
+      ? { userId: req.user._id }
+      : { clientKey: payload.clientKey };
+
+    const existing = await InterviewExperience.findOne({
+      idempotencyKey,
+      ...authorFilter,
+    });
     if (existing) {
       return res.status(200).json({
         success: true,
@@ -87,11 +97,16 @@ const createInterviewExperience = async (req, res) => {
       experience: toClientShape(experience),
     });
   } catch (error) {
-    // Concurrent retry won the unique index race — return the first write.
+    // Concurrent retry won the unique index race — return the first write by
+    // the same author (scoped, not a global key lookup).
     if (error?.code === 11000 && req.body?.idempotencyKey) {
       try {
+        const raceAuthorFilter = req.user?._id
+          ? { userId: req.user._id }
+          : { clientKey: req.body?.clientKey };
         const existing = await InterviewExperience.findOne({
           idempotencyKey: req.body.idempotencyKey,
+          ...raceAuthorFilter,
         });
         if (existing) {
           return res.status(200).json({
