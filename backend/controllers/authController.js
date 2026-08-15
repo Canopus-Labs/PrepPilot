@@ -378,14 +378,15 @@ const resendVerificationEmail = async (req, res) => {
 
         const user = await User.findOne({ email: email.trim().toLowerCase() });
 
-        // Return success even if user not found — avoids exposing which emails are registered
-        if (!user) {
-            return res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
-        }
+        // Generic message returned for every non-validation outcome so that an
+        // attacker cannot infer whether an email is registered or already
+        // verified (prevents email enumeration). A link is only actually sent
+        // when the account exists and is still unverified.
+        const genericMessage =
+            "If this email is registered and unverified, a verification link has been sent.";
 
-        // If already verified, no need to resend
-        if (user.isEmailVerified) {
-            return res.status(400).json({ success: false, message: "This email is already verified. Please log in." });
+        if (!user || user.isEmailVerified) {
+            return res.json({ success: true, message: genericMessage });
         }
 
         // Generate a fresh token and reset expiry to 24 hours from now
@@ -397,7 +398,7 @@ const resendVerificationEmail = async (req, res) => {
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
         await sendVerificationEmail(user.email, verificationUrl);
 
-        res.json({ success: true, message: "If this email is registered, a verification link has been sent." });
+        res.json({ success: true, message: genericMessage });
     } catch (error) {
         console.error("Resend verification error:", error);
         res.status(500).json({ success: false, message: "Internal server error occurred" });
