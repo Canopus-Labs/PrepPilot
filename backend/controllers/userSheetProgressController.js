@@ -61,10 +61,19 @@ exports.saveProgress = async (req, res) => {
     });
   }
 
-  if (completedTopics !== undefined && !Array.isArray(completedTopics)) {
+  if (
+    completedTopics !== undefined &&
+    (typeof completedTopics !== "object" ||
+      completedTopics === null ||
+      Array.isArray(completedTopics) ||
+      Object.values(completedTopics).some(
+        (value) => typeof value !== "boolean"
+      ))
+  ) {
     return res.status(400).json({
       success: false,
-      error: "Invalid completedTopics field, must be an array",
+      error:
+        "Invalid completedTopics field, must be an object of boolean flags",
     });
   }
 
