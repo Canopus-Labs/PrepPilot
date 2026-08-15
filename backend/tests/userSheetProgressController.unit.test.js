@@ -4,7 +4,7 @@ import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vite
 // ---------------------------------------------------------------------------
 // userSheetProgressController.js is CommonJS and loads its deps via
 // require(), which vitest's vi.mock cannot intercept. We shim Node's module
-// loader so the real UserSheetProgress model is never touched.
+// loader so the real UserSheetProgress model and streak tracker are never touched.
 //
 // Covers issue #1449: saveProgress must reject out-of-range / malformed
 // field values (percentage outside [0,100], non-boolean followed,
@@ -290,8 +290,8 @@ describe("getProgress", () => {
     expect(res.body).toEqual({ success: true, progress: fakeProgress });
   });
 
-  it("rejects an invalid sheetId with 400", async () => {
-    const req = { user: { _id: "user-4" }, params: { sheetId: "" } };
+  it("returns 400 for an invalid sheetId", async () => {
+    const req = { user: { _id: "user-3" }, params: { sheetId: "   " } };
     const res = mockRes();
 
     await getProgress(req, res);
@@ -301,9 +301,9 @@ describe("getProgress", () => {
   });
 
   it("returns 500 when findOne throws", async () => {
-    modelMock.findOne.mockRejectedValue(new Error("timeout"));
+    modelMock.findOne.mockRejectedValue(new Error("db error"));
 
-    const req = { user: { _id: "user-4" }, params: { sheetId: "dp" } };
+    const req = { user: { _id: "user-3" }, params: { sheetId: "graphs" } };
     const res = mockRes();
 
     await getProgress(req, res);
