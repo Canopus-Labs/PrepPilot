@@ -40,13 +40,25 @@ services:
     ports:
       - "5173:5173"
     environment:
-      # Use localhost:8000 so the browser can make requests to the exposed backend port
-      - VITE_BACKEND_URL=http://localhost:8000
+      # Use localhost so the browser routes requests through nginx on port 80
+      - VITE_BACKEND_URL=http://localhost
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
       - backend
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: preppilot-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
     restart: unless-stopped
 
 volumes:
