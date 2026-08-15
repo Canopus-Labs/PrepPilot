@@ -96,11 +96,23 @@ const interviewExperienceSchema = new mongoose.Schema(
 );
 
 interviewExperienceSchema.index(
-  { idempotencyKey: 1 },
+  { idempotencyKey: 1, userId: 1 },
   {
     unique: true,
     partialFilterExpression: {
       idempotencyKey: { $type: "string", $gt: "" },
+      userId: { $type: "objectId" },
+    },
+  },
+);
+
+interviewExperienceSchema.index(
+  { idempotencyKey: 1, clientKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      idempotencyKey: { $type: "string", $gt: "" },
+      clientKey: { $type: "string", $gt: "" },
     },
   },
 );
