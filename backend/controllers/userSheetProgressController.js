@@ -1,4 +1,5 @@
 const UserSheetProgress = require("../models/UserSheetProgress");
+const { recordActivity } = require("../utils/streakTracker");
 const {
   normalizeProgressItems,
   buildBulkOps,
@@ -91,19 +92,12 @@ exports.saveProgress = async (req, res) => {
 
   try {
     const progress = await UserSheetProgress.findOneAndUpdate(
-      {
-        userId,
-        sheetId: validatedSheetId,
-      },
-      {
-        $set: updateFields,
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      }
+      { userId, sheetId: validatedSheetId },
+      { $set: updateFields },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
+    await recordActivity(userId);
 
     return res.json({
       success: true,

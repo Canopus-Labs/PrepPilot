@@ -76,6 +76,20 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
+    const rawRole = req.query.role || latestSession?.role || "software engineer";
+    const rawCountry = req.query.country || ADZUNA_COUNTRY;
+
+    // Sanitize and bound client-controlled inputs before forming the cache key
+    const role = normalizeRole(rawRole) || "software engineer";
+    const country = normalizeCountry(rawCountry);
+
+    // Validate country against supported Adzuna codes
+    if (!ALLOWED_ADZUNA_COUNTRIES.includes(country)) {
+      return res.status(400).json({
+        message: `Invalid or unsupported country parameter '${rawCountry}'. Supported country codes are: ${ALLOWED_ADZUNA_COUNTRIES.join(", ")}`,
+      });
+    }
+
     const rawRole    = req.query.role || latestSession?.role || "software engineer";
     const rawCountry = req.query.country || ADZUNA_COUNTRY;
 

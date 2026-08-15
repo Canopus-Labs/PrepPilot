@@ -1,11 +1,12 @@
 const { z } = require("zod");
 const { handleValidationError } = require("./ValidateQuestions");
-const mongoose = require("mongoose");
 
-// ── Schemas ───────────────────────────────────────────────────────────────────
+// ==========================================
+// Schemas
+// ==========================================
 
 const compileResumeSchema = z.object({
-  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
+  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required").max(50000, "LaTeX code cannot exceed 50000 characters"),
 });
 
 const analyzeResumeSchema = z.object({
@@ -18,8 +19,30 @@ const analyzeResumeSchema = z.object({
 });
 
 const saveResumeSchema = z.object({
-  title: z.string({ required_error: "Title is required" }).min(1, "Title is required").max(200, "Title cannot exceed 200 characters"),
-  latexCode: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
+  title: z.string({
+    required_error: "Title is required",
+    invalid_type_error: "Title must be a string",
+  }).min(1, "Title is required"),
+  latexCode: z.string({
+    required_error: "LaTeX code is required",
+    invalid_type_error: "LaTeX code must be a string",
+  }).min(1, "LaTeX code is required"),
+  resumeId: z.string().optional(),
+  title: z
+    .string({
+      required_error: "Title is required",
+      invalid_type_error: "Title must be a string",
+    })
+    .min(1, "Title is required"),
+  latexCode: z
+    .string({
+      required_error: "LaTeX code is required",
+      invalid_type_error: "LaTeX code must be a string",
+    })
+    .min(1, "LaTeX code is required"),
+  resumeId: z.string().optional(),
+  title: z.string().min(1, "Title is required"),
+  latexCode: z.string().min(1, "LaTeX code is required"),
   resumeId: z
     .string()
     .optional()
@@ -41,9 +64,39 @@ const validateCompileResume = (req, res, next) => {
   next();
 };
 
+// Middleware for compileResume
+const validateCompileResume = validate(compileResumeSchema);
+
+// Middleware for analyzeResume (includes file check)
+// Middleware for analyzeResume (validates schema + checks file upload)
 const validateAnalyzeResume = (req, res, next) => {
   const result = analyzeResumeSchema.safeParse(req.body || {});
-  if (!result.success) return handleValidationError(res, result.error);
+  if (!result.success) {
+    return handleValidationError(res, result.error);
+  }
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ success: false, message: "No resume file uploaded" });
+  }
+// Middleware for analyzeResume
+const validateAnalyzeResume = async (req, res, next) => {
+  try {
+    analyzeResumeSchema.parse(req.body);
+    // also ensure file is uploaded
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No resume file uploaded" });
+    }
+    next();
+  } catch (error) {
+    if (req.file && req.file.path) {
+      const safePath = require('path').join(require('os').tmpdir(), require('path').basename(req.file.path));
+      await require('fs').promises.unlink(safePath).catch((err) => {
+        if (err.code !== 'ENOENT') console.error('Cleanup error:', err);
+      });
+    }
+    return handleValidationError(res, error);
+  }
   if (!req.file) {
     return res.status(400).json({ success: false, message: "No resume file uploaded" });
   }
