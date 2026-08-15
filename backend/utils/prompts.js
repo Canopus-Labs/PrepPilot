@@ -1,37 +1,23 @@
-const ALLOWED_ROLES = new Set([
-  'frontend developer',
-  'backend developer',
-  'full stack developer',
-  'react developer',
-  'node.js developer',
-  'python developer',
-  'java developer',
-  'devops engineer',
-  'cloud engineer',
-  'data scientist',
-  'machine learning engineer',
-  'systems engineer',
-  'software engineer',
-  'qa engineer',
-  'database administrator',
-  'web developer',
-  'mobile developer',
-  'ios developer',
-  'android developer',
-  'product manager',
-  'tech lead',
-  'solution architect',
-  'security engineer'
-]);
+const MAX_ROLE_LENGTH = 100;
 
 const sanitizeRole = (role) => {
   if (!role || typeof role !== 'string') {
     throw new Error('Role must be a non-empty string');
   }
-  const trimmedRole = role.trim().toLowerCase();
-  if (!ALLOWED_ROLES.has(trimmedRole)) {
-    throw new Error(`Invalid role. Allowed roles: ${Array.from(ALLOWED_ROLES).join(', ')}`);
+  const trimmedRole = role
+    .trim()
+    .toLowerCase()
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/\s+/g, ' ');
+
+  if (trimmedRole.length === 0) {
+    throw new Error('Role must be a non-empty string');
   }
+
+  if (trimmedRole.length > MAX_ROLE_LENGTH) {
+    throw new Error(`Role must be at most ${MAX_ROLE_LENGTH} characters`);
+  }
+
   return trimmedRole;
 };
 
@@ -111,4 +97,4 @@ Important: Do NOT add any extra text outside the JSON format. Only return valid 
 `;
 };
 
-module.exports = { questionAnswerPrompt, conceptExplainPrompt, interviewTipsPrompt, sanitizeRole, ALLOWED_ROLES };
+module.exports = { questionAnswerPrompt, conceptExplainPrompt, interviewTipsPrompt, sanitizeRole };
