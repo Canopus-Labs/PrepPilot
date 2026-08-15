@@ -75,17 +75,21 @@ exports.getJobs = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("role");
 
-    const role = req.query.role || latestSession?.role || "software engineer";
-    const country = (req.query.country || ADZUNA_COUNTRY).toLowerCase().trim();
+    const rawRole = req.query.role || latestSession?.role || "software engineer";
+    const rawCountry = req.query.country || ADZUNA_COUNTRY;
+
+    // Sanitize and bound client-controlled inputs before forming the cache key
+    const role = normalizeRole(rawRole) || "software engineer";
+    const country = normalizeCountry(rawCountry);
 
     // Validate country against supported Adzuna codes
     if (!ALLOWED_ADZUNA_COUNTRIES.includes(country)) {
       return res.status(400).json({
-        message: `Invalid or unsupported country parameter '${country}'. Supported country codes are: ${ALLOWED_ADZUNA_COUNTRIES.join(", ")}`,
+        message: `Invalid or unsupported country parameter '${rawCountry}'. Supported country codes are: ${ALLOWED_ADZUNA_COUNTRIES.join(", ")}`,
       });
     }
 
-    const cacheKey = `${role.toLowerCase()}|${country}`;
+    const cacheKey = `${role}|${country}`;
 
     const cached = await JobCache.findOne({ cacheKey });
     if (cached && Date.now() - cached.fetchedAt.getTime() < CACHE_TTL_MS) {

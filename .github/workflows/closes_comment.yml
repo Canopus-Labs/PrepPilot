@@ -1,0 +1,37 @@
+name: Issue Closed Comment
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+
+jobs:
+  comment-on-close:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Post Closing Comment
+        uses: actions/github-script@v7
+        
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          script: |
+            const issue = context.payload.issue;
+            const creator = issue.user.login;
+            const repoName = context.repo.repo;
+            
+            const commentBody = `### Issue Closed\n\n` +
+                                `Thank you, @${creator}, for taking the time to report or engage with this issue in **${repoName}**! 🛡️\n\n` +
+                                `Your input helps us manage our project roadmap effectively.\n\n` +
+                                `If you discover new edge cases or have ideas for enhancements, feel free to open a new issue. Happy coding! 🌟`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: commentBody
+            });
+            

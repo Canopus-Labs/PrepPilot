@@ -6,7 +6,7 @@ const saveProgressSchema = z.object({
   sheetId: z.string().min(1, "Sheet ID is required"),
   followed: z.boolean().optional(),
   completedTopics: z.record(z.string(), z.boolean()).optional(),
-  percentage: z.number().int().min(0, "Percentage must be at least 0").max(100, "Percentage cannot exceed 100").optional(),
+  percentage: z.coerce.number().int().min(0, "Percentage must be at least 0").max(100, "Percentage cannot exceed 100").refine(v => Number.isFinite(v), { message: "Percentage must be a finite number" }).optional(),
 });
 
 // Schema for getting progress by sheetId (params)

@@ -6,7 +6,7 @@ const { handleValidationError } = require("./ValidateQuestions");
 // ==========================================
 
 const compileResumeSchema = z.object({
-  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required"),
+  code: z.string({ required_error: "LaTeX code is required" }).min(1, "LaTeX code is required").max(50000, "LaTeX code cannot exceed 50000 characters"),
 });
 
 const analyzeResumeSchema = z.object({

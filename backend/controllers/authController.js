@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
 const { validatePassword } = require('../utils/passwordPolicy');
+const { isValidCountry } = require("../utils/nameCountry");
+const { resetStreakIfMissed } = require("../utils/streakTracker");
 
 // Models for cascade deletion on account delete
 const Session = require("../models/Session");
@@ -413,17 +415,8 @@ const getUserProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: "Requested user profile not found" });
         }
 
-        // Reset streak to 0 if one or more calendar days were missed
-        if (user.lastPracticeDate && user.currentStreak > 0) {
-            const now = new Date();
-            const d1 = new Date(user.lastPracticeDate);
-            const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
-            const utc2 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-            if (diffDays > 1) {
-                user.currentStreak = 0;
-                await user.save();
-            }
+        if (resetStreakIfMissed(user)) {
+            await user.save();
         }
 
         res.json(user);
@@ -432,6 +425,7 @@ const getUserProfile = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error occurred" });
     }
 };
+
 
 /**
  * Update the user profile settings.
@@ -459,13 +453,24 @@ const updateUserProfile = async (req, res) => {
         }
 
         // Update fields if they are sent in request
+       // Update fields if they are sent in request
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (bio !== undefined) user.bio = bio;
-        if (country !== undefined) user.country = country;
+
+        if (country !== undefined) {
+            if (country.trim() !== "" && !isValidCountry(country)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please enter a valid country name.",
+                });
+            }
+
+            user.country = country.trim();
+        }
+
         if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
         if (visibility !== undefined) user.visibility = visibility;
-
         // Sync name based on firstName and lastName
         if (firstName !== undefined || lastName !== undefined) {
             const fName = firstName !== undefined ? firstName : user.firstName;
