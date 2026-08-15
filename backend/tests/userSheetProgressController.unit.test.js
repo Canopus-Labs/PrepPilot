@@ -56,6 +56,13 @@ beforeAll(async () => {
     bulkWrite: modelMock.bulkWrite,
   });
 
+  // recordActivity (streakTracker) performs a real Mongoose query that
+  // throws without a DB connection, so stub it as a no-op so saveProgress
+  // reaches the success branch.
+  testDoubles.set("../utils/streakTracker", {
+    recordActivity: vi.fn().mockResolvedValue(null),
+  });
+
   const mod = await import("../controllers/userSheetProgressController.js");
   saveProgress = mod.saveProgress;
   getAllProgress = mod.getAllProgress;
