@@ -3,20 +3,31 @@ const UserSheetProgress = require('../models/UserSheetProgress');
 /**
  * Get all sheet progress entries for the authenticated user.
  * @route GET /api/user/sheet-progress
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When retrieval fails.
- * @example
- * GET /api/user/sheet-progress
- * Authorization: Bearer eyJhb...
- * @example
- * 200 {"success": true, "progressList": [{"sheetId":"...","percentage":80}]}
  */
 exports.getAllProgress = async (req, res) => {
   const userId = req.user._id;
   try {
-    const progressList = await UserSheetProgress.find({ userId });
+    const mongoose = require('mongoose');
+    const progressList = await UserSheetProgress.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: "$sheetId",
+          percentage: { $avg: "$percentage" },
+          doc: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $project: {
+          _id: "$doc._id",
+          sheetId: "$_id",
+          userId: "$doc.userId",
+          followed: "$doc.followed",
+          completedTopics: "$doc.completedTopics",
+          percentage: 1
+        }
+      }
+    ]);
     res.json({ success: true, progressList });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

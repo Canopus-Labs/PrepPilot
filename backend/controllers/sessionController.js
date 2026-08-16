@@ -75,22 +75,28 @@ exports.createSession = async (req, res) => {
 /**
  * Get all sessions for the authenticated user.
  * @route GET /api/sessions/my-sessions
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When fetch fails.
- * @example
- * GET /api/sessions/my-sessions
- * Authorization: Bearer eyJhb...
- * @example
- * 200 [{"_id":"...","role":"...","questions":[...]}]
  */
 exports.getMySessions = async (req, res) => {
     try {
       const userId = req.user._id || req.user.id;
-      const session = await Session.find({ user: userId })
-        .sort({ createdAt: -1 })
-        .populate("questions");
+      const mongoose = require("mongoose");
+      const session = await Session.aggregate([
+        { $match: { user: new mongoose.Types.ObjectId(userId) } },
+        { $sort: { createdAt: -1 } },
+        {
+          $lookup: {
+            from: "questions",
+            localField: "questions",
+            foreignField: "_id",
+            as: "questions"
+          }
+        },
+        {
+          $project: {
+            __v: 0
+          }
+        }
+      ]);
       res.status(200).json(session);
     } catch (error) {
       console.error("Error in getMySessions:", error);
@@ -101,15 +107,6 @@ exports.getMySessions = async (req, res) => {
 /**
  * Get a specific session by ID with populated questions.
  * @route GET /api/sessions/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- * @throws {Error} When session is not found.
- * @example
- * GET /api/sessions/6426c5a5...
- * Authorization: Bearer eyJhb...
- * @example
- * 200 {"success": true, "session": {"_id":"...","questions":[...]}}
  */
 exports.getSessionById = async (req, res) => {
     try {
@@ -118,6 +115,7 @@ exports.getSessionById = async (req, res) => {
     path: "questions",
     options: { sort: { isPinned: -1, createdAt: 1 } },
   })
+  .lean()
   .exec();
     if(!session){
         return res
