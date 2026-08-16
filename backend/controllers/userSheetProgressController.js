@@ -100,19 +100,26 @@ exports.saveProgress = async (req, res) => {
   if (percentage !== undefined) updateFields.percentage = percentage;
 
   try {
-    const progress = await UserSheetProgress.findOneAndUpdate(
-      { userId, sheetId: validatedSheetId },
-      { $set: updateFields },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+  const progress = await UserSheetProgress.findOneAndUpdate(
+    { userId, sheetId: validatedSheetId },
+    { $set: updateFields },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
 
-    await recordActivity(userId);
+  let newlyUnlocked = [];
+  try {
+    const streakResult = await recordActivity(userId);
+    newlyUnlocked = streakResult?.newlyUnlocked || [];
+  } catch (streakErr) {
+    console.error("Streak tracking failed:", streakErr);
+  }
 
-    return res.json({
-      success: true,
-      progress,
-    });
-  } catch (err) {
+  return res.json({
+    success: true,
+    progress,
+    newlyUnlockedAchievements: newlyUnlocked,
+  });
+ } catch (err) {
     // Rare duplicate-key race during concurrent upserts.
     if (err.code === 11000) {
       try {
@@ -129,9 +136,12 @@ exports.saveProgress = async (req, res) => {
           }
         );
 
+        const { newlyUnlocked: retryNewlyUnlocked } = await recordActivity(userId);
+
         return res.json({
           success: true,
           progress,
+          newlyUnlockedAchievements: retryNewlyUnlocked,
         });
       } catch (retryErr) {
         return res.status(500).json({

@@ -14,8 +14,10 @@ const getUTCDayDifference = (date1, date2) => {
   return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
 };
 
+// Now returns the list of badges newly unlocked by THIS call, instead of nothing.
 const applyStreakForActivity = (user) => {
   const now = new Date();
+  const newlyUnlocked = [];
 
   if (!user.lastPracticeDate) {
     user.currentStreak = 1;
@@ -40,10 +42,11 @@ const applyStreakForActivity = (user) => {
       !user.unlockedAchievements.includes(milestone.badge)
     ) {
       user.unlockedAchievements.push(milestone.badge);
+      newlyUnlocked.push(milestone.badge);
     }
   }
 
-  return user;
+  return newlyUnlocked;
 };
 
 const resetStreakIfMissed = (user) => {
@@ -57,6 +60,8 @@ const resetStreakIfMissed = (user) => {
   return false;
 };
 
+// BREAKING CHANGE: now resolves to { user, newlyUnlockedMilestones } instead of
+// just `user`. Every caller of recordActivity() needs a small update — see below.
 const recordActivity = async (userId, mongooseSession = null) => {
   const query = User.findById(userId);
   if (mongooseSession) query.session(mongooseSession);
@@ -65,12 +70,12 @@ const recordActivity = async (userId, mongooseSession = null) => {
 
   if (user.lastPracticeDate) {
     const diff = getUTCDayDifference(user.lastPracticeDate, new Date());
-    if (diff === 0) return user;
+    if (diff === 0) return { user, newlyUnlockedMilestones: [] };
   }
 
-  applyStreakForActivity(user);
+  const newlyUnlockedMilestones = applyStreakForActivity(user);
   await user.save(mongooseSession ? { session: mongooseSession } : undefined);
-  return user;
+  return { user, newlyUnlockedMilestones };
 };
 
 module.exports = {

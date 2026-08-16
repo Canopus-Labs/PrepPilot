@@ -198,18 +198,15 @@ const reviewFlashcard = async (req, res) => {
 
     await flashcard.save();
 
-    await recordActivity(userId);
+    const { newlyUnlocked } = await recordActivity(userId);
 
     return res.status(200).json({
       success: true,
       message: "Flashcard review recorded successfully",
       flashcard,
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Flashcard review recorded successfully",
-      flashcard,
+      // Streak milestones (e.g. "7-Day Streak") unlocked by this activity,
+      // if any — lets the frontend show a toast.
+      newlyUnlockedAchievements: newlyUnlocked,
     });
   } catch (error) {
     return res.status(500).json({
