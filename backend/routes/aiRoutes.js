@@ -10,19 +10,12 @@ const NodeCache = require('node-cache');
 // Cache to track off-topic attempts per IP (TTL: 1 hour)
 const offTopicCache = new NodeCache({ stdTTL: 3600 });
 
+const AiJob = require('../models/AiJob');
+const { aiQueue } = require('../queues/aiQueue');
+
 /**
  * Shared handler for text generation using Gemini.
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<import('express').Response>}
- * @throws {Error} When prompt validation fails or AI generation fails.
- * @example
- * POST /api/generate
- * {
- *   "prompt": "Explain event delegation in JavaScript."
- * }
- * @example
- * 200 {"text": "...", "model": "models/gemini-2.5-flash"}
+ * @route POST /api/generate
  */
 async function generateHandler(req, res) {
   const { prompt, history = [], systemInstruction } = req.body || {};
@@ -51,83 +44,30 @@ async function generateHandler(req, res) {
       model: "local-classifier" 
     });
   }
-  if (!process.env.GEMINI_API_KEY) {
-    return res
-      .status(500)
-      .json({ error: "GEMINI_API_KEY not configured on server" });
-  }
+
   try {
-    const start = Date.now();
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "models/gemini-2.5-flash",
-      "models/gemini-flash-latest",
-      "models/gemini-2.0-flash",
-    ].filter(Boolean);
+    const jobDoc = await AiJob.create({
+      type: 'chat_generation',
+      userId: req.user ? req.user._id : null
+    });
 
-    let lastErr = null;
-    let result = null;
-    let usedModel = null;
-    for (const m of candidateModels) {
-      try {
-        const model = genAI.getGenerativeModel({ 
-          model: m,
-          systemInstruction: systemInstruction || `You are PrepPilot AI Mentor.
-1. Allow friendly greetings and casual onboarding conversation.
-2. Focus primarily on PrepPilot-related domains: interview preparation, coding interviews, aptitude, resumes, career guidance, mock interviews, and platform usage.
-3. Politely redirect unrelated conversations.
-4. End your responses with a helpful, contextual follow-up question whenever appropriate (e.g., asking if they want an example, feedback on a resume section, or practice questions).`
-        });
-        
-        // Format history for Gemini API
-        let formattedHistory = history.map(msg => ({
-          role: msg.role === "model" ? "model" : "user",
-          parts: [{ text: msg.text }]
-        }));
+    await aiQueue.add('generate', {
+      jobId: jobDoc._id,
+      prompt,
+      history,
+      systemInstruction,
+      isJson: false
+    });
 
-        // Gemini requires the first message in history to be from the user
-        if (formattedHistory.length > 0 && formattedHistory[0].role !== "user") {
-          formattedHistory.unshift({ role: "user", parts: [{ text: "Hi" }] });
-        }
-
-        const chat = model.startChat({
-          history: formattedHistory
-        });
-
-        result = await chat.sendMessage(prompt);
-        usedModel = m;
-        break;
-      } catch (e) {
-        lastErr = e;
-        continue;
-      }
-    }
-    if (!result) throw lastErr || new Error("All Gemini models failed");
-
-    const rawText = await result.response.text();
-    console.log("Incoming Prompt:", prompt);
-    console.log("Model Used:", usedModel);
-    console.log("Raw Gemini Response:", rawText);
-
-    let cleanedText = rawText
-      .replace(/^[\s`]*json\s*/i, "")
-      .replace(/^\s*```/i, "")
-      .replace(/```$/i, "")
-      .trim();
-
-    console.log(
-      "[AI] promptLen=%d model=%s ms=%d",
-      prompt.length,
-      usedModel,
-      Date.now() - start,
-    );
-    return res.json({ text: cleanedText, model: usedModel });
+    res.status(202).json({ 
+      message: "AI Generation job enqueued", 
+      jobId: jobDoc._id 
+    });
   } catch (error) {
     console.error("[AI] Generation failed:", error.message);
     return res
       .status(500)
-      .json({ error: "Failed to generate content", detail: error.message });
+      .json({ error: "Failed to enqueue content generation", detail: error.message });
   }
 }
 
@@ -135,6 +75,10 @@ async function generateHandler(req, res) {
 router.post('/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
 // Alias under /ai for consistency if needed later (/api/ai/generate)
 router.post('/ai/generate', aiLimiter, validateAiPrompt, sanitizeAiPrompt, generateHandler);
+
+const { getJobStatus, generateInterviewQuestions, generateConceptExplanation, generateInterviewTips } = require('../controllers/aiController');
+router.get('/job/:jobId', getJobStatus);
+
 
 // List available models
 /**
