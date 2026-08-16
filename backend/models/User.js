@@ -51,6 +51,13 @@ const UserSchema = new mongoose.Schema(
         
         unlockedAchievements: { type: [String], default: [] },
 
+        // Roles
+        roles: { 
+            type: [String], 
+            enum: ['user', 'moderator', 'admin'], 
+            default: ['user'] 
+        },
+
         //Email Verification
         isEmailVerified: { type: Boolean, default: false },
         emailVerificationToken: { type: String, default: null },
