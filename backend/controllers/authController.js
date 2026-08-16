@@ -117,9 +117,6 @@ const registerUser = async (req, res) => {
             });
         }
 
-        // Hash raw password with bcrypt before DB creation (#757)
-        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
-
         // Split name into first and last names for defaults
         const nameParts = cleanName.split(/\s+/);
         const firstName = nameParts[0] || "";
@@ -135,7 +132,7 @@ const registerUser = async (req, res) => {
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
-            password: hashedPassword,
+            password,
             profileImageUrl,
             firstName,
             lastName,
@@ -563,8 +560,8 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect original password" });
         }
 
-        // Hash new password before saving (#757)
-        user.password = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+        // Set new password (User.js pre save hook hashes it automatically)
+        user.password = newPassword;
 
         // Fix #759: Revoke active refresh tokens in database & increment tokenVersion for access tokens
         user.refreshTokenHash = null;
