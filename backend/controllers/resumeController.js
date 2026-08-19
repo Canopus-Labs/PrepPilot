@@ -2,6 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const { generateWithFallback } = require('../utils/geminiHelper');
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 /**
  * Compile LaTeX resume code to a PDF document.
@@ -312,4 +313,45 @@ const getResumeAnalysisHistory = async (req, res) => {
     }
 };
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory };
+const validateFile = (file) => {
+    if (!file) return false;
+
+    if (file.type !== "application/pdf") {
+        setError("Only PDF files are allowed.");
+        return false;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+        setError("File size must be less than 5MB.");
+        return false;
+    }
+
+    setError("");
+    return true;
+};
+const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!validateFile(file)) {
+        e.target.value = "";
+        setFile(null);
+        return;
+    }
+
+    setFile(file);
+};
+const handleDrop = (e) => {
+    e.preventDefault();
+
+    const file = e.dataTransfer.files[0];
+
+    if (!validateFile(file)) {
+        setFile(null);
+        return;
+    }
+
+    setFile(file);
+};
+
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory ,validateFile,handleFileChange,handleDrop};
