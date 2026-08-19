@@ -26,6 +26,32 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// ── CSRF Token Manager ───────────────────────────────────────────────────
+let cachedCsrfToken = null;
+
+async function getCsrfToken() {
+    if (cachedCsrfToken) {
+        return cachedCsrfToken;
+    }
+
+    const { data } = await axios.get(
+        `${BASE_URL}/api/auth/csrf-token`,
+        {
+            withCredentials: true,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        }
+    );
+
+    if (!data?.csrfToken) {
+        throw new Error("CSRF token was not returned by the server");
+    }
+
+    cachedCsrfToken = data.csrfToken;
+    return cachedCsrfToken;
+}
+
 // ── Token refresh state ───────────────────────────────────────────────────
 let isRefreshing = false;
 let refreshSubscribers = [];   // subscribers waiting for the new token
@@ -83,13 +109,18 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // The refresh token is in an httpOnly cookie — just POST
+                const csrfToken = await getCsrfToken();
+
+                // The refresh token is in an httpOnly cookie — send X-CSRF-Token header
                 const { data } = await axios.post(
                     `${BASE_URL}/api/auth/refresh`,
                     {},
                     {
                         withCredentials: true,
-                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-Token": csrfToken,
+                        },
                     }
                 );
 
@@ -113,6 +144,7 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
+                cachedCsrfToken = null;
                 // Refresh failed — reject all queued requests before clearing
                 refreshSubscribers.forEach((subscriber) => {
                     if (subscriber.reject) {

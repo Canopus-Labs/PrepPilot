@@ -3,7 +3,7 @@ const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserPr
 const { protect } = require("../middlewares/authMiddleware");
 const { upload, validateImageUpload } = require("../middlewares/uploadMiddleware");
 const { validateUserLogin, validateUserSignup, validateRefreshToken, validateResendEmail } = require("../Input_validators/ValidateAuth");
-const csrfHeaderCheck = require("../middlewares/csrfHeaderCheck");
+const { generateCsrfToken, csrfProtection } = require("../middlewares/csrf");
 const router = express.Router();
 
 const {
@@ -13,23 +13,18 @@ const {
   sensitiveAuthLimiter,
 } = require("../middlewares/rateLimiter");
 
-// CSRF protection is applied globally in server.js via lusca.csrf(), with a
-// blocklist exempting every JWT-bearer-only route. Only /refresh and /logout
-// (below) are actually enforced at runtime, since they're the two routes
-// that authenticate off the ambient refreshToken cookie.
-
 // Auth Routes
 router.post("/register", authLimiter, validateUserSignup, registerUser);
 router.post("/login", loginLimiter, validateUserLogin, loginUser);
 
-// Frontend should GET this once on app load to prime the XSRF-TOKEN cookie
-// before it ever needs to call /refresh or /logout.
+// Frontend GETs this endpoint to receive CSRF token and set the csrfToken cookie
 router.get("/csrf-token", generalLimiter, (req, res) => {
-  res.json({ success: true });
+  const csrfToken = generateCsrfToken(req, res);
+  res.json({ success: true, csrfToken });
 });
 
-router.post("/refresh", authLimiter, csrfHeaderCheck, validateRefreshToken, refreshToken);
-router.post("/logout", authLimiter, csrfHeaderCheck, validateRefreshToken, logoutUser);
+router.post("/refresh", authLimiter, csrfProtection, validateRefreshToken, refreshToken);
+router.post("/logout", authLimiter, csrfProtection, validateRefreshToken, logoutUser);
 router.get("/profile", protect, generalLimiter, getUserProfile);
 router.put("/profile", protect, generalLimiter, updateUserProfile);
 router.put("/change-password", protect, sensitiveAuthLimiter, changePassword);
