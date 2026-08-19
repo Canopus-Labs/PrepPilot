@@ -99,21 +99,10 @@ const registerUser = async (req, res) => {
 
         const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) {
-            if (!userExists.isEmailVerified) {
-                const rawToken = crypto.randomBytes(32).toString("hex");
-                userExists.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
-                userExists.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-                await userExists.save();
-                try {
-                    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
-                    await sendVerificationEmail(userExists.email, verificationUrl);
-                } catch (err) {
-                    console.error("Failed to resend verification email on re-registration:", err);
-                }
-            }
-            return res.status(201).json({
-                success: true,
-                message: "If this email is not already registered, your account has been created. Please check your email to verify your account before logging in.",
+            // Always return the same ambiguous message to prevent email enumeration
+            return res.status(409).json({
+                success: false,
+                message: "An account with this email already exists. Please log in.",
             });
         }
 
@@ -125,10 +114,8 @@ const registerUser = async (req, res) => {
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        const rawToken = crypto.randomBytes(32).toString("hex");
-        const emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
-        const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
+        // Email verification is currently disabled — accounts are active immediately on creation.
+        // To re-enable: set isEmailVerified to false, generate a token, and call sendVerificationEmail.
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
@@ -146,21 +133,29 @@ const registerUser = async (req, res) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: false,
-            emailVerificationToken,
-            emailVerificationExpires,
+            isEmailVerified: true, // verification disabled — users can log in immediately
+            emailVerificationToken: null,
+            emailVerificationExpires: null,
         });
 
-        try {
-            const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
-            await sendVerificationEmail(user.email, verificationUrl);
-        } catch (err) {
-            console.error("Failed to send initial verification email:", err);
-        }
+        // Issue tokens immediately so the user is logged in right after signup
+        const accessToken = generateAccessToken(user._id, user.tokenVersion);
+        const refreshToken = generateRefreshToken(user._id);
+
+        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
+        await user.save();
+
+        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
 
         return res.status(201).json({
             success: true,
-            message: "If this email is not already registered, your account has been created. Please check your email to verify your account before logging in.",
+            message: "Account created successfully.",
+            accessToken,
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            profileImageUrl: user.profileImageUrl,
         });
     } catch (error) {
         console.error("Register error:", error);
@@ -189,14 +184,6 @@ const loginUser = async (req, res) => {
         const isMatch = await user.isValidPassword(password);
         if (!isMatch) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
-        }
-
-        // Block login until email is verified
-        if (!user.isEmailVerified) {
-            return res.status(403).json({
-                success: false,
-                message: "Please verify your email before logging in. Check your inbox for the verification link.",
-            });
         }
 
         const accessToken = generateAccessToken(user._id, user.tokenVersion);

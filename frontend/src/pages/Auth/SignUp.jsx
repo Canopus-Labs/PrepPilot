@@ -17,10 +17,6 @@ const SignUp = ({ setCurrentPage }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendError, setResendError] = useState("");
-  const [resendCooldown, setResendCooldown] = useState(0);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -77,19 +73,9 @@ const SignUp = ({ setCurrentPage }) => {
 
       if (response.data.success) {
         const authToken = response.data.token || response.data.accessToken;
-
-        if (authToken) {
-          // Server issued a token immediately (e.g. email verification disabled)
-          sessionStorage.setItem("token", authToken);
-          updateUser(response.data);
-          navigate("/dashboard");
-        } else {
-          // Email-verification required flow — show the success/verify screen
-          setSuccessMessage(
-            response.data.message ||
-              "Account created! Please check your email to verify your account before logging in."
-          );
-        }
+        sessionStorage.setItem("token", authToken);
+        updateUser(response.data);
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error.response && error.response.data.message) {
@@ -101,25 +87,6 @@ const SignUp = ({ setCurrentPage }) => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    setResendLoading(true);
-    setResendError("");
-    try {
-      await axiosInstance.post(API_PATHS.AUTH.RESEND_VERIFICATION, { email });
-      setResendCooldown(60);
-      const interval = setInterval(() => {
-        setResendCooldown((prev) => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
-    } catch (error) {
-      setResendError(error.response?.data?.message || "Failed to resend. Please try again.");
-    } finally {
-      setResendLoading(false);
     }
   };
 
@@ -137,45 +104,8 @@ const SignUp = ({ setCurrentPage }) => {
         <p className="text-sm text-gray-400">Join thousands preparing smarter for their dream jobs</p>
       </div>
 
-      {successMessage ? (
-        /* Success state */
-        <div className="space-y-4">
-          <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-            <p className="text-green-400 text-sm font-medium">{successMessage}</p>
-            <p className="text-green-400/70 text-xs mt-1">Didn't receive it? Check your spam folder.</p>
-          </div>
-
-          <button
-            type="button"
-            disabled={resendLoading || resendCooldown > 0}
-            onClick={handleResend}
-            className="w-full text-sm text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend email (${resendCooldown}s)` : "Resend verification email"}
-          </button>
-
-          {resendError && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-red-400 text-sm font-medium">{resendError}</p>
-            </div>
-          )}
-
-          <div className="pt-4 border-t border-white/10">
-            <p className="text-sm text-gray-400 text-center">
-              Already verified?{" "}
-              <button
-                type="button"
-                className="font-semibold text-transparent bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text hover:opacity-80 transition-opacity cursor-pointer"
-                onClick={() => { setCurrentPage("login"); setSuccessMessage(""); }}
-              >
-                Sign in
-              </button>
-            </p>
-          </div>
-        </div>
-      ) : (
-        /* Registration form */
-        <form onSubmit={handleSignup} className="space-y-4">
+      {/* Registration form */}
+      <form onSubmit={handleSignup} className="space-y-4">
           <div className="mb-6">
             <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
           </div>
@@ -310,7 +240,6 @@ const SignUp = ({ setCurrentPage }) => {
             </p>
           </div>
         </form>
-      )}
     </div>
   );
 };
