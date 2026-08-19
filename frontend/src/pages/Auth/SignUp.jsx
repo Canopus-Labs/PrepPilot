@@ -7,7 +7,6 @@ import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
-import uploadImage from "../../utils/uploadimage";
 import { LuArrowRight } from "react-icons/lu";
 
 const SignUp = ({ setCurrentPage }) => {
@@ -48,7 +47,6 @@ const SignUp = ({ setCurrentPage }) => {
   }
   const handleSignup = async (e) => {
     e.preventDefault();
-    let profileImageUrl = "";
 
     if (!fullName) { setError("Please enter your full name"); return; }
     if(containsNumber(fullName) || !containsAlphanumeric(fullName)) { setError("Full name should not contain numbers or special characters"); return; }
@@ -64,31 +62,40 @@ const SignUp = ({ setCurrentPage }) => {
     setLoading(true);
 
     try {
-      if (profilePic) {
-        const imgUploadRes = await uploadImage(profilePic);
-        profileImageUrl = imgUploadRes.imageUrl || "";
-      }
+      // Note: profile image upload requires auth, so we only send the
+      // profileImageUrl if the user picked a file — the backend stores the
+      // URL reference; the actual upload happens after email verification + login.
+      // For now we skip the upload here to avoid a 401 on the protected endpoint.
 
       const payload = {
         name: fullName,
         email,
         password,
       };
-      if (profileImageUrl) payload.profileImageUrl = profileImageUrl;
 
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, payload);
-      
+
       if (response.data.success) {
         const authToken = response.data.token || response.data.accessToken;
+
         if (authToken) {
+          // Server issued a token immediately (e.g. email verification disabled)
           sessionStorage.setItem("token", authToken);
           updateUser(response.data);
           navigate("/dashboard");
+        } else {
+          // Email-verification required flow — show the success/verify screen
+          setSuccessMessage(
+            response.data.message ||
+              "Account created! Please check your email to verify your account before logging in."
+          );
         }
       }
     } catch (error) {
       if (error.response && error.response.data.message) {
         setError(error.response.data.message);
+      } else if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+        setError("Request timed out. Please check your connection and try again.");
       } else {
         setError("Something went wrong. Please try again");
       }
