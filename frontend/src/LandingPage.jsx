@@ -17,7 +17,7 @@ import ForgotPassword from "./pages/Auth/ForgotPAssword";
 import { UserContext } from "./context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ServicesMarquee from "./components/ServicesMarquee";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for testimonials
+import { Star, ChevronLeft, ChevronRight, Menu, X } from "lucide-react"; // Import icons for testimonials
 import TermsandConditions from "./pages/Terms/TermsandConditions";   // ← Add this
 
 
@@ -244,6 +244,7 @@ const LandingPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const [isPaused, setIsPaused] = useState(false);
+  const [mobileMenuOpen,setMobileMenuOpen] = useState(false);
 
   // Hero parallax
   const heroRef = useRef(null);
@@ -314,7 +315,7 @@ const LandingPage = () => {
         >
           {/* Floating pill – true glassmorphism: ~40% opacity + strong blur */}
           <div
-            className="max-w-[1200px] mx-auto flex items-center justify-between gap-6 px-5 sm:px-7 rounded-full"
+            className="relative max-w-[1200px] mx-auto flex items-center justify-between gap-6 px-5 sm:px-7 rounded-full"
             style={{
               height: "64px",
               background: "rgba(0,0,0,0.40)",
@@ -348,6 +349,16 @@ const LandingPage = () => {
                 </button>
               ))}
             </nav>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="lg:hidden absolute left-1/2 -translate-x-1/2 p-2 text-gray-300 hover:text-white transition-colors"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}>
+
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
 
             {/* Right buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -395,6 +406,25 @@ const LandingPage = () => {
               )}
             </div>
           </div>
+            {/* Mobile navigation */}
+            {mobileMenuOpen && (
+              <div className="lg:hidden mt-2 max-w-[1200px] mx-auto rounded-2xl border border-white/10 bg-black/80 backdrop-blur-md shadow-2xl p-3">
+                <nav className="flex flex-col gap-1">
+                  {navRoutes.map((item) => (
+                    <button
+                      key={item.route}
+                      onClick={() => {
+                        handleNav(item.route);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 rounded-xl text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            )}
         </header>
 
         {/* ─────────────────────────────────
