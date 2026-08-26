@@ -245,6 +245,7 @@ const LandingPage = () => {
 
   const [isPaused, setIsPaused] = useState(false);
   const [mobileMenuOpen,setMobileMenuOpen] = useState(false);
+  const publicRoutes = ["/ai-helper", "/coding-sheets", "/assessment"];
 
   // Hero parallax
   const heroRef = useRef(null);
@@ -271,13 +272,13 @@ const LandingPage = () => {
   ];
 
   const handleNav = (route) => {
-    if (!user) {
-      setOpenAuthModal(true);
-      setPendingRoute(route);
-    } else {
-      navigate(route);
-    }
-  };
+  if (!user && !publicRoutes.includes(route)) {
+    setOpenAuthModal(true);
+    setPendingRoute(route);
+  } else {
+    navigate(route);
+  }
+};
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
@@ -422,6 +423,18 @@ const LandingPage = () => {
                       {item.label}
                     </button>
                   ))}
+
+                  {/* Login */}
+                  <button
+                    onClick={() => {
+                      setOpenAuthModal(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-3 rounded-xl text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    Login
+                  </button>
+
                 </nav>
               </div>
             )}
