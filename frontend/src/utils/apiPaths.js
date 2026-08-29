@@ -87,4 +87,14 @@ export const API_PATHS = {
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
+    STUDY_GOALS: {
+        CREATE: "/api/study-goals",
+        GET_ALL: "/api/study-goals",
+        GET_ONE: (id) => `/api/study-goals/${id}`,
+        UPDATE: (id) => `/api/study-goals/${id}`,
+        DELETE: (id) => `/api/study-goals/${id}`,
+        LOG_SESSION: (id) => `/api/study-goals/${id}/log`,
+        HISTORY: (id) => `/api/study-goals/${id}/history`,
+        ANALYTICS: "/api/study-goals/analytics",
+    },
 };
