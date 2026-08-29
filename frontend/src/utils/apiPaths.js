@@ -87,4 +87,16 @@ export const API_PATHS = {
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
+    COMPANY_PREP: {
+        CREATE: "/api/company-prep",
+        GET_ALL: "/api/company-prep",
+        GET_ONE: (id) => `/api/company-prep/${id}`,
+        UPDATE: (id) => `/api/company-prep/${id}`,
+        DELETE: (id) => `/api/company-prep/${id}`,
+        ADD_QUESTION: (id) => `/api/company-prep/${id}/questions`,
+        TOGGLE_Q_SOLVED: (id, qid) => `/api/company-prep/${id}/questions/${qid}/toggle-solved`,
+        ADD_ROUND: (id) => `/api/company-prep/${id}/rounds`,
+        TOGGLE_ROUND: (id, rid) => `/api/company-prep/${id}/rounds/${rid}/toggle-complete`,
+        STATS: "/api/company-prep/stats",
+    },
 };
