@@ -87,4 +87,14 @@ export const API_PATHS = {
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
+    SKILLS: {
+        GET_PROFILE: "/api/skills",
+        ADD_SKILL: "/api/skills",
+        UPDATE_SKILL: (id) => `/api/skills/${id}`,
+        DELETE_SKILL: (id) => `/api/skills/${id}`,
+        SET_ALL: "/api/skills",
+        SNAPSHOT: "/api/skills/snapshot",
+        HISTORY: "/api/skills/history",
+        ANALYSIS: "/api/skills/analysis",
+    },
 };
