@@ -160,6 +160,8 @@ const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
+const bookmarkRoutes = require("./routes/bookmarkRoutes");
+app.use("/api/bookmarks", generalLimiter, bookmarkRoutes);
 
 
 app.use(
