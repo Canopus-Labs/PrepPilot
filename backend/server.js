@@ -183,6 +183,25 @@ if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
 }
 
+// Spaced Repetition CRON logic
+const RepetitionState = require("./models/RepetitionState");
+const runSpacedRepetitionCron = async () => {
+  try {
+    const today = new Date();
+    // This will aggregate and flag "due" cards for users.
+    // In a full implementation, you would update user queues here.
+    const dueCards = await RepetitionState.find({ nextReviewDate: { $lte: today } });
+    if (dueCards.length > 0) {
+      console.log(`[CRON] Found ${dueCards.length} due flashcards for spaced repetition review.`);
+    }
+  } catch (error) {
+    console.error("[CRON] Spaced repetition error:", error);
+  }
+};
+// Run the spaced repetition job every 24 hours
+setInterval(runSpacedRepetitionCron, 24 * 60 * 60 * 1000);
+
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
