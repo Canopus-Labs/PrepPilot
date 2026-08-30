@@ -12,6 +12,8 @@ const googleCalendarRoutes = require("./routes/googleCalendarRoutes");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
+const WebSocket = require("ws");
+const { setupAudioPipeline } = require("./controllers/audioPipelineController");
 const {
   generateInterviewQuestions,
   generateConceptExplanation,
@@ -194,6 +196,21 @@ const server = app.listen(PORT, "0.0.0.0", () => {
     console.log("  -", o);
   }
 });
+
+// Attach WebSocket Server
+const wss = new WebSocket.Server({ noServer: true });
+server.on("upgrade", (request, socket, head) => {
+  if (request.url === "/api/audio-stream") {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
+
+// Initialize the audio pipeline handler
+setupAudioPipeline(wss);
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
