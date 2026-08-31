@@ -56,7 +56,7 @@ const aiOutputSchema = z.object({
 
 
 const saveNotesSummarySchema = z.object({
-  fileName: z.string().min(1).max(200),
+  fileName: z.string().min(1).max(200, "File name cannot exceed 200 characters"),
   sourceType: z.enum(["upload", "platform"]),
   sourceUrl: z.string().url().optional().nullable(),
   pageCount: z.number().int().nonnegative().optional().default(0),

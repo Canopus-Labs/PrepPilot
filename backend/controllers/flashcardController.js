@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
+const { recordActivity } = require("../utils/streakTracker");
 
-/**
- * SuperMemo SM-2 Algorithm helper
- * Returns updated { interval, repetition, efactor, dueDate }
- */
 const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) => {
   let score = 3;
   if (rating === "again" || rating === "1") score = 1;
@@ -201,10 +198,15 @@ const reviewFlashcard = async (req, res) => {
 
     await flashcard.save();
 
+    const { newlyUnlocked } = await recordActivity(userId);
+
     return res.status(200).json({
       success: true,
       message: "Flashcard review recorded successfully",
       flashcard,
+      // Streak milestones (e.g. "7-Day Streak") unlocked by this activity,
+      // if any — lets the frontend show a toast.
+      newlyUnlockedAchievements: newlyUnlocked,
     });
   } catch (error) {
     return res.status(500).json({

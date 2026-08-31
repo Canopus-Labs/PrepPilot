@@ -11,8 +11,8 @@ import toast from "react-hot-toast";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import StreakBadge from "../../components/StreakBadge";
 
-/* ── Donut (SVG, zero deps) ─────────────────────────────────────────────── */
 const DonutChart = ({ value, max, size = 84, stroke = 9, color = "#7c3aed" }) => {
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
@@ -30,7 +30,6 @@ const DonutChart = ({ value, max, size = 84, stroke = 9, color = "#7c3aed" }) =>
   );
 };
 
-/* ── Difficulty breakdown ────────────────────────────────────────────────── */
 const DIFF_CONFIG = {
   easy:   { label: "Easy",   bar: "bg-emerald-500", text: "text-emerald-400", bg: "bg-emerald-500/10" },
   medium: { label: "Medium", bar: "bg-yellow-400",  text: "text-yellow-400",  bg: "bg-yellow-400/10" },
@@ -60,7 +59,6 @@ const DiffBar = ({ level, solved, total }) => {
   );
 };
 
-/* ── Small stat card ─────────────────────────────────────────────────────── */
 const StatCard = ({ label, value, icon: Icon, accent }) => (
   <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5 flex items-center gap-3">
     <Icon size={20} className={accent} />
@@ -71,7 +69,6 @@ const StatCard = ({ label, value, icon: Icon, accent }) => (
   </div>
 );
 
-/* ── Helpers ─────────────────────────────────────────────────────────────── */
 const fmtSheet = (id) =>
   (id || "Unknown").split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
 
@@ -99,8 +96,6 @@ function buildDifficultyStats(progress, sheetsMap) {
   return stats;
 }
 
-
-/* ── Main ────────────────────────────────────────────────────────────────── */
 const ProgressTrackerDashboard = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
@@ -127,17 +122,13 @@ const ProgressTrackerDashboard = () => {
         setSessions(sRes.data || []);
         setResumes(rRes.data?.resumes || []);
 
-        // Build a sheetId → sheet object lookup
         const map = {};
         (shRes.data?.sheets || []).forEach(sh => { map[sh.id] = sh; });
         setSheetsMap(map);
 
-        // Start with backend data
         const backendProgress = pRes.data?.progressList || [];
         const backendIds = new Set(backendProgress.map(p => p.sheetId));
 
-        // Merge localStorage entries for any followed sheets not yet in backend
-        // and sync them up in the background
         const localExtra = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -153,7 +144,6 @@ const ProgressTrackerDashboard = () => {
                 completedTopics: raw.completedTopics || {},
                 percentage: raw.percentage || 0,
               });
-              // Background sync to backend
               axiosInstance.post("/api/user/sheet-progress", {
                 sheetId,
                 followed: true,
@@ -257,12 +247,9 @@ const ProgressTrackerDashboard = () => {
     <div className="min-h-full bg-[var(--color-background)] dark:bg-[#0b1120] text-gray-900 dark:text-white">
       <div className="max-w-[1360px] mx-auto p-4 md:p-6 lg:p-8 space-y-6">
 
-        {/* ══ TOP ROW: Profile + Stats ══════════════════════════════════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">
 
-          {/* Profile card */}
           <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-6 flex flex-col items-center text-center gap-4">
-            {/* Avatar */}
             <div className="relative">
               {user?.profileImageUrl ? (
                 <img src={user.profileImageUrl} alt="User profile avatar"
@@ -275,14 +262,14 @@ const ProgressTrackerDashboard = () => {
               <span className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-[#0b1120] ${user?.isEmailVerified ? "bg-emerald-400" : "bg-gray-400"}`} />
             </div>
 
-            {/* Name + ID */}
             <div className="space-y-0.5">
               <h2 className="text-base font-bold text-gray-900 dark:text-white">{displayName}</h2>
               {user?.prepPilotId && <p className="text-xs text-violet-400">@{user.prepPilotId}</p>}
               {user?.bio && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed line-clamp-2">{user.bio}</p>}
             </div>
 
-            {/* Socials */}
+            <StreakBadge streak={user?.currentStreak} />
+
             {(socials.github || socials.linkedin || socials.twitter || socials.portfolio) && (
               <div className="flex items-center gap-3 justify-center">
                 {socials.github    && <a href={socials.github}    target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors"><Github   size={15} /></a>}
@@ -292,7 +279,6 @@ const ProgressTrackerDashboard = () => {
               </div>
             )}
 
-            {/* Meta */}
             <div className="w-full text-left space-y-1.5 pt-3 border-t border-gray-100 dark:border-white/8">
               {user?.country && (
                 <div className="flex items-center gap-2 text-xs text-gray-500"><MapPin size={11} />{user.country}</div>
@@ -314,14 +300,12 @@ const ProgressTrackerDashboard = () => {
             </button>
           </div>
 
-          {/* Stats grid */}
           <div className="grid grid-cols-2 gap-3 content-start">
             <StatCard label="Mock Sessions"  value={sessions.length}      icon={Video}       accent="text-violet-400" />
             <StatCard label="Saved Resumes"  value={resumes.length}       icon={FileText}    accent="text-blue-400" />
             <StatCard label="Active Sheets"  value={sheetProgress.length} icon={Code2}       accent="text-emerald-400" />
             <StatCard label="Topics Solved"  value={solved}               icon={CheckCircle} accent="text-fuchsia-400" />
 
-            {/* Quick actions */}
             <button onClick={() => navigate("/role-prep")}
               className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors">
               <PlusCircle size={15} /> New Session
@@ -333,10 +317,8 @@ const ProgressTrackerDashboard = () => {
           </div>
         </div>
 
-        {/* ══ MIDDLE ROW: Analysis + Sessions ══════════════════════════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-          {/* DSA Level Analysis */}
           <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
@@ -349,7 +331,6 @@ const ProgressTrackerDashboard = () => {
             </div>
             {(diffStats.easy.total + diffStats.medium.total + diffStats.hard.total) > 0 ? (
               <div className="space-y-5">
-                {/* Summary badges */}
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { level: "easy",   ...diffStats.easy },
@@ -366,13 +347,11 @@ const ProgressTrackerDashboard = () => {
                     );
                   })}
                 </div>
-                {/* Progress bars */}
                 <div className="space-y-3">
                   <DiffBar level="easy"   solved={diffStats.easy.solved}   total={diffStats.easy.total} />
                   <DiffBar level="medium" solved={diffStats.medium.solved} total={diffStats.medium.total} />
                   <DiffBar level="hard"   solved={diffStats.hard.solved}   total={diffStats.hard.total} />
                 </div>
-                {/* Total */}
                 <div className="flex items-center justify-between pt-3 border-t border-white/8 text-xs text-gray-500">
                   <span>Total solved</span>
                   <span className="text-white font-bold">
@@ -392,7 +371,6 @@ const ProgressTrackerDashboard = () => {
             )}
           </div>
 
-          {/* Recent Sessions */}
           <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
@@ -434,10 +412,8 @@ const ProgressTrackerDashboard = () => {
           </div>
         </div>
 
-        {/* ══ BOTTOM ROW: Sheet Progress + Solved Donuts + Resumes ══════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* Sheet Progress */}
           <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
@@ -519,7 +495,6 @@ const ProgressTrackerDashboard = () => {
             )}
           </div>
 
-          {/* Problems Solved (donuts) */}
           <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
             <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white mb-4">
               <Star size={15} className="text-amber-400" /> Problems Solved
@@ -566,7 +541,6 @@ const ProgressTrackerDashboard = () => {
             </div>
           </div>
 
-          {/* Resumes */}
           <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-white">
@@ -611,3 +585,5 @@ const ProgressTrackerDashboard = () => {
 };
 
 export default ProgressTrackerDashboard;
+
+
