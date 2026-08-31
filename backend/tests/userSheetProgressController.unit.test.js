@@ -4,11 +4,16 @@ import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vite
 // ---------------------------------------------------------------------------
 // userSheetProgressController.js is CommonJS and loads its deps via
 // require(), which vitest's vi.mock cannot intercept. We shim Node's module
-// loader so the real UserSheetProgress model is never touched.
+// loader so the real UserSheetProgress model and streak tracker are never touched.
 //
 // Covers issue #1449: saveProgress must reject out-of-range / malformed
 // field values (percentage outside [0,100], non-boolean followed,
 // non-object completedTopics) while still allowing partial payloads.
+//
+// Also mocks ../utils/streakTracker: saveProgress now calls recordActivity()
+// after a successful upsert (streak-milestone toast support). Without this
+// mock, recordActivity() would hit the real (unconnected) User model and
+// throw, which the controller's catch block turns into a false-negative 500.
 // ---------------------------------------------------------------------------
 
 const modelMock = vi.hoisted(() => ({
@@ -17,6 +22,10 @@ const modelMock = vi.hoisted(() => ({
   findOneAndUpdate: vi.fn(),
   create: vi.fn(),
   bulkWrite: vi.fn(),
+}));
+
+const streakTrackerMock = vi.hoisted(() => ({
+  recordActivity: vi.fn(),
 }));
 
 const testDoubles = new Map();
@@ -34,7 +43,9 @@ const clearRequireCache = () => {
       key.includes("controllers\\userSheetProgressController") ||
       key.includes("controllers/userSheetProgressController") ||
       key.includes("models\\UserSheetProgress") ||
-      key.includes("models/UserSheetProgress")
+      key.includes("models/UserSheetProgress") ||
+      key.includes("utils\\streakTracker") ||
+      key.includes("utils/streakTracker")
     ) {
       delete require.cache[key];
     }
@@ -55,6 +66,9 @@ beforeAll(async () => {
     create: modelMock.create,
     bulkWrite: modelMock.bulkWrite,
   });
+  testDoubles.set("../utils/streakTracker", {
+    recordActivity: streakTrackerMock.recordActivity,
+  });
 
   const mod = await import("../controllers/userSheetProgressController.js");
   saveProgress = mod.saveProgress;
@@ -73,6 +87,12 @@ beforeEach(() => {
   modelMock.findOneAndUpdate.mockReset();
   modelMock.create.mockReset();
   modelMock.bulkWrite.mockReset();
+
+  streakTrackerMock.recordActivity.mockReset();
+  // Sensible default so tests that don't care about streaks don't need to
+  // stub this individually; override with .mockResolvedValue(...) in any
+  // test that needs specific newlyUnlocked values.
+  streakTrackerMock.recordActivity.mockResolvedValue({ newlyUnlocked: [] });
 });
 
 afterEach(() => {
@@ -167,6 +187,7 @@ describe("saveProgress", () => {
       percentage: 80,
     };
     modelMock.findOneAndUpdate.mockResolvedValue(fakeProgress);
+    streakTrackerMock.recordActivity.mockResolvedValue({ newlyUnlocked: [] });
 
     const req = {
       user: { _id: "user-1" },
@@ -181,7 +202,11 @@ describe("saveProgress", () => {
       { $set: { followed: true, percentage: 80 } },
       expect.objectContaining({ upsert: true, new: true })
     );
-    expect(res.body).toEqual({ success: true, progress: fakeProgress });
+    expect(res.body).toEqual({
+      success: true,
+      progress: fakeProgress,
+      newlyUnlockedAchievements: [],
+    });
   });
 
   it("rejects an invalid sheetId with 400", async () => {
@@ -265,8 +290,8 @@ describe("getProgress", () => {
     expect(res.body).toEqual({ success: true, progress: fakeProgress });
   });
 
-  it("rejects an invalid sheetId with 400", async () => {
-    const req = { user: { _id: "user-4" }, params: { sheetId: "" } };
+  it("returns 400 for an invalid sheetId", async () => {
+    const req = { user: { _id: "user-3" }, params: { sheetId: "   " } };
     const res = mockRes();
 
     await getProgress(req, res);
@@ -276,9 +301,9 @@ describe("getProgress", () => {
   });
 
   it("returns 500 when findOne throws", async () => {
-    modelMock.findOne.mockRejectedValue(new Error("timeout"));
+    modelMock.findOne.mockRejectedValue(new Error("db error"));
 
-    const req = { user: { _id: "user-4" }, params: { sheetId: "dp" } };
+    const req = { user: { _id: "user-3" }, params: { sheetId: "graphs" } };
     const res = mockRes();
 
     await getProgress(req, res);

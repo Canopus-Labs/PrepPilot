@@ -12,6 +12,7 @@ const VALID_ACHIEVEMENTS = new Set([
   "DSA Master",
   "3-Day Streak",
   "7-Day Streak",
+  "14-Day Streak",
   "30-Day Streak",
 ]);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { LuPlus } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -9,13 +9,16 @@ import SummaryCard from "../../components/Cards/SummaryCard";
 import Modal from "../../components/Loader/Modal";
 import CreateSessionForm from "./CreateSessionForm";
 import DeleteAlertContent from "../../components/DeleteAlertContent";
+import StreakBadge from "../../components/StreakBadge";
 
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { CARD_BG } from "../../utils/data";
+import { UserContext } from "../../context/userContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useContext(UserContext);
   const [sessions, setSessions] = useState([]);
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
@@ -54,12 +57,14 @@ const Dashboard = () => {
     <>
       <div className="min-h-screen bg-[var(--color-background)] dark:bg-gradient-to-b dark:from-[#0f172a] dark:to-[#0b1120] text-gray-900 dark:text-white md:px-10 relative overflow-hidden transition-colors duration-300">
         <div className="container mx-auto pt-8 pb-16 px-4 md:px-0 relative z-10">
-          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 md:mb-10 gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
-                Your Interview Sessions
-              </h1>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 tracking-tight">
+                  Your Interview Sessions
+                </h1>
+                <StreakBadge streak={user?.currentStreak} />
+              </div>
 
               <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base">
                 Manage, review, and dynamically create your AI-driven mock
@@ -75,7 +80,6 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Sessions Grid */}
           {sessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sessions.map((data, index) => (
@@ -126,7 +130,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Floating Add Button */}
           {sessions.length > 0 && (
             <button
               className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-14 flex items-center gap-2 px-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-1 transition-all duration-300 z-50 ring-2 ring-white/20 dark:ring-transparent"
@@ -139,7 +142,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Create Session Modal */}
       <Modal
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
@@ -148,7 +150,6 @@ const Dashboard = () => {
         <CreateSessionForm />
       </Modal>
 
-      {/* Delete Alert Modal */}
       <Modal
         isOpen={openDeleteAlert.open}
         onClose={() =>
@@ -169,3 +170,10 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+
+
