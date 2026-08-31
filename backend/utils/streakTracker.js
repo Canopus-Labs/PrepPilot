@@ -3,6 +3,7 @@ const User = require("../models/User");
 const STREAK_MILESTONES = [
   { days: 3, badge: "3-Day Streak" },
   { days: 7, badge: "7-Day Streak" },
+  { days: 14, badge: "14-Day Streak" },
   { days: 30, badge: "30-Day Streak" },
 ];
 
