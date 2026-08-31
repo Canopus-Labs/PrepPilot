@@ -1,40 +1,27 @@
 const express = require("express");
 
 const router = express.Router();
+const { protect } = require("../middlewares/authMiddleware");
+const {
+  connectCalendar,
+  handleCallback,
+  getCalendarStatus,
+  syncCalendarEvents,
+} = require("../controllers/googleCalendarController");
 
 // GET /api/google-calendar/connect
-router.get("/connect", (req, res) => {
-    res.json({
-        success: true,
-        message: "Google Calendar connect route is working",
-    });
-});
+router.get("/connect", protect, connectCalendar);
 
 // GET /api/google-calendar/callback
-router.get("/callback", (req, res) => {
-    res.json({
-        success: true,
-        message: "Google Calendar callback route is working",
-    });
-});
+router.get("/callback", handleCallback);
 
 // GET /api/google-calendar/status
-router.get("/status", (req, res) => {
-    res.json({
-        success: true,
-        connected: false,
-    });
-});
+router.get("/status", protect, getCalendarStatus);
 
 // POST /api/google-calendar/events
-router.post("/events", (req, res) => {
-    const { events } = req.body;
+router.post("/events", protect, syncCalendarEvents);
 
-    res.json({
-        success: true,
-        message: "Calendar events received successfully",
-        count: Array.isArray(events) ? events.length : 0,
-    });
-});
+// POST /api/google-calendar/sync-events
+router.post("/sync-events", protect, syncCalendarEvents);
 
 module.exports = router;

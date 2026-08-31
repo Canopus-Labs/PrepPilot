@@ -63,6 +63,14 @@ const UserSchema = new mongoose.Schema(
         isEmailVerified: { type: Boolean, default: false },
         emailVerificationToken: { type: String, default: null },
         emailVerificationExpires: { type: Date, default: null },
+
+        // Google Calendar Connection
+        googleCalendar: {
+            connected: { type: Boolean, default: false },
+            refreshToken: { type: String, default: null },
+            email: { type: String, default: null },
+            connectedAt: { type: Date, default: null },
+        },
     },
     { timestamps: true }
 );
@@ -95,6 +103,9 @@ UserSchema.set("toJSON", {
     delete ret.emailVerificationToken;
     delete ret.emailVerificationExpires;
     delete ret.tokenVersion;
+    if (ret.googleCalendar) {
+      delete ret.googleCalendar.refreshToken;
+    }
     return ret;
   },
 });
