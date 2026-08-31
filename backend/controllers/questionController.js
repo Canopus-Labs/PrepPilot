@@ -268,4 +268,5 @@ module.exports = {
   togglePinQuestion,
   updateQuestionNote,
   getMyQuestions,
+  escapeRegex,
 };
