@@ -11,6 +11,12 @@ import { API_PATHS } from "../../utils/apiPaths";
 
 const CATEGORIES = ["All", "DSA", "Aptitude", "Role-Prep", "AI", "General", "Custom"];
 
+const notifyStreakMilestones = (newlyUnlockedAchievements) => {
+  (newlyUnlockedAchievements || [])
+    .filter((badge) => badge.endsWith("Streak"))
+    .forEach((badge) => toast.success(`🏆 Milestone unlocked: ${badge}!`));
+};
+
 const SpacedRepetitionPage = () => {
   const [flashcards, setFlashcards] = useState([]);
   const [stats, setStats] = useState({ totalCards: 0, dueCount: 0, masteredCount: 0, reviewedToday: 0 });
@@ -75,7 +81,8 @@ const SpacedRepetitionPage = () => {
       const res = await axiosInstance.put(API_PATHS.FLASHCARD.REVIEW(currentCard._id), { rating });
       if (res.data.success) {
         toast.success(`Review saved! Next due in ${res.data.flashcard.interval} day(s)`);
-        
+        notifyStreakMilestones(res.data.newlyUnlockedAchievements);
+
         // Remove current card from queue or move to next
         const updatedList = flashcards.filter((_, idx) => idx !== currentIndex);
         setFlashcards(updatedList);

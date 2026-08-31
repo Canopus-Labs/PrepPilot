@@ -7,7 +7,8 @@ const express = require("express");
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Promise Rejection:", err);
 });
-
+//caleder------------
+const googleCalendarRoutes = require("./routes/googleCalendarRoutes");
 const path = require("path");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
@@ -159,6 +160,8 @@ const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmaps", roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
+const bookmarkRoutes = require("./routes/bookmarkRoutes");
+app.use("/api/bookmarks", generalLimiter, bookmarkRoutes);
 
 
 app.use(
@@ -216,3 +219,19 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
+
+app.use("/api/books", generalLimiter, booksRoutes);
+app.use("/api/jobs", jobRoutes);
+
+app.use("/api/google-calendar", googleCalendarRoutes);
+
+
+app.use(
+    "/api/google-calendar",
+    generalLimiter,
+    googleCalendarRoutes
+);
+
+
+app.use("/api/courses", generalLimiter, coursesRoutes);
+

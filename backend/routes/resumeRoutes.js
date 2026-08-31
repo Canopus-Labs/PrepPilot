@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory } = require('../controllers/resumeController');
+const { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory, atsMatch } = require('../controllers/resumeController');
 const { protect } = require('../middlewares/authMiddleware');
 const { upload, uploadResume, validateResumeMagicBytes } = require('../middlewares/uploadMiddleware');
 const { aiLimiter } = require('../middlewares/rateLimiter');
@@ -32,6 +32,11 @@ router.get('/my-resumes', getMyResumes);
 // @desc    Get all saved resume analyses for logged-in user
 // @access  Private
 router.get('/analysis-history', getResumeAnalysisHistory);
+
+// @route   POST /api/resume/ats-match
+// @desc    Deterministic keyword-overlap score between a resume and a JD
+// @access  Private — pure keyword match, no AI/file, so no aiLimiter needed
+router.post('/ats-match', atsMatch);
 
 // @route   DELETE /api/resume/:id
 // @desc    Delete a saved resume by ID

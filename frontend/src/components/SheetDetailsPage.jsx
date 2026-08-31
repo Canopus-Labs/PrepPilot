@@ -9,6 +9,13 @@ import { BASE_URL } from "../utils/apiPaths";
 import axiosInstance from "../utils/axiosinstance";
 import { UserContext } from "../context/userContext";
 import { CheckCircle2, Circle, AlertCircle, BookOpen, Users, CheckSquare, RotateCcw } from "lucide-react";
+import toast from "react-hot-toast";
+
+const notifyStreakMilestones = (newlyUnlockedAchievements) => {
+  (newlyUnlockedAchievements || [])
+    .filter((badge) => badge.endsWith("Streak"))
+    .forEach((badge) => toast.success(`🏆 Milestone unlocked: ${badge}!`));
+};
 
 const SubtopicRow = memo(({ sub, sectionIdx, topicIdx, subIdx, completed, followed, onToggle }) => {
   let diffColor = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
@@ -198,7 +205,10 @@ function SheetDetail() {
       { sheetId: id, followed: followedState, completedTopics: topicsToSave, percentage },
       { signal: controller.signal }
     )
-      .then(() => refreshSheetProgress?.())
+      .then((res) => {
+        notifyStreakMilestones(res.data?.newlyUnlockedAchievements);
+        refreshSheetProgress?.();
+      })
       .catch((err) => {
         if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
           console.error("Failed to sync progress to backend:", err);
@@ -226,7 +236,10 @@ function SheetDetail() {
         followed: false,
         completedTopics: {},
         percentage: 0
-      }).then(() => refreshSheetProgress?.()).catch(err => console.error(err));
+      }).then((res) => {
+        notifyStreakMilestones(res.data?.newlyUnlockedAchievements);
+        refreshSheetProgress?.();
+      }).catch(err => console.error(err));
 
     } else {
       setFollowed(true);
@@ -242,7 +255,10 @@ function SheetDetail() {
         followed: true,
         completedTopics,
         percentage: 0,
-      }).then(() => refreshSheetProgress?.()).catch(err => console.error("Failed to sync follow to backend:", err));
+      }).then((res) => {
+        notifyStreakMilestones(res.data?.newlyUnlockedAchievements);
+        refreshSheetProgress?.();
+      }).catch(err => console.error("Failed to sync follow to backend:", err));
     }
   };
 

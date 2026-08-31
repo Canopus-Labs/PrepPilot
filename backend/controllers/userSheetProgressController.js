@@ -1,4 +1,5 @@
 const UserSheetProgress = require("../models/UserSheetProgress");
+const { recordActivity } = require("../utils/streakTracker");
 const {
   normalizeProgressItems,
   buildBulkOps,
@@ -60,10 +61,19 @@ exports.saveProgress = async (req, res) => {
     });
   }
 
-  if (completedTopics !== undefined && !Array.isArray(completedTopics)) {
+  if (
+    completedTopics !== undefined &&
+    (typeof completedTopics !== "object" ||
+      completedTopics === null ||
+      Array.isArray(completedTopics) ||
+      Object.values(completedTopics).some(
+        (value) => typeof value !== "boolean"
+      ))
+  ) {
     return res.status(400).json({
       success: false,
-      error: "Invalid completedTopics field, must be an array",
+      error:
+        "Invalid completedTopics field, must be an object of boolean flags",
     });
   }
 
@@ -90,26 +100,26 @@ exports.saveProgress = async (req, res) => {
   if (percentage !== undefined) updateFields.percentage = percentage;
 
   try {
-    const progress = await UserSheetProgress.findOneAndUpdate(
-      {
-        userId,
-        sheetId: validatedSheetId,
-      },
-      {
-        $set: updateFields,
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      }
-    );
+  const progress = await UserSheetProgress.findOneAndUpdate(
+    { userId, sheetId: validatedSheetId },
+    { $set: updateFields },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
 
-    return res.json({
-      success: true,
-      progress,
-    });
-  } catch (err) {
+  let newlyUnlocked = [];
+  try {
+    const streakResult = await recordActivity(userId);
+    newlyUnlocked = streakResult?.newlyUnlocked || [];
+  } catch (streakErr) {
+    console.error("Streak tracking failed:", streakErr);
+  }
+
+  return res.json({
+    success: true,
+    progress,
+    newlyUnlockedAchievements: newlyUnlocked,
+  });
+ } catch (err) {
     // Rare duplicate-key race during concurrent upserts.
     if (err.code === 11000) {
       try {
@@ -126,9 +136,12 @@ exports.saveProgress = async (req, res) => {
           }
         );
 
+        const { newlyUnlocked: retryNewlyUnlocked } = await recordActivity(userId);
+
         return res.json({
           success: true,
           progress,
+          newlyUnlockedAchievements: retryNewlyUnlocked,
         });
       } catch (retryErr) {
         return res.status(500).json({

@@ -2,6 +2,9 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const { generateWithFallback } = require('../utils/geminiHelper');
+const { matchResumeKeywords } = require('../utils/atsKeywordMatch');
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_ATS_INPUT = 50000; // chars; guards against oversized payloads
 
 /**
  * Compile LaTeX resume code to a PDF document.
@@ -312,4 +315,74 @@ const getResumeAnalysisHistory = async (req, res) => {
     }
 };
 
-module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory };
+const validateFile = (file) => {
+    if (!file) return false;
+
+    if (file.type !== "application/pdf") {
+        setError("Only PDF files are allowed.");
+        return false;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+        setError("File size must be less than 5MB.");
+        return false;
+    }
+
+    setError("");
+    return true;
+};
+const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!validateFile(file)) {
+        e.target.value = "";
+        setFile(null);
+        return;
+    }
+
+    setFile(file);
+};
+const handleDrop = (e) => {
+    e.preventDefault();
+
+    const file = e.dataTransfer.files[0];
+
+    if (!validateFile(file)) {
+        setFile(null);
+        return;
+    }
+
+    setFile(file);
+};
+
+
+/**
+ * Deterministic ATS keyword match between a resume and a job description.
+ * No AI / no file upload — pure keyword overlap, instant and free.
+ * @route POST /api/resume/ats-match
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ */
+const atsMatch = async (req, res) => {
+  const { resumeText, jobDescription } = req.body || {};
+
+  if (
+    typeof resumeText !== 'string' || resumeText.trim().length === 0 ||
+    typeof jobDescription !== 'string' || jobDescription.trim().length === 0
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: 'resumeText and jobDescription are required strings',
+    });
+  }
+
+  if (resumeText.length > MAX_ATS_INPUT || jobDescription.length > MAX_ATS_INPUT) {
+    return res.status(400).json({ success: false, error: 'Input too large' });
+  }
+
+  const result = matchResumeKeywords(resumeText, jobDescription);
+  return res.json({ success: true, ...result });
+};
+
+module.exports = { compileResume, analyzeResume, saveResume, getMyResumes, deleteResume, getResumeAnalysisHistory ,validateFile,handleFileChange,handleDrop,atsMatch};
