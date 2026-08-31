@@ -92,7 +92,7 @@ beforeEach(() => {
   // Sensible default so tests that don't care about streaks don't need to
   // stub this individually; override with .mockResolvedValue(...) in any
   // test that needs specific newlyUnlocked values.
-  streakTrackerMock.recordActivity.mockResolvedValue({ newlyUnlocked: [] });
+  streakTrackerMock.recordActivity.mockResolvedValue({ newlyUnlockedMilestones: [] });
 });
 
 afterEach(() => {
@@ -187,7 +187,7 @@ describe("saveProgress", () => {
       percentage: 80,
     };
     modelMock.findOneAndUpdate.mockResolvedValue(fakeProgress);
-    streakTrackerMock.recordActivity.mockResolvedValue({ newlyUnlocked: [] });
+    streakTrackerMock.recordActivity.mockResolvedValue({ newlyUnlockedMilestones: [] });
 
     const req = {
       user: { _id: "user-1" },
@@ -206,6 +206,28 @@ describe("saveProgress", () => {
       success: true,
       progress: fakeProgress,
       newlyUnlockedAchievements: [],
+    });
+  });
+
+  it("propagates newly unlocked streak milestones in newlyUnlockedAchievements (#2288)", async () => {
+    const fakeProgress = { sheetId: "arrays", percentage: 100 };
+    modelMock.findOneAndUpdate.mockResolvedValue(fakeProgress);
+    streakTrackerMock.recordActivity.mockResolvedValue({
+      newlyUnlockedMilestones: ["7-Day Streak"],
+    });
+
+    const req = {
+      user: { _id: "user-1" },
+      body: { sheetId: "arrays", percentage: 100 },
+    };
+    const res = mockRes();
+
+    await saveProgress(req, res);
+
+    expect(res.body).toEqual({
+      success: true,
+      progress: fakeProgress,
+      newlyUnlockedAchievements: ["7-Day Streak"],
     });
   });
 

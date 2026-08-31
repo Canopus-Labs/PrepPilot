@@ -109,7 +109,7 @@ exports.saveProgress = async (req, res) => {
   let newlyUnlocked = [];
   try {
     const streakResult = await recordActivity(userId);
-    newlyUnlocked = streakResult?.newlyUnlocked || [];
+    newlyUnlocked = streakResult?.newlyUnlockedMilestones || [];
   } catch (streakErr) {
     console.error("Streak tracking failed:", streakErr);
   }
@@ -136,12 +136,12 @@ exports.saveProgress = async (req, res) => {
           }
         );
 
-        const { newlyUnlocked: retryNewlyUnlocked } = await recordActivity(userId);
+        const { newlyUnlockedMilestones: retryNewlyUnlocked } = await recordActivity(userId);
 
         return res.json({
           success: true,
           progress,
-          newlyUnlockedAchievements: retryNewlyUnlocked,
+          newlyUnlockedAchievements: retryNewlyUnlocked || [],
         });
       } catch (retryErr) {
         return res.status(500).json({
