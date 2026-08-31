@@ -30,6 +30,7 @@ const jobRoutes = require("./routes/jobRoutes");
 const { generalLimiter, aiLimiter } = require("./middlewares/rateLimiter");
 const { generalHeaders, sensitiveRouteHeaders } = require("./middlewares/securityHeaders");
 const { uploadsStaticHeaders } = require("./middlewares/uploadMiddleware");
+const jobApplicationRoutes = require('./routes/jobApplicationRoutes');
 const app = express();
 
 // Trust X-Forwarded-For only when it comes from a known reverse proxy. The
@@ -163,6 +164,7 @@ app.use("/api/roadmaps", roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 
+app.use('/api/job-applications', jobApplicationRoutes);
 
 app.use(
   "/uploads",
