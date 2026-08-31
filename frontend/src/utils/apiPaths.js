@@ -87,4 +87,14 @@ export const API_PATHS = {
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
+    BOOKMARKS: {
+        CREATE: "/api/bookmarks",
+        GET_ALL: "/api/bookmarks",
+        GET_ONE: (id) => `/api/bookmarks/${id}`,
+        UPDATE: (id) => `/api/bookmarks/${id}`,
+        TOGGLE_STAR: (id) => `/api/bookmarks/${id}/star`,
+        DELETE: (id) => `/api/bookmarks/${id}`,
+        TAGS: "/api/bookmarks/tags",
+        STATS: "/api/bookmarks/stats",
+    },
 };

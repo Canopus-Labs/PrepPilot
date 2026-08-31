@@ -164,6 +164,9 @@ const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const codeExecutionRoutes = require("./routes/codeExecutionRoutes");
 app.use("/api/execute", generalLimiter, codeExecutionRoutes);
+const bookmarkRoutes = require("./routes/bookmarkRoutes");
+app.use("/api/bookmarks", generalLimiter, bookmarkRoutes);
+
 
 app.use(
   "/uploads",
