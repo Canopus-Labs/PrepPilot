@@ -114,8 +114,10 @@ const registerUser = async (req, res) => {
         // Generate default unique PrepPilot ID
         const defaultPrepPilotId = cleanEmail.split("@")[0] + Math.floor(1000 + Math.random() * 9000);
 
-        // Email verification is currently disabled — accounts are active immediately on creation.
-        // To re-enable: set isEmailVerified to false, generate a token, and call sendVerificationEmail.
+        // Generate email verification token (24-hour expiry)
+        const rawVerificationToken = crypto.randomBytes(32).toString("hex");
+        const hashedVerificationToken = crypto.createHash("sha256").update(rawVerificationToken).digest("hex");
+
         const user = await User.create({
             name: cleanName,
             email: cleanEmail,
@@ -133,25 +135,27 @@ const registerUser = async (req, res) => {
                 socials: { github: "", linkedin: "", twitter: "", portfolio: "" }
             },
             platformPreferences: { theme: "light", notificationsEnabled: true },
-            isEmailVerified: true, // verification disabled — users can log in immediately
-            emailVerificationToken: null,
-            emailVerificationExpires: null,
+            isEmailVerified: false,
+            emailVerificationToken: hashedVerificationToken,
+            emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         });
 
-        // Issue tokens immediately so the user is logged in right after signup
-        const accessToken = generateAccessToken(user._id, user.tokenVersion);
-        const refreshToken = generateRefreshToken(user._id);
-
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
-        user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
-        await user.save();
-
-        res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
+        // Send verification email
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${rawVerificationToken}`;
+        try {
+            await sendVerificationEmail(user.email, verificationUrl);
+        } catch (emailError) {
+            console.error("Failed to send verification email:", emailError);
+            await User.findByIdAndDelete(user._id);
+            return res.status(500).json({
+                success: false,
+                message: "Failed to send verification email. Please try registering again.",
+            });
+        }
 
         return res.status(201).json({
             success: true,
-            message: "Account created successfully.",
-            accessToken,
+            message: "Account created successfully. Please verify your email to log in.",
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -178,6 +182,14 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ email: email.trim().toLowerCase() });
         if (!user) {
             return res.status(401).json({ success: false, message: "Invalid email or password provided." });
+        }
+
+        // Check if email is verified
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                success: false,
+                message: "Please verify your email before logging in. Check your inbox for a verification link.",
+            });
         }
 
         // Verify password against stored hash
