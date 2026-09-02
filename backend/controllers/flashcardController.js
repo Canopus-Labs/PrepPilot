@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
 const { recordActivity } = require("../utils/streakTracker");
+const { escapeRegex } = require("./questionController");
 
 const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) => {
   let score = 3;
@@ -121,7 +122,7 @@ const createFlashcard = async (req, res) => {
 const getUserFlashcards = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { due, category } = req.query;
+    const { due, category, q } = req.query;
 
     const query = { userId };
     if (due === "true") {
@@ -129,6 +130,14 @@ const getUserFlashcards = async (req, res) => {
     }
     if (category && category !== "All") {
       query.category = category;
+    }
+    if (typeof q === "string" && q.trim().length > 0) {
+      const term = q.trim().slice(0, 200);
+      const searchRegex = new RegExp(escapeRegex(term), "i");
+      query.$or = [
+        { question: searchRegex },
+        { answer: searchRegex },
+      ];
     }
 
     const flashcards = await Flashcard.find(query).sort({ dueDate: 1 });
