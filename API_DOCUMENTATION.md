@@ -430,6 +430,100 @@ Errors:
 
 ---
 
+## Adaptive Interview Routes
+
+### Start Adaptive Session
+- `POST /api/adaptive-interview/start`
+- Private
+
+Request Body:
+```json
+{
+  "role": "Software Engineer",
+  "experienceLevel": "Mid-level",
+  "topics": ["React", "Node.js"],
+  "maxQuestions": 5
+}
+```
+Response `201`:
+```json
+{
+  "success": true,
+  "session": {
+    "_id": "6426c5a5...",
+    "role": "Software Engineer",
+    "experienceLevel": "Mid-level",
+    "currentDifficulty": "Medium",
+    "questions": [
+      {
+        "questionText": "Explain the virtual DOM.",
+        "topic": "React",
+        "difficulty": "Medium"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### Submit Answer
+- `POST /api/adaptive-interview/:sessionId/answer`
+- Private
+
+Request Body:
+```json
+{
+  "answer": "The virtual DOM is a lightweight copy..."
+}
+```
+Response `200`:
+```json
+{
+  "success": true,
+  "evaluation": {
+    "correctnessScore": 90,
+    "explanationScore": 85,
+    "overallScore": 88,
+    "approachFeedback": "Good structural explanation.",
+    "generalFeedback": "You covered the main concepts well."
+  },
+  "isCompleted": false,
+  "session": {
+    "currentDifficulty": "Hard",
+    "questions": [
+      { "..." : "..." }
+    ]
+  }
+}
+```
+
+---
+
+### Get Session Report
+- `GET /api/adaptive-interview/:sessionId`
+- Private
+
+Response `200`:
+```json
+{
+  "success": true,
+  "session": {
+    "status": "completed",
+    "finalReport": {
+      "totalScore": 85,
+      "topicPerformance": {
+        "React": 90,
+        "Node.js": 80
+      },
+      "improvementAreas": ["Focus on advanced Node streams."]
+    }
+  }
+}
+```
+
+---
+
 ## Question Routes
 
 ### Add Question to Session
