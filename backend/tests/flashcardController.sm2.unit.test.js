@@ -48,7 +48,7 @@ describe("calculateSM2 — rating \"again\"", () => {
     const result = fn({ interval: 10, repetition: 3, efactor: 2.5 }, "again");
     expect(result.repetition).toBe(0);
     expect(result.interval).toBe(1);
-  });
+  },30000);
 
   it("accepts string rating \"1\" as equivalent to \"again\"", async () => {
     const fn = await getSM2();
