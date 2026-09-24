@@ -1,6 +1,8 @@
-// Determine backend base URL: prefer explicit env var, fallback to localhost:8000 for dev
-export const BASE_URL =
-    import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
+// Keep the base URL host-only because API paths below include /api.
+const configuredBackendUrl = import.meta.env.VITE_BACKEND_URL?.trim();
+export const BASE_URL = (configuredBackendUrl || "http://localhost:8000")
+    .replace(/\/+$/, "")
+    .replace(/\/api$/, "");
 
 export const API_PATHS = {
     AUTH: {

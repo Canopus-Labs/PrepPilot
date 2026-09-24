@@ -6,7 +6,9 @@ import process from 'node:process';
 // Dynamically configure proxy only for local dev when hitting backend directly
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const backend = env.VITE_BACKEND_URL || 'http://localhost:8000';
+  const backend = (env.VITE_BACKEND_URL || 'http://localhost:8000')
+    .replace(/\/+$/, '')
+    .replace(/\/api$/, '');
 
   // If backend is localhost we keep a dev proxy (helps with cookies / same-site)
   const useProxy = /localhost|127\.0\.0\.1/.test(backend);
