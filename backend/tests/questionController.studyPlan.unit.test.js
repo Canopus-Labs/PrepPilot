@@ -119,6 +119,24 @@ describe("buildStudyPlanHandler — malformed problems (issue #2319)", () => {
     expect(res.body.error).toContain("difficulty");
   });
 
+  it.each([
+    ["status", { status: "x".repeat(21) }, "status"],
+    ["description", { description: "x".repeat(2001) }, "description"],
+    ["link", { links: { leetcode: "x".repeat(1001) } }, "links.leetcode"],
+    ["nested title", { sections: [{ topics: [{ subtopics: [{ title: "x".repeat(201) }] }] }] }, "sections[0].topics[0].subtopics[0].title"],
+    ["extra nested text", { metadata: { notes: ["x".repeat(2001)] } }, "metadata.notes[0]"],
+  ])("rejects oversized %s with its problem index", async (_, fields, path) => {
+    const res = await run({
+      problems: [{ title: "Two Sum" }, { title: "Valid title", ...fields }],
+      days: 2,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error).toContain("Invalid problem at index 1");
+    expect(res.body.error).toContain(path);
+  });
+
   it("reports the index of the first bad entry, not just index 0", async () => {
     const res = await run({
       problems: [{ title: "Two Sum" }, null],
@@ -159,6 +177,22 @@ describe("buildStudyPlanHandler — valid requests (issue #2319)", () => {
 
     // easy(1) + hard(3) + omitted-as-medium(2) = 6
     expect(res.body.totalLoad).toBe(6);
+  });
+
+  it("accepts valid nested sheet fields and extra short text", async () => {
+    const problem = {
+      title: "Two Sum",
+      difficulty: "medium",
+      status: "not-started",
+      links: { gfg: "https://example.com/problem", leetcode: "", youtube: "" },
+      sections: [{ topics: [{ subtopics: [{ title: "Warmup", status: "completed" }] }] }],
+      metadata: { notes: ["Try a hash map"] },
+    };
+    const res = await run({ problems: [problem], days: 1 });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.plan[0].problems).toEqual([problem]);
   });
 
   it("keeps scheduling unrecognized difficulty strings as medium", async () => {
