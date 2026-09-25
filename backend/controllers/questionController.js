@@ -264,6 +264,38 @@ const updateQuestionNote = async (req, res) => {
   }
 };
 
+const MAX_STUDY_PLAN_TITLE_LENGTH = 500;
+const MAX_STUDY_PLAN_DIFFICULTY_LENGTH = 20;
+
+/**
+ * Validate a single study-plan problem entry.
+ * Returns an error string describing the first problem found, or null when
+ * the entry is usable. Difficulty stays optional: omitted or unrecognized
+ * values keep scheduling as medium (see problemWeight in
+ * utils/studyPlanScheduler.js), so only the wrong type or an oversized
+ * string is rejected here.
+ */
+const validateStudyPlanProblem = (problem) => {
+  if (problem === null || typeof problem !== "object" || Array.isArray(problem)) {
+    return "must be an object";
+  }
+  if (typeof problem.title !== "string" || problem.title.trim().length === 0) {
+    return "title must be a non-empty string";
+  }
+  if (problem.title.length > MAX_STUDY_PLAN_TITLE_LENGTH) {
+    return `title must be at most ${MAX_STUDY_PLAN_TITLE_LENGTH} characters`;
+  }
+  if (
+    problem.difficulty !== undefined &&
+    problem.difficulty !== null &&
+    (typeof problem.difficulty !== "string" ||
+      problem.difficulty.length > MAX_STUDY_PLAN_DIFFICULTY_LENGTH)
+  ) {
+    return `difficulty must be a string of at most ${MAX_STUDY_PLAN_DIFFICULTY_LENGTH} characters`;
+  }
+  return null;
+};
+
 /**
  * Build a balanced day-by-day study plan from a list of problems.
  * @route POST /api/question/study-plan
@@ -278,6 +310,16 @@ const buildStudyPlanHandler = async (req, res) => {
   }
   if (problems.length > 1000) {
     return res.status(400).json({ success: false, error: "Too many problems" });
+  }
+
+  for (let i = 0; i < problems.length; i++) {
+    const problemError = validateStudyPlanProblem(problems[i]);
+    if (problemError) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid problem at index ${i}: ${problemError}`,
+      });
+    }
   }
 
   const dayCount = Number(days);
