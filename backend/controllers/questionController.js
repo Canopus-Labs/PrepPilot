@@ -264,6 +264,73 @@ const updateQuestionNote = async (req, res) => {
   }
 };
 
+const MAX_STUDY_PLAN_TITLE_LENGTH = 500;
+const MAX_STUDY_PLAN_DIFFICULTY_LENGTH = 20;
+// Sheet problem entries can carry status and links, as well as extra metadata.
+// Keep extra keys, but do not let an arbitrary nested string bypass the cap.
+const STUDY_PLAN_TEXT_LIMITS = {
+  title: 200,
+  difficulty: MAX_STUDY_PLAN_DIFFICULTY_LENGTH,
+  status: 20,
+  category: 50,
+  id: 100,
+  description: 2000,
+  gfg: 1000,
+  leetcode: 1000,
+  youtube: 1000,
+};
+const DEFAULT_STUDY_PLAN_TEXT_LIMIT = 2000;
+
+/**
+ * Validate a single study-plan problem entry. Keep unknown keys and the
+ * scheduler's medium fallback for missing or unrecognized difficulty.
+ */
+const validateStudyPlanProblem = (problem) => {
+  if (problem === null || typeof problem !== "object" || Array.isArray(problem)) {
+    return "must be an object";
+  }
+  if (typeof problem.title !== "string" || problem.title.trim().length === 0) {
+    return "title must be a non-empty string";
+  }
+  if (problem.title.length > MAX_STUDY_PLAN_TITLE_LENGTH) {
+    return `title must be at most ${MAX_STUDY_PLAN_TITLE_LENGTH} characters`;
+  }
+  if (
+    problem.difficulty !== undefined &&
+    problem.difficulty !== null &&
+    typeof problem.difficulty !== "string"
+  ) {
+    return `difficulty must be a string of at most ${MAX_STUDY_PLAN_DIFFICULTY_LENGTH} characters`;
+  }
+
+  // An iterative walk also handles deeply nested JSON without overflowing the stack.
+  const pending = [{ value: problem, path: "" }];
+  while (pending.length > 0) {
+    const { value, path } = pending.pop();
+    const entries = Array.isArray(value)
+      ? value.map((item, index) => [index, item])
+      : Object.entries(value);
+    for (const [key, child] of entries) {
+      const childPath = Array.isArray(value)
+        ? `${path}[${key}]`
+        : path ? `${path}.${key}` : key;
+      if (typeof child === "string") {
+        const limit = childPath === "title"
+          ? MAX_STUDY_PLAN_TITLE_LENGTH
+          : Object.prototype.hasOwnProperty.call(STUDY_PLAN_TEXT_LIMITS, key)
+            ? STUDY_PLAN_TEXT_LIMITS[key]
+            : DEFAULT_STUDY_PLAN_TEXT_LIMIT;
+        if (child.length > limit) {
+          return `${childPath} must be at most ${limit} characters`;
+        }
+      } else if (child !== null && typeof child === "object") {
+        pending.push({ value: child, path: childPath });
+      }
+    }
+  }
+  return null;
+};
+
 /**
  * Build a balanced day-by-day study plan from a list of problems.
  * @route POST /api/question/study-plan
@@ -278,6 +345,16 @@ const buildStudyPlanHandler = async (req, res) => {
   }
   if (problems.length > 1000) {
     return res.status(400).json({ success: false, error: "Too many problems" });
+  }
+
+  for (let i = 0; i < problems.length; i++) {
+    const problemError = validateStudyPlanProblem(problems[i]);
+    if (problemError) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid problem at index ${i}: ${problemError}`,
+      });
+    }
   }
 
   const dayCount = Number(days);
