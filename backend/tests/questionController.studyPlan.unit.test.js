@@ -125,6 +125,7 @@ describe("buildStudyPlanHandler — malformed problems (issue #2319)", () => {
     ["link", { links: { leetcode: "x".repeat(1001) } }, "links.leetcode"],
     ["nested title", { sections: [{ topics: [{ subtopics: [{ title: "x".repeat(201) }] }] }] }, "sections[0].topics[0].subtopics[0].title"],
     ["extra nested text", { metadata: { notes: ["x".repeat(2001)] } }, "metadata.notes[0]"],
+    ["inherited key", { metadata: { toString: "x".repeat(2001) } }, "metadata.toString"],
   ])("rejects oversized %s with its problem index", async (_, fields, path) => {
     const res = await run({
       problems: [{ title: "Two Sum" }, { title: "Valid title", ...fields }],
@@ -188,6 +189,15 @@ describe("buildStudyPlanHandler — valid requests (issue #2319)", () => {
       sections: [{ topics: [{ subtopics: [{ title: "Warmup", status: "completed" }] }] }],
       metadata: { notes: ["Try a hash map"] },
     };
+    const res = await run({ problems: [problem], days: 1 });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.plan[0].problems).toEqual([problem]);
+  });
+
+  it("accepts short text under a key named toString", async () => {
+    const problem = { title: "Two Sum", metadata: { toString: "short note" } };
     const res = await run({ problems: [problem], days: 1 });
 
     expect(res.statusCode).toBe(200);

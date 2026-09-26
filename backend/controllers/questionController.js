@@ -317,7 +317,9 @@ const validateStudyPlanProblem = (problem) => {
       if (typeof child === "string") {
         const limit = childPath === "title"
           ? MAX_STUDY_PLAN_TITLE_LENGTH
-          : STUDY_PLAN_TEXT_LIMITS[key] ?? DEFAULT_STUDY_PLAN_TEXT_LIMIT;
+          : Object.prototype.hasOwnProperty.call(STUDY_PLAN_TEXT_LIMITS, key)
+            ? STUDY_PLAN_TEXT_LIMITS[key]
+            : DEFAULT_STUDY_PLAN_TEXT_LIMIT;
         if (child.length > limit) {
           return `${childPath} must be at most ${limit} characters`;
         }
