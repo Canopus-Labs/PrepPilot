@@ -1,242 +1,624 @@
 const AdaptiveInterviewSession = require("../models/AdaptiveInterviewSession");
 const { generateWithFallback } = require("../utils/geminiHelper");
 
-// Helper to generate a question using Gemini
-async function generateQuestion(role, experienceLevel, topics, currentDifficulty, previousQuestions = []) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+const DIFFICULTIES = ["Easy", "Medium", "Hard"];
+const MAX_QUESTIONS_LIMIT = 20;
+const MAX_TOPIC_LENGTH = 100;
 
-  const prevQTexts = previousQuestions.map(q => q.questionText).join(" | ");
+function cleanGeminiJson(rawText) {
+  if (typeof rawText !== "string" || !rawText.trim()) {
+    throw new Error("AI returned an empty response");
+  }
 
-  const promptText = `
-You are an expert technical interviewer for the role of ${role} (${experienceLevel} experience).
-You need to generate a single interview question.
-Target difficulty: ${currentDifficulty}.
-Allowed topics: ${topics.join(", ")}.
-Previously asked questions (DO NOT repeat these or ask highly similar ones): [${prevQTexts}].
+  let cleaned = rawText.trim();
 
-Output your response strictly as a JSON object matching this structure:
-{
-  "questionText": "The interview question",
-  "topic": "The specific topic of the question (must be one of the allowed topics or closely related)"
-}
-Do not include markdown blocks, just the raw JSON.`;
+  // Remove markdown code fences if Gemini adds them.
+  cleaned = cleaned
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
 
-  const { result } = await generateWithFallback(apiKey, [{ text: promptText }], {
-    systemInstruction: "You are an AI interviewer generating structured JSON questions."
-  });
+  // Extract the first JSON object if extra text is present.
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
 
-  const rawText = await result.response.text();
-  const cleanedText = rawText.replace(/^[\s`]*json\s*/i, "").replace(/^\s*```/i, "").replace(/```$/i, "").trim();
-  
-  return JSON.parse(cleanedText);
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
+
+  return JSON.parse(cleaned);
 }
 
-// Helper to evaluate an answer using Gemini
-async function evaluateAnswer(questionText, topic, difficulty, userAnswer) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+function clampScore(value) {
+  const number = Number(value);
 
-  const promptText = `
-You are an expert technical interviewer evaluating a candidate's answer.
-Question (${difficulty} level, Topic: ${topic}): "${questionText}"
-Candidate's Answer: "${userAnswer}"
+  if (!Number.isFinite(number)) {
+    return 0;
+  }
 
-Evaluate the answer based on correctness, explanation quality, and overall approach.
-Output strictly as a JSON object matching this structure:
-{
-  "correctnessScore": 0-100,
-  "explanationScore": 0-100,
-  "overallScore": 0-100,
-  "approachFeedback": "Brief feedback on their problem-solving approach or thought process.",
-  "generalFeedback": "Constructive feedback on what was good and what could be improved."
-}
-Do not include markdown blocks, just the raw JSON.`;
-
-  const { result } = await generateWithFallback(apiKey, [{ text: promptText }], {
-    systemInstruction: "You are an AI interviewer evaluating answers and returning structured JSON."
-  });
-
-  const rawText = await result.response.text();
-  const cleanedText = rawText.replace(/^[\s`]*json\s*/i, "").replace(/^\s*```/i, "").replace(/```$/i, "").trim();
-  
-  return JSON.parse(cleanedText);
+  return Math.max(0, Math.min(100, Math.round(number)));
 }
 
-// Helper to determine next difficulty
+function calculateOverallScore({
+  correctnessScore,
+  explanationScore,
+  approachScore,
+}) {
+  // Consistent rubric:
+  // Correctness = 50%
+  // Explanation = 25%
+  // Approach = 25%
+  return Math.round(
+    correctnessScore * 0.5 +
+      explanationScore * 0.25 +
+      approachScore * 0.25
+  );
+}
+
 function getNextDifficulty(currentDifficulty, score) {
   if (score >= 80) {
     if (currentDifficulty === "Easy") return "Medium";
     if (currentDifficulty === "Medium") return "Hard";
     return "Hard";
-  } else if (score <= 40) {
+  }
+
+  if (score <= 40) {
     if (currentDifficulty === "Hard") return "Medium";
     if (currentDifficulty === "Medium") return "Easy";
     return "Easy";
   }
-  return currentDifficulty; // Remains the same if score is between 41 and 79
+
+  return currentDifficulty;
 }
 
-// 1. Start a new adaptive session
+function normalizeQuestion(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function selectNextTopic(topics, questions) {
+  if (!Array.isArray(topics) || topics.length === 0) {
+    throw new Error("At least one topic is required");
+  }
+
+  const counts = new Map(topics.map((topic) => [topic, 0]));
+
+  for (const question of questions) {
+    const topic = String(question.topic || "").trim();
+
+    if (counts.has(topic)) {
+      counts.set(topic, counts.get(topic) + 1);
+    }
+  }
+
+  const minimumCount = Math.min(...counts.values());
+
+  const candidates = topics.filter(
+    (topic) => counts.get(topic) === minimumCount
+  );
+
+  // Rotate through equally-used topics rather than always selecting
+  // the first topic when several have the same count.
+  const index = questions.length % candidates.length;
+
+  return candidates[index];
+}
+
+async function generateQuestion({
+  role,
+  interviewType,
+  experienceLevel,
+  topic,
+  currentDifficulty,
+  previousQuestions = [],
+}) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing");
+  }
+
+  const previousQuestionTexts = previousQuestions
+    .map((question) => question.questionText)
+    .filter(Boolean)
+    .join("\n- ");
+
+  const promptText = `
+You are an expert technical interviewer.
+
+Role: ${role}
+Interview type: ${interviewType}
+Candidate experience level: ${experienceLevel}
+Target difficulty: ${currentDifficulty}
+Required topic: ${topic}
+
+Generate exactly ONE interview question.
+
+Requirements:
+- The question must match the role and interview type.
+- The question must be appropriate for the experience level.
+- The question must match the target difficulty.
+- The question must clearly belong to the required topic.
+- Do not repeat or closely paraphrase any previous question.
+
+Previously asked questions:
+- ${previousQuestionTexts || "None"}
+
+Return ONLY valid JSON:
+{
+  "questionText": "string",
+  "topic": "${topic}"
+}
+`;
+
+  const { result } = await generateWithFallback(
+    apiKey,
+    [{ text: promptText }],
+    {
+      systemInstruction:
+        "You generate structured interview questions and return valid JSON only.",
+    }
+  );
+
+  const rawText = await result.response.text();
+  const data = cleanGeminiJson(rawText);
+
+  if (!data.questionText || typeof data.questionText !== "string") {
+    throw new Error("AI returned an invalid question");
+  }
+
+  return {
+    questionText: data.questionText.trim(),
+    topic,
+  };
+}
+
+async function generateUniqueQuestion({
+  role,
+  interviewType,
+  experienceLevel,
+  topic,
+  currentDifficulty,
+  previousQuestions,
+}) {
+  const previousNormalized = new Set(
+    previousQuestions.map((question) =>
+      normalizeQuestion(question.questionText)
+    )
+  );
+
+  // Try twice in case Gemini generates a duplicate.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const generated = await generateQuestion({
+      role,
+      interviewType,
+      experienceLevel,
+      topic,
+      currentDifficulty,
+      previousQuestions,
+    });
+
+    const normalized = normalizeQuestion(generated.questionText);
+
+    if (!previousNormalized.has(normalized)) {
+      return generated;
+    }
+  }
+
+  throw new Error("AI generated a duplicate interview question");
+}
+
+async function evaluateAnswer(
+  questionText,
+  topic,
+  difficulty,
+  interviewType,
+  userAnswer
+) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing");
+  }
+
+  const promptText = `
+You are an expert ${interviewType} interviewer evaluating a candidate's answer.
+
+Question:
+${questionText}
+
+Topic:
+${topic}
+
+Difficulty:
+${difficulty}
+
+Candidate answer:
+${userAnswer}
+
+Evaluate using this rubric:
+
+1. Correctness: technical correctness and completeness.
+2. Explanation: clarity and quality of explanation.
+3. Approach: quality of reasoning, problem-solving method, and structure.
+
+Give each category a score from 0 to 100.
+
+Return ONLY valid JSON:
+{
+  "correctnessScore": 0,
+  "explanationScore": 0,
+  "approachScore": 0,
+  "approachFeedback": "string",
+  "generalFeedback": "string"
+}
+`;
+
+  const { result } = await generateWithFallback(
+    apiKey,
+    [{ text: promptText }],
+    {
+      systemInstruction:
+        "You are an AI interviewer evaluating answers. Return valid JSON only.",
+    }
+  );
+
+  const rawText = await result.response.text();
+  const data = cleanGeminiJson(rawText);
+
+  if (
+    data.correctnessScore === undefined ||
+    data.explanationScore === undefined ||
+    data.approachScore === undefined
+  ) {
+    throw new Error("AI returned incomplete evaluation data");
+  }
+
+  const correctnessScore = clampScore(data.correctnessScore);
+  const explanationScore = clampScore(data.explanationScore);
+  const approachScore = clampScore(data.approachScore);
+
+  return {
+    correctnessScore,
+    explanationScore,
+    approachScore,
+    overallScore: calculateOverallScore({
+      correctnessScore,
+      explanationScore,
+      approachScore,
+    }),
+    approachFeedback:
+      typeof data.approachFeedback === "string"
+        ? data.approachFeedback.trim()
+        : "No approach feedback was provided.",
+    generalFeedback:
+      typeof data.generalFeedback === "string"
+        ? data.generalFeedback.trim()
+        : "No general feedback was provided.",
+  };
+}
+
+function buildFinalReport(questions) {
+  const answeredQuestions = questions.filter(
+    (question) => question.isAnswered
+  );
+
+  if (answeredQuestions.length === 0) {
+    return {
+      totalScore: 0,
+      topicPerformance: {},
+      improvementAreas: ["Complete at least one answered question."],
+    };
+  }
+
+  const totalScore = Math.round(
+    answeredQuestions.reduce(
+      (sum, question) => sum + (question.overallScore || 0),
+      0
+    ) / answeredQuestions.length
+  );
+
+  const topicScores = {};
+  const topicCounts = {};
+
+  for (const question of answeredQuestions) {
+    const topic = question.topic || "General";
+
+    topicScores[topic] =
+      (topicScores[topic] || 0) + (question.overallScore || 0);
+
+    topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+  }
+
+  for (const topic of Object.keys(topicScores)) {
+    topicScores[topic] = Math.round(
+      topicScores[topic] / topicCounts[topic]
+    );
+  }
+
+  const improvementAreas = Object.entries(topicScores)
+    .filter(([, score]) => score < 70)
+    .sort((a, b) => a[1] - b[1])
+    .map(
+      ([topic, score]) =>
+        `${topic}: strengthen this area (average score ${score}%).`
+    );
+
+  if (improvementAreas.length === 0) {
+    improvementAreas.push(
+      "Continue practicing mixed-difficulty questions to maintain consistency."
+    );
+  }
+
+  return {
+    totalScore,
+    topicPerformance: topicScores,
+    improvementAreas,
+  };
+}
+
+// POST /api/adaptive-interview/start
 exports.startSession = async (req, res) => {
   try {
-    const { role, experienceLevel, topics, maxQuestions = 5 } = req.body;
-    
-    if (!role || !experienceLevel || !topics || topics.length === 0) {
-      return res.status(400).json({ error: "Missing required fields: role, experienceLevel, topics" });
+    const {
+      role,
+      interviewType = "Technical",
+      experienceLevel,
+      topics,
+      maxQuestions = 5,
+    } = req.body;
+
+    if (!role || !experienceLevel) {
+      return res.status(400).json({
+        error: "role and experienceLevel are required",
+      });
+    }
+
+    if (!Array.isArray(topics) || topics.length === 0) {
+      return res.status(400).json({
+        error: "topics must be a non-empty array",
+      });
+    }
+
+    const cleanedTopics = [
+      ...new Set(
+        topics
+          .map((topic) => String(topic).trim())
+          .filter(Boolean)
+          .slice(0, 10)
+      ),
+    ];
+
+    if (cleanedTopics.length === 0) {
+      return res.status(400).json({
+        error: "At least one valid topic is required",
+      });
+    }
+
+    if (
+      cleanedTopics.some((topic) => topic.length > MAX_TOPIC_LENGTH)
+    ) {
+      return res.status(400).json({
+        error: "Each topic must be 100 characters or fewer",
+      });
+    }
+
+    const parsedMaxQuestions = Number(maxQuestions);
+
+    if (
+      !Number.isInteger(parsedMaxQuestions) ||
+      parsedMaxQuestions < 1 ||
+      parsedMaxQuestions > MAX_QUESTIONS_LIMIT
+    ) {
+      return res.status(400).json({
+        error: `maxQuestions must be an integer between 1 and ${MAX_QUESTIONS_LIMIT}`,
+      });
     }
 
     const session = new AdaptiveInterviewSession({
       user: req.user._id,
-      role,
-      experienceLevel,
-      topics,
+      role: String(role).trim(),
+      interviewType: String(interviewType).trim() || "Technical",
+      experienceLevel: String(experienceLevel).trim(),
+      topics: cleanedTopics,
       currentDifficulty: "Medium",
-      maxQuestions
+      maxQuestions: parsedMaxQuestions,
     });
 
-    // Generate first question
-    const qData = await generateQuestion(role, experienceLevel, topics, session.currentDifficulty, []);
-    
+    const topic = selectNextTopic(cleanedTopics, []);
+
+    const question = await generateUniqueQuestion({
+      role: session.role,
+      interviewType: session.interviewType,
+      experienceLevel: session.experienceLevel,
+      topic,
+      currentDifficulty: session.currentDifficulty,
+      previousQuestions: [],
+    });
+
     session.questions.push({
-      questionText: qData.questionText,
-      topic: qData.topic,
-      difficulty: session.currentDifficulty
+      questionText: question.questionText,
+      topic: question.topic,
+      difficulty: session.currentDifficulty,
     });
 
     await session.save();
 
-    res.status(201).json({ success: true, session });
+    return res.status(201).json({
+      success: true,
+      session,
+    });
   } catch (error) {
     console.error("[Adaptive] Start Session Error:", error);
-    res.status(500).json({ error: "Failed to start session" });
+
+    const message = String(error.message || "").toLowerCase();
+
+    if (
+      message.includes("ai returned") ||
+      message.includes("gemini") ||
+      message.includes("duplicate")
+    ) {
+      return res.status(502).json({
+        error:
+          "The AI service could not generate a valid interview question. Please try again.",
+      });
+    }
+
+    return res.status(500).json({
+      error: "Failed to start adaptive interview session",
+    });
   }
 };
 
-// 2. Submit an answer and get next question (or complete)
+// POST /api/adaptive-interview/:sessionId/answer
 exports.submitAnswer = async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { answer } = req.body;
 
-    if (!answer) {
-      return res.status(400).json({ error: "Answer is required" });
+    if (!answer || !String(answer).trim()) {
+      return res.status(400).json({
+        error: "Answer is required",
+      });
     }
 
-    const session = await AdaptiveInterviewSession.findOne({ _id: sessionId, user: req.user._id });
+    const session = await AdaptiveInterviewSession.findOne({
+      _id: sessionId,
+      user: req.user._id,
+    });
+
     if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+      return res.status(404).json({
+        error: "Session not found",
+      });
     }
 
     if (session.status === "completed") {
-      return res.status(400).json({ error: "Session already completed" });
+      return res.status(400).json({
+        error: "Session already completed",
+      });
     }
 
-    // Get current question (last one)
     const currentQIndex = session.questions.length - 1;
-    const currentQ = session.questions[currentQIndex];
+    const currentQuestion = session.questions[currentQIndex];
 
-    if (currentQ.isAnswered) {
-      return res.status(400).json({ error: "Current question is already answered. Fetch session for next question." });
+    if (!currentQuestion || currentQuestion.isAnswered) {
+      return res.status(400).json({
+        error: "There is no unanswered question in this session",
+      });
     }
 
-    // Evaluate
-    const evaluation = await evaluateAnswer(currentQ.questionText, currentQ.topic, currentQ.difficulty, answer);
-    
-    session.questions[currentQIndex].userAnswer = answer;
-    session.questions[currentQIndex].isAnswered = true;
-    session.questions[currentQIndex].feedback = {
+    const evaluation = await evaluateAnswer(
+      currentQuestion.questionText,
+      currentQuestion.topic,
+      currentQuestion.difficulty,
+      session.interviewType,
+      String(answer).trim()
+    );
+
+    currentQuestion.userAnswer = String(answer).trim();
+    currentQuestion.isAnswered = true;
+    currentQuestion.feedback = {
       correctnessScore: evaluation.correctnessScore,
       explanationScore: evaluation.explanationScore,
+      approachScore: evaluation.approachScore,
       approachFeedback: evaluation.approachFeedback,
-      generalFeedback: evaluation.generalFeedback
+      generalFeedback: evaluation.generalFeedback,
     };
-    session.questions[currentQIndex].overallScore = evaluation.overallScore;
+    currentQuestion.overallScore = evaluation.overallScore;
 
-    // Determine next difficulty
-    const nextDiff = getNextDifficulty(currentQ.difficulty, evaluation.overallScore);
-    session.currentDifficulty = nextDiff;
+    session.currentDifficulty = getNextDifficulty(
+      currentQuestion.difficulty,
+      evaluation.overallScore
+    );
 
-    let isCompleted = session.questions.length >= session.maxQuestions;
+    const isCompleted =
+      session.questions.length >= session.maxQuestions;
 
-    if (!isCompleted) {
-      // Generate next question
-      const nextQData = await generateQuestion(
-        session.role, 
-        session.experienceLevel, 
-        session.topics, 
-        session.currentDifficulty, 
+    if (isCompleted) {
+      session.status = "completed";
+      session.finalReport = buildFinalReport(session.questions);
+    } else {
+      const nextTopic = selectNextTopic(
+        session.topics,
         session.questions
       );
-      
+
+      const nextQuestion = await generateUniqueQuestion({
+        role: session.role,
+        interviewType: session.interviewType,
+        experienceLevel: session.experienceLevel,
+        topic: nextTopic,
+        currentDifficulty: session.currentDifficulty,
+        previousQuestions: session.questions,
+      });
+
       session.questions.push({
-        questionText: nextQData.questionText,
-        topic: nextQData.topic,
-        difficulty: session.currentDifficulty
+        questionText: nextQuestion.questionText,
+        topic: nextQuestion.topic,
+        difficulty: session.currentDifficulty,
       });
-    } else {
-      // Complete session and generate metrics
-      session.status = "completed";
-      
-      let total = 0;
-      let topicScores = {};
-      let topicCounts = {};
-      
-      session.questions.forEach(q => {
-        total += q.overallScore || 0;
-        if (!topicScores[q.topic]) {
-          topicScores[q.topic] = 0;
-          topicCounts[q.topic] = 0;
-        }
-        topicScores[q.topic] += q.overallScore || 0;
-        topicCounts[q.topic] += 1;
-      });
-
-      Object.keys(topicScores).forEach(t => {
-        topicScores[t] = Math.round(topicScores[t] / topicCounts[t]);
-      });
-
-      // Simple AI call for improvement areas based on weak topics
-      const weakTopics = Object.keys(topicScores).filter(t => topicScores[t] < 70);
-      let improvementAreas = ["Keep practicing your problem-solving skills!"];
-      if (weakTopics.length > 0) {
-        improvementAreas = weakTopics.map(t => `Focus on improving your understanding of ${t}.`);
-      }
-
-      session.finalReport = {
-        totalScore: Math.round(total / session.questions.length),
-        topicPerformance: topicScores,
-        improvementAreas
-      };
     }
 
     await session.save();
 
-    res.json({
+    return res.json({
       success: true,
       evaluation,
       session,
-      isCompleted
+      isCompleted,
     });
   } catch (error) {
     console.error("[Adaptive] Submit Answer Error:", error);
-    res.status(500).json({ error: "Failed to evaluate answer" });
+
+    const message = String(error.message || "").toLowerCase();
+
+    if (
+      message.includes("ai returned") ||
+      message.includes("gemini") ||
+      message.includes("duplicate")
+    ) {
+      return res.status(502).json({
+        error:
+          "The AI service could not process this answer correctly. Please try again.",
+      });
+    }
+
+    return res.status(500).json({
+      error: "Failed to evaluate answer",
+    });
   }
 };
 
-// 3. Get session details (for final report)
+// GET /api/adaptive-interview/:sessionId
 exports.getSessionReport = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const session = await AdaptiveInterviewSession.findOne({ _id: sessionId, user: req.user._id });
-    
+
+    const session = await AdaptiveInterviewSession.findOne({
+      _id: sessionId,
+      user: req.user._id,
+    });
+
     if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+      return res.status(404).json({
+        error: "Session not found",
+      });
     }
 
-    res.json({ success: true, session });
+    return res.json({
+      success: true,
+      session,
+    });
   } catch (error) {
     console.error("[Adaptive] Get Report Error:", error);
-    res.status(500).json({ error: "Failed to fetch session" });
+
+    return res.status(500).json({
+      error: "Failed to fetch session",
+    });
   }
 };
