@@ -232,16 +232,203 @@ const TEMPLATES = {
   },
   "deedy-cv": {
     name: "Deedy CV",
-    code: `\\documentclass[a4paper]{article}
+    code: `\\documentclass[10pt, a4paper]{article}
+
+% ------ Deedy CV (pdfLaTeX-compatible two-column edition) ------
+\\usepackage[left=1.1cm, right=1.1cm, top=1.1cm, bottom=1.1cm]{geometry}
+\\usepackage{paracol}
+\\usepackage{titlesec}
+\\usepackage{enumitem}
+\\usepackage{xcolor}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{tabularx}
+
+\\definecolor{accent}{HTML}{C0392B}
+\\pagestyle{empty}
+\\setlength{\\parindent}{0pt}
+\\setlist[itemize]{leftmargin=1.05em, itemsep=1pt, topsep=2pt, parsep=0pt}
+
+\\titleformat{\\section}{\\color{accent}\\Large\\scshape\\raggedright}{}{0em}{}[\\color{accent}\\titlerule]
+\\titlespacing{\\section}{0pt}{8pt}{4pt}
+
+\\newcommand{\\entry}[4]{%
+  \\textbf{#1} \\hfill {\\small #2}\\\\
+  \\textit{\\small #3} \\hfill {\\small \\textit{#4}}\\\\[2pt]
+}
+
 \\begin{document}
-\\Huge\\textbf{Deedy CV}
+
+% ---------- Header ----------
+\\begin{center}
+  {\\Huge \\textbf{Deedy Das}}\\\\[4pt]
+  \\small
+  \\href{mailto:deedy@email.com}{deedy@email.com} \\;$|$\\;
+  +1-555-012-3456 \\;$|$\\;
+  \\href{https://linkedin.com/in/deedy}{linkedin.com/in/deedy} \\;$|$\\;
+  \\href{https://github.com/deedy}{github.com/deedy}
+\\end{center}
+\\vspace{2pt}
+
+\\columnratio{0.30}
+\\begin{paracol}{2}
+
+% ============ LEFT (narrow) COLUMN ============
+\\section*{Coursework}
+\\small
+\\textbf{Graduate}\\\\
+Machine Learning, Distributed Systems, Advanced Algorithms\\\\[4pt]
+\\textbf{Undergraduate}\\\\
+Data Structures, Operating Systems, Computer Networks, Linear Algebra
+
+\\section*{Skills}
+\\small
+\\textbf{Languages}\\\\
+Python, C++, JavaScript, Go, SQL\\\\[4pt]
+\\textbf{Frameworks}\\\\
+React, Node.js, Django, TensorFlow\\\\[4pt]
+\\textbf{Tools}\\\\
+Git, Docker, Kubernetes, AWS, Linux
+
+\\section*{Links}
+\\small
+Github: \\href{https://github.com/deedy}{github.com/deedy}\\\\
+Blog: \\href{https://deedy.dev}{deedy.dev}\\\\
+LinkedIn: \\href{https://linkedin.com/in/deedy}{in/deedy}
+
+\\section*{Awards}
+\\small
+1\\textsuperscript{st} Place, University Hackathon (2024)\\\\
+Dean's List, 4 consecutive semesters\\\\
+Winner, National Coding Olympiad (2023)
+
+\\switchcolumn
+
+% ============ RIGHT (wide) COLUMN ============
+\\section*{Education}
+\\entry{Massachusetts Institute of Technology}{2022 -- 2026}{B.S. in Computer Science, GPA: 3.9/4.0}{Cambridge, MA}
+
+\\section*{Experience}
+\\entry{Software Engineering Intern}{Summer 2025}{Big Tech Co.}{Remote}
+\\begin{itemize}
+  \\item Built a distributed caching layer that cut median API latency by 32\\% across 40+ services.
+  \\item Shipped a self-serve internal dashboard adopted by 6 engineering teams within one quarter.
+  \\item Wrote integration tests raising backend coverage from 61\\% to 88\\%.
+\\end{itemize}
+
+\\entry{Research Assistant}{Jan 2024 -- Present}{University Systems Lab}{Cambridge, MA}
+\\begin{itemize}
+  \\item Designed a fault-tolerant consensus prototype evaluated on a 50-node testbed.
+  \\item Co-authored a paper accepted at a peer-reviewed systems workshop.
+\\end{itemize}
+
+\\section*{Projects}
+\\entry{PrepPilot}{2025}{Open-source interview-prep platform \\textbar{} React, Node.js, MongoDB}{}
+\\begin{itemize}
+  \\item Contributed features used by thousands of job-seekers preparing for technical interviews.
+\\end{itemize}
+
+\\entry{Gitlytics}{2024}{GitHub analytics dashboard \\textbar{} Python, Flask, PostgreSQL}{}
+\\begin{itemize}
+  \\item Built OAuth-backed pipelines to visualize contributor activity across repositories.
+\\end{itemize}
+
+\\section*{Extra-Curricular Activities}
+\\begin{itemize}
+  \\item Teaching Assistant for Introduction to Algorithms (240+ students).
+  \\item Organizer, campus-wide open-source hackathon (500+ attendees).
+\\end{itemize}
+
+\\end{paracol}
+
 \\end{document}`,
   },
   "harvard-pro": {
-    name: "Harvard Pro",
-    code: `\\documentclass[a4paper]{article}
+    name: "Harvard Professional",
+    code: `\\documentclass[11pt, letterpaper]{article}
+
+% ------ Harvard Professional Resume (classic, conservative, single column) ------
+\\usepackage[left=0.85in, right=0.85in, top=0.7in, bottom=0.7in]{geometry}
+\\usepackage{titlesec}
+\\usepackage{enumitem}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{tabularx}
+
+\\pagestyle{empty}
+\\setlength{\\parindent}{0pt}
+\\setlist[itemize]{leftmargin=1.1em, itemsep=1pt, topsep=1pt, parsep=0pt}
+
+\\titleformat{\\section}{\\normalsize\\scshape\\centering}{}{0em}{}
+\\titlespacing{\\section}{0pt}{10pt}{6pt}
+
+\\newcommand{\\heading}[2]{%
+  \\textbf{#1} \\hfill #2 \\\\
+}
+
 \\begin{document}
-\\Huge\\textbf{Harvard Pro}
+
+% ---------- Header ----------
+\\begin{center}
+  {\\LARGE \\textbf{Alexandra Morgan}}\\\\[3pt]
+  Cambridge, MA \\;$\\vert$\\; +1-555-987-6543 \\;$\\vert$\\;
+  \\href{mailto:alexandra.morgan@email.com}{alexandra.morgan@email.com} \\;$\\vert$\\;
+  \\href{https://linkedin.com/in/alexandramorgan}{linkedin.com/in/alexandramorgan}
+\\end{center}
+
+% ---------- Education ----------
+\\section{Education}
+\\heading{Harvard University, A.B. in Economics}{Cambridge, MA}
+\\textit{GPA: 3.85/4.0, Magna Cum Laude} \\hfill \\textit{Sep 2022 -- May 2026}
+\\begin{itemize}
+  \\item Relevant Coursework: Microeconomic Theory, Statistics, Corporate Finance, Data Analysis
+  \\item Activities: Harvard Consulting Club, Varsity Debate Team, Undergraduate Economics Journal
+\\end{itemize}
+
+% ---------- Experience ----------
+\\section{Experience}
+\\heading{Summer Analyst, Investment Banking Division}{New York, NY}
+\\textit{Global Finance \\& Co.} \\hfill \\textit{Jun 2025 -- Aug 2025}
+\\begin{itemize}
+  \\item Built financial models and comparable-company analyses supporting 3 live M\\&A transactions.
+  \\item Prepared client-facing pitch materials reviewed directly by senior banking leadership.
+  \\item Assisted due-diligence workstreams across a \\$450M cross-border acquisition.
+\\end{itemize}
+
+\\heading{Strategy Intern}{Boston, MA}
+\\textit{Beacon Consulting Group} \\hfill \\textit{Jun 2024 -- Aug 2024}
+\\begin{itemize}
+  \\item Conducted market-sizing analysis for a client's entry into three new regional markets.
+  \\item Synthesized findings from 20+ stakeholder interviews into an executive strategy deck.
+\\end{itemize}
+
+\\heading{Research Assistant, Department of Economics}{Cambridge, MA}
+\\textit{Harvard University} \\hfill \\textit{Sep 2023 -- May 2024}
+\\begin{itemize}
+  \\item Cleaned and analyzed a 50,000-observation panel dataset using Stata and Python.
+  \\item Co-authored a working paper on labor-market outcomes, cited in one peer-reviewed journal.
+\\end{itemize}
+
+% ---------- Leadership & Activities ----------
+\\section{Leadership \\& Activities}
+\\heading{Vice President, Harvard Consulting Club}{Cambridge, MA}
+\\hfill \\textit{Sep 2024 -- Present}
+\\begin{itemize}
+  \\item Lead a 40-member club delivering pro-bono consulting projects to 6 local nonprofits per year.
+\\end{itemize}
+
+\\heading{Captain, Varsity Debate Team}{Cambridge, MA}
+\\hfill \\textit{Sep 2023 -- Present}
+\\begin{itemize}
+  \\item Ranked top-8 nationally; mentor 15 first-year debaters on argumentation and research.
+\\end{itemize}
+
+% ---------- Skills & Interests ----------
+\\section{Skills \\& Interests}
+\\begin{tabularx}{\\textwidth}{@{}l X@{}}
+  \\textbf{Technical:} & Excel (financial modeling), Python, Stata, SQL, PowerPoint \\\\
+  \\textbf{Languages:} & English (native), Spanish (fluent), Mandarin (conversational) \\\\
+  \\textbf{Interests:} & Chess, marathon running, jazz piano \\\\
+\\end{tabularx}
+
 \\end{document}`,
   },
   "modern-tech": {
@@ -354,6 +541,9 @@ const ResumeEditor = () => {
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
+      // Allow the same editor instance to auto-compile when the route changes
+      // between different templates or saved resumes.
+      didInitialCompile.current = false;
       if (isTemplateKey(id)) {
         // Fresh template — no existing resume ID
         const tpl = TEMPLATES[id];
