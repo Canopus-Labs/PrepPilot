@@ -4,12 +4,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import AdaptiveInterview from '../feat-pages/AdaptiveInterview';
 
-// Mock Auth Context
-vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({
-    user: { _id: '123', name: 'Test User' }
-  })
-}));
 
 // Mock User Context
 vi.mock('../context/userContext', () => ({
@@ -40,3 +34,4 @@ describe('AdaptiveInterview Component', () => {
     expect(screen.getByText(/Start Adaptive Session/i)).toBeDefined();
   });
 });
+

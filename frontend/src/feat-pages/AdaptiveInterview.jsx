@@ -1,7 +1,6 @@
 ﻿import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
-import { useAuth } from "../context/AuthContext";
 import { UserContext } from "../context/userContext";
 import { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -615,3 +614,4 @@ const AdaptiveInterview = () => {
 };
 
 export default AdaptiveInterview;
+
