@@ -4,12 +4,13 @@ import DsaSheet from "./components/SheetDetailsPage";
 import SheetList from "./components/SheetList";
 import UserProvider from "./context/userContext";
 import ThemeProvider from "./context/themeContext";
-import React from "react";
+import React, { useEffect } from "react"; 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
+import axiosInstance from "./utils/axiosinstance"; 
 
 import AuthPage from "./pages/Auth/AuthPage";
 import VerifyEmail from "./pages/Auth/verifyEmail";
@@ -51,6 +52,7 @@ import Analytics from "./pages/Analytics";
 
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
 import AdaptiveInterview from "./feat-pages/AdaptiveInterview";
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   const location = useLocation();
@@ -72,6 +74,18 @@ const BuggyComponent = () => {
 };
 
 const App = () => {
+  //Request CSRF token and set cookie when app loads
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        await axiosInstance.get('/api/auth/csrf-token');
+      } catch (error) {
+        console.error('Failed to fetch CSRF token:', error);
+      }
+    };
+    fetchCsrfToken();
+  }, []);
+
   return (
     <ThemeProvider>
       <UserProvider>
