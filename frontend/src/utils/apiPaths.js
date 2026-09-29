@@ -1,20 +1,19 @@
-// Determine backend base URL: prefer explicit env var, fallback to localhost:8000 for dev
+﻿// Determine backend base URL: prefer explicit env var, fallback to localhost:8000 for dev
 export const BASE_URL =
     import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
 
 export const API_PATHS = {
     AUTH: {
-    REGISTER: "/api/auth/register",
-    LOGIN: "/api/auth/login",
-    VERIFY_EMAIL: "/api/auth/verify-email",
-    RESEND_VERIFICATION: "/api/auth/resend-verification",
-    GET_PROFILE: "/api/auth/profile",
-
-    UPDATE_PROFILE: "/api/auth/profile",
-    CHANGE_PASSWORD: "/api/auth/change-password",
-    DELETE_ACCOUNT: "/api/auth/delete-account",
-    LOGOUT: "/api/auth/logout",
-},
+        REGISTER: "/api/auth/register",
+        LOGIN: "/api/auth/login",
+        VERIFY_EMAIL: "/api/auth/verify-email",
+        RESEND_VERIFICATION: "/api/auth/resend-verification",
+        GET_PROFILE: "/api/auth/profile",
+        UPDATE_PROFILE: "/api/auth/profile",
+        CHANGE_PASSWORD: "/api/auth/change-password",
+        DELETE_ACCOUNT: "/api/auth/delete-account",
+        LOGOUT: "/api/auth/logout",
+    },
     IMAGE: {
         UPLOAD_IMAGE: "/api/auth/upload-image", // Upload profile picture
     },
@@ -34,6 +33,12 @@ export const API_PATHS = {
         ADD_TO_SESSION: "/api/question/add", // Add more questions to a session (fixed to match backend)
         PIN: (id) => `/api/question/${id}/pin`, // Pin or Unpin a question (fixed to match backend)
         UPDATE_NOTE: (id) => `/api/question/${id}/note`, // Update/Add a note to a question (fixed to match backend)
+    },
+    ADAPTIVE_INTERVIEW: {
+        START: "/api/adaptive-interview/start",
+        ANSWER: (id) => `/api/adaptive-interview/${id}/answer`,
+        REPORT: (id) => `/api/adaptive-interview/${id}`,
+        HISTORY: "/api/adaptive-interview/history"
     },
     GOOGLE_CALENDAR: {
         CONNECT: "/api/google-calendar/connect",
@@ -64,7 +69,7 @@ export const API_PATHS = {
         GET_ALL: "/api/courses", // GET all free courses
     },
     BEHAVIORAL: {
-    ANALYZE: "/api/behavioral/analyze",
+        ANALYZE: "/api/behavioral/analyze",
     },
     FLASHCARD: {
         CREATE: "/api/flashcards",
