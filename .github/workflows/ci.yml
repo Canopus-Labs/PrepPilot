@@ -30,6 +30,9 @@ jobs:
       
     - name: Build Frontend
       run: cd frontend && npm run build
+
+    - name: Run Tests (Frontend)
+      run: cd frontend && npm test
       
     - name: Run Tests (Backend)
       run: cd backend && npm test

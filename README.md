@@ -142,7 +142,7 @@ npm install
 ```bash
 cd ../frontend
 npm install
-echo "VITE_BACKEND_URL=http://localhost:8000/api" > .env
+echo "VITE_BACKEND_URL=http://localhost:8000" > .env
 ```
 
 #### 4️⃣ Environment Configuration
