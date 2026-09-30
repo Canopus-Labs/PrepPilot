@@ -159,12 +159,15 @@ app.use("/api/courses", generalLimiter, coursesRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
-app.use("/api/roadmaps", roadmapRoutes);
+// Added a generalLimiter to the roadmaps route
+app.use("/api/roadmaps", generalLimiter, roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const adaptiveInterviewRoutes = require("./routes/adaptiveInterviewRoutes");
 app.use("/api/adaptive-interview", generalLimiter, adaptiveInterviewRoutes);
 
+//  moved the `google-calendar` route from the bottom to the top and correctly configured it with `generalLimiter`.
+app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 
 app.use(
   "/uploads",
@@ -235,18 +238,3 @@ process.on("uncaughtException", (err) => {
 });
 
 // Removed the redundant and dangerous unhandledRejection handler from here
-
-app.use("/api/books", generalLimiter, booksRoutes);
-app.use("/api/jobs", jobRoutes);
-
-app.use("/api/google-calendar", googleCalendarRoutes);
-
-
-app.use(
-    "/api/google-calendar",
-    generalLimiter,
-    googleCalendarRoutes
-);
-
-
-app.use("/api/courses", generalLimiter, coursesRoutes);
