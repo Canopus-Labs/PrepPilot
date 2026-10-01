@@ -1,0 +1,1521 @@
+import React, { useMemo, useState } from "react";
+import {
+  Brain,
+  ShieldAlert,
+  AlertTriangle,
+  CheckCircle2,
+  Sparkles,
+  MessageSquare,
+  TrendingUp,
+  Target,
+  BarChart3,
+  Lightbulb,
+  RefreshCw,
+  ArrowRight,
+  Award,
+  Search,
+  HelpCircle,
+  MessageCircleQuestion,
+  CircleAlert,
+  ShieldCheck,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
+const AIInterviewAnswerFollowUpRiskDetector = () => {
+  const [selectedAnswer, setSelectedAnswer] = useState(0);
+  const [activeTab, setActiveTab] = useState("analysis");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [expandedQuestion, setExpandedQuestion] = useState(null);
+
+  const answers = [
+    {
+      question: "Tell me about a project where you used machine learning.",
+      type: "Project Discussion",
+      difficulty: "Medium",
+      original:
+        "I built an AI-based plant disease detection system using a CNN model. I trained the model on a large image dataset and achieved around 95% accuracy. I used data augmentation to improve the model and deployed it using a cloud API. The model was optimized so that it could process images very quickly.",
+      readinessScore: 68,
+      riskLevel: "Medium",
+      challengeableCount: 4,
+      improved:
+        "I built a plant disease detection system using a CNN trained on a labeled image dataset. I used data augmentation to improve generalization and evaluated the model using accuracy and validation performance. I exposed the trained model through an API so users could submit images for prediction. I also optimized inference to reduce response time.",
+      statements: [
+        {
+          statement:
+            "I trained the model on a large image dataset.",
+          risk: "Medium",
+          reason:
+            "An interviewer may ask about dataset size, source, class distribution, and preprocessing.",
+          followUps: [
+            "How large was the dataset?",
+            "Where did the dataset come from?",
+            "How many disease classes did you have?",
+          ],
+          preparation:
+            "Be ready to explain the dataset size, source, class distribution, and preprocessing pipeline.",
+        },
+        {
+          statement:
+            "I achieved around 95% accuracy.",
+          risk: "High",
+          reason:
+            "A specific performance claim naturally invites questions about validation, test data, and possible overfitting.",
+          followUps: [
+            "Was the 95% accuracy measured on training, validation, or test data?",
+            "How did you prevent overfitting?",
+            "What other evaluation metrics did you use?",
+          ],
+          preparation:
+            "Know exactly how the metric was calculated and be prepared to discuss precision, recall, F1-score, and validation methodology.",
+        },
+        {
+          statement:
+            "I used data augmentation to improve the model.",
+          risk: "Medium",
+          reason:
+            "The interviewer may ask which augmentation techniques were used and why they helped.",
+          followUps: [
+            "Which augmentation techniques did you use?",
+            "Why did augmentation improve performance?",
+            "Could augmentation introduce unrealistic images?",
+          ],
+          preparation:
+            "Understand techniques such as rotation, flipping, cropping, scaling, and brightness changes.",
+        },
+        {
+          statement:
+            "The model was optimized so that it could process images very quickly.",
+          risk: "High",
+          reason:
+            "This is a broad performance claim without a measurable result.",
+          followUps: [
+            "How did you optimize inference?",
+            "What was the original and final response time?",
+            "Did you use model quantization or another optimization technique?",
+          ],
+          preparation:
+            "Be prepared to provide actual latency measurements and describe the optimization techniques used.",
+        },
+      ],
+      strengths: [
+        "Clearly explains the main purpose of the project.",
+        "Mentions relevant machine-learning techniques.",
+        "Connects model development with deployment.",
+      ],
+      recommendations: [
+        "Add measurable evidence to performance claims.",
+        "Review the model evaluation methodology.",
+        "Prepare deeper explanations for optimization decisions.",
+      ],
+    },
+    {
+      question: "How did you design the authentication system for your application?",
+      type: "System Design",
+      difficulty: "Hard",
+      original:
+        "I implemented JWT authentication because it is secure and scalable. The token is generated after login and stored in the browser. I used refresh tokens to make the system more secure and the API validates the JWT on every request.",
+      readinessScore: 61,
+      riskLevel: "High",
+      challengeableCount: 4,
+      improved:
+        "I implemented JWT-based authentication where the server issues an access token after successful authentication. The API validates the token on protected requests, while refresh tokens can be used to obtain new access tokens without requiring the user to log in again. The exact storage strategy and token lifetime are selected based on the application's security requirements.",
+      statements: [
+        {
+          statement:
+            "JWT authentication is secure and scalable.",
+          risk: "High",
+          reason:
+            "Security depends on token handling, expiration, storage, signing, and application architecture.",
+          followUps: [
+            "Why did you choose JWT instead of sessions?",
+            "How did you protect the JWT?",
+            "How do you handle token expiration?",
+          ],
+          preparation:
+            "Understand JWT signing, expiration, storage risks, refresh tokens, and revocation strategies.",
+        },
+        {
+          statement:
+            "The token is stored in the browser.",
+          risk: "High",
+          reason:
+            "An interviewer may challenge where the token is stored and ask about XSS and CSRF risks.",
+          followUps: [
+            "Did you use localStorage or cookies?",
+            "How did you protect the token from XSS?",
+            "How did you handle CSRF protection?",
+          ],
+          preparation:
+            "Know the security tradeoffs of HttpOnly cookies, localStorage, sessionStorage, CSRF protection, and XSS.",
+        },
+        {
+          statement:
+            "I used refresh tokens to make the system more secure.",
+          risk: "Medium",
+          reason:
+            "Refresh tokens improve session usability but require careful lifecycle and storage management.",
+          followUps: [
+            "Where did you store refresh tokens?",
+            "How can a refresh token be revoked?",
+            "How long did refresh tokens remain valid?",
+          ],
+          preparation:
+            "Understand refresh-token rotation, expiration, revocation, and secure storage.",
+        },
+        {
+          statement:
+            "The API validates the JWT on every request.",
+          risk: "Low",
+          reason:
+            "This is reasonable, but an interviewer may ask what validation actually includes.",
+          followUps: [
+            "What exactly do you validate in the JWT?",
+            "How do you verify the signature?",
+          ],
+          preparation:
+            "Review signature verification, expiration, issuer, audience, and authorization checks.",
+        },
+      ],
+      strengths: [
+        "Identifies JWT as an authentication mechanism.",
+        "Understands the role of access and refresh tokens.",
+        "Recognizes that protected APIs need authentication validation.",
+      ],
+      recommendations: [
+        "Review JWT security tradeoffs.",
+        "Prepare to explain token storage decisions.",
+        "Understand refresh-token lifecycle management.",
+      ],
+    },
+    {
+      question: "Why did you choose React for your frontend project?",
+      type: "Technology Decision",
+      difficulty: "Medium",
+      original:
+        "I chose React because it is faster than other frontend frameworks and it is the best framework for building modern applications. React also makes everything reusable and automatically improves performance.",
+      readinessScore: 57,
+      riskLevel: "High",
+      challengeableCount: 4,
+      improved:
+        "I chose React because its component-based architecture fits the structure of the application. Reusable components helped us maintain consistent UI patterns, while the ecosystem provided libraries and tools that matched our project requirements. The choice was based on our team's familiarity, project needs, and available ecosystem rather than assuming React is universally better.",
+      statements: [
+        {
+          statement:
+            "React is faster than other frontend frameworks.",
+          risk: "High",
+          reason:
+            "This is a broad comparative claim without defining the workload or benchmark.",
+          followUps: [
+            "Faster in which scenario?",
+            "Which frameworks did you compare?",
+            "What benchmark did you use?",
+          ],
+          preparation:
+            "Avoid unsupported comparisons and be prepared to explain performance based on a specific use case.",
+        },
+        {
+          statement:
+            "React is the best framework for modern applications.",
+          risk: "High",
+          reason:
+            "There is no universally best framework; the interviewer may challenge your criteria.",
+          followUps: [
+            "Why React instead of Vue or Angular?",
+            "What project requirements influenced your decision?",
+            "What are React's disadvantages?",
+          ],
+          preparation:
+            "Understand the tradeoffs between React and alternative frontend technologies.",
+        },
+        {
+          statement:
+            "React makes everything reusable.",
+          risk: "Medium",
+          reason:
+            "React encourages component reuse, but not every part of an application is automatically reusable.",
+          followUps: [
+            "What components did you reuse?",
+            "How did you structure your components?",
+          ],
+          preparation:
+            "Prepare concrete examples of reusable components from your project.",
+        },
+        {
+          statement:
+            "React automatically improves performance.",
+          risk: "High",
+          reason:
+            "React provides mechanisms that can support performance, but performance improvements require appropriate architecture and optimization.",
+          followUps: [
+            "How did React improve your application's performance?",
+            "Did you use memoization?",
+            "How did you measure performance?",
+          ],
+          preparation:
+            "Review React rendering, memoization, lazy loading, code splitting, and performance profiling.",
+        },
+      ],
+      strengths: [
+        "Provides a clear reason for selecting React.",
+        "Recognizes component reusability.",
+        "Connects technology choice with application development.",
+      ],
+      recommendations: [
+        "Replace absolute claims with evidence-based reasoning.",
+        "Prepare comparisons with alternative technologies.",
+        "Know the limitations of the technology you selected.",
+      ],
+    },
+  ];
+
+  const selected = answers[selectedAnswer];
+
+  const overallReadiness = useMemo(() => {
+    return Math.round(
+      answers.reduce(
+        (sum, answer) => sum + answer.readinessScore,
+        0
+      ) / answers.length
+    );
+  }, []);
+
+  const highRiskCount = useMemo(() => {
+    return selected.statements.filter(
+      (item) => item.risk === "High"
+    ).length;
+  }, [selected]);
+
+  const getRiskColor = (risk) => {
+    if (risk === "High") return "text-red-600";
+    if (risk === "Medium") return "text-orange-500";
+    return "text-green-600";
+  };
+
+  const getRiskBackground = (risk) => {
+    if (risk === "High") {
+      return "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30";
+    }
+
+    if (risk === "Medium") {
+      return "bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900/30";
+    }
+
+    return "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30";
+  };
+
+  const getReadinessLabel = (score) => {
+    if (score >= 85) return "Follow-Up Ready";
+    if (score >= 70) return "Mostly Ready";
+    if (score >= 55) return "Needs Practice";
+    return "High Follow-Up Risk";
+  };
+
+  const handleAnalyze = () => {
+    setAnalyzing(true);
+
+    setTimeout(() => {
+      setAnalyzing(false);
+      setActiveTab("analysis");
+    }, 800);
+  };
+
+  const toggleQuestion = (index) => {
+    setExpandedQuestion(
+      expandedQuestion === index ? null : index
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--color-background)] px-4 sm:px-6 py-10">
+      <div className="max-w-7xl mx-auto">
+
+        {/* Header */}
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-10">
+
+          <div className="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center shrink-0">
+            <ShieldAlert
+              size={34}
+              className="text-red-600"
+            />
+          </div>
+
+          <div>
+
+            <h1 className="text-3xl font-bold">
+              AI Interview Answer Follow-Up Risk Detector
+            </h1>
+
+            <p className="text-gray-500 mt-2 leading-6">
+              Identify claims that may trigger difficult follow-up
+              questions and practice defending your answers.
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* Overview */}
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-6 text-center">
+
+            <MessageSquare
+              className="mx-auto text-blue-600"
+              size={30}
+            />
+
+            <p className="text-gray-500 mt-4">
+              Answers Analyzed
+            </p>
+
+            <p className="text-5xl font-black mt-3">
+              32
+            </p>
+
+          </div>
+
+          <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-6 text-center">
+
+            <AlertTriangle
+              className="mx-auto text-red-500"
+              size={30}
+            />
+
+            <p className="text-gray-500 mt-4">
+              Follow-Up Risks
+            </p>
+
+            <p className="text-5xl font-black mt-3">
+              41
+            </p>
+
+          </div>
+
+          <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-6 text-center">
+
+            <ShieldCheck
+              className="mx-auto text-green-600"
+              size={30}
+            />
+
+            <p className="text-gray-500 mt-4">
+              Follow-Up Readiness
+            </p>
+
+            <p className="text-5xl font-black mt-3">
+              {overallReadiness}%
+            </p>
+
+          </div>
+
+          <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-6 text-center">
+
+            <TrendingUp
+              className="mx-auto text-violet-600"
+              size={30}
+            />
+
+            <p className="text-gray-500 mt-4">
+              Questions Practiced
+            </p>
+
+            <p className="text-5xl font-black mt-3">
+              76
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* AI Banner */}
+
+        <div className="mt-10 bg-gradient-to-r from-red-600 via-orange-600 to-violet-600 rounded-3xl p-8 sm:p-10 text-white">
+
+          <div className="flex items-center gap-3 mb-5">
+
+            <Brain size={32} />
+
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              AI Follow-Up Risk Engine
+            </h2>
+
+          </div>
+
+          <p className="leading-8 text-white/90 max-w-5xl">
+            AI identifies statements that naturally invite deeper
+            questioning. It predicts likely follow-up questions, explains
+            why an interviewer may challenge the statement, and helps
+            you practice honest, well-supported responses.
+          </p>
+
+        </div>
+
+        {/* Answer Selector */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex items-center gap-3 mb-8">
+
+            <MessageSquare className="text-red-600" />
+
+            <h2 className="text-2xl font-bold">
+              Select Interview Answer
+            </h2>
+
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+
+            {answers.map((answer, index) => (
+
+              <button
+                key={index}
+                type="button"
+                onClick={() => {
+                  setSelectedAnswer(index);
+                  setActiveTab("analysis");
+                  setExpandedQuestion(null);
+                }}
+                className={`text-left rounded-2xl border p-6 transition hover:-translate-y-1 ${
+                  selectedAnswer === index
+                    ? "border-red-500 bg-red-50 dark:bg-red-900/10"
+                    : "border-gray-200 dark:border-white/10"
+                }`}
+              >
+
+                <div className="flex items-center justify-between gap-4">
+
+                  <span className="inline-block px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm font-semibold">
+                    {answer.type}
+                  </span>
+
+                  <span className="text-sm text-gray-500">
+                    {answer.difficulty}
+                  </span>
+
+                </div>
+
+                <h3 className="font-bold text-lg mt-5 leading-7">
+                  {answer.question}
+                </h3>
+
+                <div className="flex items-center gap-2 mt-5">
+
+                  <span
+                    className={`font-bold ${getRiskColor(
+                      answer.riskLevel
+                    )}`}
+                  >
+                    {answer.readinessScore}%
+                  </span>
+
+                  <span className="text-sm text-gray-500">
+                    follow-up readiness
+                  </span>
+
+                </div>
+
+              </button>
+
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* Selected Question */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <p className="text-sm text-gray-500">
+            Interview Question
+          </p>
+
+          <h2 className="text-2xl sm:text-3xl font-bold mt-3">
+            {selected.question}
+          </h2>
+
+          <div className="flex flex-wrap gap-3 mt-5">
+
+            <span className="px-4 py-2 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300">
+              {selected.type}
+            </span>
+
+            <span className="px-4 py-2 rounded-full bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400">
+              {selected.difficulty}
+            </span>
+
+            <span
+              className={`px-4 py-2 rounded-full font-semibold ${
+                selected.riskLevel === "High"
+                  ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                  : "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400"
+              }`}
+            >
+              {selected.riskLevel} Risk
+            </span>
+
+          </div>
+
+        </div>
+
+        {/* Analyze Button */}
+
+        <div className="mt-8 flex justify-center">
+
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            className="inline-flex items-center gap-3 px-7 py-4 rounded-2xl bg-red-600 text-white font-bold text-lg hover:bg-red-700 transition disabled:opacity-60"
+          >
+
+            {analyzing ? (
+              <>
+                <RefreshCw
+                  size={22}
+                  className="animate-spin"
+                />
+
+                Detecting Follow-Up Risks...
+              </>
+            ) : (
+              <>
+                <Sparkles size={22} />
+
+                Detect Follow-Up Risks
+              </>
+            )}
+
+          </button>
+
+        </div>
+
+        {/* Tabs */}
+
+        <div className="mt-10 flex flex-wrap gap-3">
+
+          {[
+            ["analysis", "Risk Analysis"],
+            ["original", "Original Answer"],
+            ["questions", "Likely Follow-Ups"],
+            ["practice", "Practice Guidance"],
+          ].map(([value, label]) => (
+
+            <button
+              key={value}
+              type="button"
+              onClick={() => setActiveTab(value)}
+              className={`px-5 py-3 rounded-xl font-semibold ${
+                activeTab === value
+                  ? "bg-red-600 text-white"
+                  : "bg-white dark:bg-[#111827] shadow text-gray-600 dark:text-gray-300"
+              }`}
+            >
+              {label}
+            </button>
+
+          ))}
+
+        </div>
+
+        {/* Analysis */}
+
+        {activeTab === "analysis" && (
+
+          <div className="mt-6 grid lg:grid-cols-2 gap-8">
+
+            <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-7">
+
+              <div className="flex items-center gap-3 mb-7">
+
+                <BarChart3 className="text-red-600" />
+
+                <h2 className="text-2xl font-bold">
+                  Follow-Up Readiness Score
+                </h2>
+
+              </div>
+
+              <div className="flex items-center justify-center py-6">
+
+                <div className="relative w-48 h-48 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+
+                  <div className="text-center">
+
+                    <p
+                      className={`text-5xl font-black ${
+                        selected.readinessScore >= 70
+                          ? "text-green-600"
+                          : "text-orange-500"
+                      }`}
+                    >
+                      {selected.readinessScore}%
+                    </p>
+
+                    <p className="text-gray-500 mt-2">
+                      {getReadinessLabel(
+                        selected.readinessScore
+                      )}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="w-full h-4 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+
+                <div
+                  className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-green-500"
+                  style={{
+                    width: `${selected.readinessScore}%`,
+                  }}
+                />
+
+              </div>
+
+              <p className="text-gray-500 mt-5 leading-6">
+                This score estimates how prepared you are to defend the
+                claims and technical decisions mentioned in your answer.
+              </p>
+
+            </div>
+
+            <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-7">
+
+              <div className="flex items-center gap-3 mb-7">
+
+                <CircleAlert className="text-red-500" />
+
+                <h2 className="text-2xl font-bold">
+                  Challengeable Statements
+                </h2>
+
+              </div>
+
+              <div className="text-center py-5">
+
+                <p className="text-6xl font-black text-red-500">
+                  {selected.challengeableCount}
+                </p>
+
+                <p className="text-gray-500 mt-2">
+                  statements may trigger deeper questioning
+                </p>
+
+              </div>
+
+              <div className="space-y-3 mt-5">
+
+                {selected.statements.map((item, index) => (
+
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => toggleQuestion(index)}
+                    className={`w-full text-left rounded-xl border p-4 ${getRiskBackground(
+                      item.risk
+                    )}`}
+                  >
+
+                    <div className="flex items-center justify-between gap-4">
+
+                      <div className="flex items-center gap-3">
+
+                        <AlertTriangle
+                          className={getRiskColor(item.risk)}
+                          size={20}
+                        />
+
+                        <span className="font-semibold">
+                          Statement {index + 1}
+                        </span>
+
+                      </div>
+
+                      <div className="flex items-center gap-3">
+
+                        <span
+                          className={`font-bold ${getRiskColor(
+                            item.risk
+                          )}`}
+                        >
+                          {item.risk} Risk
+                        </span>
+
+                        {expandedQuestion === index ? (
+                          <ChevronUp size={18} />
+                        ) : (
+                          <ChevronDown size={18} />
+                        )}
+
+                      </div>
+
+                    </div>
+
+                    {expandedQuestion === index && (
+
+                      <div className="mt-4 pt-4 border-t border-black/10 dark:border-white/10">
+
+                        <p className="text-sm leading-6">
+                          {item.statement}
+                        </p>
+
+                        <p className="text-sm text-gray-500 mt-3 leading-6">
+                          {item.reason}
+                        </p>
+
+                      </div>
+
+                    )}
+
+                  </button>
+                ))}
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* Original Answer */}
+
+        {activeTab === "original" && (
+
+          <div className="mt-6 bg-white dark:bg-[#111827] rounded-3xl shadow p-7">
+
+            <div className="flex items-center gap-3 mb-6">
+
+              <MessageSquare className="text-orange-500" />
+
+              <h2 className="text-2xl font-bold">
+                Original Answer
+              </h2>
+
+            </div>
+
+            <div className="rounded-2xl bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-900/30 p-7">
+
+              <p className="text-lg leading-8">
+                {selected.original}
+              </p>
+
+            </div>
+
+            <div className="mt-7 grid sm:grid-cols-3 gap-5">
+
+              <div className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-5">
+
+                <p className="text-sm text-gray-500">
+                  Readiness
+                </p>
+
+                <p className="text-3xl font-black text-orange-500 mt-2">
+                  {selected.readinessScore}%
+                </p>
+
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-5">
+
+                <p className="text-sm text-gray-500">
+                  Challengeable Statements
+                </p>
+
+                <p className="text-3xl font-black text-red-500 mt-2">
+                  {selected.challengeableCount}
+                </p>
+
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-5">
+
+                <p className="text-sm text-gray-500">
+                  Status
+                </p>
+
+                <p className="text-xl font-black text-orange-500 mt-3">
+                  Needs Follow-Up Practice
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* Likely Follow-Up Questions */}
+
+        {activeTab === "questions" && (
+
+          <div className="mt-6 bg-white dark:bg-[#111827] rounded-3xl shadow p-7">
+
+            <div className="flex items-center gap-3 mb-8">
+
+              <MessageCircleQuestion className="text-red-600" />
+
+              <h2 className="text-2xl font-bold">
+                Predicted Follow-Up Questions
+              </h2>
+
+            </div>
+
+            <div className="space-y-6">
+
+              {selected.statements.map((item, index) => (
+
+                <div
+                  key={index}
+                  className="rounded-2xl border border-gray-200 dark:border-white/10 p-6"
+                >
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+
+                        <span className="font-black text-red-600">
+                          {index + 1}
+                        </span>
+
+                      </div>
+
+                      <h3 className="text-xl font-bold">
+                        Challengeable Statement
+                      </h3>
+
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-bold ${
+                        item.risk === "High"
+                          ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                          : item.risk === "Medium"
+                          ? "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400"
+                          : "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                      }`}
+                    >
+                      {item.risk} Risk
+                    </span>
+
+                  </div>
+
+                  <div className="mt-5 rounded-xl bg-gray-50 dark:bg-gray-800 p-5">
+
+                    <p className="font-semibold leading-7">
+                      "{item.statement}"
+                    </p>
+
+                  </div>
+
+                  <div className="mt-5">
+
+                    <p className="text-sm text-gray-500 mb-3">
+                      Why could this be challenged?
+                    </p>
+
+                    <p className="leading-7">
+                      {item.reason}
+                    </p>
+
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+
+                    {item.followUps.map((question, questionIndex) => (
+
+                      <div
+                        key={questionIndex}
+                        className="flex items-start gap-3 rounded-xl bg-red-50 dark:bg-red-900/10 p-4"
+                      >
+
+                        <HelpCircle
+                          className="text-red-600 shrink-0 mt-1"
+                          size={20}
+                        />
+
+                        <p className="font-semibold leading-6">
+                          {question}
+                        </p>
+
+                      </div>
+                    ))}
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+        )}
+
+        {/* Practice Guidance */}
+
+        {activeTab === "practice" && (
+
+          <div className="mt-6 grid lg:grid-cols-2 gap-8">
+
+            <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-7">
+
+              <div className="flex items-center gap-3 mb-8">
+
+                <Target className="text-violet-600" />
+
+                <h2 className="text-2xl font-bold">
+                  Follow-Up Practice Guidance
+                </h2>
+
+              </div>
+
+              <div className="space-y-5">
+
+                {selected.statements.map((item, index) => (
+
+                  <div
+                    key={index}
+                    className="rounded-2xl border border-gray-200 dark:border-white/10 p-6"
+                  >
+
+                    <div className="flex items-center gap-3">
+
+                      <span className="w-9 h-9 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center font-black text-violet-600">
+                        {index + 1}
+                      </span>
+
+                      <h3 className="font-bold">
+                        Practice Statement {index + 1}
+                      </h3>
+
+                    </div>
+
+                    <p className="text-gray-500 mt-4 leading-6">
+                      {item.preparation}
+                    </p>
+
+                    <button
+                      type="button"
+                      className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 text-white font-semibold hover:bg-violet-700 transition"
+                    >
+                      Practice Follow-Up
+                      <ArrowRight size={17} />
+                    </button>
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+            <div className="bg-white dark:bg-[#111827] rounded-3xl shadow p-7">
+
+              <div className="flex items-center gap-3 mb-8">
+
+                <BookOpen className="text-blue-600" />
+
+                <h2 className="text-2xl font-bold">
+                  How to Prepare
+                </h2>
+
+              </div>
+
+              <div className="space-y-6">
+
+                {[
+                  {
+                    number: "1",
+                    title: "Know Your Claims",
+                    description:
+                      "Be able to explain every technology, metric, architecture decision, and implementation detail you mention.",
+                  },
+                  {
+                    number: "2",
+                    title: "Prepare the Why",
+                    description:
+                      "For every important decision, prepare a clear explanation of why you selected that approach.",
+                  },
+                  {
+                    number: "3",
+                    title: "Prepare the How",
+                    description:
+                      "Understand how the feature or system actually works rather than memorizing only the final result.",
+                  },
+                  {
+                    number: "4",
+                    title: "Use Evidence",
+                    description:
+                      "Support performance claims with measurements, benchmarks, or specific examples whenever possible.",
+                  },
+                ].map((item) => (
+
+                  <div
+                    key={item.number}
+                    className="flex gap-4"
+                  >
+
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+
+                      <span className="font-black text-blue-600">
+                        {item.number}
+                      </span>
+
+                    </div>
+
+                    <div>
+
+                      <h3 className="font-bold">
+                        {item.title}
+                      </h3>
+
+                      <p className="text-gray-500 mt-1 leading-6">
+                        {item.description}
+                      </p>
+
+                    </div>
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* Recommended Improved Answer */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex items-center justify-between gap-5 mb-7">
+
+            <div className="flex items-center gap-3">
+
+              <ShieldCheck className="text-green-600" />
+
+              <h2 className="text-2xl font-bold">
+                Better-Supported Answer
+              </h2>
+
+            </div>
+
+            <span className="px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 font-semibold">
+              AI Suggested
+            </span>
+
+          </div>
+
+          <div className="rounded-2xl bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 p-7">
+
+            <p className="text-lg leading-8">
+              {selected.improved}
+            </p>
+
+          </div>
+
+          <div className="mt-7 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 p-6">
+
+            <div className="flex items-start gap-3">
+
+              <Lightbulb
+                className="text-blue-600 shrink-0 mt-1"
+                size={22}
+              />
+
+              <div>
+
+                <p className="font-bold text-blue-700 dark:text-blue-400">
+                  Why this version is stronger
+                </p>
+
+                <p className="mt-2 leading-7">
+                  It avoids unsupported absolute claims, provides more
+                  precise technical language, and makes the reasoning
+                  behind important decisions easier to defend.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Strengths */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex items-center gap-3 mb-8">
+
+            <Award className="text-green-600" />
+
+            <h2 className="text-2xl font-bold">
+              What You Are Already Doing Well
+            </h2>
+
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+
+            {selected.strengths.map((strength, index) => (
+
+              <div
+                key={index}
+                className="rounded-2xl bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 p-6"
+              >
+
+                <CheckCircle2
+                  className="text-green-600"
+                  size={24}
+                />
+
+                <p className="font-semibold mt-4 leading-6">
+                  {strength}
+                </p>
+
+              </div>
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* Risk Categories */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex items-center gap-3 mb-8">
+
+            <BarChart3 className="text-indigo-600" />
+
+            <h2 className="text-2xl font-bold">
+              Follow-Up Risk Categories
+            </h2>
+
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            {[
+              {
+                title: "Technical Claims",
+                score: 72,
+                example: "Technologies and implementation details",
+                icon: "💻",
+              },
+              {
+                title: "Performance Claims",
+                score: 54,
+                example: "Speed, accuracy, scalability, latency",
+                icon: "📈",
+              },
+              {
+                title: "Design Decisions",
+                score: 63,
+                example: "Why a particular architecture was selected",
+                icon: "🏗️",
+              },
+              {
+                title: "Project Ownership",
+                score: 81,
+                example: "What you personally implemented",
+                icon: "👤",
+              },
+            ].map((item) => (
+
+              <div
+                key={item.title}
+                className="rounded-2xl border border-gray-200 dark:border-white/10 p-6"
+              >
+
+                <div className="text-4xl">
+                  {item.icon}
+                </div>
+
+                <h3 className="font-bold text-lg mt-4">
+                  {item.title}
+                </h3>
+
+                <p className="text-3xl font-black text-red-600 mt-3">
+                  {item.score}%
+                </p>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Risk level
+                </p>
+
+                <p className="text-sm text-gray-500 mt-3">
+                  {item.example}
+                </p>
+
+                <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 mt-5 overflow-hidden">
+
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 to-red-600"
+                    style={{
+                      width: `${item.score}%`,
+                    }}
+                  />
+
+                </div>
+
+              </div>
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* Progress */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex items-center gap-3 mb-8">
+
+            <TrendingUp className="text-green-600" />
+
+            <h2 className="text-2xl font-bold">
+              Follow-Up Readiness Progress
+            </h2>
+
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+
+            {[
+              {
+                label: "Week 1",
+                score: 51,
+              },
+              {
+                label: "Week 2",
+                score: 59,
+              },
+              {
+                label: "Week 3",
+                score: 67,
+              },
+              {
+                label: "Current",
+                score: 76,
+              },
+            ].map((item) => (
+
+              <div
+                key={item.label}
+                className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-6 text-center"
+              >
+
+                <p className="text-sm text-gray-500">
+                  {item.label}
+                </p>
+
+                <p className="text-4xl font-black text-violet-600 mt-3">
+                  {item.score}%
+                </p>
+
+                <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 mt-5">
+
+                  <div
+                    className="h-full bg-violet-600 rounded-full"
+                    style={{
+                      width: `${item.score}%`,
+                    }}
+                  />
+
+                </div>
+
+              </div>
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* AI Recommendation */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex items-center gap-3 mb-8">
+
+            <Brain className="text-red-600" />
+
+            <h2 className="text-2xl font-bold">
+              AI Personalized Recommendation
+            </h2>
+
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+
+            <div className="rounded-2xl border border-gray-200 dark:border-white/10 p-6">
+
+              <p className="text-sm text-gray-500">
+                Current Strength
+              </p>
+
+              <h3 className="text-xl font-bold mt-2">
+                Project Context
+              </h3>
+
+              <p className="text-gray-500 mt-3 leading-6">
+                You explain the main purpose of your projects clearly.
+                Focus next on defending the technical details behind them.
+              </p>
+
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 dark:border-white/10 p-6">
+
+              <p className="text-sm text-gray-500">
+                Biggest Opportunity
+              </p>
+
+              <h3 className="text-xl font-bold mt-2">
+                Support Your Claims
+              </h3>
+
+              <p className="text-gray-500 mt-3 leading-6">
+                Broad statements about performance, security, or technology
+                choices are the most likely to trigger difficult questions.
+              </p>
+
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 dark:border-white/10 p-6">
+
+              <p className="text-sm text-gray-500">
+                Next Practice Goal
+              </p>
+
+              <h3 className="text-xl font-bold mt-2">
+                Practice the Why
+              </h3>
+
+              <p className="text-gray-500 mt-3 leading-6">
+                For every major project decision, prepare a concise
+                explanation of why you chose that approach and what
+                alternatives you considered.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Final Score */}
+
+        <div className="mt-10 bg-white dark:bg-[#111827] rounded-3xl shadow p-6 sm:p-8">
+
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+
+            <div>
+
+              <h2 className="text-2xl font-bold">
+                Overall Follow-Up Readiness
+              </h2>
+
+              <p className="text-gray-500 mt-3 leading-7 max-w-2xl">
+                Your answers contain useful technical information, but
+                several claims could invite deeper questioning. Practice
+                explaining the evidence, reasoning, and implementation
+                behind each important statement.
+              </p>
+
+            </div>
+
+            <div className="text-center">
+
+              <p className="text-7xl font-black text-red-600">
+                {overallReadiness}%
+              </p>
+
+              <p className="text-gray-500 mt-2">
+                {getReadinessLabel(overallReadiness)}
+              </p>
+
+            </div>
+
+          </div>
+
+          <div className="mt-8 w-full h-5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+
+            <div
+              className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-green-500"
+              style={{
+                width: `${overallReadiness}%`,
+              }}
+            />
+
+          </div>
+
+        </div>
+
+        {/* Final AI Insight */}
+
+        <div className="mt-10 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-10 text-white shadow-xl">
+
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+
+            <div>
+
+              <div className="flex items-center gap-3 mb-4">
+
+                <Brain size={30} />
+
+                <h2 className="text-3xl font-bold">
+                  AI Final Insight
+                </h2>
+
+              </div>
+
+              <p className="leading-8 text-white/90 max-w-3xl">
+                The goal is not to avoid every follow-up question.
+                Strong candidates should be able to explain and defend
+                the important claims they make. Focus on understanding
+                your technical decisions, supporting performance claims
+                with evidence, and being honest about what you personally
+                implemented or know.
+              </p>
+
+            </div>
+
+            <div className="text-center shrink-0">
+
+              <div className="text-6xl">
+                🎯
+              </div>
+
+              <h3 className="mt-4 text-2xl font-bold">
+                Readiness
+              </h3>
+
+              <p className="text-5xl font-black">
+                {overallReadiness}%
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default AIInterviewAnswerFollowUpRiskDetector;
