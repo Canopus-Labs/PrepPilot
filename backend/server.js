@@ -161,7 +161,7 @@ app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
-app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/roadmaps", generalLimiter, roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const adaptiveInterviewRoutes = require("./routes/adaptiveInterviewRoutes");
