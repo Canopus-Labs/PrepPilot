@@ -96,8 +96,10 @@ const AdaptiveInterview = () => {
         
         <form onSubmit={handleStart} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
+            <label htmlFor="adaptive-role" className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
             <input 
+              id="adaptive-role"
+              
               type="text" 
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               value={form.role}
@@ -106,8 +108,10 @@ const AdaptiveInterview = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+            <label htmlFor="adaptive-level" className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
             <select 
+              id="adaptive-level"
+              
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               value={form.experienceLevel}
               onChange={e => setForm({...form, experienceLevel: e.target.value})}
@@ -119,8 +123,10 @@ const AdaptiveInterview = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Topics (comma separated)</label>
+            <label htmlFor="adaptive-topics" className="block text-sm font-medium text-gray-700 mb-1">Topics (comma separated)</label>
             <input 
+              id="adaptive-topics"
+              
               type="text" 
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               value={form.topics}
