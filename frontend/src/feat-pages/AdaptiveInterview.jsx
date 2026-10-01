@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { UserContext } from "../context/userContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const AdaptiveInterview = () => {
-  const { user } = useAuth();
+  const { user } = useContext(UserContext);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -96,8 +96,9 @@ const AdaptiveInterview = () => {
         
         <form onSubmit={handleStart} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
+            <label htmlFor="targetRole" className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
             <input 
+              id="targetRole"
               type="text" 
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               value={form.role}
@@ -106,8 +107,9 @@ const AdaptiveInterview = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+            <label htmlFor="experienceLevel" className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
             <select 
+              id="experienceLevel"
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               value={form.experienceLevel}
               onChange={e => setForm({...form, experienceLevel: e.target.value})}
@@ -119,8 +121,9 @@ const AdaptiveInterview = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Topics (comma separated)</label>
+            <label htmlFor="topics" className="block text-sm font-medium text-gray-700 mb-1">Topics (comma separated)</label>
             <input 
+              id="topics"
               type="text" 
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               value={form.topics}
