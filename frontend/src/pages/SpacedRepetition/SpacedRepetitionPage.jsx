@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  RotateCcw, Brain, CheckCircle2, Clock,
-  Plus, Trash2, BookOpen, Layers, Flame, Award, ChevronRight, RefreshCw, X
+  Brain,
+  CheckCircle2,
+  Clock,
+  Plus,
+  Trash2,
+  BookOpen,
+  Layers,
+  Flame,
+  Award,
+  ChevronRight,
+  RefreshCw,
+  X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -9,7 +19,54 @@ import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
-const CATEGORIES = ["All", "DSA", "Aptitude", "Role-Prep", "AI", "General", "Custom"];
+const CATEGORIES = [
+  "All",
+  "DSA",
+  "Aptitude",
+  "Role-Prep",
+  "AI",
+  "General",
+  "Custom",
+];
+
+const REVIEW_RATINGS = [
+  {
+    rating: "again",
+    label: "Again",
+    color:
+      "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400",
+    intervalColor: "text-rose-300/70",
+  },
+  {
+    rating: "hard",
+    label: "Hard",
+    color:
+      "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-400",
+    intervalColor: "text-amber-300/70",
+  },
+  {
+    rating: "good",
+    label: "Good",
+    color:
+      "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-400",
+    intervalColor: "text-blue-300/70",
+  },
+  {
+    rating: "easy",
+    label: "Easy",
+    color:
+      "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-400",
+    intervalColor: "text-emerald-300/70",
+  },
+];
+
+const formatInterval = (days) => {
+  if (typeof days !== "number" || !Number.isFinite(days)) {
+    return "—";
+  }
+
+  return `${days} ${days === 1 ? "day" : "days"}`;
+};
 
 const notifyStreakMilestones = (newlyUnlockedAchievements) => {
   (newlyUnlockedAchievements || [])
@@ -19,12 +76,17 @@ const notifyStreakMilestones = (newlyUnlockedAchievements) => {
 
 const SpacedRepetitionPage = () => {
   const [flashcards, setFlashcards] = useState([]);
-  const [stats, setStats] = useState({ totalCards: 0, dueCount: 0, masteredCount: 0, reviewedToday: 0 });
+  const [stats, setStats] = useState({
+    totalCards: 0,
+    dueCount: 0,
+    masteredCount: 0,
+    reviewedToday: 0,
+  });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("due"); // "due" | "all"
+  const [activeTab, setActiveTab] = useState("due");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // Review Queue state
+  // Review queue state
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewing, setReviewing] = useState(false);
@@ -39,17 +101,26 @@ const SpacedRepetitionPage = () => {
   const fetchFlashcards = useCallback(async () => {
     try {
       setLoading(true);
-      const isDueQuery = activeTab === "due" ? "?due=true" : "";
-      const catQuery = selectedCategory !== "All" ? `${isDueQuery ? "&" : "?"}category=${selectedCategory}` : "";
 
-      const res = await axiosInstance.get(`${API_PATHS.FLASHCARD.GET_ALL}${isDueQuery}${catQuery}`);
+      const isDueQuery = activeTab === "due" ? "?due=true" : "";
+      const catQuery =
+        selectedCategory !== "All"
+          ? `${isDueQuery ? "&" : "?"}category=${selectedCategory}`
+          : "";
+
+      const res = await axiosInstance.get(
+        `${API_PATHS.FLASHCARD.GET_ALL}${isDueQuery}${catQuery}`
+      );
+
       if (res.data.success) {
         setFlashcards(res.data.flashcards);
         setCurrentIndex(0);
         setIsFlipped(false);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load flashcards");
+      toast.error(
+        err.response?.data?.message || "Failed to load flashcards"
+      );
     } finally {
       setLoading(false);
     }
@@ -58,6 +129,7 @@ const SpacedRepetitionPage = () => {
   const fetchStats = useCallback(async () => {
     try {
       const res = await axiosInstance.get(API_PATHS.FLASHCARD.GET_STATS);
+
       if (res.data.success) {
         setStats(res.data.stats);
       }
@@ -73,27 +145,43 @@ const SpacedRepetitionPage = () => {
 
   const handleReviewRating = async (rating) => {
     if (reviewing || flashcards.length === 0) return;
+
     const currentCard = flashcards[currentIndex];
     if (!currentCard) return;
 
     try {
       setReviewing(true);
-      const res = await axiosInstance.put(API_PATHS.FLASHCARD.REVIEW(currentCard._id), { rating });
+
+      const res = await axiosInstance.put(
+        API_PATHS.FLASHCARD.REVIEW(currentCard._id),
+        { rating }
+      );
+
       if (res.data.success) {
-        toast.success(`Review saved! Next due in ${res.data.flashcard.interval} day(s)`);
+        toast.success(
+          `Review saved! Next due in ${res.data.flashcard.interval} day(s)`
+        );
+
         notifyStreakMilestones(res.data.newlyUnlockedAchievements);
 
-        // Remove current card from queue or move to next
-        const updatedList = flashcards.filter((_, idx) => idx !== currentIndex);
+        // Remove the reviewed card from the queue.
+        const updatedList = flashcards.filter(
+          (_, idx) => idx !== currentIndex
+        );
+
         setFlashcards(updatedList);
         setIsFlipped(false);
+
         if (currentIndex >= updatedList.length) {
           setCurrentIndex(0);
         }
+
         fetchStats();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to submit review");
+      toast.error(
+        err.response?.data?.message || "Failed to submit review"
+      );
     } finally {
       setReviewing(false);
     }
@@ -101,20 +189,31 @@ const SpacedRepetitionPage = () => {
 
   const handleDeleteCard = async (id, e) => {
     e?.stopPropagation();
+
     try {
-      const res = await axiosInstance.delete(API_PATHS.FLASHCARD.DELETE(id));
+      const res = await axiosInstance.delete(
+        API_PATHS.FLASHCARD.DELETE(id)
+      );
+
       if (res.data.success) {
         toast.success("Flashcard removed from deck");
-        setFlashcards((prev) => prev.filter((card) => card._id !== id));
+
+        setFlashcards((prev) =>
+          prev.filter((card) => card._id !== id)
+        );
+
         fetchStats();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete flashcard");
+      toast.error(
+        err.response?.data?.message || "Failed to delete flashcard"
+      );
     }
   };
 
   const handleAddCustomCard = async (e) => {
     e.preventDefault();
+
     if (!newQuestion.trim() || !newAnswer.trim()) {
       toast.error("Please enter both question and answer");
       return;
@@ -122,22 +221,30 @@ const SpacedRepetitionPage = () => {
 
     try {
       setSubmitting(true);
-      const res = await axiosInstance.post(API_PATHS.FLASHCARD.CREATE, {
-        question: newQuestion,
-        answer: newAnswer,
-        category: newCategory,
-      });
+
+      const res = await axiosInstance.post(
+        API_PATHS.FLASHCARD.CREATE,
+        {
+          question: newQuestion,
+          answer: newAnswer,
+          category: newCategory,
+        }
+      );
 
       if (res.data.success) {
         toast.success(res.data.message || "Flashcard created!");
+
         setShowAddModal(false);
         setNewQuestion("");
         setNewAnswer("");
+
         fetchFlashcards();
         fetchStats();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create card");
+      toast.error(
+        err.response?.data?.message || "Failed to create card"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -155,11 +262,14 @@ const SpacedRepetitionPage = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-semibold uppercase tracking-wider mb-3">
                 <Brain size={14} /> Cognitive Revision System (SM-2)
               </div>
+
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
                 Spaced Repetition Deck
               </h1>
+
               <p className="text-gray-400 text-sm md:text-base mt-2 max-w-2xl">
-                Boost long-term recall with adaptive flashcard scheduling. Review key interview patterns at optimal cognitive intervals.
+                Boost long-term recall with adaptive flashcard scheduling.
+                Review key interview patterns at optimal cognitive intervals.
               </p>
             </div>
 
@@ -180,7 +290,9 @@ const SpacedRepetitionPage = () => {
             </div>
             <div>
               <p className="text-xs text-gray-400 font-medium">Due Today</p>
-              <p className="text-2xl font-bold text-white">{stats.dueCount}</p>
+              <p className="text-2xl font-bold text-white">
+                {stats.dueCount}
+              </p>
             </div>
           </div>
 
@@ -190,7 +302,9 @@ const SpacedRepetitionPage = () => {
             </div>
             <div>
               <p className="text-xs text-gray-400 font-medium">Total Deck</p>
-              <p className="text-2xl font-bold text-white">{stats.totalCards}</p>
+              <p className="text-2xl font-bold text-white">
+                {stats.totalCards}
+              </p>
             </div>
           </div>
 
@@ -199,8 +313,12 @@ const SpacedRepetitionPage = () => {
               <Award size={22} />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Mastered (21+ days)</p>
-              <p className="text-2xl font-bold text-white">{stats.masteredCount}</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Mastered (21+ days)
+              </p>
+              <p className="text-2xl font-bold text-white">
+                {stats.masteredCount}
+              </p>
             </div>
           </div>
 
@@ -209,8 +327,12 @@ const SpacedRepetitionPage = () => {
               <Flame size={22} />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Reviewed Today</p>
-              <p className="text-2xl font-bold text-white">{stats.reviewedToday}</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Reviewed Today
+              </p>
+              <p className="text-2xl font-bold text-white">
+                {stats.reviewedToday}
+              </p>
             </div>
           </div>
         </div>
@@ -231,6 +353,7 @@ const SpacedRepetitionPage = () => {
             >
               Due Queue ({stats.dueCount})
             </button>
+
             <button
               onClick={() => setActiveTab("all")}
               className={`flex-1 sm:flex-initial px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
@@ -264,21 +387,29 @@ const SpacedRepetitionPage = () => {
         {/* Content Body */}
         {loading ? (
           <div className="h-80 flex items-center justify-center">
-            <RefreshCw className="animate-spin text-violet-400" size={32} />
+            <RefreshCw
+              className="animate-spin text-violet-400"
+              size={32}
+            />
           </div>
         ) : flashcards.length === 0 ? (
           <div className="bg-[#111827]/60 border border-white/5 rounded-3xl p-12 text-center">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center mb-4 border border-emerald-500/20">
               <CheckCircle2 size={32} />
             </div>
+
             <h3 className="text-xl font-bold text-white mb-2">
-              {activeTab === "due" ? "All Caught Up for Today! 🎉" : "No Flashcards Found"}
+              {activeTab === "due"
+                ? "All Caught Up for Today! 🎉"
+                : "No Flashcards Found"}
             </h3>
+
             <p className="text-gray-400 text-sm max-w-md mx-auto mb-6">
               {activeTab === "due"
                 ? "Great job maintaining your recall! Check back tomorrow or review all cards in your deck."
                 : "Bookmark questions from DSA sheets, Aptitude, or Role Prep to populate your SRS deck."}
             </p>
+
             <button
               onClick={() => setShowAddModal(true)}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-all"
@@ -291,34 +422,51 @@ const SpacedRepetitionPage = () => {
           <div className="max-w-2xl mx-auto">
             {/* Card Progress Indicator */}
             <div className="flex items-center justify-between text-xs text-gray-400 mb-3 px-1">
-              <span>Card {currentIndex + 1} of {flashcards.length}</span>
+              <span>
+                Card {currentIndex + 1} of {flashcards.length}
+              </span>
+
               <span className="bg-violet-500/10 text-violet-400 px-2.5 py-0.5 rounded-full border border-violet-500/20 font-semibold">
                 {currentCard.category}
               </span>
             </div>
 
             {/* Flip Card */}
-            <div className="mb-6 relative w-full min-h-[320px] cursor-pointer" style={{ perspective: "1200px" }}
-              onClick={() => setIsFlipped(!isFlipped)}>
-              
-              {/* Card container */}
-              <div className="relative w-full min-h-[320px] transition-transform duration-500"
-                style={{ transformStyle: "preserve-3d", transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
-
+            <div
+              className="mb-6 relative w-full min-h-[320px] cursor-pointer"
+              style={{ perspective: "1200px" }}
+              onClick={() => setIsFlipped(!isFlipped)}
+            >
+              <div
+                className="relative w-full min-h-[320px] transition-transform duration-500"
+                style={{
+                  transformStyle: "preserve-3d",
+                  transform: isFlipped
+                    ? "rotateY(180deg)"
+                    : "rotateY(0deg)",
+                }}
+              >
                 {/* Front */}
-                <div className="absolute inset-0 rounded-3xl bg-[#111827] border border-white/10 p-6 md:p-8 shadow-2xl flex flex-col justify-between"
-                  style={{ backfaceVisibility: "hidden" }}>
+                <div
+                  className="absolute inset-0 rounded-3xl bg-[#111827] border border-white/10 p-6 md:p-8 shadow-2xl flex flex-col justify-between"
+                  style={{ backfaceVisibility: "hidden" }}
+                >
                   <div>
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                      <span className="inline-flex items-center gap-1"><BookOpen size={14} /> Question</span>
+                      <span className="inline-flex items-center gap-1">
+                        <BookOpen size={14} /> Question
+                      </span>
                       <span>Click card to reveal answer</span>
                     </div>
+
                     <h2 className="text-xl md:text-2xl font-semibold text-white leading-relaxed">
                       {currentCard.question}
                     </h2>
                   </div>
+
                   <div className="pt-6 border-t border-white/5 flex items-center justify-between text-xs text-gray-400">
                     <span>Interval: {currentCard.interval}d</span>
+
                     <span className="text-violet-400 font-semibold flex items-center gap-1">
                       Flip Card <ChevronRight size={14} />
                     </span>
@@ -326,19 +474,29 @@ const SpacedRepetitionPage = () => {
                 </div>
 
                 {/* Back */}
-                <div className="absolute inset-0 rounded-3xl bg-[#111827] border border-emerald-500/20 p-6 md:p-8 shadow-2xl flex flex-col justify-between"
-                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+                <div
+                  className="absolute inset-0 rounded-3xl bg-[#111827] border border-emerald-500/20 p-6 md:p-8 shadow-2xl flex flex-col justify-between"
+                  style={{
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)",
+                  }}
+                >
                   <div>
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                      <span className="inline-flex items-center gap-1 text-emerald-400"><CheckCircle2 size={14} /> Answer</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-400">
+                        <CheckCircle2 size={14} /> Answer
+                      </span>
+
                       <span>Ease Factor: {currentCard.efactor}</span>
                     </div>
+
                     <div className="prose prose-invert max-w-none text-gray-200 text-sm md:text-base leading-relaxed overflow-y-auto max-h-[220px] custom-scrollbar pr-2">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {currentCard.answer}
                       </ReactMarkdown>
                     </div>
                   </div>
+
                   <div className="pt-4 border-t border-white/5 text-xs text-gray-400 text-center">
                     Rate difficulty below to schedule next review
                   </div>
@@ -349,45 +507,29 @@ const SpacedRepetitionPage = () => {
             {/* Rating Buttons */}
             {isFlipped && (
               <div className="grid grid-cols-4 gap-2 md:gap-3">
-                <button
-                  disabled={reviewing}
-                  onClick={() => handleReviewRating("again")}
-                  className="p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold text-xs md:text-sm flex flex-col items-center gap-1 transition-all"
-                >
-                  <span>Again</span>
-                  <span className="text-[10px] font-normal text-rose-300/70">1 day</span>
-                </button>
+                {REVIEW_RATINGS.map(
+                  ({ rating, label, color, intervalColor }) => {
+                    const interval =
+                      currentCard.reviewIntervals?.[rating];
 
-                <button
-                  disabled={reviewing}
-                  onClick={() => handleReviewRating("hard")}
-                  className="p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-xs md:text-sm flex flex-col items-center gap-1 transition-all"
-                >
-                  <span>Hard</span>
-                  <span className="text-[10px] font-normal text-amber-300/70">2 days</span>
-                </button>
+                    return (
+                      <button
+                        key={rating}
+                        disabled={reviewing}
+                        onClick={() => handleReviewRating(rating)}
+                        className={`p-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center gap-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${color}`}
+                      >
+                        <span>{label}</span>
 
-                <button
-                  disabled={reviewing}
-                  onClick={() => handleReviewRating("good")}
-                  className="p-3 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs md:text-sm flex flex-col items-center gap-1 transition-all"
-                >
-                  <span>Good</span>
-                  <span className="text-[10px] font-normal text-blue-300/70">
-                    {Math.max(6, Math.round((currentCard.interval || 1) * currentCard.efactor))} days
-                  </span>
-                </button>
-
-                <button
-                  disabled={reviewing}
-                  onClick={() => handleReviewRating("easy")}
-                  className="p-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs md:text-sm flex flex-col items-center gap-1 transition-all"
-                >
-                  <span>Easy</span>
-                  <span className="text-[10px] font-normal text-emerald-300/70">
-                    {Math.max(7, Math.round((currentCard.interval || 1) * currentCard.efactor * 1.3))} days
-                  </span>
-                </button>
+                        <span
+                          className={`text-[10px] font-normal ${intervalColor}`}
+                        >
+                          {formatInterval(interval)}
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
               </div>
             )}
           </div>
@@ -404,6 +546,7 @@ const SpacedRepetitionPage = () => {
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
                       {card.category}
                     </span>
+
                     <button
                       onClick={(e) => handleDeleteCard(card._id, e)}
                       className="p-1 text-gray-500 hover:text-rose-400 rounded-lg transition-colors"
@@ -412,9 +555,11 @@ const SpacedRepetitionPage = () => {
                       <Trash2 size={16} />
                     </button>
                   </div>
+
                   <h4 className="text-base font-semibold text-white mb-2 line-clamp-2">
                     {card.question}
                   </h4>
+
                   <p className="text-xs text-gray-400 line-clamp-3 mb-4">
                     {card.answer}
                   </p>
@@ -422,7 +567,9 @@ const SpacedRepetitionPage = () => {
 
                 <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-gray-500">
                   <span>Interval: {card.interval}d</span>
-                  <span>Due: {new Date(card.dueDate).toLocaleDateString()}</span>
+                  <span>
+                    Due: {new Date(card.dueDate).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             ))}
@@ -442,7 +589,8 @@ const SpacedRepetitionPage = () => {
             </button>
 
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Plus size={20} className="text-violet-400" /> Create Custom Flashcard
+              <Plus size={20} className="text-violet-400" /> Create Custom
+              Flashcard
             </h3>
 
             <form onSubmit={handleAddCustomCard} className="space-y-4">
@@ -450,13 +598,16 @@ const SpacedRepetitionPage = () => {
                 <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Category
                 </label>
+
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                   className="w-full bg-[#0B0F19] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-violet-500"
                 >
                   {CATEGORIES.filter((c) => c !== "All").map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -465,6 +616,7 @@ const SpacedRepetitionPage = () => {
                 <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Question Prompt
                 </label>
+
                 <textarea
                   rows={3}
                   value={newQuestion}
@@ -478,6 +630,7 @@ const SpacedRepetitionPage = () => {
                 <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Answer / Solution
                 </label>
+
                 <textarea
                   rows={4}
                   value={newAnswer}
@@ -495,10 +648,11 @@ const SpacedRepetitionPage = () => {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm shadow-md"
+                  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "Adding..." : "Add Flashcard"}
                 </button>

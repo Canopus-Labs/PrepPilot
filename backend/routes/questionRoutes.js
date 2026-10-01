@@ -4,6 +4,7 @@ const {
   updateQuestionNote,
   addQuestionToSession,
   getMyQuestions,
+  buildStudyPlanHandler,
 } = require("../controllers/questionController");
 const {protect} = require("../middlewares/authMiddleware");
 
@@ -39,5 +40,11 @@ router.post('/:id/pin',validateTogglePinQuestion,togglePinQuestion);
  * @route POST /api/question/:id/note
  */
 router.post('/:id/note', validateUpdateQuestionNote, updateQuestionNote);
+
+/**
+ * Build a balanced day-by-day study plan from a list of problems.
+ * @route POST /api/question/study-plan
+ */
+router.post('/study-plan', buildStudyPlanHandler);
 
 module.exports = router;

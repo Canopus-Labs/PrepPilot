@@ -3,9 +3,9 @@
     {
       "id": "bit-manipulation",
       "title": "Bit Manipulation Practice",
-      "description": "Master Bit Manipulation techniques -- bitwise operators, counting bits, missing numbers, power of two, bitwise AND/OR/XOR tricks, and Gray code. Covers all essential bit problems for FAANG/MAANG interviews.",
+      "description": "Master essential bit manipulation techniques including bitwise operators, XOR, counting set bits, bit masking, powers of two, and advanced bit manipulation problems.",
       "followers": 1638,
-      "questions": 26,
+      "questions": 20,
       "category": "popular",
       "sections": [
         {
@@ -19,9 +19,9 @@
                   "difficulty": "easy",
                   "status": "not-started",
                   "links": {
+                    "gfg": "https://www.geeksforgeeks.org/count-set-bits-in-an-integer/",
                     "leetcode": "https://leetcode.com/problems/number-of-1-bits/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/count-total-set-bits/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=number+of+1+bits+bit+manipulation"
                   }
                 },
                 {
@@ -29,9 +29,9 @@
                   "difficulty": "easy",
                   "status": "not-started",
                   "links": {
+                    "gfg": "https://www.geeksforgeeks.org/reverse-bits/",
                     "leetcode": "https://leetcode.com/problems/reverse-bits/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/reverse-bits/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=reverse+bits+leetcode+190"
                   }
                 },
                 {
@@ -39,19 +39,49 @@
                   "difficulty": "easy",
                   "status": "not-started",
                   "links": {
+                    "gfg": "https://www.geeksforgeeks.org/problems/power-of-2-1587115620/1",
                     "leetcode": "https://leetcode.com/problems/power-of-two/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/power-of-2/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=power+of+two+bit+manipulation"
                   }
                 },
                 {
-                  "title": "Missing Number",
+                  "title": "Counting Bits",
                   "difficulty": "easy",
                   "status": "not-started",
                   "links": {
-                    "leetcode": "https://leetcode.com/problems/missing-number/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/missing-number-in-array/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/count-total-set-bits/",
+                    "leetcode": "https://leetcode.com/problems/counting-bits/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+338+counting+bits"
+                  }
+                },
+                {
+                  "title": "Brian Kernighan's Algorithm",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/count-set-bits-in-an-integer/",
+                    "leetcode": "https://leetcode.com/problems/number-of-1-bits/",
+                    "youtube": "https://www.youtube.com/results?search_query=Brian+Kernighan+algorithm+count+set+bits"
+                  }
+                },
+                {
+                  "title": "Check Whether the K-th Bit Is Set",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/check-whether-k-th-bit-set-not/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/results?search_query=check+kth+bit+is+set"
+                  }
+                },
+                {
+                  "title": "Set, Clear, and Toggle a Bit",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/bitwise-hacks-for-competitive-programming/",
+                    "leetcode": "",
+                    "youtube": "https://www.youtube.com/results?search_query=set+clear+toggle+bit+bit+manipulation"
                   }
                 }
               ]
@@ -64,9 +94,9 @@
                   "difficulty": "easy",
                   "status": "not-started",
                   "links": {
+                    "gfg": "",
                     "leetcode": "https://leetcode.com/problems/single-number/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/element-appearing-once/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+136+single+number+XOR"
                   }
                 },
                 {
@@ -74,44 +104,29 @@
                   "difficulty": "medium",
                   "status": "not-started",
                   "links": {
-                    "leetcode": "https://leetcode.com/problems/single-number-ii/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/unique-element/",
-                    "youtube": ""
-                  }
-                },
-                {
-                  "title": "Find Two Missing Numbers",
-                  "difficulty": "hard",
-                  "status": "not-started",
-                  "links": {
-                    "leetcode": "",
-                    "gfg": "https://www.geeksforgeeks.org/problems/find-missing-and-repeating2512/",
-                    "youtube": ""
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Bitwise AND / OR Problems",
-              "subtopics": [
-                {
-                  "title": "Bitwise AND of Numbers Range",
-                  "difficulty": "medium",
-                  "status": "not-started",
-                  "links": {
-                    "leetcode": "https://leetcode.com/problems/bitwise-and-of-numbers-range/",
                     "gfg": "",
-                    "youtube": ""
+                    "leetcode": "https://leetcode.com/problems/single-number-ii/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+137+single+number+II"
                   }
                 },
                 {
-                  "title": "Maximum XOR With an Element From Array",
+                  "title": "Single Number III",
                   "difficulty": "medium",
                   "status": "not-started",
                   "links": {
-                    "leetcode": "https://leetcode.com/problems/maximum-xor-with-an-element-from-array/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/maximum-xor-with-an-element-from-array/",
-                    "youtube": ""
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/single-number-iii/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+260+single+number+III"
+                  }
+                },
+                {
+                  "title": "Missing Number Using XOR",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "https://www.geeksforgeeks.org/find-the-missing-number/",
+                    "leetcode": "https://leetcode.com/problems/missing-number/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+268+missing+number+XOR"
                   }
                 },
                 {
@@ -119,24 +134,79 @@
                   "difficulty": "medium",
                   "status": "not-started",
                   "links": {
+                    "gfg": "https://www.geeksforgeeks.org/maximum-xor-of-two-numbers-in-an-array/",
                     "leetcode": "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+421+maximum+XOR+of+two+numbers"
+                  }
+                },
+                {
+                  "title": "Maximum XOR With an Element From Array",
+                  "difficulty": "hard",
+                  "status": "not-started",
+                  "links": {
                     "gfg": "",
-                    "youtube": ""
+                    "leetcode": "https://leetcode.com/problems/maximum-xor-with-an-element-from-array/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+1707+maximum+XOR+with+an+element"
                   }
                 }
               ]
             },
             {
-              "title": "Tricky Bit Problems",
+              "title": "Bitwise AND and OR Problems",
+              "subtopics": [
+                {
+                  "title": "Bitwise AND of Numbers Range",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/bitwise-and-of-numbers-range/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+201+bitwise+AND+of+numbers+range"
+                  }
+                },
+                {
+                  "title": "Bitwise ORs of Subarrays",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/bitwise-ors-of-subarrays/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+898+bitwise+ORs+of+subarrays"
+                  }
+                },
+                {
+                  "title": "Minimum Bit Flips to Convert Number",
+                  "difficulty": "easy",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/minimum-bit-flips-to-convert-number/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+2220+minimum+bit+flips"
+                  }
+                },
+                {
+                  "title": "Sum of Two Integers Without Using Plus",
+                  "difficulty": "medium",
+                  "status": "not-started",
+                  "links": {
+                    "gfg": "",
+                    "leetcode": "https://leetcode.com/problems/sum-of-two-integers/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+371+sum+of+two+integers+bit+manipulation"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Bitmasking and Advanced Problems",
               "subtopics": [
                 {
                   "title": "Gray Code",
                   "difficulty": "medium",
                   "status": "not-started",
                   "links": {
+                    "gfg": "https://www.geeksforgeeks.org/generate-n-bit-gray-codes/",
                     "leetcode": "https://leetcode.com/problems/gray-code/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/gray-code/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+89+gray+code"
                   }
                 },
                 {
@@ -144,19 +214,19 @@
                   "difficulty": "medium",
                   "status": "not-started",
                   "links": {
-                    "leetcode": "https://leetcode.com/problems/total-hamming-distance/",
                     "gfg": "",
-                    "youtube": ""
+                    "leetcode": "https://leetcode.com/problems/total-hamming-distance/",
+                    "youtube": "https://www.youtube.com/results?search_query=leetcode+477+total+hamming+distance"
                   }
                 },
                 {
-                  "title": "Find the Closest Palindrome",
-                  "difficulty": "hard",
+                  "title": "Subsets Using Bitmasking",
+                  "difficulty": "medium",
                   "status": "not-started",
                   "links": {
-                    "leetcode": "https://leetcode.com/problems/find-the-closest-palindrome/",
-                    "gfg": "",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/power-set/",
+                    "leetcode": "https://leetcode.com/problems/subsets/",
+                    "youtube": "https://www.youtube.com/results?search_query=generate+subsets+using+bitmasking"
                   }
                 }
               ]

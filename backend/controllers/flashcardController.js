@@ -2,11 +2,16 @@ const mongoose = require("mongoose");
 const Flashcard = require("../models/Flashcard");
 const { recordActivity } = require("../utils/streakTracker");
 
-const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) => {
+const calculateSM2 = (
+  { interval = 0, repetition = 0, efactor = 2.5 },
+  rating
+) => {
   let score = 3;
+
   if (rating === "again" || rating === "1") score = 1;
   else if (rating === "hard" || rating === "2") score = 2;
-  else if (rating === "medium" || rating === "good" || rating === "3") score = 4;
+  else if (rating === "medium" || rating === "good" || rating === "3")
+    score = 4;
   else if (rating === "easy" || rating === "4") score = 5;
 
   let newRepetition = repetition;
@@ -21,7 +26,8 @@ const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) =
     } else {
       // Hard: keep or slight progression
       newRepetition = repetition > 0 ? repetition : 1;
-      newInterval = repetition <= 1 ? 1 : Math.max(1, Math.round(interval * 1.2));
+      newInterval =
+        repetition <= 1 ? 1 : Math.max(1, Math.round(interval * 1.2));
     }
   } else {
     // Successful recall (Medium / Easy)
@@ -33,17 +39,27 @@ const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) =
       const multiplier = score === 5 ? newEFactor * 1.3 : newEFactor;
       newInterval = Math.max(1, Math.round(interval * multiplier));
     }
+
     newRepetition += 1;
   }
 
-  // Update Ease Factor (EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)))
+  // Update Ease Factor
+  // EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
   const q = score;
-  newEFactor = newEFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+
+  newEFactor =
+    newEFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+
   if (newEFactor < 1.3) newEFactor = 1.3;
-  newEFactor = Math.round(newEFactor * 100 + Number.EPSILON) / 100;
+
+  newEFactor =
+    Math.round(newEFactor * 100 + Number.EPSILON) / 100;
 
   const now = new Date();
-  const nextDueDate = new Date(now.getTime() + newInterval * 24 * 60 * 60 * 1000);
+
+  const nextDueDate = new Date(
+    now.getTime() + newInterval * 24 * 60 * 60 * 1000
+  );
 
   return {
     interval: newInterval,
@@ -51,6 +67,27 @@ const calculateSM2 = ({ interval = 0, repetition = 0, efactor = 2.5 }, rating) =
     efactor: newEFactor,
     dueDate: nextDueDate,
   };
+};
+
+/**
+ * Calculate the predicted review interval for each supported rating.
+ *
+ * These values are previews only. This function does not modify or
+ * save the flashcard's scheduling state.
+ */
+const REVIEW_RATINGS = ["again", "hard", "good", "easy"];
+
+const getReviewIntervals = (flashcard) => {
+  const state = {
+    interval: flashcard.interval,
+    repetition: flashcard.repetition,
+    efactor: flashcard.efactor,
+  };
+
+  return REVIEW_RATINGS.reduce((intervals, rating) => {
+    intervals[rating] = calculateSM2(state, rating).interval;
+    return intervals;
+  }, {});
 };
 
 /**
@@ -81,6 +118,7 @@ const createFlashcard = async (req, res) => {
     // Check if card with exact sourceId already exists for this user
     if (sourceId) {
       const existingCard = await Flashcard.findOne({ userId, sourceId });
+
       if (existingCard) {
         return res.status(200).json({
           success: true,
@@ -124,19 +162,30 @@ const getUserFlashcards = async (req, res) => {
     const { due, category } = req.query;
 
     const query = { userId };
+
     if (due === "true") {
       query.dueDate = { $lte: new Date() };
     }
+
     if (category && category !== "All") {
       query.category = category;
     }
 
     const flashcards = await Flashcard.find(query).sort({ dueDate: 1 });
 
+    // Attach predicted review intervals without changing the stored cards.
+    const flashcardsWithPreview = flashcards.map((flashcard) => {
+      const card = flashcard.toObject();
+
+      card.reviewIntervals = getReviewIntervals(flashcard);
+
+      return card;
+    });
+
     return res.status(200).json({
       success: true,
-      count: flashcards.length,
-      flashcards,
+      count: flashcardsWithPreview.length,
+      flashcards: flashcardsWithPreview,
     });
   } catch (error) {
     return res.status(500).json({
@@ -169,11 +218,13 @@ const reviewFlashcard = async (req, res) => {
     if (!rating) {
       return res.status(400).json({
         success: false,
-        message: "Rating is required. Supported values: 'again', 'hard', 'good', 'easy'.",
+        message:
+          "Rating is required. Supported values: 'again', 'hard', 'good', 'easy'.",
       });
     }
 
     const flashcard = await Flashcard.findOne({ _id: id, userId });
+
     if (!flashcard) {
       return res.status(404).json({
         success: false,
@@ -204,6 +255,7 @@ const reviewFlashcard = async (req, res) => {
       success: true,
       message: "Flashcard review recorded successfully",
       flashcard,
+
       // Streak milestones (e.g. "7-Day Streak") unlocked by this activity,
       // if any — lets the frontend show a toast.
       newlyUnlockedAchievements: newlyUnlocked,
@@ -236,6 +288,7 @@ const deleteFlashcard = async (req, res) => {
     }
 
     const flashcard = await Flashcard.findOneAndDelete({ _id: id, userId });
+
     if (!flashcard) {
       return res.status(404).json({
         success: false,
@@ -267,16 +320,18 @@ const getFlashcardStats = async (req, res) => {
     const now = new Date();
 
     const totalCards = await Flashcard.countDocuments({ userId });
+
     const dueCount = await Flashcard.countDocuments({
       userId,
       dueDate: { $lte: now },
     });
+
     const masteredCount = await Flashcard.countDocuments({
       userId,
       interval: { $gte: 21 },
     });
 
-    // Fix: Clone 'now' before setting hours to avoid in-place mutation of 'now'
+    // Clone 'now' before setting hours to avoid in-place mutation.
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -310,4 +365,5 @@ module.exports = {
   deleteFlashcard,
   getFlashcardStats,
   calculateSM2,
+  getReviewIntervals,
 };

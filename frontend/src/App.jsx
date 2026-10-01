@@ -50,6 +50,7 @@ import ProblemSolver from "./pages/ProblemSolver/ProblemSolver";
 import Analytics from "./pages/Analytics";
 
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
+import AdaptiveInterview from "./feat-pages/AdaptiveInterview";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
   const location = useLocation();
@@ -194,16 +195,26 @@ const App = () => {
                       </PageTransition>
                     }
                   />
-                  <Route
-                    path="/practice"
-                    element={
-                      <ProtectedRoute>
-                        <PageTransition>
-                          <PracticePage />
-                        </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
+                <Route
+                  path="/practice"
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <PracticePage />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/adaptive-interview"
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <AdaptiveInterview />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
                   <Route
                     path="/aptitude"
                     element={

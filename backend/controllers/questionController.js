@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Question = require("../models/Question");
+const { buildStudyPlan } = require("../utils/studyPlanScheduler");
 const Session = require("../models/Session");
 
 // Escape regex metacharacters so user search text is treated as a literal
@@ -263,9 +264,38 @@ const updateQuestionNote = async (req, res) => {
   }
 };
 
+/**
+ * Build a balanced day-by-day study plan from a list of problems.
+ * @route POST /api/question/study-plan
+ */
+const buildStudyPlanHandler = async (req, res) => {
+  const { problems, days } = req.body || {};
+
+  if (!Array.isArray(problems) || problems.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, error: "problems must be a non-empty array" });
+  }
+  if (problems.length > 1000) {
+    return res.status(400).json({ success: false, error: "Too many problems" });
+  }
+
+  const dayCount = Number(days);
+  if (!Number.isInteger(dayCount) || dayCount < 1 || dayCount > 365) {
+    return res.status(400).json({
+      success: false,
+      error: "days must be an integer between 1 and 365",
+    });
+  }
+
+  const result = buildStudyPlan(problems, dayCount);
+  return res.json({ success: true, ...result });
+};
+
 module.exports = {
   addQuestionToSession,
   togglePinQuestion,
   updateQuestionNote,
   getMyQuestions,
+  buildStudyPlanHandler,
 };
