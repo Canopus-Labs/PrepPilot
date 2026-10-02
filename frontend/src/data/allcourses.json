@@ -3367,5 +3367,34 @@
       "link": "https://alison.com/course/prompt-engineering-for-ai-applications"
     }
   ]
-}
+},
+  {
+    "title": "Kubernetes",
+    "cards": [
+      {
+        "icon": "fa-solid fa-dharmachakra",
+        "name": "Introduction to Kubernetes (LFS158)",
+        "source": "The Linux Foundation",
+        "link": "https://training.linuxfoundation.org/training/introduction-to-kubernetes/"
+      },
+      {
+        "icon": "fa-solid fa-dharmachakra",
+        "name": "Learn Kubernetes Basics (Interactive Tutorial)",
+        "source": "Kubernetes.io",
+        "link": "https://kubernetes.io/docs/tutorials/kubernetes-basics/"
+      },
+      {
+        "icon": "fa-solid fa-dharmachakra",
+        "name": "Learn Kubernetes and Start Containerizing Your Applications",
+        "source": "freeCodeCamp",
+        "link": "https://www.freecodecamp.org/news/learn-kubernetes-and-start-containerizing-your-applications"
+      },
+      {
+        "icon": "fa-solid fa-dharmachakra",
+        "name": "Course on Docker and Kubernetes",
+        "source": "freeCodeCamp",
+        "link": "https://www.freecodecamp.org/news/course-on-docker-and-kubernetes/"
+      }
+    ]
+  }
 ]

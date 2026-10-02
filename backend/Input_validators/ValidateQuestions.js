@@ -31,6 +31,26 @@ const getMyQuestionsQuerySchema = z.object({
   pinned: z.enum(["true", "false"]).optional(),
 });
 
+// Schema for a single problem in a study-plan request. Requires a usable,
+// bounded title so a null/string/empty-object entry can never silently ride
+// along into a generated plan (issue #2319). `difficulty` is optional and
+// bounded — buildStudyPlan's documented fallback (unknown/missing -> medium)
+// is intentionally preserved, this only guards against oversized values.
+// `.passthrough()` keeps other legitimate problem fields (links, status,
+// topic, etc.) intact since the scheduler returns the original object as-is.
+const studyPlanProblemSchema = z.object({
+  title: z.string().trim().min(1, "title is required").max(300, "title must be at most 300 characters"),
+  difficulty: z.string().trim().max(20, "difficulty must be at most 20 characters").optional(),
+}).passthrough();
+
+// Schema for POST /api/question/study-plan.
+const buildStudyPlanSchema = z.object({
+  problems: z.array(studyPlanProblemSchema)
+    .min(1, "problems must be a non-empty array")
+    .max(1000, "Too many problems (max 1000)"),
+  days: z.coerce.number().int().min(1, "days must be at least 1").max(365, "days must be at most 365"),
+});
+
 
 // Helper for consistent error responses
 const handleValidationError = (res, error) => {
@@ -84,10 +104,28 @@ const validateGetMyQuestions = (req, res, next) => {
   }
 };
 
+// Middleware for POST /api/question/study-plan. Rejects null/string/empty
+// entries and problems without a usable title with 400 before they ever
+// reach buildStudyPlan; zod's per-item error path (e.g. "problems.2.title")
+// tells the client exactly which index was invalid. The parsed result is
+// assigned back to req.body so the handler receives the trimmed title/
+// difficulty and coerced numeric days — not the raw input — otherwise a
+// title with leading/trailing whitespace could pass the trimmed length
+// check yet still exceed 300 chars once it reaches the generated plan.
+const validateBuildStudyPlan = (req, res, next) => {
+  try {
+    req.body = buildStudyPlanSchema.parse(req.body);
+    next();
+  } catch (error) {
+    return handleValidationError(res, error);
+  }
+};
+
 module.exports = {
   validateAddQuestionToSession,
   validateTogglePinQuestion,
   validateUpdateQuestionNote,
   validateGetMyQuestions,
+  validateBuildStudyPlan,
   handleValidationError
 };

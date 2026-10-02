@@ -75,6 +75,63 @@ def reverse_array(arr):
         left += 1
         right -= 1
 \`\`\``;
+  it("does not treat headings inside fenced code blocks as section boundaries", () => {
+    const fencedCodeText = `## Steps
+1. First step.
+
+\`\`\`python
+# Complexity
+print("hello")
+\`\`\`
+
+## Complexity
+O(n)`;
+
+    const section = extractSection(fencedCodeText, "Steps");
+
+    expect(section).toContain("# Complexity");
+    expect(section).toContain('print("hello")');
+    expect(section).not.toContain("## Complexity");
+    expect(section).not.toContain("O(n)");
+  });
+
+  it("does not treat four-space-indented backticks as fenced code", () => {
+    const text = `## Steps
+1. First step.
+
+    \`\`\`python
+    # Complexity
+    print("hello")
+    \`\`\`
+
+## Complexity
+O(n)`;
+
+    const section = extractSection(text, "Steps");
+
+    expect(section).toContain("1. First step.");
+    expect(section).toContain("    # Complexity");
+    expect(section).toContain('    print("hello")');
+    expect(section).not.toContain("O(n)");
+  });
+
+  it("does not treat headings inside the Code section as section boundaries", () => {
+    const codeText = `## Code
+\`\`\`python
+# Steps
+print("hello")
+\`\`\`
+
+## Complexity
+O(n)`;
+
+    const section = extractSection(codeText, "Code");
+
+    expect(section).toContain("# Steps");
+    expect(section).toContain('print("hello")');
+    expect(section).not.toContain("## Complexity");
+    expect(section).not.toContain("O(n)");
+  });
 
   it("extracts the section text between the heading and the next heading", () => {
     const section = extractSection(text, "Approach");

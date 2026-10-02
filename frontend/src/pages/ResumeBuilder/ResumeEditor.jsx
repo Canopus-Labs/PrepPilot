@@ -232,16 +232,219 @@ const TEMPLATES = {
   },
   "deedy-cv": {
     name: "Deedy CV",
-    code: `\\documentclass[a4paper]{article}
+    code: `\\documentclass[10pt, a4paper]{article}
+\\usepackage[margin=0.6in, top=0.5in, bottom=0.5in]{geometry}
+\\usepackage{paracol}
+\\usepackage{titlesec}
+\\usepackage{enumitem}
+\\usepackage{xcolor}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{fontawesome5}
+
+\\definecolor{accent}{HTML}{9333EA}
+\\pagenumbering{gobble}
+\\setlength{\\parindent}{0pt}
+\\setlist[itemize]{leftmargin=1.1em, itemsep=1pt, topsep=2pt, parsep=0pt}
+
+\\titleformat{\\section}{\\bfseries\\large\\color{accent}}{}{0em}{}[\\vspace{-0.35em}\\color{accent}\\hrule\\vspace{0.3em}]
+\\titlespacing*{\\section}{0pt}{0.9em}{0.3em}
+
+\\newcommand{\\entry}[3]{\\textbf{#1} \\hfill \\textit{#2}\\\\[-1pt] \\textit{#3}\\\\[2pt]}
+
 \\begin{document}
-\\Huge\\textbf{Deedy CV}
+
+%----------------- HEADER -----------------
+\\begin{center}
+  {\\Huge\\textbf{Rohan Verma}}\\\\[4pt]
+  \\small
+  \\faEnvelope\\ \\href{mailto:rohan.verma@email.com}{rohan.verma@email.com} \\quad
+  \\faPhone\\ +91 90000 12345 \\quad
+  \\faLinkedin\\ \\href{https://linkedin.com/in/rohanverma}{linkedin.com/in/rohanverma} \\quad
+  \\faGithub\\ \\href{https://github.com/rohanverma}{github.com/rohanverma}
+\\end{center}
+\\vspace{4pt}
+
+\\columnratio{0.34}
+\\begin{paracol}{2}
+
+%============= LEFT COLUMN =============
+\\section*{Education}
+\\textbf{B.Tech, Computer Science}\\\\
+\\textit{National Institute of Technology}\\\\
+\\small 2021 -- 2025 \\quad CGPA: 8.9/10
+
+\\vspace{6pt}
+\\textbf{Higher Secondary (XII)}\\\\
+\\textit{Delhi Public School}\\\\
+\\small 2019 -- 2021 \\quad 95.2\\%
+
+\\section*{Skills}
+\\textbf{Languages}\\\\
+\\small C++, Python, JavaScript, SQL, Java
+
+\\vspace{4pt}
+\\textbf{Frameworks}\\\\
+\\small React, Node.js, Express, Django, Tailwind CSS
+
+\\vspace{4pt}
+\\textbf{Tools}\\\\
+\\small Git, Docker, AWS, MongoDB, PostgreSQL, Linux
+
+\\section*{Coursework}
+\\small
+\\begin{itemize}
+  \\item Data Structures \\& Algorithms
+  \\item Operating Systems
+  \\item Database Management Systems
+  \\item Computer Networks
+  \\item Object-Oriented Design
+\\end{itemize}
+
+\\section*{Achievements}
+\\small
+\\begin{itemize}
+  \\item Rank 312, ICPC Regionals 2024
+  \\item 3\\textsuperscript{rd} Place, Smart India Hackathon
+  \\item 5-star Coder, CodeChef
+\\end{itemize}
+
+\\switchcolumn
+
+%============= RIGHT COLUMN =============
+\\section*{Experience}
+\\entry{Software Engineering Intern}{May 2024 -- Aug 2024}{Bluewave Technologies, Remote}
+\\begin{itemize}
+  \\item Built and shipped 6+ REST API endpoints powering the core billing service, cutting invoice-generation latency by 40\\%.
+  \\item Wrote integration tests that raised backend coverage from 54\\% to 88\\%, catching regressions before release.
+  \\item Collaborated with 4 engineers in an agile sprint cycle, shipping features on a 2-week release cadence.
+\\end{itemize}
+
+\\entry{Backend Developer (Part-time)}{Jan 2024 -- Apr 2024}{Campus Connect, On-site}
+\\begin{itemize}
+  \\item Designed a MongoDB schema for a student-club management platform serving 2,000+ users.
+  \\item Implemented JWT-based authentication and role-based access control for admin and member roles.
+\\end{itemize}
+
+\\section*{Projects}
+\\entry{PrepMate -- Interview Prep Tracker}{React, Node.js, MongoDB}{Personal Project}
+\\begin{itemize}
+  \\item Built a full-stack app to track DSA practice with spaced-repetition flashcards and progress analytics.
+  \\item Deployed on Render with CI/CD via GitHub Actions; 150+ active users within the first month.
+\\end{itemize}
+
+\\entry{Distributed Cache Simulator}{Go, gRPC}{Coursework Project}
+\\begin{itemize}
+  \\item Simulated a distributed LRU cache cluster with consistent hashing and gRPC-based node communication.
+  \\item Benchmarked hit-rate and latency across cluster sizes, presenting results in a written report.
+\\end{itemize}
+
+\\section*{Leadership}
+\\entry{Technical Lead}{Aug 2023 -- Present}{Developer Student Club}
+\\begin{itemize}
+  \\item Mentored 20+ juniors through weekly DSA and web-development workshops.
+  \\item Organized a 24-hour hackathon with 150+ participants and 12 industry-sponsored problem statements.
+\\end{itemize}
+
+\\end{paracol}
 \\end{document}`,
   },
   "harvard-pro": {
     name: "Harvard Pro",
-    code: `\\documentclass[a4paper]{article}
+    code: `\\documentclass[11pt, letterpaper]{article}
+\\usepackage[margin=0.9in]{geometry}
+\\usepackage{mathptmx}
+\\usepackage{titlesec}
+\\usepackage{enumitem}
+\\usepackage[hidelinks]{hyperref}
+
+\\pagenumbering{gobble}
+\\setlength{\\parindent}{0pt}
+\\setlist[itemize]{leftmargin=1.15em, itemsep=1pt, topsep=2pt, parsep=0pt}
+
+\\titleformat{\\section}{\\normalsize\\scshape\\centering}{}{0em}{}[\\vspace{-6pt}\\rule{\\textwidth}{0.4pt}]
+\\titlespacing*{\\section}{0pt}{10pt}{6pt}
+
+\\newcommand{\\heading}[4]{%
+  \\textbf{#1} \\hfill #2\\\\
+  \\textit{#3} \\hfill \\textit{#4}\\\\[2pt]
+}
+
 \\begin{document}
-\\Huge\\textbf{Harvard Pro}
+
+%----------------- HEADER -----------------
+\\begin{center}
+  {\\Large\\scshape Priya Menon}\\\\[3pt]
+  \\small
+  Boston, MA \\ $\\cdot$ \\ +1 (617) 555-0148 \\ $\\cdot$ \\
+  \\href{mailto:priya.menon@email.com}{priya.menon@email.com} \\ $\\cdot$ \\
+  \\href{https://linkedin.com/in/priyamenon}{linkedin.com/in/priyamenon}
+\\end{center}
+
+%----------------- SUMMARY -----------------
+\\section*{Summary}
+Economics and Computer Science student with experience in financial modeling, data analysis, and client-facing consulting work. Skilled in translating quantitative analysis into clear, actionable recommendations for cross-functional teams.
+
+%----------------- EDUCATION -----------------
+\\section*{Education}
+\\heading{Harvard University}{Cambridge, MA}{Bachelor of Arts in Economics and Computer Science}{Sept. 2022 -- May 2026}
+\\begin{itemize}
+  \\item GPA: 3.85/4.0. Relevant coursework: Data Structures, Microeconomic Theory, Applied Statistics, Corporate Finance.
+  \\item Activities: Harvard Financial Analysts Club, Undergraduate Consulting Group.
+\\end{itemize}
+
+%----------------- EXPERIENCE -----------------
+\\section*{Experience}
+\\heading{Summer Analyst}{New York, NY}{Meridian Capital Partners}{June 2025 -- Aug. 2025}
+\\begin{itemize}
+  \\item Built a discounted cash flow model to evaluate a \\$120M mid-market acquisition, presented to the deal team.
+  \\item Conducted comparable-company analysis across 15 industry peers to support valuation recommendations.
+  \\item Automated a recurring reporting workflow in Excel and Python, saving the team 5 hours per week.
+\\end{itemize}
+
+\\heading{Business Analyst Intern}{Boston, MA}{Northbridge Consulting Group}{June 2024 -- Aug. 2024}
+\\begin{itemize}
+  \\item Analyzed operational data for a healthcare client, identifying \\$400K in annual cost-saving opportunities.
+  \\item Co-authored a 20-page client-facing strategy deck presented to the VP of Operations.
+\\end{itemize}
+
+\\heading{Research Assistant}{Cambridge, MA}{Harvard Department of Economics}{Jan. 2024 -- May 2024}
+\\begin{itemize}
+  \\item Cleaned and analyzed a 50,000-observation panel dataset in Stata for a labor-economics working paper.
+  \\item Reviewed literature and summarized findings for a faculty-authored publication.
+\\end{itemize}
+
+%----------------- LEADERSHIP -----------------
+\\section*{Leadership \\& Activities}
+\\heading{Vice President}{Cambridge, MA}{Harvard Financial Analysts Club}{Sept. 2024 -- Present}
+\\begin{itemize}
+  \\item Lead a 40-member club hosting weekly workshops on valuation, markets, and case interviews.
+  \\item Coordinated recruiting events with 6 partner firms, connecting 100+ students to internship pipelines.
+\\end{itemize}
+
+%----------------- PROJECTS -----------------
+\\section*{Projects}
+\\heading{Undergraduate Thesis: Pricing Behavior in Retail Markets}{Cambridge, MA}{Harvard Department of Economics}{Sept. 2025 -- Present}
+\\begin{itemize}
+  \\item Building a regression model on 3 years of retail pricing data to study demand elasticity across product categories.
+  \\item Presenting preliminary findings at the department's undergraduate research symposium in Spring 2026.
+\\end{itemize}
+
+\\heading{Case Competition: Market Entry Strategy}{Cambridge, MA}{Harvard Undergraduate Consulting Group}{Nov. 2024}
+\\begin{itemize}
+  \\item Developed a market-entry recommendation for a simulated consumer goods client, placing top 3 of 24 teams.
+\\end{itemize}
+
+%----------------- SKILLS -----------------
+\\section*{Skills \\& Interests}
+\\textbf{Technical:} Excel (financial modeling), Python, SQL, Stata, Bloomberg Terminal, PowerPoint\\\\
+\\textbf{Languages:} English (native), Hindi (fluent), Spanish (conversational)\\\\
+\\textbf{Interests:} Long-distance running, chess, personal finance writing
+
+%----------------- CERTIFICATIONS -----------------
+\\section*{Certifications}
+\\heading{Bloomberg Market Concepts (BMC)}{}{Bloomberg}{2025}
+\\heading{Financial Modeling \\& Valuation Analyst (FMVA)}{}{Corporate Finance Institute}{2024}
+
 \\end{document}`,
   },
   "modern-tech": {
@@ -401,15 +604,16 @@ const ResumeEditor = () => {
 
   // Completion meter
   useEffect(() => {
-    const sections = [
-      "\\section{Education}",
-      "\\section{Experience}",
-      "\\section{Projects}",
-      "\\section{Skills}",
-      "\\section{Achievements}",
-    ];
-    const done = sections.filter(s => code.includes(s)).length;
-    setCompletion(Math.round((done / sections.length) * 100));
+    const sectionKeywords = ["Education", "Experience", "Projects", "Skills", "Achievements"];
+    // Match both \section{...} and \section*{...} (starred sections are common
+    // in single-column/CV-style templates like Harvard Pro and Deedy CV), and
+    // match on keyword rather than exact title so "Technical Skills",
+    // "Skills & Interests", etc. still count.
+    const sectionTitles = [...code.matchAll(/\\section\*?\{([^}]*)\}/g)].map(m => m[1]);
+    const done = sectionKeywords.filter(
+      keyword => sectionTitles.some(title => title.includes(keyword))
+    ).length;
+    setCompletion(Math.round((done / sectionKeywords.length) * 100));
   }, [code]);
 
   const compileLatex = async () => {

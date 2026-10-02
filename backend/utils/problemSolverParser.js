@@ -50,17 +50,82 @@ function extractSection(text, heading) {
     `(?:#{1,3}\\s*\\**|\\**)[ ]*${heading}[ ]*\\**(?:\\s*:)?`,
     "i"
   );
-  const match = text.match(headingPattern);
-  if (!match) return null;
 
-  const start = match.index + match[0].length;
-  const next = text.slice(start).match(
-    /(?:^|\n)(?:#{1,3}\s*\**)[ ]*[A-Z][^#\n]*\**:?(?=\n|$)/
-  );
-  const end = next ? next.index : text.length;
+  const lines = text.split("\n");
+  let codeFence = null;
+  let headingMatch = null;
+  let headingStart = 0;
+
+  for (let i = 0, offset = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const fenceMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+
+    if (fenceMatch) {
+      const fence = fenceMatch[1];
+      const trailing = fenceMatch[2].trim();
+
+      if (codeFence === null) {
+        codeFence = fence;
+      } else if (
+        fence[0] === codeFence[0] &&
+        fence.length >= codeFence.length &&
+        trailing === ""
+      ) {
+        codeFence = null;
+      }
+    } else if (codeFence === null) {
+      const match = line.match(headingPattern);
+
+      if (match) {
+        headingMatch = match;
+        headingStart = offset + match.index;
+        break;
+      }
+    }
+
+    offset += line.length + 1;
+  }
+
+  if (!headingMatch) return null;
+
+  const start = headingStart + headingMatch[0].length;
+  const remaining = text.slice(start);
+  const remainingLines = remaining.split("\n");
+
+  codeFence = null;
+  let end = remaining.length;
+  let offset = 0;
+
+  for (const line of remainingLines) {
+    const fenceMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+
+    if (fenceMatch) {
+      const fence = fenceMatch[1];
+      const trailing = fenceMatch[2].trim();
+
+      if (codeFence === null) {
+        codeFence = fence;
+      } else if (
+        fence[0] === codeFence[0] &&
+        fence.length >= codeFence.length &&
+        trailing === ""
+      ) {
+        codeFence = null;
+      }
+    } else if (
+      codeFence === null &&
+      /^(?:#{1,3}\s*\**)[ ]*[A-Z][^#\n]*\**:?$/.test(line)
+    ) {
+      end = offset;
+      break;
+    }
+
+    offset += line.length + 1;
+  }
 
   let section = text.slice(start, start + end).trim();
   section = section.replace(/\n+$/, "");
+
   return section || null;
 }
 

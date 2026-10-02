@@ -1,11 +1,9 @@
-import React, { act, useEffect } from "react";
-import { createRoot } from "react-dom/client";
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
+import { renderHook, act } from "@testing-library/react";
 import {
     useMemoryMatch,
     DIFFICULTY_CONFIGS,
 } from "./useMemoryMatch";
-import { act, renderHook } from "@testing-library/react";
 
 vi.mock("../utils/matchAudio", () => ({
     playCardFlipSound: vi.fn(),
@@ -19,10 +17,13 @@ vi.mock("../utils/dailySeed", () => ({
     getDailySeed: vi.fn(() => 12345),
 }));
 
-
 describe("useMemoryMatch", () => {
     beforeEach(() => {
-        localStorage.clear();
+        // Make sure localStorage is available in the test environment.
+        if (typeof localStorage !== "undefined") {
+            localStorage.clear();
+        }
+
         vi.clearAllMocks();
         vi.useRealTimers();
     });
@@ -131,6 +132,7 @@ describe("useMemoryMatch", () => {
         expect(Object.values(counts)).toEqual(
             expect.arrayContaining(Array(8).fill(2))
         );
+
         expect(Object.keys(counts)).toHaveLength(8);
 
         expect(

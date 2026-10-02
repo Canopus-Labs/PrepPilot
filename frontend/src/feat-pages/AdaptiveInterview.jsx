@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { UserContext } from "../context/userContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const AdaptiveInterview = () => {
-  const { user } = useAuth();
+  const { user } = useContext(UserContext);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

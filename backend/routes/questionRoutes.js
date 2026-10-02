@@ -9,7 +9,7 @@ const {
 const {protect} = require("../middlewares/authMiddleware");
 
 const { generalLimiter } = require("../middlewares/rateLimiter");
-const { validateAddQuestionToSession, validateTogglePinQuestion, validateUpdateQuestionNote, validateGetMyQuestions } = require('../Input_validators/ValidateQuestions');
+const { validateAddQuestionToSession, validateTogglePinQuestion, validateUpdateQuestionNote, validateGetMyQuestions, validateBuildStudyPlan } = require('../Input_validators/ValidateQuestions');
 const router = express.Router();
 
 /**
@@ -45,6 +45,6 @@ router.post('/:id/note', validateUpdateQuestionNote, updateQuestionNote);
  * Build a balanced day-by-day study plan from a list of problems.
  * @route POST /api/question/study-plan
  */
-router.post('/study-plan', buildStudyPlanHandler);
+router.post('/study-plan', validateBuildStudyPlan, buildStudyPlanHandler);
 
 module.exports = router;

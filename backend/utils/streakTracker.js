@@ -61,22 +61,23 @@ const resetStreakIfMissed = (user) => {
   return false;
 };
 
-// BREAKING CHANGE: now resolves to { user, newlyUnlockedMilestones } instead of
-// just `user`. Every caller of recordActivity() needs a small update — see below.
+// Resolves to { user, newlyUnlocked } - the same `newlyUnlocked` key every caller
+// (flashcardController, userSheetProgressController) reads. Always resolves to an
+// object (never null) so callers can safely destructure the result.
 const recordActivity = async (userId, mongooseSession = null) => {
   const query = User.findById(userId);
   if (mongooseSession) query.session(mongooseSession);
   const user = await query;
-  if (!user) return null;
+  if (!user) return { user: null, newlyUnlocked: [] };
 
   if (user.lastPracticeDate) {
     const diff = getUTCDayDifference(user.lastPracticeDate, new Date());
-    if (diff === 0) return { user, newlyUnlockedMilestones: [] };
+    if (diff === 0) return { user, newlyUnlocked: [] };
   }
 
-  const newlyUnlockedMilestones = applyStreakForActivity(user);
+  const newlyUnlocked = applyStreakForActivity(user);
   await user.save(mongooseSession ? { session: mongooseSession } : undefined);
-  return { user, newlyUnlockedMilestones };
+  return { user, newlyUnlocked };
 };
 
 module.exports = {
