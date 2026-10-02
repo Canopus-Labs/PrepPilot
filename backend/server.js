@@ -83,7 +83,7 @@ app.use((req, res, next) => {
   }
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with, x-csrf-token");
     return res.sendStatus(200);
   }
   next();
