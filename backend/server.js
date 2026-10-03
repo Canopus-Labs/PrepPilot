@@ -3,9 +3,10 @@ const validateEnv = require("./config/validateEnv.js");
 validateEnv();
 const express = require("express");
 
-// Global unhandled promise rejection handler
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Promise Rejection:", err);
+// Global unhandled promise rejection handler (single registration: log only,
+// so one stray rejection does not take the whole server down).
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Promise Rejection:", reason);
 });
 //caleder------------
 const googleCalendarRoutes = require("./routes/googleCalendarRoutes");
@@ -156,10 +157,11 @@ app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", generalLimiter, jobRoutes);
 const coursesRoutes = require("./routes/coursesRoutes");
 app.use("/api/courses", generalLimiter, coursesRoutes);
+app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
-app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/roadmaps", generalLimiter, roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const adaptiveInterviewRoutes = require("./routes/adaptiveInterviewRoutes");
@@ -230,25 +232,3 @@ process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
   process.exit(1);
 });
-
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  process.exit(1);
-});
-
-app.use("/api/books", generalLimiter, booksRoutes);
-app.use("/api/jobs", jobRoutes);
-
-app.use("/api/google-calendar", googleCalendarRoutes);
-
-
-app.use(
-    "/api/google-calendar",
-    generalLimiter,
-    googleCalendarRoutes
-);
-
-
-app.use("/api/courses", generalLimiter, coursesRoutes);
-
