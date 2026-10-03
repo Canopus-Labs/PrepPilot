@@ -1,6 +1,15 @@
 import axios from "axios";
 import { BASE_URL } from "./apiPaths";
 
+// The function that reads the cookie
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+
 const axiosInstance = axios.create({
     baseURL: BASE_URL,
     timeout: 80000,
@@ -12,7 +21,7 @@ const axiosInstance = axios.create({
     },
 });
 
-// ── Request interceptor — attach access token ─────────────────────────────
+// ── Request interceptor — attach access token & CSRF token ─────────────────
 axiosInstance.interceptors.request.use(
     (config) => {
         const accessToken =
@@ -21,6 +30,14 @@ axiosInstance.interceptors.request.use(
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+
+        // The CSRF token header
+        const csrfToken = getCookie("csrfToken");
+        if (csrfToken) {
+            config.headers["x-csrf-token"] = csrfToken;
+        }
+        
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -83,13 +100,18 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             try {
+                const csrfToken = getCookie("csrfToken"); 
+
                 // The refresh token is in an httpOnly cookie — just POST
                 const { data } = await axios.post(
                     `${BASE_URL}/api/auth/refresh`,
                     {},
                     {
                         withCredentials: true,
-                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        headers: { 
+                            "X-Requested-With": "XMLHttpRequest",
+                            ...(csrfToken && { "x-csrf-token": csrfToken }) 
+                        },
                     }
                 );
 
