@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto"); 
 const { registerUser, loginUser, verifyEmail, resendVerificationEmail, getUserProfile, updateUserProfile, changePassword, deleteUserAccount, refreshToken, logoutUser } = require("../controllers/authController");
 const { protect } = require("../middlewares/authMiddleware");
 const { upload, validateImageUpload } = require("../middlewares/uploadMiddleware");
@@ -13,19 +14,26 @@ const {
   sensitiveAuthLimiter,
 } = require("../middlewares/rateLimiter");
 
-// CSRF protection is applied globally in server.js via lusca.csrf(), with a
-// blocklist exempting every JWT-bearer-only route. Only /refresh and /logout
-// (below) are actually enforced at runtime, since they're the two routes
-// that authenticate off the ambient refreshToken cookie.
+// CSRF protection is applied globally in server.js via lusca.csrf(), with a blocklist exempting every JWT-bearer-only route. Only /refresh and /logout
+// (below) are actually enforced at runtime, since they're the two routes that authenticate off the ambient refreshToken cookie.
 
 // Auth Routes
 router.post("/register", authLimiter, validateUserSignup, registerUser);
 router.post("/login", loginLimiter, validateUserLogin, loginUser);
 
-// Frontend should GET this once on app load to prime the XSRF-TOKEN cookie
-// before it ever needs to call /refresh or /logout.
+// Frontend should GET this once on app load to prime the XSRF-TOKEN cookie before it ever needs to call /refresh or /logout.
 router.get("/csrf-token", generalLimiter, (req, res) => {
-  res.json({ success: true });
+  
+  const csrfToken = crypto.randomBytes(32).toString("hex");
+  
+ 
+  res.cookie("csrfToken", csrfToken, {
+    httpOnly: false, 
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
+  });
+
+  res.json({ success: true, csrfToken });
 });
 
 router.post("/refresh", authLimiter, csrfHeaderCheck, validateRefreshToken, refreshToken);
