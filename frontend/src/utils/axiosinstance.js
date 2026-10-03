@@ -12,19 +12,74 @@ const axiosInstance = axios.create({
     },
 });
 
-// ── Request interceptor — attach access token ─────────────────────────────
+// ── CSRF token (double-submit cookie) ─────────────────────────────────────
+// /api/auth/refresh and /api/auth/logout authenticate off an httpOnly cookie, so
+// the backend requires an X-CSRF-Token header matching its `csrfToken` cookie.
+// The token is fetched from the backend (which also sets the cookie) and kept in
+// memory; the cookie lives on the API origin so it can't be read from here.
+let csrfToken = null;
+let csrfRequest = null;
+
+function fetchCsrfToken(force = false) {
+    if (csrfToken && !force) return Promise.resolve(csrfToken);
+    if (!csrfRequest) {
+        csrfRequest = axios
+            .get(`${BASE_URL}/api/auth/csrf-token`, { withCredentials: true })
+            .then(({ data }) => {
+                if (!data?.csrfToken) throw new Error("No CSRF token in response");
+                csrfToken = data.csrfToken;
+                return csrfToken;
+            })
+            .finally(() => {
+                csrfRequest = null;
+            });
+    }
+    return csrfRequest;
+}
+
+const isLogoutUrl = (url = "") => url.includes("/auth/logout");
+
+// ── Request interceptor — attach access token (+ CSRF token for logout) ───
 axiosInstance.interceptors.request.use(
-    (config) => {
+    async (config) => {
         const accessToken =
             localStorage.getItem("token") ||
             sessionStorage.getItem("token");
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+        if (isLogoutUrl(config.url)) {
+            config.headers["X-CSRF-Token"] = await fetchCsrfToken();
+        }
         return config;
     },
     (error) => Promise.reject(error)
 );
+
+// POST /api/auth/refresh with a CSRF token; if the token was rejected (cookie
+// expired or rotated), fetch a fresh one and retry exactly once.
+async function requestTokenRefresh(allowCsrfRetry = true) {
+    const token = await fetchCsrfToken();
+    try {
+        return await axios.post(
+            `${BASE_URL}/api/auth/refresh`,
+            {},
+            {
+                withCredentials: true,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRF-Token": token,
+                },
+            }
+        );
+    } catch (err) {
+        if (allowCsrfRetry && err.response?.status === 403) {
+            await fetchCsrfToken(true);
+            return requestTokenRefresh(false);
+        }
+        throw err;
+    }
+}
 
 // ── Token refresh state ───────────────────────────────────────────────────
 let isRefreshing = false;
@@ -84,14 +139,7 @@ axiosInstance.interceptors.response.use(
 
             try {
                 // The refresh token is in an httpOnly cookie — just POST
-                const { data } = await axios.post(
-                    `${BASE_URL}/api/auth/refresh`,
-                    {},
-                    {
-                        withCredentials: true,
-                        headers: { "X-Requested-With": "XMLHttpRequest" },
-                    }
-                );
+                const { data } = await requestTokenRefresh();
 
                 const newToken = data.accessToken;
                 if (!newToken) throw new Error("No access token in refresh response");
@@ -126,6 +174,13 @@ axiosInstance.interceptors.response.use(
             } finally {
                 isRefreshing = false;
             }
+        }
+
+        // Logout rejected for a stale/missing CSRF token: refresh it and retry once.
+        if (status === 403 && isLogoutUrl(url) && !originalRequest._csrfRetried) {
+            originalRequest._csrfRetried = true;
+            originalRequest.headers["X-CSRF-Token"] = await fetchCsrfToken(true);
+            return axiosInstance(originalRequest);
         }
 
         if (status === 500) {
