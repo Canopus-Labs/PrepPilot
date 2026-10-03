@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import request from 'supertest';
 import express from 'express';
 import mongoose from 'mongoose';
 import adaptiveInterviewRoutes from '../routes/adaptiveInterviewRoutes';
-import AdaptiveInterviewSession from '../models/AdaptiveInterviewSession';
 
 // Mock the AI Helper
 vi.mock('../utils/geminiHelper', () => ({
