@@ -107,6 +107,7 @@ const ProgressTrackerDashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [importing, setImporting] = useState(false);
   const [importPreview, setImportPreview] = useState(null);
+  const [importItems, setImportItems] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -187,43 +188,94 @@ const ProgressTrackerDashboard = () => {
 
   const handleImportFile = (file) => {
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = async (e) => {
+
+    reader.onload = (e) => {
       try {
         const json = JSON.parse(e.target.result);
-        const items = json.items || (Array.isArray(json) ? json : []);
+
+        const items = Array.isArray(json)
+          ? json
+          : json && Array.isArray(json.items)
+            ? json.items
+            : null;
+
+        if (!items || items.length === 0) {
+          toast.error("Invalid backup format or no records to import");
+
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+          return;
+        }
+
+        setImportItems(items);
         setImportPreview(items.length);
         setImporting(true);
       } catch {
         toast.error("Invalid JSON file");
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     };
+
+    reader.onerror = () => {
+      toast.error("Failed to read the backup file");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    };
+
     reader.readAsText(file);
   };
 
   const confirmImport = async () => {
-    if (!importPreview) return;
+    if (!Array.isArray(importItems) || importItems.length === 0) {
+      return;
+    }
+
+    const itemsToImport = importItems;
+
     setImporting(false);
     setImportPreview(null);
+    setImportItems(null);
+
     try {
-      const res = await axiosInstance.post("/api/user/sheet-progress/import", {
-        items: importPreview,
-      });
+      const res = await axiosInstance.post(
+        "/api/user/sheet-progress/import",
+        {
+          items: itemsToImport,
+        }
+      );
+
       toast.success(
         `Imported ${res.data.imported} sheets (${res.data.created} new, ${res.data.updated} updated)`
       );
+
       setRefreshKey((k) => k + 1);
     } catch (err) {
-      toast.error("Import failed");
+      toast.error(
+        err.response?.data?.error || "Import failed"
+      );
     } finally {
-      fileInputRef.current.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
   const cancelImport = () => {
     setImporting(false);
     setImportPreview(null);
-    fileInputRef.current.value = "";
+    setImportItems(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   if (loading) {
