@@ -1,24 +1,24 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import AdaptiveInterview from '../feat-pages/AdaptiveInterview';
-
-// Mock Auth Context
-vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({
-    user: { _id: '123', name: 'Test User' }
-  })
-}));
+import { UserContext } from '../context/userContext';
 
 describe('AdaptiveInterview Component', () => {
   it('renders the initial setup form', () => {
     render(
-      <BrowserRouter>
-        <AdaptiveInterview />
-      </BrowserRouter>
+      <UserContext.Provider
+        value={{
+          user: { _id: '123', name: 'Test User' },
+        }}
+      >
+        <BrowserRouter>
+          <AdaptiveInterview />
+        </BrowserRouter>
+      </UserContext.Provider>
     );
-    
+
     expect(screen.getByText('Adaptive AI Interview')).toBeDefined();
     expect(screen.getByLabelText('Target Role')).toBeDefined();
     expect(screen.getByLabelText('Experience Level')).toBeDefined();
