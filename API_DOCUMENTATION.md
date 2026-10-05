@@ -1,4 +1,4 @@
-# PrepPilot Backend API Documentation
+﻿# PrepPilot Backend API Documentation
 
 ## Overview
 
@@ -133,7 +133,7 @@ Errors:
 - `PUT /api/auth/profile`
 - Private
 
-All fields are optional — only supplied fields are updated.
+All fields are optional â€” only supplied fields are updated.
 
 Headers:
 
@@ -267,9 +267,9 @@ Errors:
 ### Upload Profile Image
 
 - `POST /api/auth/upload-image`
-- Public — no authentication or rate limiter applied
+- Public â€” no authentication or rate limiter applied
 
-> ⚠️ **Note for contributors:** This endpoint has no `protect` guard and no rate limiter. See [issue #128](https://github.com/Canopus-Labs/PrepPilot/issues/128) for the tracked remediation. Do not add features that depend on `req.user` in this handler until auth is added.
+> âš ï¸ **Note for contributors:** This endpoint has no `protect` guard and no rate limiter. See [issue #128](https://github.com/Canopus-Labs/PrepPilot/issues/128) for the tracked remediation. Do not add features that depend on `req.user` in this handler until auth is added.
 
 Form field:
 
@@ -296,7 +296,7 @@ Errors:
 - `POST /api/ai/generate`
 - Public (rate-limited: 20 req / hour per IP)
 
-> ⚠️ **Note:** The path is `/api/ai/generate`. An alias `/api/generate` also exists (same handler, same rate limit). Both are registered via `app.use("/api", aiRoutes)` in `server.js`. Prefer `/api/ai/generate` for clarity.
+> âš ï¸ **Note:** The path is `/api/ai/generate`. An alias `/api/generate` also exists (same handler, same rate limit). Both are registered via `app.use("/api", aiRoutes)` in `server.js`. Prefer `/api/ai/generate` for clarity.
 
 Request Body:
 
@@ -327,7 +327,7 @@ Errors:
 - `GET /api/models`
 - Public
 
-> ⚠️ **Note:** Registered via `app.use("/api", aiRoutes)` — the effective path is `/api/models`. Availability depends on the `GEMINI_API_KEY` in use and the caller's region.
+> âš ï¸ **Note:** Registered via `app.use("/api", aiRoutes)` â€” the effective path is `/api/models`. Availability depends on the `GEMINI_API_KEY` in use and the caller's region.
 
 Response `200`:
 
@@ -408,6 +408,127 @@ Errors:
 
 ---
 
+
+## Adaptive Interview Routes
+
+### Start Adaptive Session
+- POST /api/adaptive-interview/start
+- Private
+
+Request Body:
+`json
+{
+  "role": "Software Engineer",
+  "experienceLevel": "Mid-level",
+  "topics": ["React", "Node.js"],
+  "maxQuestions": 5
+}
+`
+
+Response 201:
+`json
+{
+  "success": true,
+  "session": {
+    "_id": "6426c5a5...",
+    "role": "Software Engineer",
+    "experienceLevel": "Mid-level",
+    "currentDifficulty": "Medium",
+    "questions": [
+      {
+        "questionText": "Explain the virtual DOM.",
+        "topic": "React",
+        "difficulty": "Medium"
+      }
+    ]
+  }
+}
+`
+
+---
+
+### Submit Answer
+- POST /api/adaptive-interview/:sessionId/answer
+- Private
+
+Request Body:
+`json
+{
+  "answer": "The virtual DOM is a lightweight copy..."
+}
+`
+
+Response 200:
+`json
+{
+  "success": true,
+  "evaluation": {
+    "correctnessScore": 85,
+    "explanationScore": 90,
+    "overallScore": 87,
+    "approachFeedback": "Good...",
+    "generalFeedback": "Keep it up"
+  },
+  "session": {
+    "currentDifficulty": "Hard"
+  },
+  "isCompleted": false
+}
+`
+
+---
+
+### Get Session Report
+- GET /api/adaptive-interview/:sessionId
+- Private
+
+Response 200:
+`json
+{
+  "success": true,
+  "session": {
+    "_id": "6426c5a5...",
+    "finalReport": {
+      "totalScore": 85,
+      "topicPerformance": { "React": 90, "Node.js": 80 },
+      "improvementAreas": []
+    }
+  }
+}
+`
+
+---
+
+### Get Session History
+- GET /api/adaptive-interview/history
+- Private
+
+Optional Query Parameters:
+- page: Page number (default: 1)
+- limit: Items per page (default: 10, max: 20)
+
+Response 200:
+`json
+{
+  "success": true,
+  "sessions": [
+    {
+      "_id": "6426c5a5...",
+      "role": "Software Engineer",
+      "status": "completed",
+      "maxQuestions": 5
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  }
+}
+`
+
+---
 ## Session Routes
 
 ### Create Session
@@ -700,7 +821,7 @@ Errors:
 - `POST /api/resume/compile`
 - Private (rate-limited: 20 req / hour per IP)
 
-> ⚠️ **External dependency:** This endpoint proxies to [texlive.net](https://texlive.net), a public LaTeX compilation service. Network failures or texlive.net downtime will surface as 500 errors. Authentication and rate limiting are applied to prevent billing abuse.
+> âš ï¸ **External dependency:** This endpoint proxies to [texlive.net](https://texlive.net), a public LaTeX compilation service. Network failures or texlive.net downtime will surface as 500 errors. Authentication and rate limiting are applied to prevent billing abuse.
 
 Request Body:
 
@@ -725,7 +846,7 @@ Errors:
 - `POST /api/resume/analyze`
 - Private (rate-limited: 20 req / hour per IP)
 
-> ⚠️ **External dependency:** This endpoint sends the uploaded PDF to the **Gemini API** (paid quota). Authentication and rate limiting are applied to prevent quota exhaustion.
+> âš ï¸ **External dependency:** This endpoint sends the uploaded PDF to the **Gemini API** (paid quota). Authentication and rate limiting are applied to prevent quota exhaustion.
 
 Form fields (multipart/form-data):
 

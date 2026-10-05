@@ -1,52 +1,65 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import request from 'supertest';
-import express from 'express';
-import mongoose from 'mongoose';
-import adaptiveInterviewRoutes from '../routes/adaptiveInterviewRoutes';
-import AdaptiveInterviewSession from '../models/AdaptiveInterviewSession';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { _parseGeminiJson, _getNextDifficulty, _buildFinalReport } from '../controllers/adaptiveInterviewController';
 
-// Mock the AI Helper
-vi.mock('../utils/geminiHelper', () => ({
-  generateWithFallback: vi.fn().mockResolvedValue({
-    result: {
-      response: {
-        text: () => JSON.stringify({
-          questionText: "Mocked question?",
-          topic: "React",
-          correctnessScore: 90,
-          explanationScore: 85,
-          overallScore: 88,
-          approachFeedback: "Good approach",
-          generalFeedback: "Keep it up"
-        })
-      }
-    },
-    usedModel: "mock-model"
-  })
-}));
+describe('Adaptive Interview Controller Helpers', () => {
+  describe('parseGeminiJson', () => {
+    it('parses valid JSON without markdown', () => {
+      const input = '{"test": "value"}';
+      expect(_parseGeminiJson(input)).toEqual({ test: 'value' });
+    });
 
-// Mock Auth Middleware
-vi.mock('../middlewares/authMiddleware', () => ({
-  protect: (req, res, next) => {
-    req.user = { _id: new mongoose.Types.ObjectId() };
-    next();
-  }
-}));
+    it('parses JSON with markdown fences', () => {
+      const input = '```json\n{"test": "value"}\n```';
+      expect(_parseGeminiJson(input)).toEqual({ test: 'value' });
+    });
 
-const app = express();
-app.use(express.json());
-app.use('/api/adaptive-interview', adaptiveInterviewRoutes);
-
-describe('Adaptive Interview Routes', () => {
-  beforeEach(async () => {
-    // Clear mocks if needed
-    vi.clearAllMocks();
+    it('parses JSON with generic markdown fences', () => {
+      const input = '```\n{"test": "value"}\n```';
+      expect(_parseGeminiJson(input)).toEqual({ test: 'value' });
+    });
   });
 
-  // We are skipping actual DB connection in this isolated route test,
-  // typically we'd use mongodb-memory-server, but we'll mock the Mongoose Model.
-  
-  it('should have the route structure setup correctly', () => {
-    expect(adaptiveInterviewRoutes).toBeDefined();
+  describe('getNextDifficulty', () => {
+    it('increases difficulty on score >= 80', () => {
+      expect(_getNextDifficulty('Easy', 80)).toBe('Medium');
+      expect(_getNextDifficulty('Medium', 85)).toBe('Hard');
+      expect(_getNextDifficulty('Hard', 90)).toBe('Hard');
+    });
+
+    it('decreases difficulty on score <= 40', () => {
+      expect(_getNextDifficulty('Hard', 40)).toBe('Medium');
+      expect(_getNextDifficulty('Medium', 35)).toBe('Easy');
+      expect(_getNextDifficulty('Easy', 20)).toBe('Easy');
+    });
+
+    it('keeps difficulty on 41 <= score <= 79', () => {
+      expect(_getNextDifficulty('Medium', 60)).toBe('Medium');
+      expect(_getNextDifficulty('Easy', 79)).toBe('Easy');
+      expect(_getNextDifficulty('Hard', 41)).toBe('Hard');
+    });
+  });
+
+  describe('buildFinalReport', () => {
+    it('calculates averages and improvement areas correctly', () => {
+      const questions = [
+        { topic: 'React', overallScore: 90 },
+        { topic: 'Node.js', overallScore: 40 },
+        { topic: 'Node.js', overallScore: 60 },
+      ];
+      const report = _buildFinalReport(questions);
+      
+      expect(report.totalScore).toBe(63); // (90 + 40 + 60) / 3
+      expect(report.topicPerformance).toEqual({
+        'React': 90,
+        'Node.js': 50 // (40 + 60) / 2
+      });
+      expect(report.improvementAreas).toContain('Focus on improving your understanding of Node.js.');
+    });
+    
+    it('handles empty questions gracefully', () => {
+      const report = _buildFinalReport([]);
+      expect(report.totalScore).toBe(0);
+      expect(report.topicPerformance).toEqual({});
+    });
   });
 });

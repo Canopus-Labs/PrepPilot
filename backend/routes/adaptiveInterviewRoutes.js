@@ -1,18 +1,26 @@
-const express = require("express");
+﻿const express = require("express");
 const router = express.Router();
-const { startSession, submitAnswer, getSessionReport } = require("../controllers/adaptiveInterviewController");
+const {
+  startSession,
+  submitAnswer,
+  getSessionHistory,
+  getSessionReport,
+} = require("../controllers/adaptiveInterviewController");
 const { protect } = require("../middlewares/authMiddleware");
 
-// All adaptive interview routes should be protected
+// All adaptive interview routes require authentication
 router.use(protect);
 
-// Start a new adaptive interview session
+// GET /api/adaptive-interview/history - Paginated session history
+router.get("/history", getSessionHistory);
+
+// POST /api/adaptive-interview/start - Start a new adaptive interview session
 router.post("/start", startSession);
 
-// Submit an answer to the current question
+// POST /api/adaptive-interview/:sessionId/answer - Submit answer to current question
 router.post("/:sessionId/answer", submitAnswer);
 
-// Get the full session / final report
+// GET /api/adaptive-interview/:sessionId - Get full session details / final report
 router.get("/:sessionId", getSessionReport);
 
 module.exports = router;

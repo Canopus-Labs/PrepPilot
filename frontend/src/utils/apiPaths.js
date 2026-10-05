@@ -1,4 +1,4 @@
-// Keep the base URL host-only because API paths below include /api.
+﻿// Keep the base URL host-only because API paths below include /api.
 const configuredBackendUrl = import.meta.env.VITE_BACKEND_URL?.trim();
 export const BASE_URL = (configuredBackendUrl || "http://localhost:8000")
     .replace(/\/+$/, "")
@@ -6,17 +6,16 @@ export const BASE_URL = (configuredBackendUrl || "http://localhost:8000")
 
 export const API_PATHS = {
     AUTH: {
-    REGISTER: "/api/auth/register",
-    LOGIN: "/api/auth/login",
-    VERIFY_EMAIL: "/api/auth/verify-email",
-    RESEND_VERIFICATION: "/api/auth/resend-verification",
-    GET_PROFILE: "/api/auth/profile",
-
-    UPDATE_PROFILE: "/api/auth/profile",
-    CHANGE_PASSWORD: "/api/auth/change-password",
-    DELETE_ACCOUNT: "/api/auth/delete-account",
-    LOGOUT: "/api/auth/logout",
-},
+        REGISTER: "/api/auth/register",
+        LOGIN: "/api/auth/login",
+        VERIFY_EMAIL: "/api/auth/verify-email",
+        RESEND_VERIFICATION: "/api/auth/resend-verification",
+        GET_PROFILE: "/api/auth/profile",
+        UPDATE_PROFILE: "/api/auth/profile",
+        CHANGE_PASSWORD: "/api/auth/change-password",
+        DELETE_ACCOUNT: "/api/auth/delete-account",
+        LOGOUT: "/api/auth/logout",
+    },
     IMAGE: {
         UPLOAD_IMAGE: "/api/auth/upload-image", // Upload profile picture
     },
@@ -36,6 +35,12 @@ export const API_PATHS = {
         ADD_TO_SESSION: "/api/question/add", // Add more questions to a session (fixed to match backend)
         PIN: (id) => `/api/question/${id}/pin`, // Pin or Unpin a question (fixed to match backend)
         UPDATE_NOTE: (id) => `/api/question/${id}/note`, // Update/Add a note to a question (fixed to match backend)
+    },
+    ADAPTIVE_INTERVIEW: {
+        START: "/api/adaptive-interview/start",
+        ANSWER: (id) => `/api/adaptive-interview/${id}/answer`,
+        REPORT: (id) => `/api/adaptive-interview/${id}`,
+        HISTORY: "/api/adaptive-interview/history"
     },
     GOOGLE_CALENDAR: {
         CONNECT: "/api/google-calendar/connect",
@@ -66,7 +71,7 @@ export const API_PATHS = {
         GET_ALL: "/api/courses", // GET all free courses
     },
     BEHAVIORAL: {
-    ANALYZE: "/api/behavioral/analyze",
+        ANALYZE: "/api/behavioral/analyze",
     },
     FLASHCARD: {
         CREATE: "/api/flashcards",
@@ -88,5 +93,15 @@ export const API_PATHS = {
         APPROVED: "/api/interview-experiences/approved",
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
+    },
+    STUDY_GOALS: {
+        CREATE: "/api/study-goals",
+        GET_ALL: "/api/study-goals",
+        GET_ONE: (id) => `/api/study-goals/${id}`,
+        UPDATE: (id) => `/api/study-goals/${id}`,
+        DELETE: (id) => `/api/study-goals/${id}`,
+        LOG_SESSION: (id) => `/api/study-goals/${id}/log`,
+        HISTORY: (id) => `/api/study-goals/${id}/history`,
+        ANALYTICS: "/api/study-goals/analytics",
     },
 };
