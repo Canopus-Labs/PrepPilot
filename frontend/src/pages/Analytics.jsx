@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
 import {
@@ -198,9 +199,12 @@ const Analytics = () => {
               <h3 className="font-semibold">
                 Strengths & Weaknesses
               </h3>
-              <p className="text-gray-500">
-                Coming Soon
-              </p>
+              <Link
+                to="/weak-topics-dashboard"
+                className="inline-block mt-1 text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 text-sm font-medium transition-colors"
+              >
+                View your personalised analysis →
+              </Link>
             </div>
 
             <div className="border rounded-lg p-4">

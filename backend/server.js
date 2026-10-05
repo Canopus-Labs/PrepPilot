@@ -106,7 +106,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //Routes
-app.use("/api/auth", sensitiveRouteHeaders,authRoutes);
+app.use("/api/auth", sensitiveRouteHeaders, authRoutes);
 app.use("/api/sessions", generalLimiter, sessionRoutes);
 app.use("/api/question", generalLimiter, questionRoutes);
 app.use("/api", aiRoutes);
@@ -164,6 +164,9 @@ const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const adaptiveInterviewRoutes = require("./routes/adaptiveInterviewRoutes");
 app.use("/api/adaptive-interview", generalLimiter, adaptiveInterviewRoutes);
+
+const weaknessRoutes = require("./routes/weaknessRoutes");
+app.use("/api/weakness", weaknessRoutes);
 
 
 app.use(
@@ -244,9 +247,9 @@ app.use("/api/google-calendar", googleCalendarRoutes);
 
 
 app.use(
-    "/api/google-calendar",
-    generalLimiter,
-    googleCalendarRoutes
+  "/api/google-calendar",
+  generalLimiter,
+  googleCalendarRoutes
 );
 
 

@@ -56,11 +56,11 @@ const NAV_ITEMS = [
     icon: Briefcase,
     isHeader: true,
     items: [
-      { id: "role-prep",              title: "Role-Specific Prep",    path: "/role-prep",              icon: Briefcase },
-      { id: "spaced-repetition",     title: "Spaced Repetition",     path: "/spaced-repetition",      icon: RotateCcw },
-      { id: "assessment",             title: "Skill Assessment",       path: "/assessment",             icon: Target },
-      { id: "question-bank",          title: "Question Bank",          path: "/question-bank",          icon: Brain },
-      { id: "interview-experiences",  title: "Interview Experiences",  path: "/interview-experiences",  icon: MessageSquare },
+      { id: "role-prep", title: "Role-Specific Prep", path: "/role-prep", icon: Briefcase },
+      { id: "spaced-repetition", title: "Spaced Repetition", path: "/spaced-repetition", icon: RotateCcw },
+      { id: "assessment", title: "Skill Assessment", path: "/assessment", icon: Target },
+      { id: "question-bank", title: "Question Bank", path: "/question-bank", icon: Brain },
+      { id: "interview-experiences", title: "Interview Experiences", path: "/interview-experiences", icon: MessageSquare },
     ],
   },
   {
@@ -88,7 +88,7 @@ const NAV_ITEMS = [
     icon: FileText,
     isHeader: true,
     items: [
-      { id: "resume-builder",  title: "Resume Builder",  path: "/resume-builder",  icon: FileText },
+      { id: "resume-builder", title: "Resume Builder", path: "/resume-builder", icon: FileText },
       { id: "resume-analyzer", title: "Resume Analyzer", path: "/resume-analyzer", icon: Zap },
     ],
   },
@@ -98,10 +98,11 @@ const NAV_ITEMS = [
     icon: Bot,
     isHeader: true,
     items: [
-      { id: "ai-assistance",    title: "AI Assistance",       path: "/ai-assistance",    icon: Bot },
-      { id: "behavioral-coach", title: "Behavioral Coach",    path: "/behavioral-coach", icon: MessageSquare },
-      { id: "daily-challenge",  title: "Daily Challenge",     path: "/daily-challenge",  icon: CalendarDays },
-      { id: "analytics",        title: "Analytics",           path: "/analytics",        icon: LayoutDashboard },
+      { id: "ai-assistance", title: "AI Assistance", path: "/ai-assistance", icon: Bot },
+      { id: "behavioral-coach", title: "Behavioral Coach", path: "/behavioral-coach", icon: MessageSquare },
+      { id: "daily-challenge", title: "Daily Challenge", path: "/daily-challenge", icon: CalendarDays },
+      { id: "analytics", title: "Analytics", path: "/analytics", icon: LayoutDashboard },
+      { id: "weak-topics", title: "Weak Topics", path: "/weak-topics-dashboard", icon: Brain },
     ],
   },
   {
@@ -110,9 +111,9 @@ const NAV_ITEMS = [
     icon: Github,
     isHeader: true,
     items: [
-      { id: "repository-hive", title: "Repository Hive",      path: "/repository-hive", icon: Github },
-      { id: "oss-blog",        title: "OSS Learning Hub",     path: "/oss-blog",         icon: BookOpen },
-      { id: "oss-events",      title: "Conferences & Events", path: "/oss-events",       icon: CalendarDays },
+      { id: "repository-hive", title: "Repository Hive", path: "/repository-hive", icon: Github },
+      { id: "oss-blog", title: "OSS Learning Hub", path: "/oss-blog", icon: BookOpen },
+      { id: "oss-events", title: "Conferences & Events", path: "/oss-events", icon: CalendarDays },
     ],
   },
   {
@@ -182,11 +183,10 @@ const Sidebar = () => {
           <button
             key={item.id}
             onClick={() => handleServiceClick(item)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
-              isActive
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${isActive
                 ? "bg-white/10 text-white shadow-sm"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`}
+              }`}
           >
             <Icon size={18} className={isActive ? "text-violet-400" : "text-gray-500"} />
             {item.title}
@@ -207,13 +207,12 @@ const Sidebar = () => {
           {/* Section header row */}
           <button
             onClick={() => toggleSection(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
-              anyChildActive && !isOpen
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${anyChildActive && !isOpen
                 ? "text-white"
                 : isOpen
-                ? "text-white"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`}
+                  ? "text-white"
+                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+              }`}
           >
             <SectionIcon
               size={18}
@@ -236,11 +235,10 @@ const Sidebar = () => {
                   <button
                     key={navItem.id}
                     onClick={() => handleServiceClick(navItem)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm transition-all duration-150 ${
-                      isActive
+                    className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm transition-all duration-150 ${isActive
                         ? "bg-white/10 text-white font-semibold shadow-sm"
                         : "text-gray-400 hover:bg-white/5 hover:text-gray-200 font-medium"
-                    }`}
+                      }`}
                   >
                     {navItem.title}
                   </button>
@@ -275,17 +273,16 @@ const Sidebar = () => {
         {/* Settings / Policy / Help — icon row */}
         <div className="flex items-center gap-1 mb-3">
           {[
-            { path: "/settings",           icon: Settings,   title: "Settings" },
+            { path: "/settings", icon: Settings, title: "Settings" },
             { path: "/terms-and-conditions", icon: ScrollText, title: "Policy" },
-            { path: "/support",            icon: HelpCircle, title: "Help & Support" },
+            { path: "/support", icon: HelpCircle, title: "Help & Support" },
           ].map(({ path, icon: Icon, title }) => {
             const active = location.pathname.startsWith(path);
             return (
               <button key={path} onClick={() => { navigate(path); setMobileMenuOpen(false); }}
                 title={title}
-                className={`flex-1 flex items-center justify-center p-2 rounded-xl transition-all ${
-                  active ? "bg-violet-600/15 text-violet-400" : "text-gray-500 hover:bg-white/5 hover:text-white"
-                }`}>
+                className={`flex-1 flex items-center justify-center p-2 rounded-xl transition-all ${active ? "bg-violet-600/15 text-violet-400" : "text-gray-500 hover:bg-white/5 hover:text-white"
+                  }`}>
                 <Icon size={17} />
               </button>
             );
@@ -360,7 +357,7 @@ const Sidebar = () => {
       <div className="md:hidden h-16 w-full shrink-0" />
 
       <Modal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} hideHeader>
-        <Login setCurrentPage={() => {}} />
+        <Login setCurrentPage={() => { }} />
       </Modal>
     </>
   );
