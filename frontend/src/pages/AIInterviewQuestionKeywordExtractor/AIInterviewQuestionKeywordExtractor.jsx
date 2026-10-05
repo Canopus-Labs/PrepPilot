@@ -78,7 +78,7 @@ const AIInterviewQuestionKeywordExtractor = () => {
             <div key={i} className="bg-white dark:bg-[#111827] rounded-3xl shadow p-6 text-center">
               {item.icon}
               <h3 className="mt-4 text-gray-500">{item.label}</h3>
-              <p className={`text-5xl font-black mt-3 ${getScoreColor(typeof item.value == int and item.value or (item.value))}`}>{item.value}</p>
+              <p className={`text-5xl font-black mt-3 ${getScoreColor(typeof item.value === 'number' ? item.value : parseInt(item.value, 10))}`}>{item.value}</p>
             </div>
           ))}
         </div>

@@ -1,3 +1,12 @@
+import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { UserContext } from "../context/userContext";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const AdaptiveInterview = () => {
+  const { user } = useContext(UserContext);
 ﻿import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
@@ -160,6 +169,65 @@ const AdaptiveInterview = () => {
     );
   }
 
+  // 1. Start Form
+  if (!session) {
+    return (
+      <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md border border-gray-100">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Adaptive AI Interview</h2>
+        <p className="text-gray-600 mb-6">
+          Experience a dynamic interview that adjusts question difficulty based on your performance.
+        </p>
+        
+        {error && <div className="p-3 mb-4 text-red-700 bg-red-100 rounded-lg">{error}</div>}
+        
+        <form onSubmit={handleStart} className="space-y-4">
+          <div>
+            <label htmlFor="targetRole" className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
+            <input 
+              id="targetRole"
+              type="text" 
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              value={form.role}
+              onChange={e => setForm({...form, role: e.target.value})}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="experienceLevel" className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+            <select 
+              id="experienceLevel"
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              value={form.experienceLevel}
+              onChange={e => setForm({...form, experienceLevel: e.target.value})}
+            >
+              <option value="Intern/Entry-level">Intern/Entry-level</option>
+              <option value="Junior">Junior</option>
+              <option value="Mid-level">Mid-level</option>
+              <option value="Senior">Senior</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="topics" className="block text-sm font-medium text-gray-700 mb-1">Topics (comma separated)</label>
+            <input 
+              id="topics"
+              type="text" 
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              value={form.topics}
+              onChange={e => setForm({...form, topics: e.target.value})}
+              required
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition"
+          >
+            {loading ? "Starting..." : "Start Interview"}
+          </button>
+        </form>
+      </div>
+    );
+  }
   // Visual helper for difficulty
   const getDifficultyBadge = (diff) => {
     switch (diff) {

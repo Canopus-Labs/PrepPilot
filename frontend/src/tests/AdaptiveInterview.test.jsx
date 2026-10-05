@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import AdaptiveInterview from '../feat-pages/AdaptiveInterview';
 import { UserContext } from '../context/userContext';
@@ -18,6 +18,11 @@ describe('AdaptiveInterview Component', () => {
     const mockUserContext = { user: { _id: '123', name: 'Test User' } };
 
     render(
+      <UserContext.Provider value={{ user: { _id: '123', name: 'Test User' } }}>
+        <BrowserRouter>
+          <AdaptiveInterview />
+        </BrowserRouter>
+      </UserContext.Provider>
       <BrowserRouter>
         <UserContext.Provider value={mockUserContext}>
           <AdaptiveInterview />

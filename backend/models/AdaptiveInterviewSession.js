@@ -31,4 +31,4 @@ const adaptiveInterviewSessionSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model("AdaptiveInterviewSession", adaptiveInterviewSessionSchema);
+module.exports = mongoose.models.AdaptiveInterviewSession || mongoose.model("AdaptiveInterviewSession", adaptiveInterviewSessionSchema);
