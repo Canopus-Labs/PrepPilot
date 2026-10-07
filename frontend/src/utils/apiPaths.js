@@ -6,17 +6,17 @@ export const BASE_URL = (configuredBackendUrl || "http://localhost:8000")
 
 export const API_PATHS = {
     AUTH: {
-    REGISTER: "/api/auth/register",
-    LOGIN: "/api/auth/login",
-    VERIFY_EMAIL: "/api/auth/verify-email",
-    RESEND_VERIFICATION: "/api/auth/resend-verification",
-    GET_PROFILE: "/api/auth/profile",
+        REGISTER: "/api/auth/register",
+        LOGIN: "/api/auth/login",
+        VERIFY_EMAIL: "/api/auth/verify-email",
+        RESEND_VERIFICATION: "/api/auth/resend-verification",
+        GET_PROFILE: "/api/auth/profile",
 
-    UPDATE_PROFILE: "/api/auth/profile",
-    CHANGE_PASSWORD: "/api/auth/change-password",
-    DELETE_ACCOUNT: "/api/auth/delete-account",
-    LOGOUT: "/api/auth/logout",
-},
+        UPDATE_PROFILE: "/api/auth/profile",
+        CHANGE_PASSWORD: "/api/auth/change-password",
+        DELETE_ACCOUNT: "/api/auth/delete-account",
+        LOGOUT: "/api/auth/logout",
+    },
     IMAGE: {
         UPLOAD_IMAGE: "/api/auth/upload-image", // Upload profile picture
     },
@@ -66,7 +66,7 @@ export const API_PATHS = {
         GET_ALL: "/api/courses", // GET all free courses
     },
     BEHAVIORAL: {
-    ANALYZE: "/api/behavioral/analyze",
+        ANALYZE: "/api/behavioral/analyze",
     },
     FLASHCARD: {
         CREATE: "/api/flashcards",
@@ -92,5 +92,10 @@ export const API_PATHS = {
     ADAPTIVE_INTERVIEW: {
         START: "/api/adaptive-interview/start",
         ANSWER: (sessionId) => `/api/adaptive-interview/${sessionId}/answer`,
+    },
+    WEAKNESS: {
+        ANALYSIS: "/api/weakness/analysis",
+        REVISION_QUEUE: (page = 1) => `/api/weakness/revision-queue?page=${page}&limit=10`,
+        AI_RECOMMENDATIONS: "/api/weakness/ai-recommendations",
     },
 };

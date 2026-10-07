@@ -4,13 +4,13 @@ import DsaSheet from "./components/SheetDetailsPage";
 import SheetList from "./components/SheetList";
 import UserProvider from "./context/userContext";
 import ThemeProvider from "./context/themeContext";
-import React, { useEffect } from "react"; 
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/animations/PageTransition";
 import ErrorBoundary from "./components/ErrorBoundary";
-import axiosInstance from "./utils/axiosinstance"; 
+import axiosInstance from "./utils/axiosinstance";
 
 import AuthPage from "./pages/Auth/AuthPage";
 import VerifyEmail from "./pages/Auth/verifyEmail";
@@ -52,6 +52,7 @@ import Analytics from "./pages/Analytics";
 
 import QuestionBank from "./pages/QuestionBank/QuestionBank";
 import AdaptiveInterview from "./feat-pages/AdaptiveInterview";
+import WeakTopicsDashboard from "./pages/WeakTopicsDashboard/WeakTopicsDashboard";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(UserContext);
@@ -91,442 +92,452 @@ const App = () => {
       <UserProvider>
         <ErrorBoundary>
           <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-dark)] transition-colors duration-300">
-          <Router>
-            <AnimatePresence mode="wait">
-              <Routes>
-                {/* Routes without Sidebar */}
-                <Route
-                  path="/"
-                  element={
-                    <ErrorBoundary>
-                      <PageTransition>
-                        <LandingPage />
-                      </PageTransition>
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={
-                    <ErrorBoundary>
-                      <PageTransition>
-                        <AuthPage />
-                      </PageTransition>
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/signup"
-                  element={
-                    <ErrorBoundary>
-                      <PageTransition>
-                        <AuthPage />
-                      </PageTransition>
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/verify-email"
-                  element={
-                    <ErrorBoundary>
-                      <PageTransition>
-                        <VerifyEmail />
-                      </PageTransition>
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/interview-prep/:sessionId"
-                  element={
-                    <ProtectedRoute>
-                      <ErrorBoundary>
-                        <PageTransition>
-                          <InterviewPrep />
-                        </PageTransition>
-                      </ErrorBoundary>
-                    </ProtectedRoute>
-                  }
-                />
-                {import.meta.env.DEV && (
+            <Router>
+              <AnimatePresence mode="wait">
+                <Routes>
+                  {/* Routes without Sidebar */}
                   <Route
-                    path="/test-error"
-                    element={<BuggyComponent />}
-                  />
-                )}
-                <Route
-                  path="/resume-builder/:id"
-                  element={
-                    <ProtectedRoute>
-                      <ErrorBoundary>
-                        <PageTransition>
-                          <ResumeEditor />
-                        </PageTransition>
-                      </ErrorBoundary>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  element={
-                    <MainLayout>
-                      <ErrorBoundary>
-                        <Outlet />
-                      </ErrorBoundary>
-                    </MainLayout>
-                  }
-                >
-                  <Route
-                    path="/behavioral-coach"
+                    path="/"
                     element={
-                      <ProtectedRoute>
+                      <ErrorBoundary>
                         <PageTransition>
-                          <BehavioralCoach />
+                          <LandingPage />
                         </PageTransition>
-                      </ProtectedRoute>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
-                    path="/dashboard"
+                    path="/login"
+                    element={
+                      <ErrorBoundary>
+                        <PageTransition>
+                          <AuthPage />
+                        </PageTransition>
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/signup"
+                    element={
+                      <ErrorBoundary>
+                        <PageTransition>
+                          <AuthPage />
+                        </PageTransition>
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/verify-email"
+                    element={
+                      <ErrorBoundary>
+                        <PageTransition>
+                          <VerifyEmail />
+                        </PageTransition>
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/interview-prep/:sessionId"
                     element={
                       <ProtectedRoute>
-                        <PageTransition>
-                          <ProgressTrackerDashboard />
-                        </PageTransition>
+                        <ErrorBoundary>
+                          <PageTransition>
+                            <InterviewPrep />
+                          </PageTransition>
+                        </ErrorBoundary>
                       </ProtectedRoute>
                     }
                   />
                   {import.meta.env.DEV && (
                     <Route
-                      path="/layout-test-error"
+                      path="/test-error"
                       element={<BuggyComponent />}
                     />
                   )}
                   <Route
-                    path="/ai-helper"
-                    element={
-                      <PageTransition>
-                        <AIHelper />
-                      </PageTransition>
-                    }
-                  />
-                <Route
-                  path="/practice"
-                  element={
-                    <ProtectedRoute>
-                      <PageTransition>
-                        <PracticePage />
-                      </PageTransition>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/adaptive-interview"
-                  element={
-                    <ProtectedRoute>
-                      <PageTransition>
-                        <AdaptiveInterview />
-                      </PageTransition>
-                    </ProtectedRoute>
-                  }
-                />
-                  <Route
-                    path="/aptitude"
+                    path="/resume-builder/:id"
                     element={
                       <ProtectedRoute>
-                        <PageTransition>
-                          <PracticePage />
-                        </PageTransition>
+                        <ErrorBoundary>
+                          <PageTransition>
+                            <ResumeEditor />
+                          </PageTransition>
+                        </ErrorBoundary>
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
-                    path="/cognitive-games"
                     element={
-                      <ProtectedRoute>
+                      <MainLayout>
+                        <ErrorBoundary>
+                          <Outlet />
+                        </ErrorBoundary>
+                      </MainLayout>
+                    }
+                  >
+                    <Route
+                      path="/behavioral-coach"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <BehavioralCoach />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <ProgressTrackerDashboard />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    {import.meta.env.DEV && (
+                      <Route
+                        path="/layout-test-error"
+                        element={<BuggyComponent />}
+                      />
+                    )}
+                    <Route
+                      path="/ai-helper"
+                      element={
                         <PageTransition>
-                          <CognitiveGamesPage />
+                          <AIHelper />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/role-prep"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/practice"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <PracticePage />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/adaptive-interview"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <AdaptiveInterview />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/aptitude"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <PracticePage />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/cognitive-games"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <CognitiveGamesPage />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/role-prep"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <Dashboard />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/analytics"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <Analytics />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/spaced-repetition"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <SpacedRepetitionPage />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/ai-insight"
+                      element={
                         <PageTransition>
-                          <Dashboard />
+                          <AIHelper />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/analytics"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/ai-assistance"
+                      element={
                         <PageTransition>
-                          <Analytics />
+                          <AIHelper />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/spaced-repetition"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/coding-sheets"
+                      element={
                         <PageTransition>
-                          <SpacedRepetitionPage />
+                          <SheetList type="all" />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/ai-insight"
-                    element={
-                      <PageTransition>
-                        <AIHelper />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/ai-assistance"
-                    element={
-                      <PageTransition>
-                        <AIHelper />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/coding-sheets"
-                    element={
-                      <PageTransition>
-                        <SheetList type="all" />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/daily-challenge"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/daily-challenge"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <DailyCodingChallenge />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/problem-solver"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <ProblemSolver />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/sheet/:id"
+                      element={
                         <PageTransition>
-                          <DailyCodingChallenge />
+                          <DsaSheet />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/problem-solver"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/assessment"
+                      element={
                         <PageTransition>
-                          <ProblemSolver />
+                          <SkillAssessment />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/sheet/:id"
-                    element={
-                      <PageTransition>
-                        <DsaSheet />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/assessment"
-                    element={
-                      <PageTransition>
-                        <SkillAssessment />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/compiler"
-                    element={
-                      <PageTransition>
-                        <Compiler />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/resume-builder"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/compiler"
+                      element={
                         <PageTransition>
-                          <ResumeTemplates />
+                          <Compiler />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/resume-analyzer"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/resume-builder"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <ResumeTemplates />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/resume-analyzer"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <ResumeAnalyzer />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/resume-analyzer/history"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <ResumeAnalysisHistory />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/interview-experiences"
+                      element={
                         <PageTransition>
-                          <ResumeAnalyzer />
+                          <InterviewExperiences />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/resume-analyzer/history"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/question-bank"
+                      element={
                         <PageTransition>
-                          <ResumeAnalysisHistory />
+                          <QuestionBank />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/interview-experiences"
-                    element={
-                      <PageTransition>
-                        <InterviewExperiences />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/question-bank"
-                    element={
-                      <PageTransition>
-                        <QuestionBank />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/project-ideas"
-                    element={
-                      <PageTransition>
-                        <ProjectIdeas />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/project-roadmap"
-                    element={
-                      <PageTransition>
-                        <ProjectRoadmap />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/repository-hive"
-                    element={
-                      <PageTransition>
-                        <RepositoryHive />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/oss-blog"
-                    element={
-                      <PageTransition>
-                        <OSSBlog />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/oss-events"
-                    element={
-                      <PageTransition>
-                        <OpenSourceEvents />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/notes-books"
-                    element={
-                      <PageTransition>
-                        <NotesBooks />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/notes-summarizer"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/project-ideas"
+                      element={
                         <PageTransition>
-                          <NotesSummarizer />
+                          <ProjectIdeas />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/free-courses"
-                    element={
-                      <PageTransition>
-                        <FreeCourses />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/support"
-                    element={
-                      <PageTransition>
-                        <HelpSupport />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/project-roadmap"
+                      element={
                         <PageTransition>
-                          <Settings />
+                          <ProjectRoadmap />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/jobs"
-                    element={
-                      <ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/repository-hive"
+                      element={
                         <PageTransition>
-                          <JobsForYou />
+                          <RepositoryHive />
                         </PageTransition>
-                      </ProtectedRoute>
-                    }
-                  />
+                      }
+                    />
+                    <Route
+                      path="/oss-blog"
+                      element={
+                        <PageTransition>
+                          <OSSBlog />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/oss-events"
+                      element={
+                        <PageTransition>
+                          <OpenSourceEvents />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/notes-books"
+                      element={
+                        <PageTransition>
+                          <NotesBooks />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/notes-summarizer"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <NotesSummarizer />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/free-courses"
+                      element={
+                        <PageTransition>
+                          <FreeCourses />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/support"
+                      element={
+                        <PageTransition>
+                          <HelpSupport />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <Settings />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/jobs"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <JobsForYou />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/terms-and-conditions"
+                      element={
+                        <ErrorBoundary>
+                          <PageTransition>
+                            <TermsandConditions />
+                          </PageTransition>
+                        </ErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="/weak-topics-dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <PageTransition>
+                            <WeakTopicsDashboard />
+                          </PageTransition>
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
                   <Route
-                    path="/terms-and-conditions"
+                    path="/privacy-policy"
                     element={
                       <ErrorBoundary>
                         <PageTransition>
-                          <TermsandConditions />
+                          <PrivacyPolicy />
                         </PageTransition>
                       </ErrorBoundary>
                     }
                   />
-                </Route>
-                <Route
-  path="/privacy-policy"
-  element={
-    <ErrorBoundary>
-      <PageTransition>
-        <PrivacyPolicy />
-      </PageTransition>
-    </ErrorBoundary>
-  }
-/>
-                <Route
-                 path="*"
-                 element={
-                    <PageTransition>
-                      <NotFound />
+                  <Route
+                    path="*"
+                    element={
+                      <PageTransition>
+                        <NotFound />
                       </PageTransition>
                     }
-                 />
-              </Routes>
-            </AnimatePresence>
-          </Router>
-          <Toaster
-            toastOptions={{
-              className: "",
-              style: {
-                fontSize: "13px",
-              },
-            }}
-          />
+                  />
+                </Routes>
+              </AnimatePresence>
+            </Router>
+            <Toaster
+              toastOptions={{
+                className: "",
+                style: {
+                  fontSize: "13px",
+                },
+              }}
+            />
           </div>
         </ErrorBoundary>
       </UserProvider>
