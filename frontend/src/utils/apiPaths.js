@@ -89,4 +89,8 @@ export const API_PATHS = {
         MINE: "/api/interview-experiences/mine",
         UPDATE_STATUS: (id) => `/api/interview-experiences/${id}/status`,
     },
+    ADAPTIVE_INTERVIEW: {
+        START: "/api/adaptive-interview/start",
+        ANSWER: (sessionId) => `/api/adaptive-interview/${sessionId}/answer`,
+    },
 };

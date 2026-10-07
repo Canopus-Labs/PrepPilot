@@ -3,7 +3,7 @@ const validateEnv = require("./config/validateEnv.js");
 validateEnv();
 const express = require("express");
 
-// Global unhandled promise rejection handler
+// Global unhandled promise rejection handler (Safe handler)
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Promise Rejection:", err);
 });
@@ -83,7 +83,7 @@ app.use((req, res, next) => {
   }
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with, x-csrf-token");
     return res.sendStatus(200);
   }
   next();
@@ -181,8 +181,11 @@ app.get("/api/test", (req, res) => {
 
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
-  refreshJobCache();
-  setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
+  // Added .catch() to prevent unhandled rejections from crashing the server
+  refreshJobCache().catch(err => console.error("Initial refreshJobCache failed:", err));
+  setInterval(() => {
+    refreshJobCache().catch(err => console.error("Scheduled refreshJobCache failed:", err));
+  }, 24 * 60 * 60 * 1000);
 }
 
 // Start Server
@@ -231,11 +234,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  process.exit(1);
-});
+// Removed the redundant and dangerous unhandledRejection handler from here
 
 app.use("/api/books", generalLimiter, booksRoutes);
 app.use("/api/jobs", jobRoutes);
@@ -251,4 +250,3 @@ app.use(
 
 
 app.use("/api/courses", generalLimiter, coursesRoutes);
-
