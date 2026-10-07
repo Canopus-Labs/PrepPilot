@@ -107,7 +107,9 @@ const ProgressTrackerDashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [importing, setImporting] = useState(false);
   const [importPreview, setImportPreview] = useState(null);
+  const [importItems, setImportItems] = useState(null);
   const fileInputRef = useRef(null);
+  const importRequestIdRef = useRef(0);
 
   useEffect(() => {
     (async () => {
@@ -186,46 +188,161 @@ const ProgressTrackerDashboard = () => {
   };
 
   const handleImportFile = (file) => {
+    const requestId = ++importRequestIdRef.current;
+
+    // Clear any previous preview when a new file is selected.
+    setImporting(false);
+    setImportPreview(null);
+    setImportItems(null);
+
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = async (e) => {
+
+    reader.onload = (e) => {
+      // Ignore results from an older file selection.
+      if (requestId !== importRequestIdRef.current) return;
+
       try {
         const json = JSON.parse(e.target.result);
-        const items = json.items || (Array.isArray(json) ? json : []);
-        setImportPreview(items.length);
+
+        const items = Array.isArray(json)
+          ? json
+          : json && Array.isArray(json.items)
+            ? json.items
+            : null;
+
+        if (!items || items.length === 0) {
+          toast.error("Invalid backup format or no records to import");
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+          return;
+        }
+
+        // Only preview records with a valid sheetId.
+        const validItems = items.filter(
+          (item) =>
+            item &&
+            typeof item === "object" &&
+            !Array.isArray(item) &&
+            typeof item.sheetId === "string" &&
+            item.sheetId.trim().length > 0
+        );
+
+        const invalidCount = items.length - validItems.length;
+
+        if (invalidCount > 0) {
+          toast.error(
+            `${invalidCount} invalid record(s) excluded because they have no valid sheetId`
+          );
+        }
+
+        if (validItems.length === 0) {
+          toast.error("No valid records found in the backup");
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+          return;
+        }
+
+        setImportItems(validItems);
+        setImportPreview(validItems.length);
         setImporting(true);
       } catch {
+        if (requestId !== importRequestIdRef.current) return;
+
         toast.error("Invalid JSON file");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     };
+
+    reader.onerror = () => {
+      // Do not let an obsolete read affect the current selection.
+      if (requestId !== importRequestIdRef.current) return;
+
+      toast.error("Failed to read the backup file");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    };
+
     reader.readAsText(file);
   };
 
   const confirmImport = async () => {
-    if (!importPreview) return;
+    if (!Array.isArray(importItems) || importItems.length === 0) {
+      return;
+    }
+
+    const itemsToImport = importItems;
+
+    // Invalidate any pending file reads before importing.
+    ++importRequestIdRef.current;
+
     setImporting(false);
     setImportPreview(null);
+    setImportItems(null);
+
     try {
-      const res = await axiosInstance.post("/api/user/sheet-progress/import", {
-        items: importPreview,
-      });
+      const res = await axiosInstance.post(
+        "/api/user/sheet-progress/import",
+        {
+          items: itemsToImport,
+        }
+      );
+
+      const skipped = Number(res.data?.skipped) || 0;
+
       toast.success(
         `Imported ${res.data.imported} sheets (${res.data.created} new, ${res.data.updated} updated)`
       );
+
+      if (skipped > 0) {
+        toast.error(`${skipped} record(s) were skipped by the server`);
+      }
+
+      if (
+        Array.isArray(res.data?.warnings) &&
+        res.data.warnings.length > 0
+      ) {
+        const warningMessages = res.data.warnings
+          .map((warning) =>
+            typeof warning === "string"
+              ? warning
+              : warning?.error || warning?.message || JSON.stringify(warning)
+          )
+          .join("; ");
+
+        toast.error(warningMessages);
+      }
+
       setRefreshKey((k) => k + 1);
     } catch (err) {
-      toast.error("Import failed");
+      toast.error(
+        err.response?.data?.error || "Import failed"
+      );
     } finally {
-      fileInputRef.current.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
   const cancelImport = () => {
+    // Prevent a pending read from reopening the cancelled preview.
+    ++importRequestIdRef.current;
+
     setImporting(false);
     setImportPreview(null);
-    fileInputRef.current.value = "";
-  };
+    setImportItems(null);
 
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
