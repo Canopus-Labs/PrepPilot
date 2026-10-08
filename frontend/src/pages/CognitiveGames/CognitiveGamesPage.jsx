@@ -5,7 +5,15 @@ import PatternMatrixGame from "../../components/PatternMatrixGame";
 import MemoryMatchGame from "../../components/MemoryMatchGame";
 import MemoryCardGame from "../../components/MemoryCardGame";
 import TypingSpeedGame from "../../components/TypingSpeedGame";
-import { Grid3x3, Gamepad2, Keyboard, Layers } from "lucide-react";
+import {
+  Grid3x3,
+  Gamepad2,
+  Keyboard,
+  Layers,
+  Binary,
+} from "lucide-react";
+
+import PatternRecognitionGame from "../../components/PatternRecognitionGame";
 
 // ─── Games data ────────────────────────────────────────────────────────────────
 // Add more brain-training games here in the future — each just needs a
@@ -34,6 +42,12 @@ const gamesData = [
     icon: Keyboard,
     desc: "Improve your coding speed with a paragraph typing challenge that tracks WPM and accuracy.",
     component: TypingSpeedGame,
+  },
+  {
+    name: "Pattern Recognition",
+    icon: Binary,
+    desc: "Identify missing numbers and rule patterns in mathematical sequences under time pressure.",
+    component: PatternRecognitionGame,
   },
 ];
 
