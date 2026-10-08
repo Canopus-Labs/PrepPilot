@@ -182,14 +182,22 @@ const MemoryCardGame = () => {
   const [timer, setTimer] = useState(0);
 
   const timerRef = useRef(null);
+  const mismatchTimeoutRef = useRef(null);
+  const startTimeRef = useRef(null);
 
   const currentDiff = DIFFICULTIES[difficultyKey];
   const totalPairs = currentDiff.pairs;
 
   const startTimer = useCallback(() => {
     clearInterval(timerRef.current);
+    startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
-      setTimer((t) => t + 1);
+      if (startTimeRef.current) {
+        const elapsedSeconds = Math.floor(
+          (Date.now() - startTimeRef.current) / 1000
+        );
+        setTimer(elapsedSeconds);
+      }
     }, 1000);
   }, []);
 
@@ -200,6 +208,10 @@ const MemoryCardGame = () => {
   const startGame = useCallback(
     (diff = difficultyKey) => {
       stopTimer();
+      if (mismatchTimeoutRef.current) {
+        clearTimeout(mismatchTimeoutRef.current);
+        mismatchTimeoutRef.current = null;
+      }
       setDifficultyKey(diff);
       const newDeck = buildCards(DIFFICULTIES[diff].pairs);
       setCards(newDeck);
@@ -215,7 +227,12 @@ const MemoryCardGame = () => {
   );
 
   useEffect(() => {
-    return () => stopTimer();
+    return () => {
+      stopTimer();
+      if (mismatchTimeoutRef.current) {
+        clearTimeout(mismatchTimeoutRef.current);
+      }
+    };
   }, [stopTimer]);
 
   const handleCardClick = (index) => {
@@ -279,7 +296,7 @@ const MemoryCardGame = () => {
           )
         );
 
-        setTimeout(() => {
+        mismatchTimeoutRef.current = setTimeout(() => {
           setCards((prev) =>
             prev.map((c, i) =>
               i === firstIndex || i === index
@@ -289,6 +306,7 @@ const MemoryCardGame = () => {
           );
           setFlippedIndices([]);
           setIsEvaluating(false);
+          mismatchTimeoutRef.current = null;
         }, 850);
       }
     }
@@ -393,6 +411,9 @@ const MemoryCardGame = () => {
               key={card.uid}
               onClick={() => handleCardClick(idx)}
               disabled={isFlippedOrMatched || isEvaluating || phase !== "playing"}
+              aria-label={`Card ${idx + 1} ${
+                card.isMatched ? "matched" : card.isFlipped ? "face-up" : "face-down"
+              }`}
               className={`h-28 sm:h-32 rounded-xl border p-2.5 transition-all duration-300 relative flex flex-col items-center justify-between text-center select-none overflow-hidden ${
                 card.isMatched
                   ? "bg-emerald-500/10 border-emerald-500 dark:border-emerald-500/80 text-emerald-700 dark:text-emerald-300 shadow-md ring-2 ring-emerald-500/20"
