@@ -159,9 +159,14 @@ app.use("/api/courses", generalLimiter, coursesRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
-app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/roadmaps", generalLimiter, roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
+
+// Canonical google-calendar registration (with the limiter) — the previous
+// copies lived after app.listen, and the limiter-less one won Express's
+// first-match, silently bypassing the rate limiter.
+app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 const adaptiveInterviewRoutes = require("./routes/adaptiveInterviewRoutes");
 app.use("/api/adaptive-interview", generalLimiter, adaptiveInterviewRoutes);
 
@@ -236,17 +241,7 @@ process.on("uncaughtException", (err) => {
 
 // Removed the redundant and dangerous unhandledRejection handler from here
 
-app.use("/api/books", generalLimiter, booksRoutes);
-app.use("/api/jobs", jobRoutes);
-
-app.use("/api/google-calendar", googleCalendarRoutes);
-
-
-app.use(
-    "/api/google-calendar",
-    generalLimiter,
-    googleCalendarRoutes
-);
-
-
-app.use("/api/courses", generalLimiter, coursesRoutes);
+// (Duplicate route registrations that lived here — after app.listen and the
+// error handlers — were removed: the limiter-less /api/google-calendar copy
+// won Express's first-match and silently bypassed the rate limiter on the
+// limited registration below.)
