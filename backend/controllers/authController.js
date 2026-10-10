@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../utils/sendEmail");
@@ -19,7 +18,6 @@ const UserSheetProgress = require("../models/UserSheetProgress");
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
-const REFRESH_TOKEN_SALT_ROUNDS = 10;
 const PASSWORD_SALT_ROUNDS = 10;
 
 const getRefreshCookieOptions = () => ({
@@ -29,6 +27,29 @@ const getRefreshCookieOptions = () => ({
     maxAge: REFRESH_TOKEN_MAX_AGE_MS,
     path: "/api/auth",
 });
+
+/**
+ * Deterministic SHA-256 digest of a refresh token, stored in place of the token.
+ *
+ * bcrypt only reads the first 72 bytes of its input. A refresh JWT is ~188 bytes and
+ * its first 72 bytes (header + the start of the payload holding the user id) are the
+ * same for every token issued to a user, so bcrypt.compare() would accept ANY refresh
+ * token that user was ever issued - including ones that were already rotated out.
+ * Hashing the whole token with SHA-256 makes each token individually verifiable.
+ * Refresh tokens are high-entropy and signed, so a fast hash is appropriate here.
+ */
+const hashRefreshToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+
+/**
+ * Constant-time check that `token` is the refresh token whose digest is `storedHash`.
+ * Legacy bcrypt hashes (from before this change) never match, forcing a fresh login.
+ */
+const refreshTokenMatches = (token, storedHash) => {
+    if (typeof token !== "string" || typeof storedHash !== "string") return false;
+    const actual = Buffer.from(hashRefreshToken(token), "hex");
+    const expected = Buffer.from(storedHash, "hex");
+    return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+};
 
 /**
  * Generate an access token for the authenticated user.
@@ -47,7 +68,11 @@ const generateAccessToken = (userId, tokenVersion = 0) => {
  * @returns {string} JWT refresh token valid for 30 days.
  */
 const generateRefreshToken = (userId) => {
-    return jwt.sign({ id: userId, tokenType: "refresh" }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    // jwtid makes every token unique, even when two are issued within the same second.
+    return jwt.sign({ id: userId, tokenType: "refresh" }, process.env.JWT_SECRET, {
+        expiresIn: REFRESH_TOKEN_EXPIRY,
+        jwtid: crypto.randomUUID(),
+    });
 };
 
 /**
@@ -142,7 +167,7 @@ const registerUser = async (req, res) => {
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = hashRefreshToken(refreshToken);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
 
@@ -189,7 +214,7 @@ const loginUser = async (req, res) => {
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const refreshToken = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = hashRefreshToken(refreshToken);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
         res.cookie("refreshToken", refreshToken, getRefreshCookieOptions());
@@ -238,7 +263,7 @@ const refreshToken = async (req, res) => {
             return res.status(401).json({ success: false, message: "Refresh token has expired. Please log in again." });
         }
 
-        const refreshIsValid = await bcrypt.compare(incomingRefreshToken, user.refreshTokenHash);
+        const refreshIsValid = refreshTokenMatches(incomingRefreshToken, user.refreshTokenHash);
         if (!refreshIsValid) {
             user.refreshTokenHash = null;
             user.refreshTokenExpiresAt = null;
@@ -249,7 +274,7 @@ const refreshToken = async (req, res) => {
         const accessToken = generateAccessToken(user._id, user.tokenVersion);
         const rotatedRefreshToken = generateRefreshToken(user._id);
 
-        user.refreshTokenHash = await bcrypt.hash(rotatedRefreshToken, REFRESH_TOKEN_SALT_ROUNDS);
+        user.refreshTokenHash = hashRefreshToken(rotatedRefreshToken);
         user.refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await user.save();
 
@@ -286,7 +311,7 @@ const logoutUser = async (req, res) => {
         }
 
         if (user.refreshTokenHash) {
-            const refreshIsValid = await bcrypt.compare(incomingRefreshToken, user.refreshTokenHash);
+            const refreshIsValid = refreshTokenMatches(incomingRefreshToken, user.refreshTokenHash);
             if (!refreshIsValid) {
                 user.refreshTokenHash = null;
                 user.refreshTokenExpiresAt = null;

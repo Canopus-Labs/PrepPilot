@@ -183,8 +183,11 @@ app.get("/api/test", (req, res) => {
 
 if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_API_KEY) {
   const { refreshJobCache } = require("./controllers/jobController");
-  refreshJobCache();
-  setInterval(refreshJobCache, 24 * 60 * 60 * 1000);
+  // Added .catch() to prevent unhandled rejections from crashing the server
+  refreshJobCache().catch(err => console.error("Initial refreshJobCache failed:", err));
+  setInterval(() => {
+    refreshJobCache().catch(err => console.error("Scheduled refreshJobCache failed:", err));
+  }, 24 * 60 * 60 * 1000);
 }
 
 // Start Server

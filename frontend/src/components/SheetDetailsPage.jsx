@@ -100,6 +100,7 @@ function SheetDetail() {
   const [loading, setLoading] = useState(true);
   const [completedTopics, setCompletedTopics] = useState({});
   const [followed, setFollowed] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetting, setResetting] = useState(false);
   const saveTimeoutRef = useRef(null);
@@ -352,6 +353,28 @@ function SheetDetail() {
             </div>
           </div>
         </div>
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+  {["All", "Easy", "Medium", "Hard"].map((difficulty) => (
+    <button
+      key={difficulty}
+      onClick={() => setDifficultyFilter(difficulty)}
+      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+        difficultyFilter === difficulty
+          ? "bg-violet-600 text-white"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+      }`}
+    >
+      {difficulty}
+    </button>
+  ))}
+
+  <button
+    onClick={() => setDifficultyFilter("All")}
+    className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-white/20 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition"
+  >
+    Clear Filter
+  </button>
+</div>
 
         <div className="flex flex-col gap-8">
           {sheet.sections?.map((section, sectionIdx) => (
@@ -374,6 +397,12 @@ function SheetDetail() {
 
                     <div className="flex flex-col">
                       {topic.subtopics?.map((sub, subIdx) => {
+                        if (
+                          difficultyFilter !== "All" &&
+                          (sub.difficulty || "").toLowerCase() !== difficultyFilter.toLowerCase()
+                        ) {
+                              return null;
+                        }
                         const key = `${sectionIdx}-${topicIdx}-${subIdx}`;
                         const completed = completedTopics[key];
                         return (
