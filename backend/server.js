@@ -159,11 +159,12 @@ app.use("/api/courses", generalLimiter, coursesRoutes);
 const flashcardRoutes = require("./routes/flashcardRoutes");
 app.use("/api/flashcards", generalLimiter, flashcardRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
-app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/roadmaps", generalLimiter, roadmapRoutes);
 const interviewExperienceRoutes = require("./routes/interviewExperienceRoutes");
 app.use("/api/interview-experiences", generalLimiter, interviewExperienceRoutes);
 const adaptiveInterviewRoutes = require("./routes/adaptiveInterviewRoutes");
 app.use("/api/adaptive-interview", generalLimiter, adaptiveInterviewRoutes);
+app.use("/api/google-calendar", generalLimiter, googleCalendarRoutes);
 
 
 app.use(
@@ -233,20 +234,3 @@ process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
   process.exit(1);
 });
-
-// Removed the redundant and dangerous unhandledRejection handler from here
-
-app.use("/api/books", generalLimiter, booksRoutes);
-app.use("/api/jobs", jobRoutes);
-
-app.use("/api/google-calendar", googleCalendarRoutes);
-
-
-app.use(
-    "/api/google-calendar",
-    generalLimiter,
-    googleCalendarRoutes
-);
-
-
-app.use("/api/courses", generalLimiter, coursesRoutes);
