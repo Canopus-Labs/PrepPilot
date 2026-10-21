@@ -29,7 +29,9 @@ function extractKeywords(text) {
   const seen = new Set();
   const keywords = [];
 
-  for (const raw of text.toLowerCase().split(/\s+/)) {
+  // Commas and semicolons also separate keywords: skills lists are often
+  // written "Python,Java,SQL", and no tech name contains either character.
+  for (const raw of text.toLowerCase().split(/[\s,;]+/)) {
     const token = trimPunctuation(raw);
     if (token.length < 2 || STOPWORDS.has(token) || seen.has(token)) continue;
     seen.add(token);

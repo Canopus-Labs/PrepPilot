@@ -34,6 +34,17 @@ describe("extractKeywords", () => {
     ]);
   });
 
+  it("splits comma- and semicolon-separated lists without spaces", () => {
+    expect(extractKeywords("Skills: Python,Java,SQL;C++,Node.js")).toEqual([
+      "skills",
+      "python",
+      "java",
+      "sql",
+      "c++",
+      "node.js",
+    ]);
+  });
+
   it("returns [] for non-string or empty input", () => {
     expect(extractKeywords(null)).toEqual([]);
     expect(extractKeywords(123)).toEqual([]);
@@ -55,6 +66,12 @@ describe("matchResumeKeywords", () => {
     expect(r.matched).toEqual(["react", "node"]);
     expect(r.missing).toEqual(["graphql", "aws"]);
     expect(r.totalKeywords).toBe(4);
+  });
+
+  it("matches skills the resume lists without spaces after commas", () => {
+    const r = matchResumeKeywords("Skills: Python,Java,SQL", "Python Java SQL");
+    expect(r.score).toBe(100);
+    expect(r.missing).toEqual([]);
   });
 
   it("scores 0 with no overlap", () => {
