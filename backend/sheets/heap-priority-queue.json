@@ -5,7 +5,7 @@
       "title": "Heap & Priority Queue Practice",
       "description": "Master Heap and Priority Queue data structures -- min-heap, max-heap, k-th largest/smallest, top K problems, median finder, and heap sort. Covers every heap problem asked in FAANG/MAANG interviews.",
       "followers": 2103,
-      "questions": 32,
+      "questions": 21,
       "category": "popular",
       "sections": [
         {
@@ -16,32 +16,42 @@
               "subtopics": [
                 {
                   "title": "Min Heap Implementation",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "",
                     "gfg": "https://www.geeksforgeeks.org/min-heap-in-java/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=min+heap+implementation+data+structure"
                   }
                 },
                 {
                   "title": "Max Heap Implementation",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "",
                     "gfg": "https://www.geeksforgeeks.org/max-heap-in-java/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=max+heap+implementation+data+structure"
                   }
                 },
                 {
                   "title": "Convert Min Heap to Max Heap",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "",
                     "gfg": "https://www.geeksforgeeks.org/convert-min-heap-to-max-heap/",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=convert+min+heap+to+max+heap"
+                  }
+                },
+                {
+                  "title": "Heap Sort",
+                  "difficulty": "Medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "",
+                    "gfg": "https://www.geeksforgeeks.org/heap-sort/",
+                    "youtube": "https://www.youtube.com/results?search_query=heap+sort+algorithm+explained"
                   }
                 }
               ]
@@ -51,32 +61,42 @@
               "subtopics": [
                 {
                   "title": "Kth Largest Element in an Array",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/k-largest-elements/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-largest-elements4206/1",
+                    "youtube": "https://www.youtube.com/results?search_query=kth+largest+element+in+array+leetcode+215"
                   }
                 },
                 {
                   "title": "Kth Smallest Element in a Sorted Matrix",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/find-k-th-smallest-element-in-given-n-sorted-matrices/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-k-th-smallest-element-in-given-n-sorted-matrices/1",
+                    "youtube": "https://www.youtube.com/results?search_query=kth+smallest+element+sorted+matrix+leetcode+378"
+                  }
+                },
+                {
+                  "title": "K Closest Points to Origin",
+                  "difficulty": "Medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/k-closest-points-to-origin/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-closest-point-to-origin/1",
+                    "youtube": "https://www.youtube.com/results?search_query=k+closest+points+to+origin+leetcode+973"
                   }
                 },
                 {
                   "title": "Kth Largest Sum Subarray",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "",
-                    "gfg": "https://www.geeksforgeeks.org/problems/k-th-largest-sum-subarray/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-th-largest-sum-subarray/1",
+                    "youtube": "https://www.youtube.com/results?search_query=kth+largest+sum+subarray+geeksforgeeks"
                   }
                 }
               ]
@@ -86,32 +106,52 @@
               "subtopics": [
                 {
                   "title": "Top K Frequent Elements",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "https://leetcode.com/problems/top-k-frequent-elements/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/k-most-occuring-elements/",
-                    "youtube": ""
-                  }
-                },
-                {
-                  "title": "Sort Characters By Frequency",
-                  "difficulty": "medium",
-                  "status": "not-started",
-                  "links": {
-                    "leetcode": "https://leetcode.com/problems/sort-characters-by-frequency/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/sort-characters-by-frequency/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/problems/k-most-occuring-elements/1",
+                    "youtube": "https://www.youtube.com/results?search_query=top+k+frequent+elements+leetcode+347"
                   }
                 },
                 {
                   "title": "Top K Frequent Words",
-                  "difficulty": "medium",
+                  "difficulty": "Medium",
                   "status": "not-started",
                   "links": {
                     "leetcode": "https://leetcode.com/problems/top-k-frequent-words/",
                     "gfg": "",
-                    "youtube": ""
+                    "youtube": "https://www.youtube.com/results?search_query=top+k+frequent+words+leetcode+692"
+                  }
+                },
+                {
+                  "title": "Sort Characters By Frequency",
+                  "difficulty": "Medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sort-characters-by-frequency/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/sort-characters-by-frequency/1",
+                    "youtube": "https://www.youtube.com/results?search_query=sort+characters+by+frequency+leetcode+451"
+                  }
+                },
+                {
+                  "title": "Reorganize String",
+                  "difficulty": "Medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/reorganize-string/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/rearrange-characters/1",
+                    "youtube": "https://www.youtube.com/results?search_query=reorganize+string+leetcode+767"
+                  }
+                },
+                {
+                  "title": "Task Scheduler",
+                  "difficulty": "Medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/task-scheduler/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/task-scheduler/1",
+                    "youtube": "https://www.youtube.com/results?search_query=task+scheduler+leetcode+621"
                   }
                 }
               ]
@@ -121,32 +161,92 @@
               "subtopics": [
                 {
                   "title": "Merge K Sorted Lists",
-                  "difficulty": "hard",
+                  "difficulty": "Hard",
                   "status": "not-started",
                   "links": {
                     "leetcode": "https://leetcode.com/problems/merge-k-sorted-lists/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/problems/merge-k-sorted-linked-lists/1",
+                    "youtube": "https://www.youtube.com/results?search_query=merge+k+sorted+lists+leetcode+23"
                   }
                 },
                 {
-                  "title": "Find Median from Data Stream",
-                  "difficulty": "hard",
-                  "status": "not-started",
-                  "links": {
-                    "leetcode": "https://leetcode.com/problems/find-median-from-data-stream/",
-                    "gfg": "https://www.geeksforgeeks.org/problems/finding-median-in-a-set/",
-                    "youtube": ""
-                  }
-                },
-                {
-                  "title": "Smallest Number After K Swaps",
-                  "difficulty": "medium",
+                  "title": "Merge K Sorted Arrays",
+                  "difficulty": "Hard",
                   "status": "not-started",
                   "links": {
                     "leetcode": "",
-                    "gfg": "https://www.geeksforgeeks.org/problems/find-smallest-number/",
-                    "youtube": ""
+                    "gfg": "https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/1",
+                    "youtube": "https://www.youtube.com/results?search_query=merge+k+sorted+arrays+min+heap"
+                  }
+                },
+                {
+                  "title": "Smallest Range Covering Elements from K Lists",
+                  "difficulty": "Hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-smallest-range-containing-elements-from-k-lists/1",
+                    "youtube": "https://www.youtube.com/results?search_query=smallest+range+covering+k+lists+leetcode+632"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Median Finder & Sliding Window",
+              "subtopics": [
+                {
+                  "title": "Find Median from Data Stream",
+                  "difficulty": "Hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/find-median-from-data-stream/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/find-median-in-a-stream/1",
+                    "youtube": "https://www.youtube.com/results?search_query=find+median+from+data+stream+leetcode+295"
+                  }
+                },
+                {
+                  "title": "Sliding Window Median",
+                  "difficulty": "Hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/sliding-window-median/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/median-of-sliding-window/1",
+                    "youtube": "https://www.youtube.com/results?search_query=sliding+window+median+leetcode+480"
+                  }
+                },
+                {
+                  "title": "IPO (Maximize Capital)",
+                  "difficulty": "Hard",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/ipo/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/maximize-sum-of-capital/1",
+                    "youtube": "https://www.youtube.com/results?search_query=IPO+maximize+capital+leetcode+502"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Advanced Heap Problems",
+              "subtopics": [
+                {
+                  "title": "Minimum Cost to Connect Sticks (Ropes)",
+                  "difficulty": "Medium",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/minimum-cost-to-connect-sticks/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/minimum-cost-of-ropes/1",
+                    "youtube": "https://www.youtube.com/results?search_query=minimum+cost+to+connect+ropes+sticks+heap"
+                  }
+                },
+                {
+                  "title": "Last Stone Weight",
+                  "difficulty": "Easy",
+                  "status": "not-started",
+                  "links": {
+                    "leetcode": "https://leetcode.com/problems/last-stone-weight/",
+                    "gfg": "https://www.geeksforgeeks.org/problems/last-stone-weight/1",
+                    "youtube": "https://www.youtube.com/results?search_query=last+stone+weight+leetcode+1046"
                   }
                 }
               ]
