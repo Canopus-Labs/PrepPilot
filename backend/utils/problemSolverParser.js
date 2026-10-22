@@ -46,8 +46,11 @@ function buildSolverPrompt({ problem, language = DEFAULT_LANGUAGE, constraints =
 }
 
 function extractSection(text, heading) {
+  // The heading has to be the whole line ("## Steps", "**Steps**", "Steps:").
+  // Unanchored, "steps" or "code" also matched inside prose such as "we
+  // decode the string in two steps", and the section started mid-sentence.
   const headingPattern = new RegExp(
-    `(?:#{1,3}\\s*\\**|\\**)[ ]*${heading}[ ]*\\**(?:\\s*:)?`,
+    `^ {0,3}(?:#{1,3}[ \\t]*)?\\**[ ]*${heading}[ ]*:?[ ]*\\**(?:[ \\t]*:)?[ \\t]*$`,
     "i"
   );
 

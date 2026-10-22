@@ -248,6 +248,27 @@ describe("parseSolverOutput", () => {
     expect(result.raw).not.toContain("\r");
   });
 
+  it("does not start a section at a heading word used inside prose", () => {
+    const output = [
+      "## Approach",
+      "We decode the string in two steps using a stack.",
+      "",
+      "## Steps",
+      "1. Push digits.",
+      "",
+      "## Code",
+      "```python",
+      "def solve(s):",
+      "    return s",
+      "```",
+    ].join("\n");
+
+    const { sections } = parseSolverOutput(output);
+
+    expect(sections.steps).toBe("1. Push digits.");
+    expect(sections.code).toContain("def solve(s):");
+  });
+
   it("finds code using the implementation alias", () => {
     const output = `## Approach\nBinary search.\n\n## Implementation\n\`\`\`javascript\n// using alias\n\`\`\``;
     const result = parseSolverOutput(output);
