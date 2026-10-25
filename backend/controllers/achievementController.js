@@ -20,11 +20,15 @@ exports.getAchievements = async (req, res) => {
 exports.saveAchievements = async (req, res) => {
     const { unlockedAchievements } = req.body;
 
-        if (!unlockedAchievements || !Array.isArray(unlockedAchievements)) {
+    if (!unlockedAchievements || !Array.isArray(unlockedAchievements)) {
         return res.status(400).json({
             success: false,
             error: "unlockedAchievements must be a valid array"
         });
+    }
+
+    if (unlockedAchievements.length === 0) {
+        return res.json({ success: true });
     }
 
     const unknown = unlockedAchievements.filter((id) => !VALID_ACHIEVEMENTS.has(id));
@@ -37,10 +41,13 @@ exports.saveAchievements = async (req, res) => {
     }
 
     try {
-        await User.findByIdAndUpdate(
+        const user = await User.findByIdAndUpdate(
             req.user._id,
             { $addToSet: { unlockedAchievements: { $each: unlockedAchievements } } },
         );
+        if (!user) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false, error: "A server error occurred" });

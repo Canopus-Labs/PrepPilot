@@ -135,6 +135,28 @@ describe('achievementController', () => {
       });
     });
 
+    it('handles empty unlockedAchievements array as a successful no-op without calling findByIdAndUpdate', async () => {
+      const req = makeReq({ unlockedAchievements: [] });
+      const res = makeRes();
+
+      await saveAchievements(req, res);
+
+      expect(User.findByIdAndUpdate).not.toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({ success: true });
+    });
+
+    it('returns 404 if user is not found during save', async () => {
+      User.findByIdAndUpdate.mockResolvedValue(null);
+
+      const req = makeReq({ unlockedAchievements: ['First Interview'] });
+      const res = makeRes();
+
+      await saveAchievements(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ success: false, error: 'User not found' });
+    });
+
     it('successfully saves achievements for a valid request', async () => {
       User.findByIdAndUpdate.mockResolvedValue({});
 
