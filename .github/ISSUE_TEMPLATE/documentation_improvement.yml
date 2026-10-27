@@ -1,3 +1,4 @@
+
 name: "📚 Documentation Update"
 description: "Suggest improvements, corrections, or additions to the documentation"
 title: "[Docs]: "
@@ -58,3 +59,4 @@ body:
           required: true
         - label: "I am willing to contribute the documentation update myself."
           required: false
+
