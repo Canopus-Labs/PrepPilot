@@ -1,7 +1,7 @@
-// Single source of truth for all valid achievement IDs.
-// Frontend derives display metadata (description) from the title;
-// the backend only needs to know which titles are legitimate.
 
+"use strict";
+
+// Single source of truth for valid achievement titles.
 const VALID_ACHIEVEMENTS = new Set([
   "First Interview",
   "Interview Pro",
@@ -16,4 +16,19 @@ const VALID_ACHIEVEMENTS = new Set([
   "30-Day Streak",
 ]);
 
-module.exports = { VALID_ACHIEVEMENTS };
+/**
+ * Check whether an achievement title is valid.
+ * @param {string} title
+ * @returns {boolean}
+ */
+const isValidAchievement = (title) => {
+  return (
+    typeof title === "string" &&
+    VALID_ACHIEVEMENTS.has(title.trim())
+  );
+};
+
+module.exports = {
+  VALID_ACHIEVEMENTS,
+  isValidAchievement,
+};
