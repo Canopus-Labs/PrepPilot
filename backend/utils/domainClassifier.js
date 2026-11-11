@@ -63,7 +63,7 @@ const isContextualResponse = (prompt, history) => {
   
   if (contextualRegex.test(trimmed)) {
     // The current prompt is separate from history; its last entry must be the assistant.
-    if (history && history.length > 1) {
+    if (history && history.length > 0) {
       const lastMessage = history[history.length - 1];
       if (lastMessage && lastMessage.role === "model") {
         return true;

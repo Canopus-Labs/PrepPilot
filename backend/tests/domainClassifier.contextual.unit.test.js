@@ -9,6 +9,7 @@ describe("isContextualResponse", () => {
 
   it("accepts a short reply when the previous assistant message ends the history", () => {
     expect(isContextualResponse("yes", firstExchange)).toBe(true);
+    expect(isContextualResponse("yes", [{ role: "model", text: "Ready?" }])).toBe(true);
     expect(isContextualResponse("continue", [
       ...firstExchange,
       { role: "user", text: "Explain the answer" },
@@ -23,8 +24,7 @@ describe("isContextualResponse", () => {
     ])).toBe(false);
   });
 
-  it("does not treat a reply as contextual without a completed exchange", () => {
+  it("does not treat a reply as contextual with empty history", () => {
     expect(isContextualResponse("yes", [])).toBe(false);
-    expect(isContextualResponse("yes", [{ role: "model", text: "Ready?" }])).toBe(false);
   });
 });
