@@ -1,3 +1,4 @@
+
 name: Auto Label Trusted Contributors
 
 on:
@@ -7,7 +8,8 @@ on:
       - reopened
       - ready_for_review
       - synchronize
-  workflow_dispatch:  # allows manual trigger to backfill existing open PRs
+
+  workflow_dispatch:
 
 permissions:
   pull-requests: write
@@ -15,150 +17,176 @@ permissions:
 
 jobs:
   auto-label:
-    name: Add trusted contributor labels
+    name: Add Trusted Contributor Labels
     runs-on: ubuntu-latest
 
     steps:
-      - name: Add required labels
+      - name: Add required labels to trusted PRs
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
           script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+            const { owner, repo } = context.repo;
 
-            const TRUSTED = ['buttler-josh', 'jainiksha'];
+            // Trusted contributors
+            const TRUSTED = [
+              'buttler-josh',
+              'jainiksha'
+            ];
 
+            // Labels to create and apply
             const LABELS = [
               {
-                name: "gssoc:approved",
-                color: "0075ca",
-                description: "Approved for GSSoC"
+                name: 'gssoc:approved',
+                color: '0075ca',
+                description: 'Approved for GSSoC'
               },
               {
-                name: "level:critical",
-                color: "b60205",
-                description: "Critical level contribution"
+                name: 'level:critical',
+                color: 'b60205',
+                description: 'Critical level contribution'
               },
               {
-                name: "merge ready",
-                color: "0e8a16",
-                description: "Ready to be merged"
+                name: 'merge ready',
+                color: '0e8a16',
+                description: 'Ready to be merged'
               },
               {
-                name: "quality:exceptional",
-                color: "00b300",
-                description: "Exceptional quality"
+                name: 'quality:exceptional',
+                color: '00b300',
+                description: 'Exceptional quality contribution'
               },
               {
-                name: "type:feature",
-                color: "a2eeef",
-                description: "Feature contribution"
+                name: 'type:feature',
+                color: 'a2eeef',
+                description: 'Feature contribution'
               },
               {
-                name: "type:accessibility",
-                color: "7057ff",
-                description: "Accessibility improvement"
+                name: 'type:accessibility',
+                color: '7057ff',
+                description: 'Accessibility improvement'
               }
             ];
 
-            // ------------------------------------------------------------
-            // Helper: ensure all labels exist in the repo
-            // ------------------------------------------------------------
+            const labelNames = LABELS.map(label => label.name);
+
+            // Ensure all required labels exist
             async function ensureLabels() {
               for (const label of LABELS) {
                 try {
-                  await github.rest.issues.getLabel({ owner, repo, name: label.name });
-                  core.info(`Label already exists: "${label.name}"`);
+                  await github.rest.issues.getLabel({
+                    owner,
+                    repo,
+                    name: label.name
+                  });
+
+                  core.info(`Label exists: ${label.name}`);
+
                 } catch (error) {
-                  if (error.status === 404) {
-                    try {
-                      await github.rest.issues.createLabel({
-                        owner, repo,
-                        name: label.name,
-                        color: label.color,
-                        description: label.description
-                      });
-                      core.info(`Created label: "${label.name}"`);
-                    } catch (createError) {
-                      core.error(`Failed to create label "${label.name}": ${createError.message}`);
-                      throw createError;
-                    }
-                  } else {
-                    core.error(`Failed to get label "${label.name}": ${error.message}`);
+                  if (error.status !== 404) {
                     throw error;
                   }
+
+                  try {
+                    await github.rest.issues.createLabel({
+                      owner,
+                      repo,
+                      name: label.name,
+                      color: label.color,
+                      description: label.description
+                    });
+
+                    core.info(`Created label: ${label.name}`);
+
+                  } catch (createError) {
+                    // Handle a label created concurrently
+                    if (createError.status === 422) {
+                      await github.rest.issues.getLabel({
+                        owner,
+                        repo,
+                        name: label.name
+                      });
+
+                      core.info(`Label already created: ${label.name}`);
+                    } else {
+                      throw createError;
+                    }
+                  }
                 }
               }
             }
 
-            // ------------------------------------------------------------
-            // Helper: apply all labels to a single PR
-            // ------------------------------------------------------------
+            // Apply labels to a pull request
             async function labelPR(prNumber, author) {
-              const labelNames = LABELS.map(l => l.name);
-              try {
-                await github.rest.issues.addLabels({
-                  owner, repo,
-                  issue_number: prNumber,
-                  labels: labelNames
-                });
-                core.info(`Added ${labelNames.length} labels to PR #${prNumber} by @${author}`);
-              } catch (addError) {
-                core.error(`Failed to add labels to PR #${prNumber}: ${addError.message}`);
-                throw addError;
-              }
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: prNumber,
+                labels: labelNames
+              });
+
+              core.info(
+                `Successfully applied ${labelNames.length} labels to PR #${prNumber} by @${author}`
+              );
             }
 
-            // ------------------------------------------------------------
-            // Ensure all labels exist before applying them
-            // ------------------------------------------------------------
+            // Check whether a contributor is trusted
+            function isTrusted(author) {
+              return TRUSTED.includes(author.toLowerCase());
+            }
+
+            // Create missing labels before processing PRs
             await ensureLabels();
 
-            // ------------------------------------------------------------
-            // Determine which PRs to process
-            // ------------------------------------------------------------
+            // Manual trigger: backfill existing open PRs
             if (context.eventName === 'workflow_dispatch') {
-              // Backfill mode: iterate all open PRs and label trusted ones
-              core.info('workflow_dispatch triggered — scanning all open PRs...');
 
-              let page = 1;
+              core.info('Manual trigger detected. Scanning open pull requests...');
+
+              const pullRequests = await github.paginate(
+                github.rest.pulls.list,
+                {
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100
+                }
+              );
+
               let processed = 0;
 
-              while (true) {
-                const { data: pullRequests } = await github.rest.pulls.list({
-                  owner, repo,
-                  state: 'open',
-                  per_page: 100,
-                  page
-                });
+              for (const pr of pullRequests) {
+                const author = pr.user.login;
 
-                if (pullRequests.length === 0) break;
-
-                for (const pr of pullRequests) {
-                  const author = pr.user.login;
-                  if (pr.draft) {
-                    core.info(`Skipping draft PR #${pr.number} by @${author}`);
-                    continue;
-                  }
-                  if (!TRUSTED.includes(author.toLowerCase())) {
-                    core.info(`Skipping PR #${pr.number} — @${author} is not a trusted contributor`);
-                    continue;
-                  }
-                  core.info(`Processing PR #${pr.number} by @${author}`);
-                  await labelPR(pr.number, author);
-                  processed++;
+                if (pr.draft) {
+                  core.info(`Skipping draft PR #${pr.number}`);
+                  continue;
                 }
 
-                page++;
+                if (!isTrusted(author)) {
+                  core.info(`Skipping untrusted contributor: @${author}`);
+                  continue;
+                }
+
+                await labelPR(pr.number, author);
+                processed++;
               }
 
-              core.info(`Done. Labeled ${processed} open PR(s) from trusted contributors.`);
+              core.info(
+                `Backfill completed. ${processed} trusted PR(s) labeled.`
+              );
 
             } else {
-              // Event-driven mode: single PR from the trigger event
+
+              // Automatic trigger: process the current PR
               const pr = context.payload.pull_request;
+
+              if (!pr) {
+                core.setFailed('Pull request information is missing.');
+                return;
+              }
+
               const prNumber = pr.number;
               const author = pr.user.login;
 
@@ -167,13 +195,13 @@ jobs:
                 return;
               }
 
-              if (!TRUSTED.includes(author.toLowerCase())) {
-                core.info(`Skipping: @${author} is not a trusted contributor.`);
+              if (!isTrusted(author)) {
+                core.info(`Skipping untrusted contributor: @${author}`);
                 return;
               }
 
-              core.info(`Processing PR #${prNumber} by @${author}`);
               await labelPR(prNumber, author);
             }
 
-            core.info('No merge operation performed. PRs require manual review and merge.');
+            core.info('Labeling workflow completed successfully.');
+            core.info('No automatic merge operation performed.');
