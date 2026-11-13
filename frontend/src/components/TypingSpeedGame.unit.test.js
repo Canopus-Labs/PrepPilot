@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calculateWpm, calculateAccuracy } from "./typingSpeedHelpers";
+import {
+  calculateWpm,
+  calculateAccuracy,
+  formatTime,
+} from "./typingSpeedHelpers";
 
 describe("TypingSpeedGame helpers", () => {
   it("calculates WPM correctly for positive correct chars and seconds", () => {
@@ -22,5 +26,12 @@ describe("TypingSpeedGame helpers", () => {
   it("returns 100% accuracy when nothing is typed", () => {
     expect(calculateAccuracy(0, 0)).toBe(100);
     expect(calculateAccuracy(0, -1)).toBe(100);
+  });
+  
+  it("formats time correctly", () => {
+    expect(formatTime(0)).toBe("00:00");
+    expect(formatTime(9)).toBe("00:09");
+    expect(formatTime(60)).toBe("01:00");
+    expect(formatTime(125)).toBe("02:05");
   });
 });
