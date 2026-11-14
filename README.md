@@ -29,7 +29,7 @@
 - [⚡ Quick Start Guide](#-quick-start-guide)
 - [📁 Project Structure](#-project-structure)
 - [🤝 Contributing Guidelines](#-contributing-guidelines)
-- [� Troubleshooting & FAQs](#-troubleshooting--faqs)
+- [🔧 Troubleshooting & FAQs](#-troubleshooting--faqs)
 - [📖 API Documentation](#-api-documentation)
 - [🚀 Deployment Guide](#-deployment-guide)
 - [📄 License](#-license)
@@ -116,8 +116,8 @@ Nodemon         Auto-reload during development
 
 Before getting started, ensure you have the following installed:
 
-- **Node.js** (v16 or higher) - [Download](https://nodejs.org/)
-- **npm** or **yarn** (v7 or higher)
+- **Node.js** (v20.19+ or v22.12+) - [Download](https://nodejs.org/)
+- **npm** (included with Node.js)
 - **MongoDB** instance (Local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) - Free tier available)
 - **Google Gemini API Key** - Get it free at [Google AI Studio](https://aistudio.google.com/app/apikey)
 
@@ -162,7 +162,7 @@ JWT_SECRET=your_super_secret_jwt_key_here_generate_a_strong_one
 
 # Google Gemini API
 GEMINI_API_KEY=your_gemini_api_key_from_ai_studio
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 
 # Server Configuration
 PORT=8000
@@ -171,9 +171,7 @@ NODE_ENV=development
 # Frontend Origin (for CORS)
 FRONTEND_ORIGIN=http://localhost:5173
 
-# Optional: Additional configurations
-RATE_LIMIT_WINDOW_MS=15000000
-RATE_LIMIT_MAX_REQUESTS=100
+# Rate limits are configured in backend/middlewares/rateLimiter.js.
 ```
 
 #### 5️⃣ Start Development Servers
@@ -224,16 +222,25 @@ PrepPilot/
 │   │   ├── questionController.js     # Question management
 │   │   ├── resumeController.js       # Resume operations
 │   │   ├── sessionController.js      # Session management
-│   │   └── userSheetProgressController.js # Progress tracking
-|   |
-│   ├── 📂 Input_Validators/                 # Extract the logic for Input validations
-│   │   ├── ValidateAchievement.js           # Validate and check input for Achievement Controller
-│   │   ├── ValidateAi.js                    # Validate and check input for Ai/Gemini Controller
-│   │   ├── ValidateAuth.js                  # Validate and check input for Authentication Controller
-│   │   ├── ValidateQuestions.js             # Validate and check input for Question Management Controller
-│   │   ├── ValidateResume.js                # Validate and check input for Resume Controller
-│   │   ├── ValidateSession.js               # Validate and check input for Session Controller Controller
-│   │   └── ValidateUserSheetProgess.js      # Validate and check input for UserSheetProgress Controller
+│   │   ├── userSheetProgressController.js # Progress tracking
+│   │   ├── adaptiveInterviewController.js
+│   │   ├── flashcardController.js
+│   │   ├── interviewExperienceController.js
+│   │   ├── notesSummaryController.js
+│   │   └── roadmapController.js
+│   │
+│   ├── 📂 Input_validators/           # Request input validation
+│   │   ├── ValidateAchievement.js
+│   │   ├── ValidateAi.js
+│   │   ├── ValidateAuth.js
+│   │   ├── ValidateFlashcard.js
+│   │   ├── ValidateInterviewExperience.js
+│   │   ├── ValidateNotesSummary.js
+│   │   ├── ValidateQuestions.js
+│   │   ├── ValidateResume.js
+│   │   ├── ValidateRoadmap.js
+│   │   ├── ValidateSession.js
+│   │   └── ValidateUserSheetProgress.js
 │   │
 │   ├── 📂 middlewares/               # Express middlewares
 │   │   ├── authMiddleware.js         # JWT verification
@@ -244,8 +251,14 @@ PrepPilot/
 │   │
 │   ├── 📂 models/                    # MongoDB Mongoose schemas
 │   │   ├── User.js                   # User profile & credentials
+│   │   ├── AdaptiveInterviewSession.js
+│   │   ├── Flashcard.js
+│   │   ├── InterviewExperience.js
+│   │   ├── JobCache.js
+│   │   ├── NotesSummary.js
 │   │   ├── Question.js               # Interview questions
 │   │   ├── Resume.js                 # Resume documents
+│   │   ├── RoadmapProject.js
 │   │   ├── Session.js                # Practice sessions
 │   │   ├── Sheet.js                  # Question sheets (DSA, etc.)
 │   │   ├── Book.js                   # Reference books
@@ -259,6 +272,15 @@ PrepPilot/
 │   │   ├── sessionRoutes.js          # Session endpoints
 │   │   ├── booksRoutes.js            # Books endpoints
 │   │   ├── AptitudeQuestions.js      # Aptitude test endpoints
+│   │   ├── adaptiveInterviewRoutes.js
+│   │   ├── achievementRoutes.js
+│   │   ├── coursesRoutes.js
+│   │   ├── flashcardRoutes.js
+│   │   ├── googleCalendarRoutes.js
+│   │   ├── interviewExperienceRoutes.js
+│   │   ├── jobRoutes.js
+│   │   ├── notesSummaryRoutes.js
+│   │   ├── roadmapRoutes.js
 │   │   ├── sheetJsonUpload.js        # Sheet upload
 │   │   └── userSheetProgressRoutes.js# Progress endpoints
 │   │
@@ -349,9 +371,22 @@ PrepPilot/
 │   ├── package.json
 │   └── index.html
 │
-├── .gitignore                         # Git ignore rules
+├── .github/                          # Issue, PR, and workflow templates
+├── .gitignore
+├── .mavis/                           # Generated run report
+├── .prettierrc                       # Formatting configuration
+├── API_DOCUMENTATION.md              # Backend API reference
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── docker-compose.yml                # Local development stack
 ├── LICENSE                           # MIT License
-└── README.md                         # This file
+├── m.txt
+├── orchestrate.py
+├── package-lock.json
+├── package.json
+├── README.md                         # This file
+├── render.yaml                       # Render static-site configuration
+└── TROUBLESHOOT.md
 ```
 
 ## 🤝 Contributing Guidelines
@@ -364,7 +399,7 @@ We love contributions from the community! PrepPilot is better because of talente
 
    ```bash
    # Fork via GitHub UI, then:
-   git clone https://github.com/YOUR_USERNAME/PrepPilot.git
+   git clone https://github.com/Canopus-Labs/PrepPilot.git
    cd PrepPilot
    ```
 
@@ -490,7 +525,7 @@ throw new Error("User not found with the provided email");
 - 📧 Contact maintainers for sensitive issues
 - 🤖 Check our FAQ section (coming soon)
 
-## � Troubleshooting & FAQs
+## 🔧 Troubleshooting & FAQs
 
 ### Common Issues & Solutions
 
@@ -507,7 +542,12 @@ throw new Error("User not found with the provided email");
 
 ---
 
-## Flashcard (Spaced Repetition System) Routes
+## 📖 API Documentation
+
+For complete endpoint paths, request/response examples, authentication, and
+rate limits, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+### Flashcard (Spaced Repetition System) Routes
 
 ### Create / Add Flashcard
 - `POST /api/flashcards`
@@ -628,8 +668,6 @@ Response `200`:
 
 ---
 
-## Testing Endpoint
-
 ### Health Check
 - `GET /api/test`
 - Public
@@ -641,109 +679,22 @@ Response `200`:
 }
 ```
 
-### Getting Help
-
-```bash
-# Check Node version
-node --version
-
-# Check npm version
-npm --version
-
-# Test MongoDB connection
-mongosh "your_connection_string"
-
-# View backend logs
-npm run dev  # Shows server logs
-
-# Clear npm cache if installation fails
-npm cache clean --force
-npm install
-```
-
-## 📖 API Documentation
-
-### Authentication Endpoints
-
-```
-POST   /api/auth/register       - Register new user
-POST   /api/auth/login          - Login user
-POST   /api/auth/logout         - Logout user
-GET    /api/auth/profile        - Get user profile
-PUT    /api/auth/profile        - Update user profile
-```
-
-### AI Endpoints
-
-```
-POST   /api/ai/generate         - Generate interview questions
-POST   /api/ai/explain          - Get detailed explanations
-POST   /api/ai/evaluate         - Evaluate user answer
-```
-
-### Question Endpoints
-
-```
-POST   /api/question/add        - Add questions to a session
-POST   /api/question/:id/pin    - Pin or unpin a question
-POST   /api/question/:id/note   - Update note for a question
-```
-
-### Resume Endpoints
-
-```
-GET    /api/resume              - Get user resumes
-POST   /api/resume              - Create resume
-PUT    /api/resume/:id          - Update resume
-DELETE /api/resume/:id          - Delete resume
-```
-
-For detailed API documentation, see [API.md](./API.md) (if available)
-
 ## 🚀 Deployment Guide
 
-### Deploy Backend to Heroku
+The checked-in [Render configuration](./render.yaml) deploys the frontend as a
+static site. It does not configure a backend service; deploy the backend
+separately and set its environment variables and frontend origin for your
+hosting environment.
+
+For local development with MongoDB, the frontend, and backend in containers,
+run the repository's [Docker Compose configuration](./docker-compose.yml):
 
 ```bash
-# Install Heroku CLI
-npm install -g heroku
-
-# Login to Heroku
-heroku login
-
-# Create new app
-heroku create your-app-name
-
-# Set environment variables
-heroku config:set MONGO_URI=your_mongodb_url
-heroku config:set JWT_SECRET=your_jwt_secret
-heroku config:set GEMINI_API_KEY=your_api_key
-
-# Deploy
-git push heroku main
+docker compose up --build
 ```
 
-### Deploy Frontend to Vercel
-
-```bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Deploy
-vercel
-```
-
-### Deploy with Docker
-
-```bash
-# Build and push to Docker Hub
-docker build -t username/preppilot:latest .
-docker push username/preppilot:latest
-
-# Pull and run on server
-docker pull username/preppilot:latest
-docker run -p 8000:8000 --env-file .env username/preppilot:latest
-```
+The Compose file and per-service Dockerfiles use development servers and are
+intended for local development, not as production deployment instructions.
 
 ## 📄 License
 
@@ -787,7 +738,7 @@ This project stands on the shoulders of amazing open-source projects and communi
 
 ### 📖 Resources Used
 
-- [DSA Resources](https://github.com/striver79/striver-sde-sheet) - Striver's SDE Sheet
+- [DSA Resources](https://takeuforward.org/prep-hub/strivers-180-master-dsa-patterns) - Striver's SDE Sheet
 - [NeetCode](https://neetcode.io/) - Curated DSA problems
 - [GeeksforGeeks](https://www.geeksforgeeks.org/) - Educational content
 
@@ -804,7 +755,6 @@ This project stands on the shoulders of amazing open-source projects and communi
 ### 🌟 Planned Features
 
 - [ ] Multi-language support
-- [ ] Spaced repetition system
 - [ ] Integration with LeetCode
 - [ ] Machine learning-based recommendations
 - [ ] Interview experience matching
@@ -832,11 +782,7 @@ We owe a huge thank you to the brilliant individuals who help build, refine, and
 
 ### Get Connected
 
-- 💌 **Email**: contact@preppilot.com
-- 🐦 **Twitter**: [@PrepPilot](https://twitter.com/preppilot)
-- 💻 **GitHub Issues**: [Report bugs here](https://github.com/yourusername/PrepPilot/issues)
-- 💬 **Discussions**: [Ask questions here](https://github.com/yourusername/PrepPilot/discussions)
-- 🤝 **Discord**: [Join our community](https://discord.gg/preppilot)
+- 💻 **GitHub Issues**: [Report a bug or request a feature](https://github.com/Canopus-Labs/PrepPilot/issues)
 
 ### Support This Project
 
@@ -855,9 +801,7 @@ If PrepPilot helped you land that dream job or ace your interview, consider:
 
 ## 💖 Built with passion by developers, for developers
 
-[![GitHub followers](https://img.shields.io/github/followers/karanunix?style=social&label=Follow)](https://github.com/karanunix)
-[![GitHub stars](https://img.shields.io/github/stars/YOURUSERNAME/PrepPilot?style=social&label=Star)](https://github.com/Canopus-Labs/PrepPilot)
-[![Twitter Follow](https://img.shields.io/twitter/follow/PrepPilot?style=social)](https://twitter.com/PrepPilot)
+[![GitHub stars](https://img.shields.io/github/stars/Canopus-Labs/PrepPilot?style=social&label=Star)](https://github.com/Canopus-Labs/PrepPilot)
 
 ### Made with ❤️ for the tech community
 
@@ -868,9 +812,3 @@ If PrepPilot helped you land that dream job or ace your interview, consider:
 ### ⭐ If this project helped you, please give it a star! Your support means everything! 🌟
 
 </div>
-
-## 🤝 Contributing
-
-We welcome contributions from the community!
-
-Please read the [Contributing Guidelines](./CONTRIBUTING.md) before submitting a Pull Request.
