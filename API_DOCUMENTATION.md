@@ -4,7 +4,7 @@
 
 This guide documents the backend API endpoints for PrepPilot. It includes endpoint paths, request and response examples, authentication requirements, and error cases.
 
-> **Ground truth:** Route registration in `backend/server.js` is the authoritative source for all paths and prefixes. Run `node scripts/check-routes.js` to verify this document stays in sync.
+> **Ground truth:** Route registration in `backend/server.js` and the mounted route modules are authoritative for all paths and prefixes.
 
 ---
 
@@ -25,9 +25,14 @@ Authorization: Bearer <JWT_TOKEN>
 
 | Limiter | Applied to | Window | Max requests |
 |---|---|---|---|
-| `authLimiter` | `/api/auth/register`, `/api/auth/login` | 15 min | 50 |
-| `aiLimiter` | `/api/generate`, `/api/ai/generate`, `/api/resume/compile`, `/api/resume/analyze` | 1 hour | 20 |
-| `generalLimiter` | All other routes | 15 min | 100 |
+| `loginLimiter` | `POST /api/auth/login` | 15 min | 10 per IP |
+| `authLimiter` | Auth register, refresh, logout, resend-verification, and verify-email routes | 15 min | 50 per IP |
+| `aiLimiter` | AI generation/solve and resume compile/analyze routes | 1 hour | 20 per IP |
+| `aiUserLimiter` | `/api/generate`, `/api/ai/generate`, and `/api/solve` | 1 hour | 20 per authenticated user |
+| `generalLimiter` | Routes where this middleware is explicitly applied | 15 min | 100 per IP |
+| `sensitiveAuthLimiter` | Password change and account deletion | 15 min | 10 per IP |
+
+`GET /api/test` is not rate-limited. Routes may have more than one limiter.
 
 ---
 
@@ -77,7 +82,7 @@ Errors:
 ### Login User
 
 - `POST /api/auth/login`
-- Public (rate-limited: 50 req / 15 min per IP)
+- Public (rate-limited: 10 req / 15 min per IP)
 
 Request Body:
 
@@ -267,9 +272,7 @@ Errors:
 ### Upload Profile Image
 
 - `POST /api/auth/upload-image`
-- Public — no authentication or rate limiter applied
-
-> ⚠️ **Note for contributors:** This endpoint has no `protect` guard and no rate limiter. See [issue #128](https://github.com/Canopus-Labs/PrepPilot/issues/128) for the tracked remediation. Do not add features that depend on `req.user` in this handler until auth is added.
+- Private (requires authentication; rate-limited: 100 req / 15 min per IP)
 
 Form field:
 
@@ -294,7 +297,7 @@ Errors:
 ### Generate AI Text
 
 - `POST /api/ai/generate`
-- Public (rate-limited: 20 req / hour per IP)
+- Private (requires authentication; rate-limited: 20 req / hour per IP and per user)
 
 > ⚠️ **Note:** The path is `/api/ai/generate`. An alias `/api/generate` also exists (same handler, same rate limit). Both are registered via `app.use("/api", aiRoutes)` in `server.js`. Prefer `/api/ai/generate` for clarity.
 
@@ -1150,6 +1153,47 @@ Response `200`:
 ```
 
 ---
+
+## Other Registered Routes
+
+These routes are registered by `backend/server.js` and are not covered by the
+request/response examples above:
+
+- Auth lifecycle: `GET /api/auth/csrf-token`, `POST /api/auth/refresh`,
+  `POST /api/auth/logout`, `POST /api/auth/resend-verification`, and
+  `GET /api/auth/verify-email`.
+- AI problem solving: `POST /api/solve`.
+- Questions: `GET /api/question/my-questions` and
+  `POST /api/question/study-plan`.
+- Aptitude questions: `GET /api/questions/`.
+- Sheets: `GET /api/sheets/` and `GET /api/sheets/:id`;
+  `POST /api/sheets/upload` and `POST /api/sheets/validate`;
+  `PUT /api/sheets/:id` and `DELETE /api/sheets/:id`.
+- Sheet progress: `GET /api/user/sheet-progress/export`,
+  `POST /api/user/sheet-progress/import`, and
+  `DELETE /api/user/sheet-progress/:sheetId`.
+- Courses and jobs: `GET /api/courses/` and `GET /api/jobs/`.
+- Google Calendar: `GET /api/google-calendar/connect`,
+  `GET /api/google-calendar/callback`, `GET /api/google-calendar/status`, and
+  `POST /api/google-calendar/events`.
+- Interview experiences: `GET /api/interview-experiences/approved`,
+  `GET /api/interview-experiences/mine`,
+  `POST /api/interview-experiences/`, and
+  `PATCH /api/interview-experiences/:id/status`.
+- Notes summaries: `POST /api/notes-summary/summarize`,
+  `POST /api/notes-summary/save`, `GET /api/notes-summary/my-summaries`, and
+  `DELETE /api/notes-summary/:id`.
+- Roadmaps: `POST /api/roadmaps/`, `GET /api/roadmaps/`,
+  `GET /api/roadmaps/:id`, `PUT /api/roadmaps/:id`,
+  `PATCH /api/roadmaps/:id/tasks`, and `DELETE /api/roadmaps/:id`.
+- Resume analysis history and matching: `GET /api/resume/analysis-history`
+  and `POST /api/resume/ats-match`; saved resume deletion uses
+  `DELETE /api/resume/:id`.
+- Achievements: `GET /api/user/achievements` and
+  `POST /api/user/achievements`.
+
+Sheet read routes are public; sheet write routes require an authenticated
+administrator. The jobs endpoint requires authentication.
 
 ## Testing Endpoint
 
